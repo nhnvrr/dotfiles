@@ -1,0 +1,128 @@
+add_newline = false
+command_timeout = 500
+palette = "nord"
+
+format = "🧉 $os$username$hostname$directory$git_branch$git_status$aws$docker_context$nodejs$bun$python$golang$rust$lua$c $character"
+
+[palettes.nord]
+text = "#E5E9F0"
+subtext = "#D8DEE9"
+red = "#BF616A"
+orange = "#D08770"
+yellow = "#EBCB8B"
+green = "#A3BE8C"
+blue = "#81A1C1"
+aqua = "#88C0D0"
+purple = "#B48EAD"
+
+[username]
+disabled = false
+show_always = false
+style_user = "fg:text"
+style_root = "fg:red"
+format = "[$user]($style)"
+
+[hostname]
+ssh_only = true
+trim_at = "."
+style = "fg:subtext"
+format = "@[$hostname]($style) "
+
+[os]
+disabled = true
+style = "fg:subtext"
+format = "[$symbol]($style) "
+
+[os.symbols]
+Macos = ""
+Debian = ""
+NixOS = ""
+
+[directory]
+style = "fg:aqua"
+format = "[$path]($style) "
+truncate_to_repo = true
+truncation_length = 3
+truncation_symbol = "…/"
+
+[git_branch]
+symbol = " "
+style = "fg:green"
+format = "[$symbol$branch]($style) "
+
+[git_status]
+style = "fg:red"
+format = "[$all_status$ahead_behind]($style) "
+conflicted = "✖"
+untracked = "?"
+modified = "!"
+staged = "+"
+ahead = "⇡"
+behind = "⇣"
+diverged = "⇕"
+
+[aws]
+symbol = " "
+style = "fg:orange"
+format = "[($profile)(\\($region\\)) $symbol]($style) "
+
+[docker_context]
+symbol = " "
+style = "fg:blue"
+format = "[$symbol$context]($style) "
+
+[nodejs]
+symbol = " "
+style = "fg:green"
+format = "[$symbol$version]($style) "
+detect_files = ["package.json", "pnpm-lock.yaml", "yarn.lock", "package-lock.json"]
+detect_extensions = ["js", "ts", "mjs", "cjs"]
+
+[bun]
+symbol = " "
+style = "fg:subtext"
+format = "[$symbol$version]($style) "
+detect_files = ["bun.lockb", "bun.lock"]
+
+[python]
+symbol = " "
+style = "fg:yellow"
+format = "[$symbol$version( \\($virtualenv\\))]($style) "
+detect_files = ["pyproject.toml", "uv.lock", "requirements.txt", ".python-version", "poetry.lock"]
+
+[golang]
+symbol = " "
+style = "fg:aqua"
+format = "[$symbol$version]($style) "
+detect_files = ["go.mod"]
+
+[rust]
+symbol = " "
+style = "fg:orange"
+format = "[$symbol$version]($style) "
+detect_files = ["Cargo.toml"]
+
+[lua]
+symbol = " "
+style = "fg:purple"
+format = "[$symbol$version]($style) "
+detect_files = ["stylua.toml", ".luarc.json", ".luarc.jsonc"]
+
+[c]
+symbol = " "
+style = "fg:blue"
+format = "[$symbol]($style) "
+detect_extensions = ["c", "h"]
+
+[character]
+success_symbol = "[❯](fg:green)"
+error_symbol = "[❯](fg:red)"
+
+[time]
+disabled = true
+
+[cmd_duration]
+disabled = true
+
+[nix_shell]
+disabled = true
