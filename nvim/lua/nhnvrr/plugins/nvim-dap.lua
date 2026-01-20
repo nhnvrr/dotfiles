@@ -30,13 +30,6 @@ return {
       local candidates = {
         -- Local build (preferred when available)
         vim.fn.expand("~/src/vscode-js-debug/js-debug/src/dapDebugServer.js"),
-        -- Nix profiles (if you add the package via overlay/unstable)
-        vim.fn.expand("~/.nix-profile/share/vscode/extensions/ms-vscode.js-debug/js-debug/src/dapDebugServer.js"),
-        vim.fn.expand("~/.nix-profile/share/vscode/extensions/ms-vscode.js-debug-nightly/js-debug/src/dapDebugServer.js"),
-        vim.fn.expand("/nix/profile/share/vscode/extensions/ms-vscode.js-debug/js-debug/src/dapDebugServer.js"),
-        vim.fn.expand("/nix/profile/share/vscode/extensions/ms-vscode.js-debug-nightly/js-debug/src/dapDebugServer.js"),
-        "/run/current-system/sw/share/vscode/extensions/ms-vscode.js-debug/js-debug/src/dapDebugServer.js",
-        "/run/current-system/sw/share/vscode/extensions/ms-vscode.js-debug-nightly/js-debug/src/dapDebugServer.js",
       }
 
       for _, path in ipairs(candidates) do

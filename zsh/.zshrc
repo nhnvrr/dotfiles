@@ -18,7 +18,7 @@ zstyle ':completion:*' menu select
 alias ls="eza"
 alias ll="ls -la"
 alias l="ll"
-alias la="ls -la"
+lias la="ls -la"
 alias cl="clear"
 alias grep="grep --color=auto"
 

@@ -1,10 +1,10 @@
 add_newline = false
 command_timeout = 500
-palette = "nord"
+palette = "night"
 
 format = "🧉 $os$username$hostname$directory$git_branch$git_status$aws$docker_context$nodejs$bun$python$golang$rust$lua$c $character"
 
-[palettes.nord]
+[palettes.night]
 text = "#E5E9F0"
 subtext = "#D8DEE9"
 red = "#BF616A"

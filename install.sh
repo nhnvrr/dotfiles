@@ -2,35 +2,37 @@
 
 set -euo pipefail
 
-if [ "$(uname -s)" != "Darwin" ]; then
-  echo "This setup is only supported on macOS."
-  exit 1
-fi
+[[ "$(uname -s)" == "Darwin" ]] || { echo "This setup is only supported on macOS."; exit 1; }
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
-CONFIG_DIR="${ROOT_DIR}/config"
+CONFIG_DIR="${SCRIPT_DIR}"
 
-brew_bin="$(command -v brew || true)"
+BREW_BIN="${BREW_BIN:-$(command -v brew || true)}"
 
-if [ -z "${brew_bin}" ]; then
+ensure_brew() {
+  [[ -n "${BREW_BIN}" ]] && return
   echo "Homebrew not found; installing..."
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-  if [ -x "/opt/homebrew/bin/brew" ]; then
-    brew_bin="/opt/homebrew/bin/brew"
-  elif [ -x "/usr/local/bin/brew" ]; then
-    brew_bin="/usr/local/bin/brew"
+  if [[ -x "/opt/homebrew/bin/brew" ]]; then
+    BREW_BIN="/opt/homebrew/bin/brew"
+  elif [[ -x "/usr/local/bin/brew" ]]; then
+    BREW_BIN="/usr/local/bin/brew"
   else
     echo "Homebrew installation failed: brew not found on PATH."
     exit 1
   fi
-fi
+}
 
-eval "$("${brew_bin}" shellenv)"
+link_file() {
+  local src="$1" dst="$2"
+  mkdir -p "$(dirname "${dst}")"
+  ln -sf "${src}" "${dst}"
+}
 
 echo "Installing Homebrew packages..."
-"${brew_bin}" update
+ensure_brew
+eval "$("${BREW_BIN}" shellenv)"
+"${BREW_BIN}" update
 
 cli_tools=(
   awscli
@@ -44,6 +46,7 @@ cli_tools=(
   go
   htop
   jq
+  neovim
   node
   pgcli
   pnpm
@@ -54,7 +57,10 @@ cli_tools=(
   terraform
   tmux
 )
-"${brew_bin}" install "${cli_tools[@]}"
+"${BREW_BIN}" install --formula "${cli_tools[@]}"
+
+echo "Enabling font casks..."
+"${BREW_BIN}" tap homebrew/cask-fonts
 
 apps=(
   "docker-desktop"
@@ -69,7 +75,10 @@ apps=(
   "visual-studio-code"
   "whatsapp"
 )
-"${brew_bin}" install --cask "${apps[@]}"
+"${BREW_BIN}" install --cask "${apps[@]}"
+
+echo "Installing Nerd Font (Geist Mono)..."
+"${BREW_BIN}" install --cask font-geist-mono-nerd-font
 
 echo "Configuring git..."
 git config --global user.name "Nicolas Navarro"
@@ -92,17 +101,14 @@ go env -w GOPATH="${HOME}/Develop/go"
 go env -w GOPRIVATE="github.com/nhnvrr"
 
 echo "Linking config files..."
-ln -sf "${CONFIG_DIR}/zsh/.zshrc" "${HOME}/.zshrc"
-
-mkdir -p "${HOME}/.config/starship"
-ln -sf "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship/starship.toml"
-
-mkdir -p "${HOME}/.config/pgcli"
-ln -sf "${CONFIG_DIR}/pgcli/config" "${HOME}/.config/pgcli/config"
-
-if [ -f "${CONFIG_DIR}/gh/config.yml" ]; then
-  mkdir -p "${HOME}/.config/gh"
-  ln -sf "${CONFIG_DIR}/gh/config.yml" "${HOME}/.config/gh/config.yml"
+link_file "${CONFIG_DIR}/zsh/.zshrc" "${HOME}/.zshrc"
+link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.tmux.conf"
+link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship/starship.toml"
+link_file "${CONFIG_DIR}/pgcli/config" "${HOME}/.config/pgcli/config"
+link_file "${CONFIG_DIR}/nvim/init.lua" "${HOME}/.config/nvim/init.lua"
+link_file "${CONFIG_DIR}/nvim/.stylua.toml" "${HOME}/.config/nvim/.stylua.toml"
+if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
+  link_file "${CONFIG_DIR}/gh/config.yml" "${HOME}/.config/gh/config.yml"
 fi
 
 echo "macOS standalone setup complete."
