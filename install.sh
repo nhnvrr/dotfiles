@@ -119,6 +119,7 @@ go env -w GOPRIVATE="github.com/nhnvrr"
 
 echo "Linking config files..."
 link_file "${CONFIG_DIR}/zsh/.zshrc" "${HOME}/.zshrc"
+link_file "${CONFIG_DIR}/zsh/.hushlogin" "${HOME}/.hushlogin"
 link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.tmux.conf"
 link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
 link_file "${CONFIG_DIR}/pgcli/config" "${HOME}/.config/pgcli/config"

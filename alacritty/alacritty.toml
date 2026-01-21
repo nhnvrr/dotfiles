@@ -7,6 +7,8 @@ dynamic_padding = false
 opacity = 0.94
 padding = { x = 0, y = 0 }
 option_as_alt = "Both"
+dimensions = { columns = 130, lines = 40 }
+blur = true
 
 [scrolling]
 history = 10000
@@ -18,7 +20,7 @@ save_to_clipboard = true
 style = { shape = "Block", blinking = "Off" }
 
 [font]
-size = 13.5
+size = 16
 normal = { family = "GeistMono Nerd Font", style = "Regular" }
 bold = { family = "GeistMono Nerd Font", style = "Bold" }
 italic = { family = "GeistMono Nerd Font", style = "Italic" }

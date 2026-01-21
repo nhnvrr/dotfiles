@@ -9,6 +9,7 @@ return {
       require("catppuccin").setup({
         flavour = "mocha",
         transparent_background = true,
+        no_bold = true,
         integrations = {
           lualine = true,
         },

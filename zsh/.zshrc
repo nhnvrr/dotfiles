@@ -42,6 +42,7 @@ alias nm="nmap -sC -sV -oN nmap"
 alias b="bun run"
 alias ts="npx tsx --env.file=.env "
 alias serve="python3 -m http.server"
+alias '?'="ollama run llama3.2"
 
 # Environment Variables
 export LANG=en_US.UTF-8
