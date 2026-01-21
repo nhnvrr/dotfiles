@@ -7,7 +7,7 @@ return {
 
     lualine.setup({
       options = {
-        theme = "nord",
+        theme = "catppuccin",
         component_separators = { left = "", right = "" },
         section_separators = { left = "", right = "" },
       },
@@ -25,7 +25,7 @@ return {
           {
             lazy_status.updates,
             cond = lazy_status.has_updates,
-            color = { fg = "#D08770" },
+            color = { fg = "#fab387" },
           },
           { "encoding" },
           { "fileformat" },

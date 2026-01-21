@@ -130,7 +130,7 @@ table_format = psql
 # Syntax Style. Possible values: manni, igor, xcode, vim, autumn, vs, rrt,
 # native, perldoc, borland, tango, emacs, friendly, monokai, paraiso-dark,
 # colorful, murphy, bw, pastie, paraiso-light, trac, default, fruity
-syntax_style = fruity
+syntax_style = pastie
 
 # Keybindings:
 # When Vi mode is enabled you can use modal editing features offered by Vi in the REPL.
@@ -195,28 +195,38 @@ keyring = True
 # If unset, uses the server's time zone, which is the Postgres default
 use_local_timezone = True
 
-# Ayu Dark custom colors for pgcli UI
+# Pastel dark palette (catppuccin mocha)
+# text    #cdd6f4
+# subtext #bac2de
+# red     #f38ba8
+# orange  #fab387
+# yellow  #f9e2af
+# green   #a6e3a1
+# blue    #89b4fa
+# aqua    #94e2d5
+# purple  #cba6f7
+# Pastel dark custom colors for pgcli UI
 [colors]
 # Completion menu
-completion-menu.completion.current = 'bg:#131721 #FFB454'   # active item: dark line bg + ayu orange
-completion-menu.completion         = 'bg:#0F1419 #E6E1CF'   # normal items: dark bg + ayu fg
-completion-menu.meta.completion.current = 'bg:#11151C #FFD173'  # meta active: ui line + accent yellow
-completion-menu.meta.completion         = 'bg:#0F131A #5C6773'  # meta normal: panel bg + muted fg
-completion-menu.multi-column-meta       = 'bg:#0B0E14 #3E4B59'  # ui bg + idle fg
+completion-menu.completion.current = 'bg:#313244 #fab387'   # active item: surface bg + peach
+completion-menu.completion         = 'bg:#1e1e2e #cdd6f4'   # normal items: base bg + text
+completion-menu.meta.completion.current = 'bg:#313244 #f9e2af'  # meta active: surface + yellow
+completion-menu.meta.completion         = 'bg:#181825 #bac2de'  # meta normal: mantle + subtext
+completion-menu.multi-column-meta       = 'bg:#11111b #bac2de'  # crust + subtext
 
 # Scrollbar
-scrollbar.arrow = 'bg:#0F1419'
-scrollbar       = 'bg:#14191F'
+scrollbar.arrow = 'bg:#1e1e2e'
+scrollbar       = 'bg:#181825'
 
 # Selection & search in menus
-selected       = '#E6E1CF bg:#253340'   # fg on selection bg
-search         = '#FFFFFF bg:#36A3D9'   # find highlight: cyan
-search.current = '#FFFFFF bg:#F07178'   # current match: markup red
+selected       = '#cdd6f4 bg:#45475a'   # fg on selection bg
+search         = '#1e1e2e bg:#94e2d5'   # find highlight: aqua
+search.current = '#1e1e2e bg:#f38ba8'   # current match: pastel red
 
 # Bottom toolbar
-bottom-toolbar      = 'bg:#0B0E14 #5C6773'
-bottom-toolbar.off  = 'bg:#0B0E14 #3E4B59'
-bottom-toolbar.on   = 'bg:#0B0E14 #FFB454'
+bottom-toolbar      = 'bg:#11111b #bac2de'
+bottom-toolbar.off  = 'bg:#11111b #bac2de'
+bottom-toolbar.on   = 'bg:#11111b #fab387'
 
 # Toolbars style flags
 search-toolbar      = 'noinherit bold'
@@ -226,14 +236,14 @@ arg-toolbar         = 'noinherit bold'
 arg-toolbar.text    = 'nobold'
 
 # Transaction statuses
-bottom-toolbar.transaction.valid  = 'bg:#0B0E14 #B8CC52 bold'  # ayu green
-bottom-toolbar.transaction.failed = 'bg:#0B0E14 #F07178 bold'  # ayu red
+bottom-toolbar.transaction.valid  = 'bg:#11111b #a6e3a1 bold'  # pastel green
+bottom-toolbar.transaction.failed = 'bg:#11111b #f38ba8 bold'  # pastel red
 
 # Table output
-output.header = "#FFB454 bold"   # header accent orange
+output.header = "#fab387 bold"   # header accent pastel orange
 output.odd-row = ""
 output.even-row = ""
-output.null = "#5C6773"          # comment grey
+output.null = "#a6adc8"          # pastel subtext
 # Named queries are queries you can execute by name.
 [named queries]
 

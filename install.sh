@@ -29,6 +29,12 @@ link_file() {
   ln -sf "${src}" "${dst}"
 }
 
+copy_dir() {
+  local src="$1" dst="$2"
+  mkdir -p "${dst}"
+  rsync -a "${src}/" "${dst}/"
+}
+
 echo "Installing Homebrew packages..."
 ensure_brew
 eval "$("${BREW_BIN}" shellenv)"
@@ -37,9 +43,8 @@ eval "$("${BREW_BIN}" shellenv)"
 cli_tools=(
   awscli
   bat
-  bun
-  codex
   delve
+  atuin
   firebase-cli
   gh
   git
@@ -56,13 +61,18 @@ cli_tools=(
   starship
   terraform
   tmux
+  zsh-autosuggestions
+  zsh-syntax-highlighting
 )
 "${BREW_BIN}" install --formula "${cli_tools[@]}"
 
-echo "Enabling font casks..."
-"${BREW_BIN}" tap homebrew/cask-fonts
+echo "Installing bun..."
+curl -fsSL https://bun.sh/install | bash
 
 apps=(
+  "alacritty"
+  "aws-vpn-client"
+  "codex"
   "docker-desktop"
   "google-chrome"
   "ledger-wallet"
@@ -81,6 +91,10 @@ echo "Installing Nerd Font (Geist Mono)..."
 "${BREW_BIN}" install --cask font-geist-mono-nerd-font
 
 echo "Configuring git..."
+# Some environments (e.g., Nix home-manager) symlink ~/.config/git/config to a read-only location,
+# so force Git to use a writable ~/.gitconfig for this setup.
+export GIT_CONFIG_GLOBAL="${HOME}/.gitconfig"
+touch "${GIT_CONFIG_GLOBAL}"
 git config --global user.name "Nicolas Navarro"
 git config --global user.email "navarropaeznicolas@gmail.com"
 git config --global init.defaultBranch "main"
@@ -96,6 +110,9 @@ git config --global alias.prettylog "log --graph --pretty=format:'%Cred%h%Creset
 git config --global alias.root "rev-parse --show-toplevel"
 
 echo "Configuring Go environment..."
+GOENV_PATH="${HOME}/Develop/go/goenv"
+mkdir -p "$(dirname "${GOENV_PATH}")"
+export GOENV="${GOENV_PATH}"
 mkdir -p "${HOME}/Develop/go"
 go env -w GOPATH="${HOME}/Develop/go"
 go env -w GOPRIVATE="github.com/nhnvrr"
@@ -103,10 +120,10 @@ go env -w GOPRIVATE="github.com/nhnvrr"
 echo "Linking config files..."
 link_file "${CONFIG_DIR}/zsh/.zshrc" "${HOME}/.zshrc"
 link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.tmux.conf"
-link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship/starship.toml"
+link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
 link_file "${CONFIG_DIR}/pgcli/config" "${HOME}/.config/pgcli/config"
-link_file "${CONFIG_DIR}/nvim/init.lua" "${HOME}/.config/nvim/init.lua"
-link_file "${CONFIG_DIR}/nvim/.stylua.toml" "${HOME}/.config/nvim/.stylua.toml"
+copy_dir "${CONFIG_DIR}/nvim" "${HOME}/.config/nvim"
+link_file "${CONFIG_DIR}/alacritty/alacritty.toml" "${HOME}/.config/alacritty/alacritty.toml"
 if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
   link_file "${CONFIG_DIR}/gh/config.yml" "${HOME}/.config/gh/config.yml"
 fi

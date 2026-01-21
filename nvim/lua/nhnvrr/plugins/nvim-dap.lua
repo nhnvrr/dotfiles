@@ -17,7 +17,7 @@ return {
     vim.fn.sign_define("DapBreakpointRejected", { text = "X", texthl = "", linehl = "", numhl = "" })
 
     -- Set up highlights
-    vim.api.nvim_set_hl(0, "DapStoppedLine", { bg = "#555530" })
+    vim.api.nvim_set_hl(0, "DapStoppedLine", { bg = "#45475a" })
 
     -- Setup mason-nvim-dap
     require("mason-nvim-dap").setup({

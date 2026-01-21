@@ -10,6 +10,7 @@ Visual Studio Code, Spotify, and Google Chrome.
   - `config/zsh/.zshrc` -> `~/.zshrc`
   - `config/starship/starship.toml` -> `~/.config/starship/starship.toml`
   - `config/pgcli/config` -> `~/.config/pgcli/config`
+  - `config/alacritty/alacritty.toml` -> `~/.config/alacritty/alacritty.toml`
   - `config/gh/config.yml` -> `~/.config/gh/config.yml` (if present)
 
 ## Notes

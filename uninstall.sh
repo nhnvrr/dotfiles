@@ -3,16 +3,9 @@ set -euo pipefail
 
 BREW_BIN="${BREW_BIN:-$(command -v brew || true)}"
 
-if [[ -z "${BREW_BIN}" ]]; then
-  echo "Homebrew is not installed; nothing to uninstall."
-  exit 0
-fi
-
 cli_tools=(
   awscli
   bat
-  bun
-  codex
   delve
   firebase-cli
   gh
@@ -30,10 +23,25 @@ cli_tools=(
   starship
   terraform
   tmux
+  zsh-autosuggestions
+  zsh-syntax-highlighting
 )
 
-echo "Removing CLI formulas (cask apps left intact)..."
-"${BREW_BIN}" uninstall --ignore-dependencies "${cli_tools[@]}" || true
+cask_tools=(
+  codex
+)
+
+if [[ -n "${BREW_BIN}" ]]; then
+  echo "Removing CLI formulas (other cask apps left intact)..."
+  "${BREW_BIN}" uninstall --ignore-dependencies "${cli_tools[@]}" || true
+  echo "Removing Codex cask..."
+  "${BREW_BIN}" uninstall --cask --ignore-dependencies "${cask_tools[@]}" || true
+else
+  echo "Homebrew is not installed; skipping brew removals."
+fi
+
+echo "Removing bun installation..."
+rm -rf "${HOME}/.bun"
 
 echo "Removing symlinks..."
 rm -f "${HOME}/.zshrc"
@@ -43,7 +51,8 @@ rm -f "${HOME}/.config/pgcli/config"
 rm -f "${HOME}/.config/nvim/init.lua" "${HOME}/.config/nvim/.stylua.toml"
 rm -f "${HOME}/.config/gh/config.yml"
 
-rmdir "${HOME}/.config/starship" "${HOME}/.config/pgcli" "${HOME}/.config/nvim" "${HOME}/.config/gh" 2>/dev/null || true
+echo "Removing config directories..."
+rm -rf "${HOME}/.config/starship" "${HOME}/.config/pgcli" "${HOME}/.config/nvim" "${HOME}/.config/gh"
 
 echo "Removing tool caches (non-cask)..."
 rm -rf "${HOME}/.codex"

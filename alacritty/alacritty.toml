@@ -1,0 +1,31 @@
+[env]
+TERM = "xterm-256color"
+
+[window]
+decorations = "Buttonless"
+dynamic_padding = false
+opacity = 0.94
+padding = { x = 0, y = 0 }
+option_as_alt = "Both"
+
+[scrolling]
+history = 10000
+
+[selection]
+save_to_clipboard = true
+
+[cursor]
+style = { shape = "Block", blinking = "Off" }
+
+[font]
+size = 13.5
+normal = { family = "GeistMono Nerd Font", style = "Regular" }
+bold = { family = "GeistMono Nerd Font", style = "Bold" }
+italic = { family = "GeistMono Nerd Font", style = "Italic" }
+bold_italic = { family = "GeistMono Nerd Font", style = "Bold Italic" }
+
+[colors]
+primary = { background = "#11111b", foreground = "#cdd6f4" }
+normal = { black = "#181825", red = "#f38ba8", green = "#a6e3a1", yellow = "#f9e2af", blue = "#89b4fa", magenta = "#cba6f7", cyan = "#94e2d5", white = "#bac2de" }
+bright = { black = "#313244", red = "#f38ba8", green = "#a6e3a1", yellow = "#f9e2af", blue = "#89b4fa", magenta = "#cba6f7", cyan = "#94e2d5", white = "#a6adc8" }
+selection = { text = "CellForeground", background = "#313244" }

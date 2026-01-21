@@ -1,17 +1,21 @@
 return {
   {
-    "shaunsingh/nord.nvim",
+    "catppuccin/nvim",
+    name = "catppuccin",
     lazy = false,
     priority = 1000,
     config = function()
       vim.o.background = "dark"
-      vim.g.nord_italic = false
-      vim.g.nord_bold = false
-      vim.g.nord_disable_background = true
-      vim.g.nord_disable_float_background = true
-      vim.cmd.colorscheme("nord")
-      vim.api.nvim_set_hl(0, "Comment", { fg = "#4C566A", italic = true })
-      vim.api.nvim_set_hl(0, "@comment", { fg = "#4C566A", italic = true })
+      require("catppuccin").setup({
+        flavour = "mocha",
+        transparent_background = true,
+        integrations = {
+          lualine = true,
+        },
+      })
+      vim.cmd.colorscheme("catppuccin")
+      vim.api.nvim_set_hl(0, "Comment", { fg = "#6c7086", italic = true })
+      vim.api.nvim_set_hl(0, "@comment", { fg = "#6c7086", italic = true })
     end,
   },
 }

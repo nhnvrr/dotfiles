@@ -1,19 +1,19 @@
 add_newline = false
 command_timeout = 500
-palette = "night"
+palette = "pastel_dark"
 
 format = "🧉 $os$username$hostname$directory$git_branch$git_status$aws$docker_context$nodejs$bun$python$golang$rust$lua$c $character"
 
-[palettes.night]
-text = "#E5E9F0"
-subtext = "#D8DEE9"
-red = "#BF616A"
-orange = "#D08770"
-yellow = "#EBCB8B"
-green = "#A3BE8C"
-blue = "#81A1C1"
-aqua = "#88C0D0"
-purple = "#B48EAD"
+[palettes.pastel_dark]
+text = "#cdd6f4"
+subtext = "#bac2de"
+red = "#f38ba8"
+orange = "#fab387"
+yellow = "#f9e2af"
+green = "#a6e3a1"
+blue = "#89b4fa"
+aqua = "#94e2d5"
+purple = "#cba6f7"
 
 [username]
 disabled = false
