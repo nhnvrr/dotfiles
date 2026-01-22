@@ -156,5 +156,20 @@ return {
         },
       },
     })
+
+    -- Enable configured servers (Neovim 0.11+).
+    vim.lsp.enable({
+      "ts_ls",
+      "html",
+      "cssls",
+      "tailwindcss",
+      "lua_ls",
+      "graphql",
+      "emmet_ls",
+      "prismals",
+      "eslint",
+      "yamlls",
+      "marksman",
+    })
   end,
 }
