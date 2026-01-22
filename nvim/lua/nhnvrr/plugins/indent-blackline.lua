@@ -6,10 +6,11 @@ return {
     indent = {
       char = "┊",
       tab_char = "┊",
+      highlight = "IblIndent",
     },
     whitespace = {
-      highlight = { "Whitespace", "NonText" },
+      highlight = { "IblWhitespace" },
     },
-    scope = { enabled = false },
+    scope = { enabled = false, highlight = "IblScope" },
   },
 }

@@ -53,7 +53,7 @@ show_bottom_toolbar = True
 
 table_format = psql
 
-syntax_style = paraiso-dark
+syntax_style = nord
 
 vi = False
 
@@ -82,22 +82,22 @@ keyring = True
 use_local_timezone = True
 
 [colors]
-completion-menu.completion.current = 'bg:#26233a #f6c177'
-completion-menu.completion         = 'bg:#191724 #e0def4'
-completion-menu.meta.completion.current = 'bg:#26233a #c4a7e7'
-completion-menu.meta.completion         = 'bg:#1f1d2e #908caa'
-completion-menu.multi-column-meta       = 'bg:#191724 #6e6a86'
+completion-menu.completion.current = 'bg:#4c566a #eceff4'
+completion-menu.completion         = 'bg:#3b4252 #d8dee9'
+completion-menu.meta.completion.current = 'bg:#4c566a #b48ead'
+completion-menu.meta.completion         = 'bg:#3b4252 #81a1c1'
+completion-menu.multi-column-meta       = 'bg:#2e3440 #4c566a'
 
-scrollbar.arrow = 'bg:#191724'
-scrollbar       = 'bg:#1f1d2e'
+scrollbar.arrow = 'bg:#3b4252'
+scrollbar       = 'bg:#2e3440'
 
-selected       = '#e0def4 bg:#403d52'
-search         = '#191724 bg:#9ccfd8'
-search.current = '#191724 bg:#eb6f92'
+selected       = '#eceff4 bg:#4c566a'
+search         = '#2e3440 bg:#88c0d0'
+search.current = '#2e3440 bg:#ebcb8b'
 
-bottom-toolbar      = 'bg:#1f1d2e #908caa'
-bottom-toolbar.off  = 'bg:#1f1d2e #908caa'
-bottom-toolbar.on   = 'bg:#1f1d2e #f6c177'
+bottom-toolbar      = 'bg:#3b4252 #d8dee9'
+bottom-toolbar.off  = 'bg:#3b4252 #d8dee9'
+bottom-toolbar.on   = 'bg:#3b4252 #ebcb8b'
 
 search-toolbar      = 'noinherit bold'
 search-toolbar.text = 'nobold'
@@ -105,13 +105,13 @@ system-toolbar      = 'noinherit bold'
 arg-toolbar         = 'noinherit bold'
 arg-toolbar.text    = 'nobold'
 
-bottom-toolbar.transaction.valid  = 'bg:#1f1d2e #9ccfd8 bold'
-bottom-toolbar.transaction.failed = 'bg:#1f1d2e #eb6f92 bold'
+bottom-toolbar.transaction.valid  = 'bg:#3b4252 #a3be8c bold'
+bottom-toolbar.transaction.failed = 'bg:#3b4252 #bf616a bold'
 
-output.header = "#f6c177 bold"
+output.header = "#ebcb8b bold"
 output.odd-row = ""
 output.even-row = ""
-output.null = "#6e6a86"
+output.null = "#4c566a"
 [named queries]
 
 [alias_dsn]

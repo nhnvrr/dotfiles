@@ -3,8 +3,15 @@ vim.g.mapleader = " "
 local keymap = vim.keymap -- for conciseness
 
 keymap.set("i", "jk", "<ESC>", { desc = "Exit insert mode with jk" })
-keymap.set("n", "<leader>e", ":Ex<CR>", { noremap = true, silent = true })
 keymap.set("n", "<leader>nh", ":nohl<CR>", { desc = "Clear search highlights" })
+keymap.set("n", "<leader>chc", function()
+  local current = vim.g.colors_name
+  if current == "nordic" then
+    vim.cmd.colorscheme("monochrome")
+  else
+    vim.cmd.colorscheme("nordic")
+  end
+end, { desc = "Toggle colorscheme: Monochrome/Nordic" })
 
 -- increment/decrement numbers
 keymap.set("n", "<leader>+", "<C-a>", { desc = "Increment number" }) -- increment
@@ -22,15 +29,11 @@ keymap.set("n", "<leader>tn", "<cmd>tabn<CR>", { desc = "Go to next tab" }) --  
 keymap.set("n", "<leader>tp", "<cmd>tabp<CR>", { desc = "Go to previous tab" }) --  go to previous tab
 keymap.set("n", "<leader>tf", "<cmd>tabnew %<CR>", { desc = "Open current buffer in new tab" }) --  move current buffer to new tab
 
+-- terminal
+keymap.set("n", "<leader>tv", "<cmd>vsplit | terminal<CR>", { desc = "Open terminal in vertical split" })
+
 -- LSP
 keymap.set("n", "GD", "<cmd>tab split | lua vim.lsp.buf.definition()<CR>", { desc = "Go to definition in new tab" })
-keymap.set("n", "<leader>e", function()
-  if vim.bo.filetype == "netrw" then
-    vim.cmd("b#")
-  else
-    vim.cmd("Ex")
-  end
-end, { desc = "Toggle netrw" })
 
 -- Disable horizontal scrolling
 keymap.set({ "n", "v", "i" }, "<ScrollWheelLeft>", "<Nop>", { desc = "Disable horizontal scroll left" })

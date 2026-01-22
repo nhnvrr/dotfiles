@@ -25,15 +25,6 @@ return {
       })[1]
     end
 
-    local function remove_linter(linters, linter_name)
-      for k, v in pairs(linters) do
-        if v == linter_name then
-          linters[k] = nil
-          break
-        end
-      end
-    end
-
     local function linter_in_linters(linters, linter_name)
       for k, v in pairs(linters) do
         if v == linter_name then
@@ -43,18 +34,12 @@ return {
       return false
     end
 
-    local function remove_linter_if_missing_config_file(linters, linter_name, config_file_name)
-      if linter_in_linters(linters, linter_name) and not file_in_cwd(config_file_name) then
-        remove_linter(linters, linter_name)
-      end
-    end
-
     local function eslint_config_present()
       return file_in_cwd("eslint.config.js")
-        or file_in_cwd(".eslintrc.cjs")
-        or file_in_cwd(".eslintrc.js")
-        or file_in_cwd(".eslintrc.json")
-        or file_in_cwd(".eslintrc")
+          or file_in_cwd(".eslintrc.cjs")
+          or file_in_cwd(".eslintrc.js")
+          or file_in_cwd(".eslintrc.json")
+          or file_in_cwd(".eslintrc")
     end
 
     local function find_cmd(bin)
