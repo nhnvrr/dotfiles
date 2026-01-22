@@ -1,6 +1,7 @@
 # Core ZSH Settings
 setopt auto_cd hist_ignore_all_dups share_history
 setopt extended_glob interactive_comments
+unsetopt xtrace verbose
 
 # History configuration
 HISTSIZE=10000
@@ -54,53 +55,8 @@ export BAT_THEME=Nord
 # Path Configuration
 export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH"
 
-# Vi-mode Configuration
-bindkey -v
-export KEYTIMEOUT=1
-
-# Fix backspace and other keys in insert mode
-bindkey -v '^?' backward-delete-char
-bindkey '^h' backward-delete-char
-bindkey '^r' history-incremental-search-backward
-
-# Better cursor shape for different vi modes
-function zle-keymap-select {
-  if [[ ${KEYMAP} == vicmd ]] || [[ $1 = 'block' ]]; then
-    echo -ne '\e[1 q'  # Block cursor for normal mode
-  elif [[ ${KEYMAP} == main ]] || [[ ${KEYMAP} == viins ]] || [[ ${KEYMAP} = '' ]] || [[ $1 = 'beam' ]]; then
-    echo -ne '\e[5 q'  # Beam cursor for insert mode
-  fi
-}
-zle -N zle-keymap-select
-
-# Use beam shape cursor on startup and for each new prompt
-echo -ne '\e[5 q'
-preexec() { echo -ne '\e[5 q' ;}
-
 # ZSH Plugins
 source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-
-# Pastel dark syntax highlighting
-ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#6c7086"
-typeset -A ZSH_HIGHLIGHT_STYLES
-ZSH_HIGHLIGHT_STYLES[comment]="fg=#6c7086"
-ZSH_HIGHLIGHT_STYLES[command]="fg=#a6e3a1"
-ZSH_HIGHLIGHT_STYLES[builtin]="fg=#a6e3a1"
-ZSH_HIGHLIGHT_STYLES[alias]="fg=#a6e3a1"
-ZSH_HIGHLIGHT_STYLES[function]="fg=#a6e3a1"
-ZSH_HIGHLIGHT_STYLES[reserved-word]="fg=#f9e2af"
-ZSH_HIGHLIGHT_STYLES[precommand]="fg=#89b4fa"
-ZSH_HIGHLIGHT_STYLES[commandseparator]="fg=#bac2de"
-ZSH_HIGHLIGHT_STYLES[redirection]="fg=#89b4fa"
-ZSH_HIGHLIGHT_STYLES[single-hyphen-option]="fg=#fab387"
-ZSH_HIGHLIGHT_STYLES[double-hyphen-option]="fg=#fab387"
-ZSH_HIGHLIGHT_STYLES[single-quoted-argument]="fg=#94e2d5"
-ZSH_HIGHLIGHT_STYLES[double-quoted-argument]="fg=#94e2d5"
-ZSH_HIGHLIGHT_STYLES[path]="fg=#89b4fa"
-ZSH_HIGHLIGHT_STYLES[globbing]="fg=#f9e2af"
-ZSH_HIGHLIGHT_STYLES[unknown-token]="fg=#f38ba8"
-ZSH_HIGHLIGHT_STYLES[error]="fg=#f38ba8,bold"
 
 # Keybindings for autosuggestions
 bindkey '^e' autosuggest-accept
@@ -119,3 +75,25 @@ eval "$(atuin init zsh)"
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+
+# Nord Aurora syntax highlighting (keep zsh-syntax-highlighting last)
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#4c566a"
+typeset -A ZSH_HIGHLIGHT_STYLES
+ZSH_HIGHLIGHT_STYLES[comment]="fg=#4c566a"
+ZSH_HIGHLIGHT_STYLES[command]="fg=#a3be8c"
+ZSH_HIGHLIGHT_STYLES[builtin]="fg=#a3be8c"
+ZSH_HIGHLIGHT_STYLES[alias]="fg=#a3be8c"
+ZSH_HIGHLIGHT_STYLES[function]="fg=#a3be8c"
+ZSH_HIGHLIGHT_STYLES[reserved-word]="fg=#ebcb8b"
+ZSH_HIGHLIGHT_STYLES[precommand]="fg=#b48ead"
+ZSH_HIGHLIGHT_STYLES[commandseparator]="fg=#4c566a"
+ZSH_HIGHLIGHT_STYLES[redirection]="fg=#b48ead"
+ZSH_HIGHLIGHT_STYLES[single-hyphen-option]="fg=#d08770"
+ZSH_HIGHLIGHT_STYLES[double-hyphen-option]="fg=#d08770"
+ZSH_HIGHLIGHT_STYLES[single-quoted-argument]="fg=#ebcb8b"
+ZSH_HIGHLIGHT_STYLES[double-quoted-argument]="fg=#ebcb8b"
+ZSH_HIGHLIGHT_STYLES[path]="fg=#a3be8c"
+ZSH_HIGHLIGHT_STYLES[globbing]="fg=#ebcb8b"
+ZSH_HIGHLIGHT_STYLES[unknown-token]="fg=#bf616a"
+ZSH_HIGHLIGHT_STYLES[error]="fg=#bf616a,bold"
+source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
