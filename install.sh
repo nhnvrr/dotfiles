@@ -49,7 +49,7 @@ cli_tools=(
   gh
   git
   go
-  htop
+  btop
   jq
   neovim
   node
@@ -87,8 +87,8 @@ apps=(
 )
 "${BREW_BIN}" install --cask "${apps[@]}"
 
-echo "Installing Nerd Font (Geist Mono)..."
-"${BREW_BIN}" install --cask font-geist-mono-nerd-font
+echo "Installing Nerd Fonts (Geist Mono, JetBrains Mono)..."
+"${BREW_BIN}" install --cask font-geist-mono-nerd-font font-jetbrains-mono-nerd-font
 
 echo "Configuring git..."
 # Some environments (e.g., Nix home-manager) symlink ~/.config/git/config to a read-only location,

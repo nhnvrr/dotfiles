@@ -7,54 +7,42 @@ return {
     config = function()
       vim.o.background = "dark"
       require("nordic").setup({
-        -- This callback can be used to override the colors used in the base palette.
         on_palette = function(palette) end,
-        -- This callback can be used to override the colors used in the extended palette.
         after_palette = function(palette) end,
-        -- This callback can be used to override highlights before they are applied.
-        on_highlight = function(highlights, palette) end,
-        -- Enable bold keywords.
+        on_highlight = function(highlights, palette)
+          local yellow = (type(palette.yellow) == "table" and palette.yellow.base) or palette.yellow or "#e5c07b"
+          local light_gray = palette.gray0 or palette.gray1 or "#9aa3b2"
+          local dark_bg = "#191d24"
+          highlights.NeoTreeTabActive = { fg = yellow, bg = dark_bg, bold = true }
+          highlights.NeoTreeTabInactive = { fg = light_gray, bg = dark_bg }
+          highlights.NeoTreeTabSeparatorActive = { fg = yellow, bg = dark_bg }
+          highlights.NeoTreeTabSeparatorInactive = { fg = light_gray, bg = dark_bg }
+        end,
         bold_keywords = false,
-        -- Enable italic comments.
         italic_comments = true,
-        -- Enable editor background transparency.
         transparent = {
-          -- Enable transparent background.
           bg = false,
-          -- Enable transparent background for floating windows.
           float = false,
         },
-        -- Enable brighter float border.
         bright_border = false,
-        -- Reduce the overall amount of blue in the theme (diverges from base Nord).
-        reduced_blue = true,
-        -- Swap the dark background with the normal one.
+        reduced_blue = false,
         swap_backgrounds = false,
-        -- Cursorline options.  Also includes visual/selection.
         cursorline = {
-          -- Bold font in cursorline.
           bold = false,
-          -- Bold cursorline number.
           bold_number = true,
-          -- Available styles: 'dark', 'light'.
           theme = "dark",
-          -- Blending the cursorline bg with the buffer bg.
           blend = 0.85,
         },
         noice = {
-          -- Available styles: `classic`, `flat`.
           style = "classic",
         },
         telescope = {
-          -- Available styles: `classic`, `flat`.
           style = "flat",
         },
         leap = {
-          -- Dims the backdrop when using leap.
           dim_backdrop = false,
         },
         ts_context = {
-          -- Enables dark background for treesitter-context window
           dark_background = true,
         },
       })

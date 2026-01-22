@@ -29,7 +29,6 @@ return {
       },
     })
 
-    -- Ensure YAML/YML buffers format on save even if global settings are missed
     vim.api.nvim_create_autocmd("BufWritePre", {
       pattern = { "*.yaml", "*.yml" },
       callback = function(args)

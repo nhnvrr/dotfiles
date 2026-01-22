@@ -11,7 +11,7 @@ cli_tools=(
   gh
   git
   go
-  htop
+  btop
   jq
   neovim
   node
