@@ -66,6 +66,7 @@ return {
     window = {
       position = "left",
       width = 34,
+      winhighlight = "Normal:NeoTreeNormal,NormalNC:NeoTreeNormalNC,EndOfBuffer:NeoTreeNormal,WinSeparator:NeoTreeWinSeparator",
       mappings = {
         ["<esc>"] = "close_window",
         ["?"] = "show_help",
