@@ -1,19 +1,17 @@
 add_newline = false
 command_timeout = 500
-palette = "pastel_dark"
+palette = "nord"
 
 format = "🧉 $os$username$hostname$directory$git_branch$git_status$aws$docker_context$nodejs$bun$python$golang$rust$lua$c $character"
 
-[palettes.pastel_dark]
-text = "#cdd6f4"
-subtext = "#bac2de"
-red = "#f38ba8"
-orange = "#fab387"
-yellow = "#f9e2af"
-green = "#a6e3a1"
-blue = "#89b4fa"
-aqua = "#94e2d5"
-purple = "#cba6f7"
+[palettes.nord]
+text = "#d8dee9"
+subtext = "#e5e9f0"
+red = "#bf616a"
+orange = "#d08770"
+yellow = "#ebcb8b"
+green = "#a3be8c"
+purple = "#b48ead"
 
 [username]
 disabled = false
@@ -39,14 +37,14 @@ Debian = ""
 NixOS = ""
 
 [directory]
-style = "fg:aqua"
+style = "fg:purple"
 format = "[$path]($style) "
 truncate_to_repo = true
 truncation_length = 3
 truncation_symbol = "…/"
 
 [git_branch]
-symbol = " "
+symbol = " "
 style = "fg:green"
 format = "[$symbol$branch]($style) "
 
@@ -68,7 +66,7 @@ format = "[($profile)(\\($region\\)) $symbol]($style) "
 
 [docker_context]
 symbol = " "
-style = "fg:blue"
+style = "fg:orange"
 format = "[$symbol$context]($style) "
 
 [nodejs]
@@ -92,7 +90,7 @@ detect_files = ["pyproject.toml", "uv.lock", "requirements.txt", ".python-versio
 
 [golang]
 symbol = " "
-style = "fg:aqua"
+style = "fg:green"
 format = "[$symbol$version]($style) "
 detect_files = ["go.mod"]
 
@@ -110,7 +108,7 @@ detect_files = ["stylua.toml", ".luarc.json", ".luarc.jsonc"]
 
 [c]
 symbol = " "
-style = "fg:blue"
+style = "fg:purple"
 format = "[$symbol]($style) "
 detect_extensions = ["c", "h"]
 

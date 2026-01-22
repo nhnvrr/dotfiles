@@ -4,11 +4,11 @@ TERM = "xterm-256color"
 [window]
 decorations = "Buttonless"
 dynamic_padding = false
-opacity = 0.94
+opacity = 1.0
 padding = { x = 0, y = 0 }
 option_as_alt = "Both"
 dimensions = { columns = 130, lines = 40 }
-blur = true
+blur = false
 
 [scrolling]
 history = 10000
@@ -27,7 +27,8 @@ italic = { family = "GeistMono Nerd Font", style = "Italic" }
 bold_italic = { family = "GeistMono Nerd Font", style = "Bold Italic" }
 
 [colors]
-primary = { background = "#11111b", foreground = "#cdd6f4" }
-normal = { black = "#181825", red = "#f38ba8", green = "#a6e3a1", yellow = "#f9e2af", blue = "#89b4fa", magenta = "#cba6f7", cyan = "#94e2d5", white = "#bac2de" }
-bright = { black = "#313244", red = "#f38ba8", green = "#a6e3a1", yellow = "#f9e2af", blue = "#89b4fa", magenta = "#cba6f7", cyan = "#94e2d5", white = "#a6adc8" }
-selection = { text = "CellForeground", background = "#313244" }
+primary = { background = "#2e3440", foreground = "#d8dee9" }
+normal = { black = "#3b4252", red = "#bf616a", green = "#a3be8c", yellow = "#ebcb8b", blue = "#81a1c1", magenta = "#b48ead", cyan = "#88c0d0", white = "#e5e9f0" }
+bright = { black = "#4c566a", red = "#bf616a", green = "#a3be8c", yellow = "#ebcb8b", blue = "#81a1c1", magenta = "#b48ead", cyan = "#8fbcbb", white = "#eceff4" }
+selection = { text = "#2e3440", background = "#b48ead" }
+cursor = { text = "#2e3440", cursor = "#ebcb8b" }
