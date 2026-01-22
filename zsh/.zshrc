@@ -76,24 +76,7 @@ eval "$(atuin init zsh)"
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
-# Nord Aurora syntax highlighting (keep zsh-syntax-highlighting last)
-ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#4c566a"
-typeset -A ZSH_HIGHLIGHT_STYLES
-ZSH_HIGHLIGHT_STYLES[comment]="fg=#4c566a"
-ZSH_HIGHLIGHT_STYLES[command]="fg=#a3be8c"
-ZSH_HIGHLIGHT_STYLES[builtin]="fg=#a3be8c"
-ZSH_HIGHLIGHT_STYLES[alias]="fg=#a3be8c"
-ZSH_HIGHLIGHT_STYLES[function]="fg=#a3be8c"
-ZSH_HIGHLIGHT_STYLES[reserved-word]="fg=#ebcb8b"
-ZSH_HIGHLIGHT_STYLES[precommand]="fg=#b48ead"
-ZSH_HIGHLIGHT_STYLES[commandseparator]="fg=#4c566a"
-ZSH_HIGHLIGHT_STYLES[redirection]="fg=#b48ead"
-ZSH_HIGHLIGHT_STYLES[single-hyphen-option]="fg=#d08770"
-ZSH_HIGHLIGHT_STYLES[double-hyphen-option]="fg=#d08770"
-ZSH_HIGHLIGHT_STYLES[single-quoted-argument]="fg=#ebcb8b"
-ZSH_HIGHLIGHT_STYLES[double-quoted-argument]="fg=#ebcb8b"
-ZSH_HIGHLIGHT_STYLES[path]="fg=#a3be8c"
-ZSH_HIGHLIGHT_STYLES[globbing]="fg=#ebcb8b"
-ZSH_HIGHLIGHT_STYLES[unknown-token]="fg=#bf616a"
-ZSH_HIGHLIGHT_STYLES[error]="fg=#bf616a,bold"
 source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+# Use blinking beam cursor in terminal
+print -Pn '\e[5 q'

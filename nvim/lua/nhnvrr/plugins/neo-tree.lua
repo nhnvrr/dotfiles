@@ -32,8 +32,8 @@ return {
       highlight_separator = "NeoTreeTabSeparatorInactive",
       highlight_separator_active = "NeoTreeTabSeparatorActive",
       sources = {
-        { source = "filesystem", display_name = " Files" },
-        { source = "buffers", display_name = " Buffs" },
+        { source = "filesystem", display_name = " File Explorer" },
+        -- { source = "buffers", display_name = " Buffs" },
         { source = "git_status", display_name = " Git" },
       },
     },
@@ -91,11 +91,11 @@ return {
       },
       git_status = {
         symbols = {
-          added = "✚",
-          modified = "",
-          deleted = "✖",
+          added = "",
+          modified = "",
+          deleted = "",
           renamed = "󰁕",
-          untracked = "",
+          untracked = "",
           ignored = "",
           unstaged = "󰄱",
           staged = "",
