@@ -34,4 +34,4 @@ primary = { background = "#191D24", foreground = "#D8DEE9" }
 normal = { black = "#3B4252", red = "#BF616A", green = "#A3BE8C", yellow = "#EBCB8B", blue = "#81A1C1", magenta = "#B48EAD", cyan = "#88C0D0", white = "#E5E9F0" }
 bright = { black = "#4C566A", red = "#D08770", green = "#A3BE8C", yellow = "#EBCB8B", blue = "#5E81AC", magenta = "#B48EAD", cyan = "#8FBCBB", white = "#ECEFF4" }
 selection = { text = "#2E3440", background = "#D8DEE9" }
-cursor = { text = "#2E3440", cursor = "#EBCB8B" }
+cursor = { text = "#2E3440", cursor = "#97B67C" }
