@@ -7,7 +7,7 @@ dynamic_padding = false
 opacity = 0.95
 padding = { x = 0, y = 0 }
 option_as_alt = "Both"
-dimensions = { columns = 160, lines = 100 }
+dimensions = { columns = 86, lines = 86 }
 blur = true
 
 [scrolling]
@@ -23,7 +23,7 @@ hide_when_typing = true
 style = { shape = "Beam", blinking = "On" }
 
 [font]
-size = 16
+size = 12.5
 normal = { family = "JetBrainsMono Nerd Font", style = "Regular" }
 bold = { family = "JetBrainsMono Nerd Font", style = "Bold" }
 italic = { family = "JetBrainsMono Nerd Font", style = "Italic" }
