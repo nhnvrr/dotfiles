@@ -7,7 +7,7 @@ dynamic_padding = false
 opacity = 0.95
 padding = { x = 0, y = 0 }
 option_as_alt = "Both"
-dimensions = { columns = 86, lines = 86 }
+dimensions = { columns = 110, lines = 50 }
 blur = true
 
 [scrolling]
