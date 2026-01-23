@@ -51,3 +51,10 @@ vim.opt.listchars = {
   precedes = "«",
   nbsp = "␣",
 }
+
+vim.api.nvim_create_autocmd("VimLeave", {
+  callback = function()
+    -- Restore blinking bar cursor when leaving Neovim.
+    vim.opt.guicursor = "a:ver25-blinkon500-blinkoff500"
+  end,
+})
