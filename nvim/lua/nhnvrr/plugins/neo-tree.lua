@@ -26,11 +26,6 @@ return {
       separator = " ",
       separator_active = " ",
       show_separator_on_edge = false,
-      highlight_tab = "NeoTreeTabInactive",
-      highlight_tab_active = "NeoTreeTabActive",
-      highlight_background = "NeoTreeTabInactive",
-      highlight_separator = "NeoTreeTabSeparatorInactive",
-      highlight_separator_active = "NeoTreeTabSeparatorActive",
       sources = {
         { source = "filesystem", display_name = " File Explorer" },
         -- { source = "buffers", display_name = " Buffs" },

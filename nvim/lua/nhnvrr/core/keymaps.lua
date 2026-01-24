@@ -4,14 +4,6 @@ local keymap = vim.keymap -- for conciseness
 
 keymap.set("i", "jk", "<ESC>", { desc = "Exit insert mode with jk" })
 keymap.set("n", "<leader>nh", ":nohl<CR>", { desc = "Clear search highlights" })
-keymap.set("n", "<leader>chc", function()
-  local current = vim.g.colors_name
-  if current == "nordic" then
-    vim.cmd.colorscheme("monochrome")
-  else
-    vim.cmd.colorscheme("nordic")
-  end
-end, { desc = "Toggle colorscheme: Monochrome/Nordic" })
 
 -- increment/decrement numbers
 keymap.set("n", "<leader>+", "<C-a>", { desc = "Increment number" }) -- increment
