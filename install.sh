@@ -70,20 +70,16 @@ echo "Installing bun..."
 curl -fsSL https://bun.sh/install | bash
 
 apps=(
-  "alacritty"
-  "aws-vpn-client"
-  "codex"
-  "docker-desktop"
-  "google-chrome"
-  "ledger-wallet"
-  "notion"
-  "obsidian"
   "ollama"
-  "slack"
-  "spotify"
+  "codex"
   "telegram"
+  "obsidian"
+  "alacritty"
+  "brave-browser"
+  "ledger-wallet"
+  "docker-desktop"
+  "aws-vpn-client"
   "visual-studio-code"
-  "whatsapp"
 )
 "${BREW_BIN}" install --cask "${apps[@]}"
 

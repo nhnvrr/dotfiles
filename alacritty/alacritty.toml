@@ -7,7 +7,7 @@ dynamic_padding = false
 opacity = 0.95
 padding = { x = 0, y = 0 }
 option_as_alt = "Both"
-dimensions = { columns = 120, lines = 50 }
+dimensions = { columns = 160, lines = 80 }
 blur = true
 
 [scrolling]
@@ -40,7 +40,7 @@ green = "#90b99f"
 yellow = "#e6b99d"
 blue = "#aca1cf"
 magenta = "#e29eca"
-cyan = "#ea83a5"
+cyan = "#7fc8c6"
 white = "#a0a0a0"
 
 [colors.bright]
@@ -50,5 +50,5 @@ green = "#99ffe4"
 yellow = "#ffc799"
 blue = "#b9aeda"
 magenta = "#ecaad6"
-cyan = "#f591b2"
+cyan = "#a9e3e1"
 white = "#ffffff"

@@ -2,6 +2,17 @@ return {
   "nvim-treesitter/nvim-treesitter",
   lazy = false,
   build = ":TSUpdate",
+  dependencies = {
+    {
+      "OXY2DEV/markview.nvim",
+      lazy = false,
+      opts = {
+        preview = {
+          icon_provider = "devicons",
+        },
+      },
+    },
+  },
   config = function()
     local ts = require("nvim-treesitter")
     local ts_lang = vim.treesitter.language
