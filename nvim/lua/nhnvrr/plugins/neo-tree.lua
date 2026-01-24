@@ -17,6 +17,21 @@ return {
     close_if_last_window = true,
     enable_git_status = true,
     enable_diagnostics = true,
+    source_selector = {
+      winbar = true,
+      statusline = false,
+      content_layout = "start",
+      tabs_layout = "start",
+      padding = 0,
+      separator = " ",
+      separator_active = " ",
+      show_separator_on_edge = false,
+      sources = {
+        { source = "filesystem", display_name = " File Explorer" },
+        -- { source = "buffers", display_name = " Buffs" },
+        { source = "git_status", display_name = " Git" },
+      },
+    },
     filesystem = {
       follow_current_file = { enabled = true },
       hijack_netrw_behavior = "open_current",
@@ -46,9 +61,43 @@ return {
     window = {
       position = "left",
       width = 34,
+      winhighlight = "Normal:NeoTreeNormal,NormalNC:NeoTreeNormalNC,EndOfBuffer:NeoTreeNormal,WinSeparator:NeoTreeWinSeparator",
       mappings = {
         ["<esc>"] = "close_window",
         ["?"] = "show_help",
+      },
+    },
+    default_component_configs = {
+      indent = {
+        with_markers = true,
+        indent_size = 2,
+        padding = 1,
+        marker = "│",
+        last_marker = "└",
+        expander_collapsed = "",
+        expander_expanded = "",
+      },
+      icon = {
+        folder_closed = "",
+        folder_open = "",
+        folder_empty = "",
+        default = "󰈚",
+      },
+      modified = {
+        symbol = "●",
+      },
+      git_status = {
+        symbols = {
+          added = "",
+          modified = "",
+          deleted = "",
+          renamed = "󰁕",
+          untracked = "",
+          ignored = "",
+          unstaged = "󰄱",
+          staged = "",
+          conflict = "",
+        },
       },
     },
   },

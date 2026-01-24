@@ -13,7 +13,29 @@ return {
         section_separators = "",
       },
       sections = {
-        lualine_a = { { "mode", padding = { left = 1, right = 1 } } },
+        lualine_a = {
+          {
+            "mode",
+            padding = { left = 1, right = 1 },
+            fmt = function(mode)
+              local short = {
+                NORMAL = "N",
+                INSERT = "I",
+                VISUAL = "V",
+                ["V-LINE"] = "VL",
+                ["V-BLOCK"] = "VB",
+                REPLACE = "R",
+                ["V-REPLACE"] = "VR",
+                COMMAND = "C",
+                TERMINAL = "T",
+                SELECT = "S",
+                ["S-LINE"] = "SL",
+                ["S-BLOCK"] = "SB",
+              }
+              return short[mode] or mode
+            end,
+          },
+        },
         lualine_b = { "branch" },
         lualine_c = {
           {
@@ -43,5 +65,6 @@ return {
         lualine_z = {},
       },
     })
+
   end,
 }

@@ -1,62 +1,38 @@
 add_newline = true
 command_timeout = 500
-palette = "nord"
-
+palette = "terminal"
 format = "🧉 $os$username$hostname$directory$git_branch$git_status$aws$docker_context$nodejs$bun$python$golang$rust$lua$c $character"
 
-[palettes.nord]
-black0 = "#191D24"
-black1 = "#1E222A"
-black2 = "#222630"
-gray0 = "#242933"
-gray1 = "#2E3440"
-gray2 = "#3B4252"
-gray3 = "#434C5E"
-white_alt = "#C0C8D8"
-white0 = "#BBC3D4"
-white1 = "#D8DEE9"
-white2 = "#E5E9F0"
-white3 = "#ECEFF4"
-gray5 = "#60728A"
-gray4 = "#4C566A"
-blue0 = "#5E81AC"
-cyan = "#8FBCBB"
-red = "#BF616A"
-orange = "#D08770"
-yellow = "#EBCB8B"
-green = "#A3BE8C"
-magenta = "#B48EAD"
-blue1 = "#81A1C1"
-cyan_b = "#9FC6C5"
-red_b = "#C5727A"
-orange_b = "#D79784"
-yellow_b = "#EFD49F"
-green_b = "#B1C89D"
-magenta_b = "#BE9DB8"
-blue2 = "#88C0D0"
-cyan_d = "#80B3B2"
-red_d = "#B74E58"
-orange_d = "#CB775D"
-yellow_d = "#E7C173"
-green_d = "#97B67C"
-magenta_d = "#A97EA1"
+[palettes.terminal]
+black = "#1E2228"
+red = "#D78787"
+green = "#9BBE8F"
+yellow = "#D6C48C"
+blue = "#8FB7D9"
+magenta = "#C1A0C8"
+cyan = "#8CBEC3"
+white = "#C0C6D1"
+bright_black = "#6E7684"
+bright_red = "#E7A3A3"
+bright_green = "#B6D6AA"
+bright_yellow = "#E9D9A8"
+bright_blue = "#ABC6E6"
+bright_magenta = "#DAB3DF"
+bright_cyan = "#A8D7DC"
+bright_white = "#E6E9EF"
 
 [username]
 disabled = false
 show_always = false
-style_user = "fg:white1"
-style_root = "fg:red"
 format = "[$user]($style)"
 
 [hostname]
 ssh_only = true
 trim_at = "."
-style = "fg:white2"
 format = "@[$hostname]($style) "
 
 [os]
 disabled = true
-style = "fg:white2"
 format = "[$symbol]($style) "
 
 [os.symbols]
@@ -65,19 +41,19 @@ Debian = ""
 NixOS = ""
 
 [directory]
-style = "fg:yellow_d"
 format = "[$path]($style) "
+style = "fg:magenta"
 truncate_to_repo = true
 truncation_length = 3
-truncation_symbol = "…/"
+truncation_symbol = " "
 
 [git_branch]
-symbol = " "
-style = "fg:magenta_d"
+symbol = ""
+style = "fg:green"
 format = "[$symbol$branch]($style) "
 
 [git_status]
-style = "fg:red_d"
+style = "fg:red"
 format = "[$all_status$ahead_behind]($style) "
 conflicted = "✖"
 untracked = "?"
@@ -89,24 +65,24 @@ diverged = "⇕"
 
 [aws]
 symbol = " "
-style = "fg:orange_d"
+style = "fg:yellow"
 format = "[($profile)(\\($region\\)) $symbol]($style) "
 
 [docker_context]
 symbol = " "
-style = "fg:cyan_d"
+style = "fg:cyan"
 format = "[$symbol$context]($style) "
 
 [nodejs]
 symbol = " "
-style = "fg:green_b"
+style = "fg:green"
 format = "[$symbol$version]($style) "
 detect_files = ["package.json", "pnpm-lock.yaml", "yarn.lock", "package-lock.json"]
 detect_extensions = ["js", "ts", "mjs", "cjs"]
 
 [bun]
 symbol = " "
-style = "fg:white2"
+style = "fg:white"
 format = "[$symbol$version]($style) "
 detect_files = ["bun.lockb", "bun.lock"]
 
@@ -118,13 +94,13 @@ detect_files = ["pyproject.toml", "uv.lock", "requirements.txt", ".python-versio
 
 [golang]
 symbol = " "
-style = "fg:cyan_b"
+style = "fg:cyan"
 format = "[$symbol$version]($style) "
 detect_files = ["go.mod"]
 
 [rust]
 symbol = " "
-style = "fg:orange"
+style = "fg:red"
 format = "[$symbol$version]($style) "
 detect_files = ["Cargo.toml"]
 
@@ -136,13 +112,13 @@ detect_files = ["stylua.toml", ".luarc.json", ".luarc.jsonc"]
 
 [c]
 symbol = " "
-style = "fg:magenta"
+style = "fg:blue"
 format = "[$symbol]($style) "
 detect_extensions = ["c", "h"]
 
 [character]
-success_symbol = "[❯](fg:green)"
-error_symbol = "[❯](fg:red)"
+success_symbol = "❯"
+error_symbol = "❯"
 
 [time]
 disabled = true
