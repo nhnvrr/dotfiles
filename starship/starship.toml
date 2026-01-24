@@ -1,4 +1,4 @@
-add_newline = false
+add_newline = true
 command_timeout = 500
 palette = "nord"
 
@@ -65,7 +65,7 @@ Debian = ""
 NixOS = ""
 
 [directory]
-style = "fg:cyan_b"
+style = "fg:yellow_d"
 format = "[$path]($style) "
 truncate_to_repo = true
 truncation_length = 3
@@ -73,7 +73,7 @@ truncation_symbol = "…/"
 
 [git_branch]
 symbol = " "
-style = "fg:green_d"
+style = "fg:magenta_d"
 format = "[$symbol$branch]($style) "
 
 [git_status]
