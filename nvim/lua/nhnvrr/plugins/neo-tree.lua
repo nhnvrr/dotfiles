@@ -36,7 +36,7 @@ return {
       follow_current_file = { enabled = true },
       hijack_netrw_behavior = "open_current",
       use_libuv_file_watcher = true,
-      group_empty_dirs = true,
+      group_empty_dirs = false,
       bind_to_cwd = true,
       window = {
         mappings = {
@@ -61,7 +61,8 @@ return {
     window = {
       position = "left",
       width = 34,
-      winhighlight = "Normal:NeoTreeNormal,NormalNC:NeoTreeNormalNC,EndOfBuffer:NeoTreeNormal,WinSeparator:NeoTreeWinSeparator",
+      winhighlight =
+      "Normal:NeoTreeNormal,NormalNC:NeoTreeNormalNC,EndOfBuffer:NeoTreeNormal,WinSeparator:NeoTreeWinSeparator",
       mappings = {
         ["<esc>"] = "close_window",
         ["?"] = "show_help",
