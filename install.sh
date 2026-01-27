@@ -53,7 +53,6 @@ cli_tools=(
   jq
   neovim
   node
-  pgcli
   pnpm
   postgresql
   rust
@@ -117,7 +116,6 @@ link_file "${CONFIG_DIR}/zsh/.zshrc" "${HOME}/.zshrc"
 link_file "${CONFIG_DIR}/zsh/.hushlogin" "${HOME}/.hushlogin"
 link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.tmux.conf"
 link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
-link_file "${CONFIG_DIR}/pgcli/config" "${HOME}/.config/pgcli/config"
 copy_dir "${CONFIG_DIR}/nvim" "${HOME}/.config/nvim"
 link_file "${CONFIG_DIR}/alacritty/alacritty.toml" "${HOME}/.config/alacritty/alacritty.toml"
 if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then

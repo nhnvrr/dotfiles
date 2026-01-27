@@ -1,7 +1,6 @@
 return {
   "goolord/alpha-nvim",
   event = "VimEnter",
-  dependencies = { "nvim-tree/nvim-web-devicons" },
   config = function()
     local ok_alpha, alpha = pcall(require, "alpha")
     if not ok_alpha then
@@ -18,15 +17,15 @@ return {
       return string.format(" %s ", sc)
     end
 
-    dashboard.section.header.val = { "🧉" }
+    dashboard.section.header.val = { "Welcome" }
 
     dashboard.section.buttons.val = {
-      dashboard.button("e", "  New file", ":ene <BAR> startinsert <CR>"),
-      dashboard.button("f", "󰱼  Find file", ":Telescope find_files <CR>"),
-      dashboard.button("r", "󰄉  Recent", ":Telescope oldfiles <CR>"),
-      dashboard.button("g", "󰱼  Live grep", ":Telescope live_grep <CR>"),
-      dashboard.button("c", "  Config", ":e $MYVIMRC <CR>"),
-      dashboard.button("q", "󰗼  Quit", ":qa<CR>"),
+      dashboard.button("e", "New file", ":ene <BAR> startinsert <CR>"),
+      dashboard.button("f", "Find file", ":Telescope find_files <CR>"),
+      dashboard.button("r", "Recent", ":Telescope oldfiles <CR>"),
+      dashboard.button("g", "Live grep", ":Telescope live_grep <CR>"),
+      dashboard.button("c", "Config", ":e $MYVIMRC <CR>"),
+      dashboard.button("q", "Quit", ":qa<CR>"),
     }
 
     dashboard.section.buttons.opts.hl_shortcut = "AlphaShortcut"
@@ -40,7 +39,7 @@ return {
     if ok_lazy then
       local stats = lazy.stats()
       footer = string.format(
-        "󰂖 %d plugins  •  NVIM v%d.%d.%d",
+        "%d plugins  •  NVIM v%d.%d.%d",
         stats.count,
         version.major,
         version.minor,

@@ -87,6 +87,7 @@ alias gc="git commit -m"
 alias gp="git push origin HEAD"
 alias gco="git checkout"
 alias ga="git add"
+alias lg="lazygit"
 
 # Prompt (interactive only)
 if [[ -o interactive ]] && command -v starship >/dev/null 2>&1; then

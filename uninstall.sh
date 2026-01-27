@@ -19,7 +19,6 @@ cli_tools=(
   jq
   neovim
   node
-  pgcli
   pnpm
   postgresql
   rust
@@ -67,12 +66,11 @@ rm -f "${HOME}/.zshrc"
 rm -f "${HOME}/.hushlogin"
 rm -f "${HOME}/.tmux.conf"
 rm -f "${HOME}/.config/starship/starship.toml"
-rm -f "${HOME}/.config/pgcli/config"
 rm -f "${HOME}/.config/alacritty/alacritty.toml"
 rm -f "${HOME}/.config/gh/config.yml"
 
 echo "Removing config directories..."
-rm -rf "${HOME}/.config/starship" "${HOME}/.config/pgcli" "${HOME}/.config/nvim" "${HOME}/.config/gh" "${HOME}/.config/alacritty"
+rm -rf "${HOME}/.config/starship" "${HOME}/.config/nvim" "${HOME}/.config/gh" "${HOME}/.config/alacritty"
 
 echo "Removing tool caches (non-cask)..."
 rm -rf "${HOME}/.codex"
