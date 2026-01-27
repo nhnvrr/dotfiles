@@ -22,6 +22,10 @@ return {
     telescope.setup({
       defaults = {
         path_display = { "smart" },
+        file_ignore_patterns = {
+          "%.git/",
+          "node_modules/",
+        },
         mappings = {
           i = {
             ["<C-k>"] = actions.move_selection_previous,
@@ -29,6 +33,16 @@ return {
             ["<C-q>"] = actions.send_selected_to_qflist + custom_actions.open_trouble_qflist,
             ["<C-t>"] = trouble_telescope.open,
           },
+        },
+      },
+      pickers = {
+        find_files = {
+          hidden = true,
+        },
+        live_grep = {
+          additional_args = function()
+            return { "--hidden", "--glob", "!**/.git/*", "--glob", "!**/node_modules/*" }
+          end,
         },
       },
     })
