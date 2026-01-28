@@ -36,6 +36,7 @@ cask_apps=(
   telegram
   obsidian
   alacritty
+  brave-browser
   ledger-wallet
   docker-desktop
   aws-vpn-client
