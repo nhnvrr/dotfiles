@@ -30,25 +30,37 @@ italic = { family = "GeistMono Nerd Font Propo", style = "Italic" }
 bold_italic = { family = "JetbrainsMono Nerd Font", style = "Bold Italic" }
 
 [colors.primary]
-background = "#101010"
-foreground = "#ffffff"
+background = "#181616"
+foreground = "#c5c9c5"
 
 [colors.normal]
-black = "#101010"
-red = "#f5a191"
-green = "#90b99f"
-yellow = "#e6b99d"
-blue = "#aca1cf"
-magenta = "#e29eca"
-cyan = "#7fc8c6"
-white = "#a0a0a0"
+black = "#0d0c0c"
+red = "#c4746e"
+green = "#8a9a7b"
+yellow = "#c4b28a"
+blue = "#8ba4b0"
+magenta = "#a292a3"
+cyan = "#8ea4a2"
+white = "#c8c093"
 
 [colors.bright]
-black = "#7e7e7e"
-red = "#ff8080"
-green = "#99ffe4"
-yellow = "#ffc799"
-blue = "#b9aeda"
-magenta = "#ecaad6"
-cyan = "#a9e3e1"
-white = "#ffffff"
+black = "#a6a69c"
+red = "#e46876"
+green = "#87a987"
+yellow = "#e6c384"
+blue = "#7fb4ca"
+magenta = "#938aa9"
+cyan = "#7aa89f"
+white = "#c5c9c5"
+
+[colors.selection]
+background = "#2d4f67"
+foreground = "#c8c093"
+
+[[colors.indexed_colors]]
+index = 16
+color = "#b6927b"
+
+[[colors.indexed_colors]]
+index = 17
+color = "#b98d7b"

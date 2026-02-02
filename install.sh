@@ -75,7 +75,7 @@ apps=(
   "obsidian"
   "alacritty"
   "ledger-wallet"
-  "brave-browser"
+  "google-chrome"
   "docker-desktop"
   "aws-vpn-client"
   "visual-studio-code"
