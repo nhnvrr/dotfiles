@@ -45,7 +45,17 @@ return {
         specs = {},
         groups = {},
       })
-      vim.cmd("colorscheme github_dark")
+      -- vim.cmd("colorscheme github_dark_default")
+    end,
+  },
+  {
+    "wtfox/jellybeans.nvim",
+    name = "jellybeans",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      require("jellybeans").setup({})
+      vim.cmd("colorscheme jellybeans")
     end,
   },
 }

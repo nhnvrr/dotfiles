@@ -51,7 +51,7 @@ return {
             cond = lazy_status.has_updates,
           },
           { "diagnostics", sources = { "nvim_diagnostic" } },
-          { "filetype", icon_only = false },
+          { "filetype",    icon_only = false },
         },
         lualine_y = { "progress" },
         lualine_z = { { "location", padding = { left = 1, right = 1 } } },
@@ -65,6 +65,5 @@ return {
         lualine_z = {},
       },
     })
-
   end,
 }
