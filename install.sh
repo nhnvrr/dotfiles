@@ -52,6 +52,7 @@ cli_tools=(
   btop
   jq
   neovim
+  nvm
   node
   pnpm
   postgresql
