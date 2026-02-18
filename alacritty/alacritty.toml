@@ -1,3 +1,5 @@
+general.import = ["~/.config/alacritty/theme.toml"]
+
 [env]
 TERM = "xterm-256color"
 
@@ -23,40 +25,8 @@ hide_when_typing = true
 style = { shape = "Beam", blinking = "On" }
 
 [font]
-size = 22
+size = 21
 normal = { family = "GeistMono Nerd Font Propo", style = "Regular" }
 bold = { family = "GeistMono Nerd Font Propo", style = "Bold" }
 italic = { family = "GeistMono Nerd Font Propo", style = "Italic" }
 bold_italic = { family = "JetbrainsMono Nerd Font", style = "Bold Italic" }
-
-[colors.primary]
-background = "#24292e"
-foreground = "#d1d5da"
-
-[colors.normal]
-black = "#000000"
-red = "#ea4a5a"
-green = "#34d058"
-yellow = "#ffea7f"
-blue = "#2188ff"
-magenta = "#b392f0"
-cyan = "#39c5cf"
-white = "#ffffff"
-
-[colors.bright]
-black = "#959da5"
-red = "#f97583"
-green = "#85e89d"
-yellow = "#ffea7f"
-blue = "#79b8ff"
-magenta = "#b392f0"
-cyan = "#56d4dd"
-white = "#ffffff"
-
-[[colors.indexed_colors]]
-index = 16
-color = "#d18616"
-
-[[colors.indexed_colors]]
-index = 17
-color = "#f97583"

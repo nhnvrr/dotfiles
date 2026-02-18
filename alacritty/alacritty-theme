@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+ALACRITTY_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/alacritty"
+THEME_LINK="${ALACRITTY_DIR}/theme.toml"
+
+usage() {
+  cat <<'EOF'
+Usage: alacritty-theme <dark|light|dimmed|current|list>
+
+Examples:
+  alacritty-theme dark
+  alacritty-theme light
+  alacritty-theme dimmed
+  alacritty-theme current
+EOF
+}
+
+if [[ $# -ne 1 ]]; then
+  usage
+  exit 1
+fi
+
+command_name="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
+
+case "${command_name}" in
+  list)
+    printf '%s\n' dark light dimmed
+    exit 0
+    ;;
+  current)
+    if [[ ! -e "${THEME_LINK}" ]]; then
+      echo "No active Alacritty theme set."
+      exit 1
+    fi
+
+    target_path="$(readlink "${THEME_LINK}" 2>/dev/null || true)"
+    target_file="$(basename "${target_path}")"
+    case "${target_file}" in
+      github-dark.toml) echo "dark" ;;
+      github-light.toml) echo "light" ;;
+      github-dark-dimmed.toml) echo "dimmed" ;;
+      *)
+        if [[ -n "${target_path}" ]]; then
+          echo "custom (${target_path})"
+        else
+          echo "custom (${THEME_LINK})"
+        fi
+        ;;
+    esac
+    exit 0
+    ;;
+  dark)
+    theme_file="github-dark.toml"
+    ;;
+  light)
+    theme_file="github-light.toml"
+    ;;
+  dimmed|dark-dimmed)
+    theme_file="github-dark-dimmed.toml"
+    ;;
+  *)
+    echo "Invalid theme: ${1}"
+    usage
+    exit 1
+    ;;
+esac
+
+theme_path="${ALACRITTY_DIR}/${theme_file}"
+if [[ ! -f "${theme_path}" ]]; then
+  echo "Theme file not found: ${theme_path}"
+  echo "Run ./install.sh to link Alacritty themes first."
+  exit 1
+fi
+
+mkdir -p "${ALACRITTY_DIR}"
+ln -sfn "${theme_path}" "${THEME_LINK}"
+echo "Switched Alacritty theme to ${command_name}."

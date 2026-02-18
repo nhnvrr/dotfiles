@@ -5,6 +5,19 @@ return {
     lazy = false,
     priority = 1000,
     config = function()
+      local function use_dark_theme()
+        if vim.fn.has("macunix") == 1 then
+          local result = vim.fn.system("defaults read -g AppleInterfaceStyle 2>/dev/null")
+          return vim.v.shell_error == 0 and result:match("Dark") ~= nil
+        end
+
+        return vim.o.background == "dark"
+      end
+
+      local use_dark = use_dark_theme()
+      local github_variant = use_dark and "github_dark" or "github_light"
+      vim.o.background = use_dark and "dark" or "light"
+
       require("github-theme").setup({
         options = {
           compile_path = vim.fn.stdpath("cache") .. "/github-theme",
@@ -45,7 +58,7 @@ return {
         specs = {},
         groups = {},
       })
-      -- vim.cmd("colorscheme github_dark_default")
+      vim.cmd.colorscheme(github_variant)
     end,
   },
   {
@@ -55,7 +68,7 @@ return {
     priority = 1000,
     config = function()
       require("jellybeans").setup({})
-      vim.cmd("colorscheme jellybeans")
+      -- vim.cmd("colorscheme jellybeans")
     end,
   },
 }

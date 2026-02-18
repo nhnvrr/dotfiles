@@ -1,38 +1,28 @@
 add_newline = true
-command_timeout = 500
-palette = "terminal"
-format = "🧉 $os$username$hostname$directory$git_branch$git_status$aws$docker_context$nodejs$bun$python$golang$rust$lua$c $character"
+command_timeout = 700
+scan_timeout = 30
 
-[palettes.terminal]
-black = "#000000"
-red = "#ea4a5a"
-green = "#34d058"
-yellow = "#ffea7f"
-blue = "#2188ff"
-magenta = "#b392f0"
-cyan = "#39c5cf"
-white = "#ffffff"
-bright_black = "#959da5"
-bright_red = "#f97583"
-bright_green = "#85e89d"
-bright_yellow = "#ffea7f"
-bright_blue = "#79b8ff"
-bright_magenta = "#b392f0"
-bright_cyan = "#56d4dd"
-bright_white = "#ffffff"
+format = """
+🧉 $os$username$hostname$directory$git_branch$git_state$git_status
+$status$jobs$character
+"""
+right_format = "$cmd_duration$time$aws$docker_context$nix_shell$nodejs$bun$python$golang$rust$lua$c"
 
 [username]
-disabled = false
 show_always = false
+style_user = "bold"
+style_root = "bold red"
 format = "[$user]($style)"
 
 [hostname]
 ssh_only = true
 trim_at = "."
+style = "cyan"
 format = "@[$hostname]($style) "
 
 [os]
 disabled = true
+style = "black"
 format = "[$symbol]($style) "
 
 [os.symbols]
@@ -41,21 +31,27 @@ Debian = ""
 NixOS = ""
 
 [directory]
-format = "[$path]($style) "
-style = "fg:cyan"
+style = "cyan"
+format = "[$path]($style)[$read_only]($read_only_style) "
+read_only = " 󰌾"
+read_only_style = "bold red"
 truncate_to_repo = true
-truncation_length = 3
+truncation_length = 1
 truncation_symbol = " "
 
 [git_branch]
-symbol = ""
-style = "fg:green"
+symbol = " "
+style = "green"
 format = "[$symbol$branch]($style) "
 
+[git_state]
+style = "blue"
+format = "\\([$state( $progress_current/$progress_total)]($style)\\) "
+
 [git_status]
-style = "fg:red"
-format = "[$all_status$ahead_behind]($style) "
-conflicted = "✖"
+style = "red"
+format = "([$all_status$ahead_behind]($style) )"
+conflicted = " "
 untracked = "?"
 modified = "!"
 staged = "+"
@@ -63,68 +59,88 @@ ahead = "⇡"
 behind = "⇣"
 diverged = "⇕"
 
+[status]
+disabled = false
+symbol = " "
+style = "red"
+format = "[$symbol$status]($style) "
+
+[jobs]
+symbol = " "
+style = "blue"
+number_threshold = 1
+format = "[$symbol$number]($style) "
+
+[character]
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"
+vimcmd_symbol = "[❮](bold blue)"
+
+[cmd_duration]
+min_time = 1500
+style = "blue"
+format = "[󱫑 $duration]($style) "
+
+[time]
+disabled = false
+time_format = "%R"
+style = "black"
+format = "[󰥔 $time]($style) "
+
 [aws]
 symbol = " "
-style = "fg:yellow"
+style = "bold yellow"
 format = "[($profile)(\\($region\\)) $symbol]($style) "
 
 [docker_context]
 symbol = " "
-style = "fg:cyan"
+style = "cyan"
 format = "[$symbol$context]($style) "
+
+[nix_shell]
+symbol = " "
+style = "blue"
+format = "[$symbol$state( \\($name\\))]($style) "
 
 [nodejs]
 symbol = " "
-style = "fg:green"
+style = "green"
 format = "[$symbol$version]($style) "
-detect_files = ["package.json", "pnpm-lock.yaml", "yarn.lock", "package-lock.json"]
+detect_files = ["package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml", "yarn.lock", "package-lock.json"]
 detect_extensions = ["js", "ts", "mjs", "cjs"]
 
 [bun]
 symbol = " "
-style = "fg:white"
+style = "white"
 format = "[$symbol$version]($style) "
 detect_files = ["bun.lockb", "bun.lock"]
 
 [python]
 symbol = " "
-style = "fg:yellow"
+style = "yellow"
 format = "[$symbol$version( \\($virtualenv\\))]($style) "
 detect_files = ["pyproject.toml", "uv.lock", "requirements.txt", ".python-version", "poetry.lock"]
 
 [golang]
 symbol = " "
-style = "fg:cyan"
+style = "cyan"
 format = "[$symbol$version]($style) "
 detect_files = ["go.mod"]
 
 [rust]
 symbol = " "
-style = "fg:red"
+style = "red"
 format = "[$symbol$version]($style) "
 detect_files = ["Cargo.toml"]
 
 [lua]
 symbol = " "
-style = "fg:magenta"
+style = "magenta"
 format = "[$symbol$version]($style) "
 detect_files = ["stylua.toml", ".luarc.json", ".luarc.jsonc"]
 
 [c]
 symbol = " "
-style = "fg:blue"
+style = "blue"
 format = "[$symbol]($style) "
-detect_extensions = ["c", "h"]
-
-[character]
-success_symbol = "❯"
-error_symbol = "❯"
-
-[time]
-disabled = true
-
-[cmd_duration]
-disabled = true
-
-[nix_shell]
-disabled = true
+detect_extensions = ["c", "h", "hpp", "cpp"]
