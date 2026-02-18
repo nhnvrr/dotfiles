@@ -8,6 +8,21 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_DIR="${SCRIPT_DIR}"
 
 BREW_BIN="${BREW_BIN:-$(command -v brew || true)}"
+SKIP_BREW=false
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --skipBrew)
+      SKIP_BREW=true
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1"
+      echo "Usage: $0 [--skipBrew]"
+      exit 1
+      ;;
+  esac
+done
 
 ensure_brew() {
   [[ -n "${BREW_BIN}" ]] && return
@@ -35,83 +50,88 @@ copy_dir() {
   rsync -a "${src}/" "${dst}/"
 }
 
-echo "Installing Homebrew packages..."
-ensure_brew
-eval "$("${BREW_BIN}" shellenv)"
-"${BREW_BIN}" update
+if [[ "${SKIP_BREW}" == false ]]; then
+  echo "Installing Homebrew packages..."
+  ensure_brew
+  eval "$("${BREW_BIN}" shellenv)"
+  "${BREW_BIN}" update
 
-cli_tools=(
-  awscli
-  bat
-  delve
-  atuin
-  firebase-cli
-  gh
-  git
-  go
-  btop
-  jq
-  neovim
-  nvm
-  node
-  pnpm
-  postgresql
-  rust
-  sentry-cli
-  starship
-  terraform
-  tmux
-  zsh-autosuggestions
-  zsh-syntax-highlighting
-)
-"${BREW_BIN}" install --formula "${cli_tools[@]}"
+  cli_tools=(
+    awscli
+    bat
+    delve
+    atuin
+    firebase-cli
+    gh
+    git
+    go
+    btop
+    jq
+    neovim
+    nvm
+    node
+    pnpm
+    postgresql
+    rust
+    sentry-cli
+    starship
+    terraform
+    tmux
+    zsh-autosuggestions
+    zsh-syntax-highlighting
+  )
+  "${BREW_BIN}" install --formula "${cli_tools[@]}"
 
-echo "Installing bun..."
-curl -fsSL https://bun.sh/install | bash
+  echo "Installing bun..."
+  curl -fsSL https://bun.sh/install | bash
 
-apps=(
-  "ollama"
-  "codex"
-  "telegram"
-  "obsidian"
-  "alacritty"
-  "ledger-wallet"
-  "google-chrome"
-  "docker-desktop"
-  "aws-vpn-client"
-  "visual-studio-code"
-)
-"${BREW_BIN}" install --cask "${apps[@]}"
+  apps=(
+    "ollama"
+    "codex"
+    "telegram"
+    "obsidian"
+    "alacritty"
+    "ledger-wallet"
+    "google-chrome"
+    "gather"
+    "docker-desktop"
+    "aws-vpn-client"
+    "visual-studio-code"
+  )
+  "${BREW_BIN}" install --cask "${apps[@]}"
 
-echo "Installing Nerd Fonts (Geist Mono, JetBrains Mono)..."
-"${BREW_BIN}" install --cask font-geist-mono-nerd-font font-jetbrains-mono-nerd-font
+  echo "Installing Nerd Fonts (Geist Mono, JetBrains Mono)..."
+  "${BREW_BIN}" install --cask font-geist-mono-nerd-font font-jetbrains-mono-nerd-font
 
-echo "Configuring git..."
-# Some environments (e.g., Nix home-manager) symlink ~/.config/git/config to a read-only location,
-# so force Git to use a writable ~/.gitconfig for this setup.
-export GIT_CONFIG_GLOBAL="${HOME}/.gitconfig"
-touch "${GIT_CONFIG_GLOBAL}"
-git config --global user.name "Nicolas Navarro"
-git config --global user.email "navarropaeznicolas@gmail.com"
-git config --global init.defaultBranch "main"
-git config --global push.default "tracking"
-git config --global push.autoSetupRemote "true"
-git config --global branch.autosetuprebase "always"
-git config --global color.ui "true"
-git config --global core.askPass ""
-git config --global credential.helper "osxkeychain"
-git config --global github.user "nhnvrr"
-git config --global alias.cleanup "!git branch --merged | grep -v '\\*\\|master\\|develop' | xargs -n 1 -r git branch -d"
-git config --global alias.prettylog "log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(r) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative"
-git config --global alias.root "rev-parse --show-toplevel"
+  echo "Configuring git..."
+  # Some environments (e.g., Nix home-manager) symlink ~/.config/git/config to a read-only location,
+  # so force Git to use a writable ~/.gitconfig for this setup.
+  export GIT_CONFIG_GLOBAL="${HOME}/.gitconfig"
+  touch "${GIT_CONFIG_GLOBAL}"
+  git config --global user.name "Nicolas Navarro"
+  git config --global user.email "navarropaeznicolas@gmail.com"
+  git config --global init.defaultBranch "main"
+  git config --global push.default "tracking"
+  git config --global push.autoSetupRemote "true"
+  git config --global branch.autosetuprebase "always"
+  git config --global color.ui "true"
+  git config --global core.askPass ""
+  git config --global credential.helper "osxkeychain"
+  git config --global github.user "nhnvrr"
+  git config --global alias.cleanup "!git branch --merged | grep -v '\\*\\|master\\|develop' | xargs -n 1 -r git branch -d"
+  git config --global alias.prettylog "log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(r) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative"
+  git config --global alias.root "rev-parse --show-toplevel"
 
-echo "Configuring Go environment..."
-GOENV_PATH="${HOME}/Develop/go/goenv"
-mkdir -p "$(dirname "${GOENV_PATH}")"
-export GOENV="${GOENV_PATH}"
-mkdir -p "${HOME}/Develop/go"
-go env -w GOPATH="${HOME}/Develop/go"
-go env -w GOPRIVATE="github.com/nhnvrr"
+  echo "Configuring Go environment..."
+  GOENV_PATH="${HOME}/Develop/go/goenv"
+  mkdir -p "$(dirname "${GOENV_PATH}")"
+  export GOENV="${GOENV_PATH}"
+  mkdir -p "${HOME}/Develop/go"
+  go env -w GOPATH="${HOME}/Develop/go"
+  go env -w GOPRIVATE="github.com/nhnvrr"
+else
+  echo "Skipping Homebrew setup and tool installation (--skipBrew); only copying configuration."
+fi
 
 echo "Linking config files..."
 link_file "${CONFIG_DIR}/zsh/.zshrc" "${HOME}/.zshrc"
@@ -120,6 +140,14 @@ link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.tmux.conf"
 link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
 copy_dir "${CONFIG_DIR}/nvim" "${HOME}/.config/nvim"
 link_file "${CONFIG_DIR}/alacritty/alacritty.toml" "${HOME}/.config/alacritty/alacritty.toml"
+link_file "${CONFIG_DIR}/alacritty/github-dark.toml" "${HOME}/.config/alacritty/github-dark.toml"
+link_file "${CONFIG_DIR}/alacritty/github-light.toml" "${HOME}/.config/alacritty/github-light.toml"
+link_file "${CONFIG_DIR}/alacritty/github-dark-dimmed.toml" "${HOME}/.config/alacritty/github-dark-dimmed.toml"
+if [[ ! -e "${HOME}/.config/alacritty/theme.toml" ]]; then
+  link_file "${CONFIG_DIR}/alacritty/github-dark.toml" "${HOME}/.config/alacritty/theme.toml"
+fi
+link_file "${CONFIG_DIR}/alacritty/alacritty-theme" "${HOME}/.local/bin/alacritty-theme"
+link_file "${CONFIG_DIR}/ghostty/config" "${HOME}/.config/ghostty/config"
 if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
   link_file "${CONFIG_DIR}/gh/config.yml" "${HOME}/.config/gh/config.yml"
 fi

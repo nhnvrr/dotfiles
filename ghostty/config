@@ -1,0 +1,25 @@
+theme = light:Builtin Tango Light,dark:Builtin Dark
+window-theme = system
+
+font-family = "GeistMono Nerd Font Propo"
+font-family-bold = "GeistMono Nerd Font Propo"
+font-family-italic = "GeistMono Nerd Font Propo"
+font-family-bold-italic = "JetBrainsMono Nerd Font"
+font-size = 22
+
+window-width = 160
+window-height = 80
+window-padding-x = 4
+window-padding-y = 2
+
+cursor-style = bar
+cursor-style-blink = true
+mouse-hide-while-typing = true
+copy-on-select = clipboard
+
+background-opacity = 0.95
+background-blur = true
+
+macos-option-as-alt = true
+macos-titlebar-style = transparent
+window-colorspace = display-p3

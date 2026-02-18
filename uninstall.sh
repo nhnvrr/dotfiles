@@ -68,10 +68,12 @@ rm -f "${HOME}/.hushlogin"
 rm -f "${HOME}/.tmux.conf"
 rm -f "${HOME}/.config/starship/starship.toml"
 rm -f "${HOME}/.config/alacritty/alacritty.toml"
+rm -f "${HOME}/.config/ghostty/config"
 rm -f "${HOME}/.config/gh/config.yml"
+rm -f "${HOME}/.local/bin/alacritty-theme"
 
 echo "Removing config directories..."
-rm -rf "${HOME}/.config/starship" "${HOME}/.config/nvim" "${HOME}/.config/gh" "${HOME}/.config/alacritty"
+rm -rf "${HOME}/.config/starship" "${HOME}/.config/nvim" "${HOME}/.config/gh" "${HOME}/.config/alacritty" "${HOME}/.config/ghostty"
 
 echo "Removing tool caches (non-cask)..."
 rm -rf "${HOME}/.codex"

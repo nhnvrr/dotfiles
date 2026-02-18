@@ -28,7 +28,7 @@ return {
       sources = {
         { source = "filesystem", display_name = "File Explorer" },
         -- { source = "buffers", display_name = "Buffs" },
-        { source = "git_status", display_name = "Git" },
+        -- { source = "git_status", display_name = "Git" },
       },
     },
     filesystem = {
