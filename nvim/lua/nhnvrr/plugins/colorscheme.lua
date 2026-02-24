@@ -24,7 +24,7 @@ return {
           compile_file_suffix = "_compiled",
           hide_end_of_buffer = true,
           hide_nc_statusline = true,
-          transparent = false,
+          transparent = true,
           terminal_colors = true,
           dim_inactive = false,
           module_default = true,

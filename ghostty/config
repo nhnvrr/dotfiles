@@ -1,4 +1,4 @@
-theme = light:Builtin Tango Light,dark:Builtin Dark
+theme = light:Nord Light,dark:Nord Wave
 window-theme = system
 
 font-family = "GeistMono Nerd Font Propo"
@@ -9,15 +9,15 @@ font-size = 22
 
 window-width = 160
 window-height = 80
-window-padding-x = 4
-window-padding-y = 2
+window-padding-x = 0
+window-padding-y = 0
 
 cursor-style = bar
 cursor-style-blink = true
 mouse-hide-while-typing = true
 copy-on-select = clipboard
 
-background-opacity = 0.95
+background-opacity = 0.98
 background-blur = true
 
 macos-option-as-alt = true
