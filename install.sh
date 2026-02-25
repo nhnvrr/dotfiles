@@ -62,6 +62,7 @@ if [[ "${SKIP_BREW}" == false ]]; then
     delve
     atuin
     firebase-cli
+    fish
     gh
     git
     go
@@ -136,6 +137,7 @@ fi
 echo "Linking config files..."
 link_file "${CONFIG_DIR}/zsh/.zshrc" "${HOME}/.zshrc"
 link_file "${CONFIG_DIR}/zsh/.hushlogin" "${HOME}/.hushlogin"
+link_file "${CONFIG_DIR}/fish/config.fish" "${HOME}/.config/fish/config.fish"
 link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.tmux.conf"
 link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
 copy_dir "${CONFIG_DIR}/nvim" "${HOME}/.config/nvim"
@@ -150,6 +152,14 @@ link_file "${CONFIG_DIR}/alacritty/alacritty-theme" "${HOME}/.local/bin/alacritt
 link_file "${CONFIG_DIR}/ghostty/config" "${HOME}/.config/ghostty/config"
 if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
   link_file "${CONFIG_DIR}/gh/config.yml" "${HOME}/.config/gh/config.yml"
+fi
+
+if command -v fish >/dev/null 2>&1; then
+  FISH_BIN="$(command -v fish)"
+  if [[ "${SHELL:-}" != "${FISH_BIN}" ]]; then
+    echo "To switch your login shell to fish, run:"
+    echo "  chsh -s ${FISH_BIN}"
+  fi
 fi
 
 echo "macOS standalone setup complete."
