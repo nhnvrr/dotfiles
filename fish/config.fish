@@ -43,7 +43,9 @@ if status is-interactive
         starship init fish | source
     end
 
-    if command -q bun
-        bun completions fish | source
-    end
+    # Bun 1.3.x is emitting zsh completions here; sourcing that breaks fish startup.
+    # Keep disabled until bun provides native fish completion output.
+    # if command -q bun
+    #     bun completions fish | source
+    # end
 end

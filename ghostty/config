@@ -1,3 +1,4 @@
+command = /opt/homebrew/bin/fish
 theme = light:Nord Light,dark:Nord Wave
 window-theme = system
 
