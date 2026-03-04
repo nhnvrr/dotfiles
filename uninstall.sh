@@ -12,6 +12,7 @@ cli_tools=(
   delve
   atuin
   firebase-cli
+  fish
   gh
   git
   go
@@ -66,11 +67,14 @@ echo "Removing symlinks..."
 rm -f "${HOME}/.zshrc"
 rm -f "${HOME}/.hushlogin"
 rm -f "${HOME}/.tmux.conf"
+rm -f "${HOME}/.config/starship.toml"
 rm -f "${HOME}/.config/starship/starship.toml"
+rm -f "${HOME}/.config/fish/config.fish"
 rm -f "${HOME}/.config/alacritty/alacritty.toml"
 rm -f "${HOME}/.config/ghostty/config"
 rm -f "${HOME}/.config/gh/config.yml"
 rm -f "${HOME}/.local/bin/alacritty-theme"
+rmdir "${HOME}/.config/fish" 2>/dev/null || true
 
 echo "Removing config directories..."
 rm -rf "${HOME}/.config/starship" "${HOME}/.config/nvim" "${HOME}/.config/gh" "${HOME}/.config/alacritty" "${HOME}/.config/ghostty"

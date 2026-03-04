@@ -84,7 +84,7 @@ format = "[󱫑 $duration]($style) "
 [time]
 disabled = false
 time_format = "%R"
-style = "black"
+style = "white"
 format = "[󰥔 $time]($style) "
 
 [aws]
