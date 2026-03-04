@@ -30,6 +30,9 @@ fish_add_path -m $BUN_INSTALL/bin
 set -gx NVM_DIR $HOME/.nvm
 
 if status is-interactive
+    # Keep startup clean (disable default fish greeting).
+    set -g fish_greeting
+
     # Let Ctrl-S/Ctrl-Q work in tmux and fish keybindings.
     stty -ixon 2>/dev/null
 
@@ -43,9 +46,4 @@ if status is-interactive
         starship init fish | source
     end
 
-    # Bun 1.3.x is emitting zsh completions here; sourcing that breaks fish startup.
-    # Keep disabled until bun provides native fish completion output.
-    # if command -q bun
-    #     bun completions fish | source
-    # end
 end
