@@ -78,8 +78,6 @@ if [[ "${SKIP_BREW}" == false ]]; then
     starship
     terraform
     tmux
-    zsh-autosuggestions
-    zsh-syntax-highlighting
   )
   "${BREW_BIN}" install --formula "${cli_tools[@]}"
 
@@ -89,7 +87,6 @@ if [[ "${SKIP_BREW}" == false ]]; then
   apps=(
     "ollama"
     "codex"
-    "telegram"
     "obsidian"
     "alacritty"
     "ledger-wallet"
