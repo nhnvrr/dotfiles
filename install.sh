@@ -90,7 +90,7 @@ if [[ "${SKIP_BREW}" == false ]]; then
     "obsidian"
     "alacritty"
     "ledger-wallet"
-    "brave-browser"
+    "google-chrome"
     "gather"
     "telegram"
     "docker-desktop"
