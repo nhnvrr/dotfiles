@@ -50,6 +50,13 @@ copy_dir() {
   rsync -a "${src}/" "${dst}/"
 }
 
+install_bundled_font() {
+  local src="$1" dst_dir="${HOME}/Library/Fonts"
+  [[ -f "${src}" ]] || return
+  mkdir -p "${dst_dir}"
+  cp -f "${src}" "${dst_dir}/"
+}
+
 if [[ "${SKIP_BREW}" == false ]]; then
   echo "Installing Homebrew packages..."
   ensure_brew
@@ -62,6 +69,7 @@ if [[ "${SKIP_BREW}" == false ]]; then
     delve
     atuin
     firebase-cli
+    fnm
     fish
     gh
     git
@@ -131,6 +139,9 @@ if [[ "${SKIP_BREW}" == false ]]; then
 else
   echo "Skipping Homebrew setup and tool installation (--skipBrew); only copying configuration."
 fi
+
+echo "Installing bundled fonts..."
+install_bundled_font "${CONFIG_DIR}/fonts/DankMonoNerdFont-Italic.otf"
 
 echo "Linking config files..."
 link_file "${CONFIG_DIR}/zsh/.zshrc" "${HOME}/.zshrc"
