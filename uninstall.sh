@@ -49,6 +49,10 @@ font_casks=(
   font-jetbrains-mono-nerd-font
 )
 
+local_fonts=(
+  DankMonoNerdFont-Italic.otf
+)
+
 if [[ -n "${BREW_BIN}" ]]; then
   echo "Removing CLI formulas..."
   "${BREW_BIN}" uninstall --ignore-dependencies "${cli_tools[@]}" || true
@@ -75,6 +79,11 @@ rm -f "${HOME}/.config/ghostty/config"
 rm -f "${HOME}/.config/gh/config.yml"
 rm -f "${HOME}/.local/bin/alacritty-theme"
 rmdir "${HOME}/.config/fish" 2>/dev/null || true
+
+echo "Removing bundled fonts..."
+for font_file in "${local_fonts[@]}"; do
+  rm -f "${HOME}/Library/Fonts/${font_file}"
+done
 
 echo "Removing config directories..."
 rm -rf "${HOME}/.config/starship" "${HOME}/.config/nvim" "${HOME}/.config/gh" "${HOME}/.config/alacritty" "${HOME}/.config/ghostty"
