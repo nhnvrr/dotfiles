@@ -31,7 +31,7 @@ Debian = ""
 NixOS = ""
 
 [directory]
-style = "cyan"
+style = "purple"
 format = "[$path]($style)[$read_only]($read_only_style) "
 read_only = " 󰌾"
 read_only_style = "bold red"
@@ -129,13 +129,13 @@ detect_files = ["go.mod"]
 
 [rust]
 symbol = " "
-style = "red"
+style = "purple"
 format = "[$symbol$version]($style) "
 detect_files = ["Cargo.toml"]
 
 [lua]
 symbol = " "
-style = "magenta"
+style = "blue"
 format = "[$symbol$version]($style) "
 detect_files = ["stylua.toml", ".luarc.json", ".luarc.jsonc"]
 
