@@ -12,6 +12,7 @@ alias ll "ls -l"
 alias l "ll"
 alias la "ls -la"
 alias cl "clear"
+alias code "code --new-window"
 alias grep "grep --color=auto"
 
 # Git essentials
