@@ -152,14 +152,15 @@ link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.tmux.conf"
 link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
 copy_dir "${CONFIG_DIR}/nvim" "${HOME}/.config/nvim"
 link_file "${CONFIG_DIR}/alacritty/alacritty.toml" "${HOME}/.config/alacritty/alacritty.toml"
-link_file "${CONFIG_DIR}/alacritty/github-dark.toml" "${HOME}/.config/alacritty/github-dark.toml"
-link_file "${CONFIG_DIR}/alacritty/github-light.toml" "${HOME}/.config/alacritty/github-light.toml"
-link_file "${CONFIG_DIR}/alacritty/github-dark-dimmed.toml" "${HOME}/.config/alacritty/github-dark-dimmed.toml"
-if [[ ! -e "${HOME}/.config/alacritty/theme.toml" ]]; then
-  link_file "${CONFIG_DIR}/alacritty/github-dark.toml" "${HOME}/.config/alacritty/theme.toml"
-fi
-link_file "${CONFIG_DIR}/alacritty/alacritty-theme" "${HOME}/.local/bin/alacritty-theme"
+rm -f "${HOME}/.config/alacritty/theme.toml"
+rm -f "${HOME}/.config/alacritty/github-dark.toml"
+rm -f "${HOME}/.config/alacritty/github-light.toml"
+rm -f "${HOME}/.config/alacritty/github-dark-dimmed.toml"
+rm -f "${HOME}/.config/alacritty/nord-aurora.toml"
+rm -f "${HOME}/.config/alacritty/nord-aurora-full.toml"
+rm -f "${HOME}/.local/bin/alacritty-theme"
 link_file "${CONFIG_DIR}/ghostty/config" "${HOME}/.config/ghostty/config"
+link_file "${CONFIG_DIR}/ghostty/themes/Nord Aurora" "${HOME}/.config/ghostty/themes/Nord Aurora"
 if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
   link_file "${CONFIG_DIR}/gh/config.yml" "${HOME}/.config/gh/config.yml"
 fi

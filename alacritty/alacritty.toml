@@ -30,16 +30,16 @@ italic = { family = "DankMono Nerd Font", style = "Italic" }
 bold_italic = { family = "DankMono Nerd Font", style = "Italic" }
 
 [colors.primary]
-background = "#212121"
-foreground = "#d8dee9"
+background = "#1A1B19"
+foreground = "#eceff4"
 
 [colors.cursor]
-cursor = "#ebcb8b"
-text = "#b89858"
+text = "#1A1B19"
+cursor = "#d8dee9"
 
 [colors.selection]
-background = "#d8dee9"
-text = "#212121"
+text = "#eceff4"
+background = "#434c5e"
 
 [colors.normal]
 black = "#3b4252"
@@ -47,7 +47,7 @@ red = "#bf616a"
 green = "#a3be8c"
 yellow = "#ebcb8b"
 blue = "#81a1c1"
-magenta = "#b48ead"
+magenta = "#d08770"
 cyan = "#88c0d0"
 white = "#e5e9f0"
 
@@ -56,7 +56,7 @@ black = "#4c566a"
 red = "#bf616a"
 green = "#a3be8c"
 yellow = "#ebcb8b"
-blue = "#81a1c1"
+blue = "#5e81ac"
 magenta = "#b48ead"
 cyan = "#8fbcbb"
 white = "#eceff4"

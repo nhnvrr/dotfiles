@@ -34,6 +34,9 @@ if status is-interactive
     # Keep startup clean (disable default fish greeting).
     set -g fish_greeting
 
+    # Keep inline autosuggestions readable without overpowering the prompt.
+    set -g fish_color_autosuggestion 4c566a
+
     # Let Ctrl-S/Ctrl-Q work in tmux and fish keybindings.
     stty -ixon 2>/dev/null
 

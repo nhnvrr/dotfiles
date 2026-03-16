@@ -1,5 +1,5 @@
 command = /opt/homebrew/bin/fish
-theme = light:Nord Light,dark:Nord Wave
+theme = light:Nord Light,dark:Nord Aurora
 window-theme = system
 
 font-family = "JetBrainsMono Nerd Font"
@@ -17,7 +17,7 @@ cursor-style-blink = true
 mouse-hide-while-typing = true
 copy-on-select = clipboard
 
-background-opacity = 0.98
+background-opacity = 1
 background-blur = true
 
 macos-option-as-alt = true
