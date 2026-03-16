@@ -74,10 +74,12 @@ rm -f "${HOME}/.tmux.conf"
 rm -f "${HOME}/.config/starship.toml"
 rm -f "${HOME}/.config/starship/starship.toml"
 rm -f "${HOME}/.config/fish/config.fish"
+rm -f "${HOME}/.config/fish/completions/aws.fish"
 rm -f "${HOME}/.config/alacritty/alacritty.toml"
 rm -f "${HOME}/.config/ghostty/config"
 rm -f "${HOME}/.config/gh/config.yml"
 rm -f "${HOME}/.local/bin/alacritty-theme"
+rmdir "${HOME}/.config/fish/completions" 2>/dev/null || true
 rmdir "${HOME}/.config/fish" 2>/dev/null || true
 
 echo "Removing bundled fonts..."

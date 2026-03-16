@@ -79,6 +79,7 @@ alias ll="ls -l"
 alias l="ll"
 alias la="ls -la"
 alias cl="clear"
+alias code="code --new-window"
 alias grep="grep --color=auto"
 
 # Git essentials
@@ -104,5 +105,4 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 export NVM_DIR="$HOME/.nvm"
   [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
   [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
-
 
