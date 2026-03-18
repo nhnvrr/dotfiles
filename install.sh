@@ -50,13 +50,6 @@ copy_dir() {
   rsync -a "${src}/" "${dst}/"
 }
 
-install_bundled_font() {
-  local src="$1" dst_dir="${HOME}/Library/Fonts"
-  [[ -f "${src}" ]] || return
-  mkdir -p "${dst_dir}"
-  cp -f "${src}" "${dst_dir}/"
-}
-
 if [[ "${SKIP_BREW}" == false ]]; then
   echo "Installing Homebrew packages..."
   ensure_brew
@@ -107,8 +100,8 @@ if [[ "${SKIP_BREW}" == false ]]; then
   )
   "${BREW_BIN}" install --cask "${apps[@]}"
 
-  echo "Installing Nerd Fonts (Geist Mono, JetBrains Mono)..."
-  "${BREW_BIN}" install --cask font-geist-mono-nerd-font font-jetbrains-mono-nerd-font
+  echo "Installing font (Source Code Pro Nerd Font)..."
+  "${BREW_BIN}" install --cask font-sauce-code-pro-nerd-font
 
   echo "Configuring git..."
   # Some environments (e.g., Nix home-manager) symlink ~/.config/git/config to a read-only location,
@@ -140,9 +133,6 @@ else
   echo "Skipping Homebrew setup and tool installation (--skipBrew); only copying configuration."
 fi
 
-echo "Installing bundled fonts..."
-install_bundled_font "${CONFIG_DIR}/fonts/DankMonoNerdFont-Italic.otf"
-
 echo "Linking config files..."
 link_file "${CONFIG_DIR}/zsh/.zshrc" "${HOME}/.zshrc"
 link_file "${CONFIG_DIR}/zsh/.hushlogin" "${HOME}/.hushlogin"
@@ -152,13 +142,6 @@ link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.tmux.conf"
 link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
 copy_dir "${CONFIG_DIR}/nvim" "${HOME}/.config/nvim"
 link_file "${CONFIG_DIR}/alacritty/alacritty.toml" "${HOME}/.config/alacritty/alacritty.toml"
-rm -f "${HOME}/.config/alacritty/theme.toml"
-rm -f "${HOME}/.config/alacritty/github-dark.toml"
-rm -f "${HOME}/.config/alacritty/github-light.toml"
-rm -f "${HOME}/.config/alacritty/github-dark-dimmed.toml"
-rm -f "${HOME}/.config/alacritty/nord-aurora.toml"
-rm -f "${HOME}/.config/alacritty/nord-aurora-full.toml"
-rm -f "${HOME}/.local/bin/alacritty-theme"
 link_file "${CONFIG_DIR}/ghostty/config" "${HOME}/.config/ghostty/config"
 link_file "${CONFIG_DIR}/ghostty/themes/Nord Aurora" "${HOME}/.config/ghostty/themes/Nord Aurora"
 if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then

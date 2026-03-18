@@ -45,12 +45,7 @@ cask_apps=(
 )
 
 font_casks=(
-  font-geist-mono-nerd-font
-  font-jetbrains-mono-nerd-font
-)
-
-local_fonts=(
-  DankMonoNerdFont-Italic.otf
+  font-sauce-code-pro-nerd-font
 )
 
 if [[ -n "${BREW_BIN}" ]]; then
@@ -78,14 +73,8 @@ rm -f "${HOME}/.config/fish/completions/aws.fish"
 rm -f "${HOME}/.config/alacritty/alacritty.toml"
 rm -f "${HOME}/.config/ghostty/config"
 rm -f "${HOME}/.config/gh/config.yml"
-rm -f "${HOME}/.local/bin/alacritty-theme"
 rmdir "${HOME}/.config/fish/completions" 2>/dev/null || true
 rmdir "${HOME}/.config/fish" 2>/dev/null || true
-
-echo "Removing bundled fonts..."
-for font_file in "${local_fonts[@]}"; do
-  rm -f "${HOME}/Library/Fonts/${font_file}"
-done
 
 echo "Removing config directories..."
 rm -rf "${HOME}/.config/starship" "${HOME}/.config/nvim" "${HOME}/.config/gh" "${HOME}/.config/alacritty" "${HOME}/.config/ghostty"

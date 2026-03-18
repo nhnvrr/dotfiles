@@ -3,21 +3,19 @@ command_timeout = 700
 scan_timeout = 30
 
 format = """
-🧉 $os$username$hostname$directory$git_branch$git_state$git_status
-$status$jobs$character
-"""
-right_format = "$cmd_duration$time$aws$docker_context$nix_shell$nodejs$bun$python$golang$rust$lua$c"
+🧉 $os$username$hostname$directory$git_branch$git_state$git_status$status$jobs$docker_context$nix_shell$nodejs$bun$python$golang$rust$lua$c$aws
+$cmd_duration$character"""
 
 [username]
-show_always = false
-style_user = "bold"
+show_always = true
+style_user = "white"
 style_root = "bold red"
 format = "[$user]($style)"
 
 [hostname]
-ssh_only = true
+ssh_only = false
 trim_at = "."
-style = "cyan"
+style = "italic white"
 format = "@[$hostname]($style) "
 
 [os]
