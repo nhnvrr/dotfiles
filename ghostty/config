@@ -1,12 +1,11 @@
-command = /opt/homebrew/bin/fish
-theme = light:Nord Light,dark:Nord Aurora
+theme = dark:Github Dark Default,light:Github Light Default
 window-theme = system
 
-font-family = "JetBrainsMono Nerd Font"
-font-family-bold = "JetBrainsMono Nerd Font"
-font-family-italic = "DankMono Nerd Font"
-font-family-bold-italic = "DankMono Nerd Font"
-font-size = 13
+font-family = "SauceCodePro Nerd Font Mono"
+font-family-bold = "SauceCodePro Nerd Font Mono"
+font-family-italic = "SauceCodePro Nerd Font Mono"
+font-family-bold-italic = "SauceCodePro Nerd Font Mono"
+font-size = 21
 
 maximize = true
 window-padding-x = 0
