@@ -34,6 +34,8 @@ cli_tools=(
 cask_apps=(
   ollama
   codex
+  claude
+  claude-code
   telegram
   obsidian
   alacritty
