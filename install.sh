@@ -88,6 +88,8 @@ if [[ "${SKIP_BREW}" == false ]]; then
   apps=(
     "ollama"
     "codex"
+    "claude"
+    "claude-code"
     "obsidian"
     "alacritty"
     "ledger-wallet"
