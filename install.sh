@@ -145,6 +145,8 @@ link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
 copy_dir "${CONFIG_DIR}/nvim" "${HOME}/.config/nvim"
 link_file "${CONFIG_DIR}/alacritty/alacritty.toml" "${HOME}/.config/alacritty/alacritty.toml"
 link_file "${CONFIG_DIR}/ghostty/config" "${HOME}/.config/ghostty/config"
+link_file "${CONFIG_DIR}/ghostty/themes/Kanso Pearl" "${HOME}/.config/ghostty/themes/Kanso Pearl"
+link_file "${CONFIG_DIR}/ghostty/themes/Kanso Zen" "${HOME}/.config/ghostty/themes/Kanso Zen"
 link_file "${CONFIG_DIR}/ghostty/themes/Nord Aurora" "${HOME}/.config/ghostty/themes/Nord Aurora"
 if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
   link_file "${CONFIG_DIR}/gh/config.yml" "${HOME}/.config/gh/config.yml"

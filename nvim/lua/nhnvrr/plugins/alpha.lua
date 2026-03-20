@@ -22,6 +22,7 @@ return {
     dashboard.section.buttons.val = {
       dashboard.button("e", "New file", ":ene <BAR> startinsert <CR>"),
       dashboard.button("f", "Find file", ":Telescope find_files <CR>"),
+      dashboard.button("n", "Notes", ":Neotree ~/Notes <CR>"),
       dashboard.button("r", "Recent", ":Telescope oldfiles <CR>"),
       dashboard.button("g", "Live grep", ":Telescope live_grep <CR>"),
       dashboard.button("c", "Config", ":e $MYVIMRC <CR>"),
