@@ -1,41 +1,30 @@
 add_newline = true
 command_timeout = 700
 scan_timeout = 30
-
 format = """
-🧉 $os$username$hostname$directory$git_branch$git_state$git_status$status$jobs$docker_context$nix_shell$nodejs$bun$python$golang$rust$lua$c$aws
+🧉 $username$hostname$directory$git_branch$git_state$git_status$status$jobs$docker_context$nix_shell$nodejs$bun$python$golang$rust$lua$c$aws
 $cmd_duration$character"""
 
 [username]
-show_always = true
+show_always = false
 style_user = "white"
 style_root = "bold red"
-format = "[$user]($style)"
+format = "[$user]($style)@"
 
 [hostname]
-ssh_only = false
+ssh_only = true
 trim_at = "."
 style = "italic white"
-format = "@[$hostname]($style) "
-
-[os]
-disabled = true
-style = "black"
-format = "[$symbol]($style) "
-
-[os.symbols]
-Macos = ""
-Debian = ""
-NixOS = ""
+format = "[$hostname]($style) "
 
 [directory]
-style = "purple"
+style = "blue"
 format = "[$path]($style)[$read_only]($read_only_style) "
-read_only = " 󰌾"
+read_only = " ro"
 read_only_style = "bold red"
 truncate_to_repo = true
-truncation_length = 1
-truncation_symbol = " "
+truncation_length = 3
+truncation_symbol = "…/"
 
 [git_branch]
 symbol = " "
@@ -44,27 +33,27 @@ format = "[$symbol$branch]($style) "
 
 [git_state]
 style = "blue"
-format = "\\([$state( $progress_current/$progress_total)]($style)\\) "
+format = "[$state( $progress_current/$progress_total)]($style) "
 
 [git_status]
 style = "red"
 format = "([$all_status$ahead_behind]($style) )"
-conflicted = " "
+conflicted = "!!"
 untracked = "?"
-modified = "!"
-staged = "+"
-ahead = "⇡"
-behind = "⇣"
-diverged = "⇕"
+modified = "M"
+staged = "S"
+ahead = "↑"
+behind = "↓"
+diverged = "↕"
 
 [status]
 disabled = false
-symbol = " "
+symbol = "✘ "
 style = "red"
 format = "[$symbol$status]($style) "
 
 [jobs]
-symbol = " "
+symbol = "&"
 style = "blue"
 number_threshold = 1
 format = "[$symbol$number]($style) "
@@ -75,70 +64,64 @@ error_symbol = "[❯](bold red)"
 vimcmd_symbol = "[❮](bold blue)"
 
 [cmd_duration]
-min_time = 1500
+min_time = 2000
 style = "blue"
 format = "[󱫑 $duration]($style) "
 
-[time]
-disabled = false
-time_format = "%R"
-style = "white"
-format = "[󰥔 $time]($style) "
-
 [aws]
-symbol = " "
+symbol = "aws:"
 style = "bold yellow"
 format = "[($profile)(\\($region\\)) $symbol]($style) "
 
 [docker_context]
-symbol = " "
+symbol = "docker:"
 style = "cyan"
 format = "[$symbol$context]($style) "
 
 [nix_shell]
-symbol = " "
+symbol = "nix:"
 style = "blue"
 format = "[$symbol$state( \\($name\\))]($style) "
 
 [nodejs]
-symbol = " "
+symbol = "node:"
 style = "green"
 format = "[$symbol$version]($style) "
-detect_files = ["package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml", "yarn.lock", "package-lock.json"]
+detect_files = ["package.json", "pnpm-lock.yaml", "yarn.lock", "package-lock.json"]
 detect_extensions = ["js", "ts", "mjs", "cjs"]
 
 [bun]
-symbol = " "
+symbol = "bun:"
 style = "white"
 format = "[$symbol$version]($style) "
 detect_files = ["bun.lockb", "bun.lock"]
 
 [python]
-symbol = " "
+symbol = "py:"
 style = "yellow"
 format = "[$symbol$version( \\($virtualenv\\))]($style) "
-detect_files = ["pyproject.toml", "uv.lock", "requirements.txt", ".python-version", "poetry.lock"]
+detect_files = ["pyproject.toml", "uv.lock", "requirements.txt", ".python-version"]
 
 [golang]
-symbol = " "
+symbol = "go:"
 style = "cyan"
 format = "[$symbol$version]($style) "
 detect_files = ["go.mod"]
 
 [rust]
-symbol = " "
+symbol = "rs:"
 style = "purple"
 format = "[$symbol$version]($style) "
 detect_files = ["Cargo.toml"]
 
 [lua]
-symbol = " "
+symbol = "lua:"
 style = "blue"
 format = "[$symbol$version]($style) "
-detect_files = ["stylua.toml", ".luarc.json", ".luarc.jsonc"]
+detect_files = ["stylua.toml", ".luarc.json"]
 
 [c]
-symbol = " "
+symbol = "c:"
 style = "blue"
 format = "[$symbol]($style) "
 detect_extensions = ["c", "h", "hpp", "cpp"]

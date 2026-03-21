@@ -1,9 +1,6 @@
 theme = dark:Kanso Zen,light:Kanso Pearl
 
-font-family = "SauceCodePro Nerd Font Mono"
-font-family-bold = "SauceCodePro Nerd Font Mono"
-font-family-italic = "SauceCodePro Nerd Font Mono"
-font-family-bold-italic = "SauceCodePro Nerd Font Mono"
+font-family = "Monaspace Argon"
 font-size = 16
 
 maximize = true

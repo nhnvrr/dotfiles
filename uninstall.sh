@@ -38,7 +38,7 @@ cask_apps=(
   claude-code
   telegram
   obsidian
-  alacritty
+  ghostty
   google-chrome
   ledger-wallet
   docker-desktop
@@ -47,7 +47,7 @@ cask_apps=(
 )
 
 font_casks=(
-  font-sauce-code-pro-nerd-font
+  font-monaspace
 )
 
 if [[ -n "${BREW_BIN}" ]]; then
@@ -72,14 +72,13 @@ rm -f "${HOME}/.config/starship.toml"
 rm -f "${HOME}/.config/starship/starship.toml"
 rm -f "${HOME}/.config/fish/config.fish"
 rm -f "${HOME}/.config/fish/completions/aws.fish"
-rm -f "${HOME}/.config/alacritty/alacritty.toml"
 rm -f "${HOME}/.config/ghostty/config"
 rm -f "${HOME}/.config/gh/config.yml"
 rmdir "${HOME}/.config/fish/completions" 2>/dev/null || true
 rmdir "${HOME}/.config/fish" 2>/dev/null || true
 
 echo "Removing config directories..."
-rm -rf "${HOME}/.config/starship" "${HOME}/.config/nvim" "${HOME}/.config/gh" "${HOME}/.config/alacritty" "${HOME}/.config/ghostty"
+rm -rf "${HOME}/.config/starship" "${HOME}/.config/nvim" "${HOME}/.config/gh" "${HOME}/.config/ghostty"
 
 echo "Removing tool caches (non-cask)..."
 rm -rf "${HOME}/.codex"
