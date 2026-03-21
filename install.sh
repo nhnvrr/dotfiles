@@ -91,7 +91,7 @@ if [[ "${SKIP_BREW}" == false ]]; then
     "claude"
     "claude-code"
     "obsidian"
-    "alacritty"
+    "ghostty"
     "ledger-wallet"
     "google-chrome"
     "gather"
@@ -102,8 +102,8 @@ if [[ "${SKIP_BREW}" == false ]]; then
   )
   "${BREW_BIN}" install --cask "${apps[@]}"
 
-  echo "Installing font (Source Code Pro Nerd Font)..."
-  "${BREW_BIN}" install --cask font-sauce-code-pro-nerd-font
+  echo "Installing font (Monaspace)..."
+  "${BREW_BIN}" install --cask font-monaspace
 
   echo "Configuring git..."
   # Some environments (e.g., Nix home-manager) symlink ~/.config/git/config to a read-only location,
@@ -143,7 +143,6 @@ link_file "${CONFIG_DIR}/fish/completions/aws.fish" "${HOME}/.config/fish/comple
 link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.tmux.conf"
 link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
 copy_dir "${CONFIG_DIR}/nvim" "${HOME}/.config/nvim"
-link_file "${CONFIG_DIR}/alacritty/alacritty.toml" "${HOME}/.config/alacritty/alacritty.toml"
 link_file "${CONFIG_DIR}/ghostty/config" "${HOME}/.config/ghostty/config"
 link_file "${CONFIG_DIR}/ghostty/themes/Kanso Pearl" "${HOME}/.config/ghostty/themes/Kanso Pearl"
 link_file "${CONFIG_DIR}/ghostty/themes/Kanso Zen" "${HOME}/.config/ghostty/themes/Kanso Zen"
