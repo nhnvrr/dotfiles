@@ -58,10 +58,9 @@ if [[ "${SKIP_BREW}" == false ]]; then
 
   cli_tools=(
     awscli
+    bash
     bat
     delve
-    atuin
-    firebase-cli
     fnm
     fish
     gh
@@ -70,8 +69,6 @@ if [[ "${SKIP_BREW}" == false ]]; then
     btop
     jq
     neovim
-    nvm
-    node
     pnpm
     postgresql
     rust
@@ -91,7 +88,6 @@ if [[ "${SKIP_BREW}" == false ]]; then
     "claude"
     "claude-code"
     "obsidian"
-    "ghostty"
     "ledger-wallet"
     "google-chrome"
     "gather"
@@ -106,7 +102,6 @@ if [[ "${SKIP_BREW}" == false ]]; then
   "${BREW_BIN}" install --cask font-monaspace
 
   echo "Configuring git..."
-  # Some environments (e.g., Nix home-manager) symlink ~/.config/git/config to a read-only location,
   # so force Git to use a writable ~/.gitconfig for this setup.
   export GIT_CONFIG_GLOBAL="${HOME}/.gitconfig"
   touch "${GIT_CONFIG_GLOBAL}"
@@ -136,27 +131,25 @@ else
 fi
 
 echo "Linking config files..."
-link_file "${CONFIG_DIR}/zsh/.zshrc" "${HOME}/.zshrc"
-link_file "${CONFIG_DIR}/zsh/.hushlogin" "${HOME}/.hushlogin"
 link_file "${CONFIG_DIR}/fish/config.fish" "${HOME}/.config/fish/config.fish"
 link_file "${CONFIG_DIR}/fish/completions/aws.fish" "${HOME}/.config/fish/completions/aws.fish"
 link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.tmux.conf"
 link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
 copy_dir "${CONFIG_DIR}/nvim" "${HOME}/.config/nvim"
-link_file "${CONFIG_DIR}/ghostty/config" "${HOME}/.config/ghostty/config"
-link_file "${CONFIG_DIR}/ghostty/themes/Kanso Pearl" "${HOME}/.config/ghostty/themes/Kanso Pearl"
-link_file "${CONFIG_DIR}/ghostty/themes/Kanso Zen" "${HOME}/.config/ghostty/themes/Kanso Zen"
-link_file "${CONFIG_DIR}/ghostty/themes/Nord Aurora" "${HOME}/.config/ghostty/themes/Nord Aurora"
 if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
   link_file "${CONFIG_DIR}/gh/config.yml" "${HOME}/.config/gh/config.yml"
 fi
 
 if command -v fish >/dev/null 2>&1; then
   FISH_BIN="$(command -v fish)"
+  if ! grep -qF "${FISH_BIN}" /etc/shells; then
+    echo "Adding fish to /etc/shells..."
+    echo "${FISH_BIN}" | sudo tee -a /etc/shells
+  fi
   if [[ "${SHELL:-}" != "${FISH_BIN}" ]]; then
-    echo "To switch your login shell to fish, run:"
-    echo "  chsh -s ${FISH_BIN}"
+    echo "Changing default shell to fish..."
+    chsh -s "${FISH_BIN}"
   fi
 fi
 
-echo "macOS standalone setup complete."
+echo "macOS standalone setup complete. 🧉"

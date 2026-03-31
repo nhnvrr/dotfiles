@@ -27,8 +27,10 @@ alias lg "lazygit"
 set -gx BUN_INSTALL $HOME/.bun
 fish_add_path -m $BUN_INSTALL/bin
 
-# nvm location (nvm.sh itself is bash/zsh-targeted)
-set -gx NVM_DIR $HOME/.nvm
+# fnm (Node version manager)
+if command -q fnm
+    fnm env --use-on-cd | source
+end
 
 if status is-interactive
     # Keep startup clean (disable default fish greeting).
