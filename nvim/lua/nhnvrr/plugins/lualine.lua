@@ -9,6 +9,7 @@ return {
       options = {
         theme = "auto",
         globalstatus = true,
+        icons_enabled = false,
         component_separators = "",
         section_separators = "",
       },

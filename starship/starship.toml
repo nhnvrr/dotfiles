@@ -110,7 +110,7 @@ detect_files = ["go.mod"]
 
 [rust]
 symbol = "rs:"
-style = "purple"
+style = "red"
 format = "[$symbol$version]($style) "
 detect_files = ["Cargo.toml"]
 
