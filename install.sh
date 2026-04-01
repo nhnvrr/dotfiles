@@ -95,11 +95,13 @@ if [[ "${SKIP_BREW}" == false ]]; then
     "docker-desktop"
     "aws-vpn-client"
     "visual-studio-code"
+    "hammerspoon"
+    "alacritty"
   )
   "${BREW_BIN}" install --cask "${apps[@]}"
 
-  echo "Installing font (Monaspace)..."
-  "${BREW_BIN}" install --cask font-monaspace
+  echo "Installing fonts..."
+  "${BREW_BIN}" install --cask font-monaspace font-jetbrains-mono font-geist-mono-nerd-font
 
   echo "Configuring git..."
   # so force Git to use a writable ~/.gitconfig for this setup.
@@ -139,6 +141,8 @@ copy_dir "${CONFIG_DIR}/nvim" "${HOME}/.config/nvim"
 if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
   link_file "${CONFIG_DIR}/gh/config.yml" "${HOME}/.config/gh/config.yml"
 fi
+link_file "${CONFIG_DIR}/hammerspoon/init.lua" "${HOME}/.hammerspoon/init.lua"
+link_file "${CONFIG_DIR}/alacritty/alacritty.toml" "${HOME}/.config/alacritty/alacritty.toml"
 
 if command -v fish >/dev/null 2>&1; then
   FISH_BIN="$(command -v fish)"

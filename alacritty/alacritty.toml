@@ -1,0 +1,122 @@
+[env]
+RUST_BACKTRACE = "full"
+
+[window]
+dynamic_padding = true
+padding = { x = 1, y = 1 }
+opacity = 0.925
+blur = true
+decorations = "buttonless"
+option_as_alt = "Both"
+
+[scrolling]
+multiplier = 5
+history = 25000
+
+[selection]
+semantic_escape_chars = ",│'|:\"' ()[]{}<>\t。、　【】・＜＞「」（）："
+
+[font]
+size = 13.0
+
+[font.normal]
+family = "Monaspace Neon"
+style = "Regular"
+
+[font.italic]
+family = "JetBrainsMonoNL Nerd Font Propo"
+style = "Italic"
+
+[font.bold]
+family = "GeistMono Nerd Font"
+style = "Bold"
+
+[colors]
+normal.white = "#b8b8b8"
+primary.foreground = "#b8b8b8"
+cursor = { text = "#181818", cursor = "#f8f8f8" }
+vi_mode_cursor = { text = "#181818", cursor = "#f8f8f8" }
+footer_bar = { foreground = "#b8b8b8", background = "#262626" }
+selection = { text = "CellForeground", background = "#333333" }
+indexed_colors = [
+  { color = "#052200", index = 22 },
+  { color = "#0e3337", index = 23 },
+  { color = "#405963", index = 24 },
+  { color = "#442220", index = 52 },
+  { color = "#b08d57", index = 75 },
+  { color = "#8f5536", index = 87 },
+  { color = "#8076a1", index = 129 },
+  { color = "#d28445", index = 166 },
+  { color = "#262626", index = 236 },
+  { color = "#333333", index = 237 },
+  { color = "#404040", index = 238 },
+]
+
+[cursor]
+thickness = 0.3
+blink_timeout = 5
+blink_interval = 500
+style = { shape = "Beam", blinking = "Always" }
+vi_mode_style = { shape = "Block", blinking = "Never" }
+
+[hints]
+alphabet = "hutenosadiz;"
+
+[[hints.enabled]]
+regex = "(ipfs:|ipns:|magnet:|mailto:|gemini:|gopher:|https:|http:|news:|file:|git:|ssh:|ftp:)[^\u0000-\u001F\u007F<>\"\\s{}\\^⟨⟩`]+"
+binding = { key = "U", mods = "Control|Shift" }
+mouse = { enabled = true, mods = "Control" }
+post_processing = true
+hyperlinks = true
+command = "open -a 'Google Chrome'"
+
+[[hints.enabled]]
+regex = "(ipfs:|ipns:|magnet:|mailto:|gemini:|gopher:|https:|http:|news:|file:|git:|ssh:|ftp:)[^\u0000-\u001F\u007F<>\"\\s{}\\^⟨⟩`]+"
+binding = { key = "U", mods = "Alt|Shift" }
+post_processing = true
+hyperlinks = true
+action = "Copy"
+
+[[hints.enabled]]
+regex = "[a-f0-9]{40}|[a-f0-9]{7,8}"
+binding = { key = "H", mods = "Control|Shift" }
+action = "Copy"
+
+[[hints.enabled]]
+regex = """(/?[^/ \t\"']*[a-zA-Z0-9][^/ \t\"':]*/([^/ \t\"']+/?)*)\
+    |(/[^/ \t\"']*[a-zA-Z0-9][^/ \t\"']*)"""
+action = "Copy"
+hyperlinks = true
+binding = { key = "H", mods = "Alt|Shift" }
+
+
+[keyboard]
+bindings = [
+  { key = "N",      mods = "Control|Shift",                        action = "CreateNewWindow" },
+  { key = "Escape", mods = "Control",                              action = "ToggleViMode"    },
+  { key = "K",      mods = "Control|Shift",                        action = "ClearHistory"    },
+
+  { key = "F",      mods = "Control|Shift", mode = "~Vi|~Search",  action = "ToggleViMode"    },
+  { key = "F",      mods = "Control|Shift", mode = "~Vi|~Search",  action = "High"            },
+  { key = "F",      mods = "Control|Shift", mode = "~Search",      action = "SearchForward"   },
+
+  { key = "B",      mods = "Control|Shift", mode = "~Vi|~Search",  action = "ToggleViMode"    },
+  { key = "B",      mods = "Control|Shift", mode = "~Search",      action = "SearchBackward"  },
+
+  { key = "N",                              mode = "Vi|~Search",   action = "SearchNext"           },
+  { key = "N",                              mode = "Vi|~Search",   action = "CenterAroundViCursor" },
+
+  { key = "N",      mods = "Shift",         mode = "Vi|~Search",   action = "SearchPrevious"       },
+  { key = "N",      mods = "Shift",         mode = "Vi|~Search",   action = "CenterAroundViCursor" },
+
+  { key = "P",      mods = "Control|Shift", mode = "~Vi|~Search",  action = "ToggleViMode"         },
+  { key = "P",      mods = "Control|Shift", mode = "~Vi|~Search",  action = "SearchBackward"       },
+  { key = "P",      mods = "Control|Shift", mode = "~Vi|~Search",  chars  = ""                    },
+  { key = "P",      mods = "Control|Shift", mode = "~Vi|~Search",  action = "SearchConfirm"        },
+  { key = "P",      mods = "Control|Shift", mode = "~Vi|~Search",  action = "CenterAroundViCursor" },
+
+  { key = "P",                              mode = " Vi|~Search",  action = "Paste"           },
+]
+
+[terminal.shell]
+program = "/opt/homebrew/bin/fish"
