@@ -36,25 +36,41 @@ style = "Italic"
 family = "JetBrainsMonoNL Nerd Font Propo"
 style = "Bold"
 
+[colors.primary]
+background = "#090E13"
+foreground = "#C5C9C7"
+
+[colors.normal]
+black = "#090E13"
+red = "#c4746e"
+green = "#8a9a7b"
+yellow = "#c4b28a"
+blue = "#8ba4b0"
+magenta = "#a292a3"
+cyan = "#8ea4a2"
+white = "#c8c093"
+
+[colors.bright]
+black = "#A4A7A4"
+red = "#e46876"
+green = "#87a987"
+yellow = "#e6c384"
+blue = "#7fb4ca"
+magenta = "#938aa9"
+cyan = "#7aa89f"
+white = "#C5C9C7"
+
+[colors.selection]
+background = "#393B44"
+foreground = "#C5C9C7"
+
 [colors]
-normal.white = "#b8b8b8"
-primary.foreground = "#b8b8b8"
-cursor = { text = "#181818", cursor = "#f8f8f8" }
-vi_mode_cursor = { text = "#181818", cursor = "#f8f8f8" }
-footer_bar = { foreground = "#b8b8b8", background = "#262626" }
-selection = { text = "CellForeground", background = "#333333" }
+cursor = { text = "#090E13", cursor = "#C5C9C7" }
+vi_mode_cursor = { text = "#090E13", cursor = "#C5C9C7" }
+footer_bar = { foreground = "#C5C9C7", background = "#090E13" }
 indexed_colors = [
-  { color = "#052200", index = 22 },
-  { color = "#0e3337", index = 23 },
-  { color = "#405963", index = 24 },
-  { color = "#442220", index = 52 },
-  { color = "#b08d57", index = 75 },
-  { color = "#8f5536", index = 87 },
-  { color = "#8076a1", index = 129 },
-  { color = "#d28445", index = 166 },
-  { color = "#262626", index = 236 },
-  { color = "#333333", index = 237 },
-  { color = "#404040", index = 238 },
+  { color = "#b6927b", index = 16 },
+  { color = "#b98d7b", index = 17 },
 ]
 
 [cursor]
