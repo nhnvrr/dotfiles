@@ -2,6 +2,9 @@
 RUST_BACKTRACE = "full"
 
 [window]
+dimensions = { columns = 100, lines = 30 }
+position = { x = 510, y = 380 }
+startup_mode = "Windowed"
 dynamic_padding = true
 padding = { x = 1, y = 1 }
 opacity = 0.925
@@ -17,10 +20,11 @@ history = 25000
 semantic_escape_chars = ",│'|:\"' ()[]{}<>\t。、　【】・＜＞「」（）："
 
 [font]
-size = 13.0
+size = 21.0
 
 [font.normal]
-family = "Monaspace Neon"
+# family = "Monaspace Neon"
+family = "JetBrainsMonoNL Nerd Font Propo"
 style = "Regular"
 
 [font.italic]
@@ -28,7 +32,8 @@ family = "JetBrainsMonoNL Nerd Font Propo"
 style = "Italic"
 
 [font.bold]
-family = "GeistMono Nerd Font"
+# family = "GeistMono Nerd Font Propo"
+family = "JetBrainsMonoNL Nerd Font Propo"
 style = "Bold"
 
 [colors]

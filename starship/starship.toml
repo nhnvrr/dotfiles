@@ -18,7 +18,7 @@ style = "italic white"
 format = "[$hostname]($style) "
 
 [directory]
-style = "blue"
+style = "cyan"
 format = "[$path]($style)[$read_only]($read_only_style) "
 read_only = " ro"
 read_only_style = "bold red"

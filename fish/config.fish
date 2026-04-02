@@ -38,6 +38,7 @@ if status is-interactive
 
     # Keep inline autosuggestions readable without overpowering the prompt.
     set -g fish_color_autosuggestion 4c566a
+    set -g fish_color_param green
 
     # Let Ctrl-S/Ctrl-Q work in tmux and fish keybindings.
     stty -ixon 2>/dev/null
