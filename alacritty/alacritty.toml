@@ -25,16 +25,16 @@ size = 21.0
 [font.normal]
 # family = "Monaspace Neon"
 family = "JetBrainsMonoNL Nerd Font Propo"
-style = "Regular"
+style = "Light"
 
 [font.italic]
 family = "JetBrainsMonoNL Nerd Font Propo"
-style = "Italic"
+style = "Medium Italic"
 
 [font.bold]
 # family = "GeistMono Nerd Font Propo"
 family = "JetBrainsMonoNL Nerd Font Propo"
-style = "Bold"
+style = "SemiBold"
 
 [colors.primary]
 background = "#090E13"
