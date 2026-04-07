@@ -1,0 +1,142 @@
+# Keymaps
+
+## General
+
+| Keymap       | Mode   | Action                          |
+| ------------ | ------ | ------------------------------- |
+| `jk`         | Insert | Exit insert mode                |
+| `<leader>nh` | Normal | Clear search highlights         |
+| `<leader>+`  | Normal | Increment number                |
+| `<leader>-`  | Normal | Decrement number                |
+| `q`          | Normal | Close buffer (help/man/qf only) |
+
+## Windows & Tabs
+
+| Keymap       | Mode   | Action                     |
+| ------------ | ------ | -------------------------- |
+| `<leader>sv` | Normal | Split vertical             |
+| `<leader>sh` | Normal | Split horizontal           |
+| `<leader>se` | Normal | Make splits equal size     |
+| `<leader>sx` | Normal | Close current split        |
+| `<leader>to` | Normal | New tab                    |
+| `<leader>tx` | Normal | Close tab                  |
+| `<leader>tn` | Normal | Next tab                   |
+| `<leader>tp` | Normal | Previous tab               |
+| `<leader>tf` | Normal | Current buffer in new tab  |
+| `<leader>tv` | Normal | Terminal in vertical split |
+
+## LSP (custom)
+
+| Keymap       | Mode   | Action                  |
+| ------------ | ------ | ----------------------- |
+| `gd`         | Normal | Definitions (Telescope) |
+| `gD`         | Normal | Declaration             |
+| `gR`         | Normal | References (Telescope)  |
+| `GD`         | Normal | Definition in new tab   |
+| `K`          | Normal | Hover documentation     |
+| `<leader>rs` | Normal | Restart LSP             |
+
+## LSP (Neovim 0.12 defaults)
+
+| Keymap   | Mode          | Action           |
+| -------- | ------------- | ---------------- |
+| `grr`    | Normal        | References       |
+| `gri`    | Normal        | Implementations  |
+| `grn`    | Normal        | Rename           |
+| `gra`    | Normal/Visual | Code actions     |
+| `grt`    | Normal        | Type definition  |
+| `gO`     | Normal        | Document symbols |
+| `Ctrl-S` | Insert        | Signature help   |
+
+## Diagnostics
+
+| Keymap      | Mode   | Action                         |
+| ----------- | ------ | ------------------------------ |
+| `[d`        | Normal | Previous diagnostic            |
+| `]d`        | Normal | Next diagnostic                |
+| `gl`        | Normal | Diagnostic float               |
+| `<leader>D` | Normal | Buffer diagnostics (Telescope) |
+
+## Completion (native 0.12
+
+| Keymap      | Mode   | Action                       |
+| ----------- | ------ | ---------------------------- |
+| `<C-n>`     | Insert | Next item (built-in)         |
+| `<C-p>`     | Insert | Previous item (built-in)     |
+| `<C-y>`     | Insert | Confirm selection (built-in) |
+| `<C-e>`     | Insert | Dismiss menu (built-in)      |
+| `<C-Space>` | Insert | Trigger omni completion      |
+
+## Telescope
+
+| Keymap       | Mode               | Action                   |
+| ------------ | ------------------ | ------------------------ |
+| `<leader>ff` | Normal             | Find files               |
+| `<leader>fr` | Normal             | Recent files             |
+| `<leader>fs` | Normal             | Live grep                |
+| `<leader>fg` | Normal             | Git files                |
+| `<leader>fc` | Normal             | Grep string under cursor |
+| `<leader>ft` | Normal             | Find todos               |
+| `<leader>fk` | Normal             | Find keymaps             |
+| `<C-k>`      | Insert (Telescope) | Selection up             |
+| `<C-j>`      | Insert (Telescope) | Selection down           |
+| `<C-q>`      | Insert (Telescope) | Send to quickfix         |
+| `<C-t>`      | Insert (Telescope) | Open in Trouble          |
+
+## File Explorer
+
+| Keymap       | Mode   | Action              |
+| ------------ | ------ | ------------------- |
+| `<leader>ee` | Normal | Toggle Neo-tree     |
+| `<leader>ef` | Normal | Reveal current file |
+
+## Trouble
+
+| Keymap       | Mode   | Action                |
+| ------------ | ------ | --------------------- |
+| `<leader>xw` | Normal | Workspace diagnostics |
+| `<leader>xd` | Normal | Document diagnostics  |
+| `<leader>xq` | Normal | Quickfix list         |
+| `<leader>xl` | Normal | Location list         |
+| `<leader>xt` | Normal | Todos                 |
+
+## Git
+
+| Keymap       | Mode   | Action       |
+| ------------ | ------ | ------------ |
+| `]h`         | Normal | Next hunk    |
+| `[h`         | Normal | Prev hunk    |
+| `<leader>hs` | Normal | Stage hunk   |
+| `<leader>hr` | Normal | Reset hunk   |
+| `<leader>hp` | Normal | Preview hunk |
+| `<leader>hb` | Normal | Blame line   |
+| `<leader>lg` | Normal | LazyGit      |
+
+## Debug (DAP)
+
+| Keymap       | Mode   | Action                 |
+| ------------ | ------ | ---------------------- |
+| `<M-1>`      | Normal | Continue               |
+| `<M-2>`      | Normal | Step over              |
+| `<M-3>`      | Normal | Step into              |
+| `<M-4>`      | Normal | Step out               |
+| `<leader>db` | Normal | Toggle breakpoint      |
+| `<leader>dB` | Normal | Conditional breakpoint |
+| `<leader>dc` | Normal | Clear breakpoints      |
+| `<leader>dr` | Normal | Open REPL              |
+| `<leader>dl` | Normal | Run last               |
+| `<leader>dt` | Normal | Terminate              |
+| `<leader>du` | Normal | Toggle DAP UI          |
+
+## Formatting
+
+| Keymap       | Mode          | Action               |
+| ------------ | ------------- | -------------------- |
+| `<leader>mp` | Normal/Visual | Format file or range |
+
+## Scroll
+
+| Keymap             | Mode  | Action   |
+| ------------------ | ----- | -------- |
+| `ScrollWheelLeft`  | n/v/i | Disabled |
+| `ScrollWheelRight` | n/v/i | Disabled |
