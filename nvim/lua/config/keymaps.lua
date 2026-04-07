@@ -1,5 +1,11 @@
 local keymap = vim.keymap
 
+-- command aliases
+vim.api.nvim_create_user_command("W", "w", {})
+vim.api.nvim_create_user_command("Q", "q", {})
+vim.api.nvim_create_user_command("WQ", "wq", {})
+vim.api.nvim_create_user_command("Wq", "wq", {})
+
 -- general
 keymap.set("i", "jk", "<ESC>", { desc = "Exit insert mode with jk" })
 keymap.set("n", "<leader>nh", ":nohl<CR>", { desc = "Clear search highlights" })

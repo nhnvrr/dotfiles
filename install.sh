@@ -93,6 +93,7 @@ if [[ "${SKIP_BREW}" == false ]]; then
     "gather"
     "telegram"
     "docker-desktop"
+    "linear-linear"
     "aws-vpn-client"
     "visual-studio-code"
     "hammerspoon"
@@ -143,6 +144,10 @@ if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
 fi
 link_file "${CONFIG_DIR}/hammerspoon/init.lua" "${HOME}/.hammerspoon/init.lua"
 link_file "${CONFIG_DIR}/alacritty/alacritty.toml" "${HOME}/.config/alacritty/alacritty.toml"
+link_file "${CONFIG_DIR}/alacritty/themes/dark.toml" "${HOME}/.config/alacritty/themes/dark.toml"
+link_file "${CONFIG_DIR}/alacritty/themes/light.toml" "${HOME}/.config/alacritty/themes/light.toml"
+cp "${CONFIG_DIR}/alacritty/themes/dark.toml" "${HOME}/.config/alacritty/themes/current.toml"
+link_file "${CONFIG_DIR}/fish/functions/theme.fish" "${HOME}/.config/fish/functions/theme.fish"
 
 if command -v fish >/dev/null 2>&1; then
   FISH_BIN="$(command -v fish)"

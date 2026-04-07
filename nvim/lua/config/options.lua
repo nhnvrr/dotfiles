@@ -27,6 +27,7 @@ opt.termguicolors = true
 opt.background = "dark"
 opt.signcolumn = "yes"
 opt.colorcolumn = "100"
+opt.fillchars = { horiz = "─", horizup = "┴", horizdown = "┬", vert = "│", vertleft = "┤", vertright = "├", verthoriz = "┼" }
 
 -- completion (native 0.12)
 opt.autocomplete = true
