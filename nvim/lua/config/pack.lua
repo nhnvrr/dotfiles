@@ -1,7 +1,6 @@
 vim.pack.add({
 	-- colorscheme
 	"https://github.com/webhooked/kanso.nvim",
-	"https://github.com/navarasu/onedark.nvim",
 
 	-- treesitter (parser installation only, highlighting is built-in)
 	"https://github.com/nvim-treesitter/nvim-treesitter",
@@ -66,45 +65,10 @@ vim.api.nvim_create_autocmd({ "PackChanged", "PackChangedPre" }, {
 	end,
 })
 
--- Theme: read mode from ~/.config/theme-mode (written by `theme` fish command)
-local function is_dark_mode()
-	local f = io.open(os.getenv("HOME") .. "/.config/theme-mode", "r")
-	if not f then
-		return true
-	end
-	local mode = f:read("*l")
-	f:close()
-	return mode ~= "light"
-end
-
-local _current_mode = nil
-
-local function apply_theme()
-	local dark = is_dark_mode()
-	local mode = dark and "dark" or "light"
-	if mode == _current_mode then
-		return
-	end
-	_current_mode = mode
-
-	if dark then
-		vim.o.background = "dark"
-		require("kanso").setup({ transparent = true })
-		vim.cmd.colorscheme("kanso-zen")
-		vim.api.nvim_set_hl(0, "WinSeparator", { fg = "#8a9a7b" })
-	else
-		vim.o.background = "light"
-		require("onedark").setup({ style = "light", transparent = true })
-		require("onedark").load()
-		vim.api.nvim_set_hl(0, "WinSeparator", { fg = "#50a14f" })
-	end
-end
-
-apply_theme()
-
-vim.api.nvim_create_autocmd("FocusGained", {
-	callback = apply_theme,
-})
+-- Theme
+require("kanso").setup({ transparent = true })
+vim.cmd.colorscheme("kanso-zen")
+vim.api.nvim_set_hl(0, "WinSeparator", { fg = "#8a9a7b" })
 
 -- Plugin setup calls (simple opts-only plugins)
 require("mason").setup({
