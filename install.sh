@@ -68,6 +68,7 @@ if [[ "${SKIP_BREW}" == false ]]; then
     go
     btop
     jq
+    lazygit
     neovim
     pnpm
     postgresql
@@ -89,6 +90,7 @@ if [[ "${SKIP_BREW}" == false ]]; then
     "claude-code"
     "ledger-wallet"
     "google-chrome"
+    "brave-browser"
     "gather"
     "telegram"
     "docker-desktop"
@@ -102,7 +104,7 @@ if [[ "${SKIP_BREW}" == false ]]; then
   "${BREW_BIN}" install --cask "${apps[@]}"
 
   echo "Installing fonts..."
-  "${BREW_BIN}" install --cask font-monaspace font-jetbrains-mono font-geist-mono-nerd-font
+  "${BREW_BIN}" install --cask font-monaspace font-jetbrains-mono-nerd-font
 
   echo "Configuring git..."
   # so force Git to use a writable ~/.gitconfig for this setup.
@@ -144,10 +146,6 @@ if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
 fi
 link_file "${CONFIG_DIR}/hammerspoon/init.lua" "${HOME}/.hammerspoon/init.lua"
 link_file "${CONFIG_DIR}/alacritty/alacritty.toml" "${HOME}/.config/alacritty/alacritty.toml"
-link_file "${CONFIG_DIR}/alacritty/themes/dark.toml" "${HOME}/.config/alacritty/themes/dark.toml"
-link_file "${CONFIG_DIR}/alacritty/themes/light.toml" "${HOME}/.config/alacritty/themes/light.toml"
-cp "${CONFIG_DIR}/alacritty/themes/dark.toml" "${HOME}/.config/alacritty/themes/current.toml"
-link_file "${CONFIG_DIR}/fish/functions/theme.fish" "${HOME}/.config/fish/functions/theme.fish"
 
 if command -v fish >/dev/null 2>&1; then
   FISH_BIN="$(command -v fish)"
