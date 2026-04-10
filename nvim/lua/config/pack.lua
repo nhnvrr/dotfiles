@@ -51,9 +51,6 @@ vim.pack.add({
 
 	-- lazygit
 	"https://github.com/kdheepak/lazygit.nvim",
-
-	-- markdown
-	"https://github.com/OXY2DEV/markview.nvim",
 })
 
 -- Build telescope-fzf-native after install/update
