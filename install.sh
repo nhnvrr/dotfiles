@@ -98,6 +98,7 @@ if [[ "${SKIP_BREW}" == false ]]; then
     "aws-vpn-client"
     "visual-studio-code"
     "hammerspoon"
+    "postico"
   )
   "${BREW_BIN}" install --cask "${apps[@]}"
 
