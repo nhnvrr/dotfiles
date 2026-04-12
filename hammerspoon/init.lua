@@ -50,53 +50,54 @@ local safari = "com.apple.Safari"
 local chrome = "com.google.Chrome"
 local vscode = "com.microsoft.VSCode"
 local terminal = "com.apple.Terminal"
+local postico = "at.eggerapps.Postico"
 local slack = "com.tinyspeck.slackmacgap"
+local personalBrowser = "Dia"
 
--- Cmd+Option+0: Terminal left 5/7, Safari right 2/7
+-- Cmd+Option+1: Gather left 2/9, Chrome right 7/9
+hs.hotkey.bind({ "cmd", "alt" }, "1", function()
+	layout({
+		{ name = "Gather", rect = function(f) return left(f, 2/9) end },
+		{ id = chrome, rect = function(f) return right(f, 7/9) end },
+	})
+end)
+
+-- Cmd+Option+2: Terminal left 1/3, Chrome right 2/3
+hs.hotkey.bind({ "cmd", "alt" }, "2", function()
+	layout({
+		{ id = terminal, rect = function(f) return left(f, 1/3) end },
+		{ id = chrome, rect = function(f) return right(f, 2/3) end },
+	})
+end)
+
+-- Cmd+Option+3: Terminal left 2/7, Postico 2 right 5/7
+hs.hotkey.bind({ "cmd", "alt" }, "3", function()
+	layout({
+		{ id = terminal, rect = function(f) return left(f, 2/7) end },
+		{ id = postico, rect = function(f) return right(f, 5/7) end },
+	})
+end)
+
+-- Cmd+Option+9: Dia left 5/7, Terminal right 2/7
+hs.hotkey.bind({ "cmd", "alt" }, "9", function()
+	layout({
+		{ id = terminal, rect = function(f) return right(f, 2/7) end },
+		{ name = personalBrowser, rect = function(f) return left(f, 5/7) end },
+	})
+end)
+
+-- Cmd+Option+0: Terminal left 5/7, Dia right 2/7
 hs.hotkey.bind({ "cmd", "alt" }, "0", function()
 	layout({
-		{ id = safari, rect = function(f) return right(f, 2/7) end },
+		{ name = personalBrowser, rect = function(f) return right(f, 2/7) end },
 		{ id = terminal, rect = function(f) return left(f, 5/7) end },
 	})
 end)
 
--- Cmd+Option+1: Chrome right 4/7, Slack top-left 3/7, Gather bottom-left 3/7
-hs.hotkey.bind({ "cmd", "alt" }, "1", function()
+-- Cmd+Option+-: VS Code left 5/7, Dia right 2/7
+hs.hotkey.bind({ "cmd", "alt" }, "-", function()
 	layout({
-		{ id = chrome, rect = function(f) return right(f, 4/7) end },
-		{ id = slack, rect = function(f) return topLeft(f, 3/7, 1/2) end },
-		{ name = "Gather", rect = function(f) return bottomLeft(f, 3/7, 1/2) end },
-	})
-end)
-
--- Cmd+Option+2: Gather left 1/4, Chrome right 3/4
-hs.hotkey.bind({ "cmd", "alt" }, "2", function()
-	layout({
-		{ name = "Gather", rect = function(f) return left(f, 1/4) end },
-		{ id = chrome, rect = function(f) return right(f, 3/4) end },
-	})
-end)
-
--- Cmd+Option+3: Terminal left 1/3, Safari right 2/3
-hs.hotkey.bind({ "cmd", "alt" }, "3", function()
-	layout({
-		{ id = terminal, rect = function(f) return left(f, 1/3) end },
-		{ id = safari, rect = function(f) return right(f, 2/3) end },
-	})
-end)
-
--- Cmd+Option+4: Safari left 2/7, Terminal right 5/7
-hs.hotkey.bind({ "cmd", "alt" }, "4", function()
-	layout({
-		{ id = safari, rect = function(f) return left(f, 2/7) end },
-		{ id = terminal, rect = function(f) return right(f, 5/7) end },
-	})
-end)
-
--- Cmd+Option+9: Safari left 5/7, Terminal right 2/7
-hs.hotkey.bind({ "cmd", "alt" }, "9", function()
-	layout({
-		{ id = terminal, rect = function(f) return right(f, 2/7) end },
-		{ id = safari, rect = function(f) return left(f, 5/7) end },
+		{ name = personalBrowser, rect = function(f) return right(f, 2/7) end },
+		{ id = vscode, rect = function(f) return left(f, 5/7) end },
 	})
 end)

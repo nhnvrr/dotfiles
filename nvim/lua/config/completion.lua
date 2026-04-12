@@ -1,5 +1,5 @@
 -- Native insert-mode auto-completion (Neovim 0.12)
--- autocomplete = "popup" is set in options.lua
+-- autocomplete = "popup" is set vvoptions.lua
 --
 -- Built-in keymaps:
 --   <C-n>     next item

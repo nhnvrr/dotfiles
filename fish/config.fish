@@ -21,7 +21,6 @@ alias gc "git commit -m"
 alias gp "git push origin HEAD"
 alias gco "git checkout"
 alias ga "git add"
-alias lg "lazygit"
 
 # bun
 set -gx BUN_INSTALL $HOME/.bun

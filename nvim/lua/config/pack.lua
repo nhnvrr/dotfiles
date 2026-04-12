@@ -48,9 +48,6 @@ vim.pack.add({
 
 	-- tmux
 	"https://github.com/christoomey/vim-tmux-navigator",
-
-	-- lazygit
-	"https://github.com/kdheepak/lazygit.nvim",
 })
 
 -- Build telescope-fzf-native after install/update
@@ -63,8 +60,8 @@ vim.api.nvim_create_autocmd({ "PackChanged", "PackChangedPre" }, {
 })
 
 -- Theme
-require("kanso").setup({ transparent = false })
-vim.cmd.colorscheme("kanso-zen")
+require("kanso").setup({ transparent = true })
+vim.cmd.colorscheme("kanso-mist")
 vim.api.nvim_set_hl(0, "WinSeparator", { fg = "#8a9a7b" })
 
 -- Plugin setup calls (simple opts-only plugins)

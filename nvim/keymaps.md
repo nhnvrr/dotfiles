@@ -110,7 +110,6 @@
 | `<leader>hr` | Normal | Reset hunk   |
 | `<leader>hp` | Normal | Preview hunk |
 | `<leader>hb` | Normal | Blame line   |
-| `<leader>lg` | Normal | LazyGit      |
 
 ## Debug (DAP)
 

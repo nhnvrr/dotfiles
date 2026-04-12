@@ -57,9 +57,6 @@ keymap.set("n", "<leader>xq", "<cmd>Trouble quickfix toggle<CR>", { desc = "Quic
 keymap.set("n", "<leader>xl", "<cmd>Trouble loclist toggle<CR>", { desc = "Location list" })
 keymap.set("n", "<leader>xt", "<cmd>Trouble todo toggle<CR>", { desc = "Todos in trouble" })
 
--- lazygit
-keymap.set("n", "<leader>lg", "<cmd>LazyGit<CR>", { desc = "Open LazyGit" })
-
 -- formatting (manual)
 keymap.set({ "n", "v" }, "<leader>mp", function()
   require("conform").format({

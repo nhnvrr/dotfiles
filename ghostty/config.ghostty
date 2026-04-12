@@ -1,0 +1,18 @@
+font-family = "Monaspace Neon"
+font-size = 15
+
+theme = light:nh-light,dark:nh-dark
+window-theme = auto
+macos-titlebar-style = transparent
+
+window-padding-x = 0
+window-padding-y = 0
+window-padding-balance = false
+
+cursor-style = bar
+cursor-style-blink = true
+bold-color = bright
+
+keybind = cmd+shift+r=reload_config
+
+window-save-state = always
