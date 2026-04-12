@@ -90,7 +90,6 @@ if [[ "${SKIP_BREW}" == false ]]; then
     "claude-code"
     "ledger-wallet"
     "google-chrome"
-    "brave-browser"
     "gather"
     "telegram"
     "docker-desktop"
@@ -99,7 +98,6 @@ if [[ "${SKIP_BREW}" == false ]]; then
     "aws-vpn-client"
     "visual-studio-code"
     "hammerspoon"
-    "alacritty"
   )
   "${BREW_BIN}" install --cask "${apps[@]}"
 
@@ -145,7 +143,6 @@ if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
   link_file "${CONFIG_DIR}/gh/config.yml" "${HOME}/.config/gh/config.yml"
 fi
 link_file "${CONFIG_DIR}/hammerspoon/init.lua" "${HOME}/.hammerspoon/init.lua"
-link_file "${CONFIG_DIR}/alacritty/alacritty.toml" "${HOME}/.config/alacritty/alacritty.toml"
 
 if command -v fish >/dev/null 2>&1; then
   FISH_BIN="$(command -v fish)"

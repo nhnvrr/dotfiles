@@ -46,16 +46,16 @@ local function full(f)
 	return hs.geometry.rect(f.x, f.y, f.w, f.h)
 end
 
-local brave = "com.brave.Browser"
+local safari = "com.apple.Safari"
 local chrome = "com.google.Chrome"
 local vscode = "com.microsoft.VSCode"
 local terminal = "com.apple.Terminal"
 local slack = "com.tinyspeck.slackmacgap"
 
--- Cmd+Option+0: Terminal left 5/7, Brave right 2/7
+-- Cmd+Option+0: Terminal left 5/7, Safari right 2/7
 hs.hotkey.bind({ "cmd", "alt" }, "0", function()
 	layout({
-		{ id = brave, rect = function(f) return right(f, 2/7) end },
+		{ id = safari, rect = function(f) return right(f, 2/7) end },
 		{ id = terminal, rect = function(f) return left(f, 5/7) end },
 	})
 end)
@@ -77,26 +77,26 @@ hs.hotkey.bind({ "cmd", "alt" }, "2", function()
 	})
 end)
 
--- Cmd+Option+3: Terminal left 1/3, Brave right 2/3
+-- Cmd+Option+3: Terminal left 1/3, Safari right 2/3
 hs.hotkey.bind({ "cmd", "alt" }, "3", function()
 	layout({
 		{ id = terminal, rect = function(f) return left(f, 1/3) end },
-		{ id = brave, rect = function(f) return right(f, 2/3) end },
+		{ id = safari, rect = function(f) return right(f, 2/3) end },
 	})
 end)
 
--- Cmd+Option+4: Brave left 2/7, Terminal right 5/7
+-- Cmd+Option+4: Safari left 2/7, Terminal right 5/7
 hs.hotkey.bind({ "cmd", "alt" }, "4", function()
 	layout({
-		{ id = brave, rect = function(f) return left(f, 2/7) end },
+		{ id = safari, rect = function(f) return left(f, 2/7) end },
 		{ id = terminal, rect = function(f) return right(f, 5/7) end },
 	})
 end)
 
--- Cmd+Option+9: Brave left 5/7, Terminal right 2/7
+-- Cmd+Option+9: Safari left 5/7, Terminal right 2/7
 hs.hotkey.bind({ "cmd", "alt" }, "9", function()
 	layout({
 		{ id = terminal, rect = function(f) return right(f, 2/7) end },
-		{ id = brave, rect = function(f) return left(f, 5/7) end },
+		{ id = safari, rect = function(f) return left(f, 5/7) end },
 	})
 end)
