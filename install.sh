@@ -50,6 +50,56 @@ copy_dir() {
   rsync -a "${src}/" "${dst}/"
 }
 
+brew_has_formula() {
+  "${BREW_BIN}" list --formula "$1" >/dev/null 2>&1
+}
+
+brew_has_cask() {
+  "${BREW_BIN}" list --cask "$1" >/dev/null 2>&1
+}
+
+install_missing_formulas() {
+  local missing=()
+  local formula
+
+  for formula in "$@"; do
+    if brew_has_formula "${formula}"; then
+      echo "Skipping ${formula}; already installed."
+    else
+      missing+=("${formula}")
+    fi
+  done
+
+  if [[ ${#missing[@]} -eq 0 ]]; then
+    echo "All Homebrew formulae are already installed."
+    return
+  fi
+
+  echo "Installing missing Homebrew formulae: ${missing[*]}"
+  "${BREW_BIN}" install --formula "${missing[@]}"
+}
+
+install_missing_casks() {
+  local missing=()
+  local cask
+
+  for cask in "$@"; do
+    if brew_has_cask "${cask}"; then
+      echo "Skipping ${cask}; already installed."
+    else
+      missing+=("${cask}")
+    fi
+  done
+
+  if [[ ${#missing[@]} -eq 0 ]]; then
+    echo "All Homebrew casks are already installed."
+    return
+  fi
+
+  echo "Installing missing Homebrew casks: ${missing[*]}"
+  "${BREW_BIN}" install --cask "${missing[@]}"
+}
+
 if [[ "${SKIP_BREW}" == false ]]; then
   echo "Installing Homebrew packages..."
   ensure_brew
@@ -61,14 +111,15 @@ if [[ "${SKIP_BREW}" == false ]]; then
     bash
     bat
     delve
+    fd
     fnm
     fish
+    fzf
     gh
     git
     go
     btop
     jq
-    lazygit
     neovim
     pnpm
     postgresql
@@ -78,32 +129,37 @@ if [[ "${SKIP_BREW}" == false ]]; then
     terraform
     tmux
   )
-  "${BREW_BIN}" install --formula "${cli_tools[@]}"
+  install_missing_formulas "${cli_tools[@]}"
 
-  echo "Installing bun..."
-  curl -fsSL https://bun.sh/install | bash
+  if command -v bun >/dev/null 2>&1 || [[ -x "${HOME}/.bun/bin/bun" ]]; then
+    echo "Skipping bun; already installed."
+  else
+    echo "Installing bun..."
+    curl -fsSL https://bun.sh/install | bash
+  fi
 
   apps=(
     "ollama"
     "codex"
     "claude"
     "claude-code"
+    "ghostty"
     "ledger-wallet"
-    "google-chrome"
-    "gather"
     "telegram"
     "docker-desktop"
     "nordvpn"
     "linear-linear"
     "aws-vpn-client"
     "visual-studio-code"
+    "zen"
     "hammerspoon"
     "postico"
+    "slack"
   )
-  "${BREW_BIN}" install --cask "${apps[@]}"
+  install_missing_casks "${apps[@]}"
 
   echo "Installing fonts..."
-  "${BREW_BIN}" install --cask font-monaspace font-jetbrains-mono-nerd-font
+  install_missing_casks font-monaspace font-jetbrains-mono-nerd-font
 
   echo "Configuring git..."
   # so force Git to use a writable ~/.gitconfig for this setup.
@@ -137,6 +193,9 @@ fi
 echo "Linking config files..."
 link_file "${CONFIG_DIR}/fish/config.fish" "${HOME}/.config/fish/config.fish"
 link_file "${CONFIG_DIR}/fish/completions/aws.fish" "${HOME}/.config/fish/completions/aws.fish"
+link_file "${CONFIG_DIR}/ghostty/config.ghostty" "${HOME}/.config/ghostty/config.ghostty"
+link_file "${CONFIG_DIR}/ghostty/themes/nh-light" "${HOME}/.config/ghostty/themes/nh-light"
+link_file "${CONFIG_DIR}/ghostty/themes/nh-dark" "${HOME}/.config/ghostty/themes/nh-dark"
 link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.tmux.conf"
 link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
 copy_dir "${CONFIG_DIR}/nvim" "${HOME}/.config/nvim"

@@ -24,7 +24,7 @@ keymap.set("n", "<leader>sx", "<cmd>close<CR>", { desc = "Close current split" }
 keymap.set("n", "<Tab>", "<cmd>bnext<CR>", { desc = "Next buffer" })
 keymap.set("n", "<S-Tab>", "<cmd>bprevious<CR>", { desc = "Previous buffer" })
 keymap.set("n", "<leader>bd", "<cmd>bdelete<CR>", { desc = "Close buffer" })
-keymap.set("n", "<leader>fb", "<cmd>Telescope buffers<cr>", { desc = "Find buffers" })
+keymap.set("n", "<leader>fb", "<cmd>FzfLua buffers<cr>", { desc = "Find buffers" })
 
 -- terminal
 keymap.set("n", "<leader>tv", "<cmd>vsplit | terminal<CR>", { desc = "Open terminal in vertical split" })
@@ -37,28 +37,24 @@ keymap.set("n", "GD", "<cmd>tab split | lua vim.lsp.buf.definition()<CR>", { des
 keymap.set({ "n", "v", "i" }, "<ScrollWheelLeft>", "<Nop>", { desc = "Disable horizontal scroll left" })
 keymap.set({ "n", "v", "i" }, "<ScrollWheelRight>", "<Nop>", { desc = "Disable horizontal scroll right" })
 
--- telescope
-keymap.set("n", "<leader>ff", "<cmd>Telescope find_files<cr>", { desc = "Find files" })
-keymap.set("n", "<leader>fr", "<cmd>Telescope oldfiles<cr>", { desc = "Find recent files" })
-keymap.set("n", "<leader>fs", "<cmd>Telescope live_grep<cr>", { desc = "Find string in cwd" })
-keymap.set("n", "<leader>fg", "<cmd>Telescope git_files<cr>", { desc = "Git files" })
-keymap.set("n", "<leader>fc", "<cmd>Telescope grep_string<cr>", { desc = "Find string under cursor" })
-keymap.set("n", "<leader>ft", "<cmd>TodoTelescope<cr>", { desc = "Find todos" })
-keymap.set("n", "<leader>fk", "<cmd>Telescope keymaps<cr>", { desc = "Find keymaps" })
+-- fzf-lua
+keymap.set("n", "<leader>ff", "<cmd>FzfLua files<cr>", { desc = "Find files" })
+keymap.set("n", "<leader>fr", "<cmd>FzfLua oldfiles<cr>", { desc = "Find recent files" })
+keymap.set("n", "<leader>fs", "<cmd>FzfLua live_grep<cr>", { desc = "Find string in cwd" })
+keymap.set("n", "<leader>fg", "<cmd>FzfLua git_files<cr>", { desc = "Git files" })
+keymap.set("n", "<leader>fc", "<cmd>FzfLua grep_cword<cr>", { desc = "Find string under cursor" })
+keymap.set("n", "<leader>fk", "<cmd>FzfLua keymaps<cr>", { desc = "Find keymaps" })
 
--- neo-tree
-keymap.set("n", "<leader>ee", "<cmd>Neotree toggle<CR>", { desc = "Toggle file explorer" })
-keymap.set("n", "<leader>ef", "<cmd>Neotree reveal<CR>", { desc = "Reveal current file in explorer" })
+-- file explorer (netrw)
+keymap.set("n", "<leader>ee", function()
+  vim.cmd("Explore " .. vim.fn.getcwd())
+end, { desc = "Open file explorer at project root" })
 
 -- trouble
 keymap.set("n", "<leader>xw", "<cmd>Trouble diagnostics toggle<CR>", { desc = "Workspace diagnostics" })
 keymap.set("n", "<leader>xd", "<cmd>Trouble diagnostics toggle filter.buf=0<CR>", { desc = "Document diagnostics" })
 keymap.set("n", "<leader>xq", "<cmd>Trouble quickfix toggle<CR>", { desc = "Quickfix list" })
 keymap.set("n", "<leader>xl", "<cmd>Trouble loclist toggle<CR>", { desc = "Location list" })
-keymap.set("n", "<leader>xt", "<cmd>Trouble todo toggle<CR>", { desc = "Todos in trouble" })
-
--- lazygit
-keymap.set("n", "<leader>lg", "<cmd>LazyGit<CR>", { desc = "Open LazyGit" })
 
 -- formatting (manual)
 keymap.set({ "n", "v" }, "<leader>mp", function()

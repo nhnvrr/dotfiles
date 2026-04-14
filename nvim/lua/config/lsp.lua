@@ -13,13 +13,13 @@ vim.api.nvim_create_autocmd("LspAttach", {
     --   gO   = document symbols
     --   C-S  = signature help (insert mode)
     --
-    -- We only add mappings that use Telescope or aren't covered by defaults.
+    -- We only add mappings that use fzf-lua or aren't covered by defaults.
 
     -- 0.12 defaults: grr, gri, grn, gra, grt, gO, gD, K, C-S
-    -- Only override gd to use Telescope for better UI:
+    -- Only override gd to use fzf-lua for better UI:
 
-    opts.desc = "Show LSP definitions (Telescope)"
-    vim.keymap.set("n", "gd", "<cmd>Telescope lsp_definitions<CR>", opts)
+    opts.desc = "Show LSP definitions (fzf-lua)"
+    vim.keymap.set("n", "gd", "<cmd>FzfLua lsp_definitions<CR>", opts)
 
     opts.desc = "Restart LSP"
     vim.keymap.set("n", "<leader>rs", ":LspRestart<CR>", opts)

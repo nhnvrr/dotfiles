@@ -35,4 +35,4 @@ vim.keymap.set("n", "gl", function()
   })
 end, { desc = "Show line diagnostic" })
 
-vim.keymap.set("n", "<leader>D", "<cmd>Telescope diagnostics bufnr=0<CR>", { desc = "Buffer diagnostics" })
+vim.keymap.set("n", "<leader>D", "<cmd>FzfLua diagnostics_document<CR>", { desc = "Buffer diagnostics" })
