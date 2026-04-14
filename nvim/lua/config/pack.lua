@@ -5,10 +5,8 @@ vim.pack.add({
 	-- treesitter (parser installation only, highlighting is built-in)
 	"https://github.com/nvim-treesitter/nvim-treesitter",
 
-	-- telescope
-	"https://github.com/nvim-telescope/telescope.nvim",
-	"https://github.com/nvim-lua/plenary.nvim",
-	{ src = "https://github.com/nvim-telescope/telescope-fzf-native.nvim", name = "telescope-fzf-native" },
+	-- fuzzy finder
+	"https://github.com/ibhagwan/fzf-lua",
 
 	-- lsp & mason
 	"https://github.com/williamboman/mason.nvim",
@@ -20,10 +18,6 @@ vim.pack.add({
 	-- git
 	"https://github.com/lewis6991/gitsigns.nvim",
 
-	-- file tree
-	"https://github.com/nvim-neo-tree/neo-tree.nvim",
-	"https://github.com/MunifTanjim/nui.nvim",
-
 	-- editing
 	"https://github.com/kylechui/nvim-surround",
 	"https://github.com/windwp/nvim-autopairs",
@@ -31,32 +25,12 @@ vim.pack.add({
 	"https://github.com/gbprod/substitute.nvim",
 	"https://github.com/folke/flash.nvim",
 
-	-- ui
-	"https://github.com/nvim-lualine/lualine.nvim",
-	"https://github.com/lukas-reineke/indent-blankline.nvim",
-	"https://github.com/stevearc/dressing.nvim",
 
-	-- diagnostics & todos
+	-- diagnostics
 	"https://github.com/folke/trouble.nvim",
-	"https://github.com/folke/todo-comments.nvim",
-
-	-- dap
-	"https://github.com/mfussenegger/nvim-dap",
-	"https://github.com/rcarriga/nvim-dap-ui",
-	"https://github.com/jay-babu/mason-nvim-dap.nvim",
-	"https://github.com/nvim-neotest/nvim-nio",
 
 	-- tmux
 	"https://github.com/christoomey/vim-tmux-navigator",
-})
-
--- Build telescope-fzf-native after install/update
-vim.api.nvim_create_autocmd({ "PackChanged", "PackChangedPre" }, {
-	callback = function(ev)
-		if ev.data.spec.name == "telescope-fzf-native" then
-			vim.system({ "make" }, { cwd = ev.data.path }):wait()
-		end
-	end,
 })
 
 -- Theme
@@ -83,7 +57,6 @@ require("mason-tool-installer").setup({
 		"html-lsp",
 		"css-lsp",
 		"tailwindcss-language-server",
-		"graphql-lsp",
 		"emmet-ls",
 		"prisma-language-server",
 		"eslint-lsp",
@@ -91,11 +64,8 @@ require("mason-tool-installer").setup({
 		"marksman",
 		"gopls",
 		-- formatters
-		"prettier",
 		"prettierd",
 		"stylua",
-		-- dap
-		"js-debug-adapter",
 	},
 	run_on_start = true,
 })
@@ -105,8 +75,6 @@ require("nvim-autopairs").setup()
 require("nvim-ts-autotag").setup()
 require("substitute").setup()
 require("flash").setup()
-require("todo-comments").setup()
-require("dressing").setup()
 require("gitsigns").setup({
 	on_attach = function(bufnr)
 		local gs = require("gitsigns")
@@ -121,138 +89,19 @@ require("gitsigns").setup({
 	end,
 })
 
-require("ibl").setup()
 require("trouble").setup({ focus = true })
--- Neo-tree
-require("neo-tree").setup({
-	default_component_configs = {
-		icon = {
-			folder_closed = ">",
-			folder_open = "v",
-			folder_empty = "-",
-			default = " ",
-		},
-		git_status = {
-			symbols = {
-				added = "+",
-				modified = "~",
-				deleted = "x",
-				renamed = "r",
-				untracked = "?",
-				ignored = ".",
-				unstaged = "u",
-				staged = "s",
-				conflict = "!",
-			},
+
+-- fzf-lua
+require("fzf-lua").register_ui_select()
+require("fzf-lua").setup({
+	winopts = { preview = { layout = "vertical", vertical = "down:50%" } },
+	keymap = {
+		fzf = {
+			["ctrl-j"] = "down",
+			["ctrl-k"] = "up",
+			["ctrl-q"] = "select-all+accept",
 		},
 	},
-	filesystem = {
-		filtered_items = {
-			visible = false,
-			hide_dotfiles = false,
-			hide_gitignored = false,
-		},
-	},
-	window = {
-		mappings = {
-			["l"] = "open",
-			["h"] = "close_node",
-			["v"] = "open_vsplit",
-			["s"] = "open_split",
-			["t"] = "open_tabnew",
-		},
-	},
+	files = { fd_opts = "--type f --hidden --exclude .git --exclude node_modules" },
+	grep = { rg_opts = "--hidden --glob '!.git/' --glob '!node_modules/' --column --line-number --no-heading --color=always --smart-case" },
 })
-
--- Lualine
-require("lualine").setup({
-	options = {
-		theme = "auto",
-		globalstatus = true,
-		icons_enabled = false,
-		component_separators = "",
-		section_separators = "",
-	},
-	sections = {
-		lualine_a = {
-			{
-				"mode",
-				padding = { left = 1, right = 1 },
-				fmt = function(mode)
-					local short = {
-						NORMAL = "N",
-						INSERT = "I",
-						VISUAL = "V",
-						["V-LINE"] = "VL",
-						["V-BLOCK"] = "VB",
-						REPLACE = "R",
-						["V-REPLACE"] = "VR",
-						COMMAND = "C",
-						TERMINAL = "T",
-						SELECT = "S",
-						["S-LINE"] = "SL",
-						["S-BLOCK"] = "SB",
-					}
-					return short[mode] or mode
-				end,
-			},
-		},
-		lualine_b = { "branch" },
-		lualine_c = {
-			{
-				"filename",
-				path = 1,
-				shorting_target = 80,
-				symbols = { modified = "[+]", readonly = "[ro]", unnamed = "[No Name]" },
-			},
-		},
-		lualine_x = {
-			{ "diagnostics", sources = { "nvim_diagnostic" } },
-			{ "filetype", icon_only = false },
-		},
-		lualine_y = { "progress" },
-		lualine_z = { { "location", padding = { left = 1, right = 1 } } },
-	},
-	inactive_sections = {
-		lualine_a = {},
-		lualine_b = {},
-		lualine_c = { "filename" },
-		lualine_x = { "location" },
-		lualine_y = {},
-		lualine_z = {},
-	},
-})
-
--- Telescope
-local telescope = require("telescope")
-local actions = require("telescope.actions")
-local trouble_telescope = require("trouble.sources.telescope")
-
-telescope.setup({
-	defaults = {
-		path_display = { "smart" },
-		file_ignore_patterns = { "%.git/", "node_modules/" },
-		mappings = {
-			i = {
-				["<C-k>"] = actions.move_selection_previous,
-				["<C-j>"] = actions.move_selection_next,
-				["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
-				["<C-t>"] = trouble_telescope.open,
-			},
-		},
-	},
-	pickers = {
-		find_files = { hidden = true },
-		live_grep = {
-			additional_args = function()
-				return { "--hidden", "--glob", "!**/.git/*", "--glob", "!**/node_modules/*" }
-			end,
-		},
-	},
-})
-
--- Load fzf extension (may fail if not yet built)
-local fzf_ok, _ = pcall(telescope.load_extension, "fzf")
-if not fzf_ok then
-	vim.notify("telescope-fzf-native: run :call vim.pack.update() to build", vim.log.levels.WARN)
-end

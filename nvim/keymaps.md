@@ -29,9 +29,9 @@
 
 | Keymap       | Mode   | Action                  |
 | ------------ | ------ | ----------------------- |
-| `gd`         | Normal | Definitions (Telescope) |
+| `gd`         | Normal | Definitions (fzf-lua)   |
 | `gD`         | Normal | Declaration             |
-| `gR`         | Normal | References (Telescope)  |
+| `gR`         | Normal | References (fzf-lua)    |
 | `GD`         | Normal | Definition in new tab   |
 | `K`          | Normal | Hover documentation     |
 | `<leader>rs` | Normal | Restart LSP             |
@@ -55,7 +55,7 @@
 | `[d`        | Normal | Previous diagnostic            |
 | `]d`        | Normal | Next diagnostic                |
 | `gl`        | Normal | Diagnostic float               |
-| `<leader>D` | Normal | Buffer diagnostics (Telescope) |
+| `<leader>D` | Normal | Buffer diagnostics (fzf-lua)   |
 
 ## Completion (native 0.12
 
@@ -67,28 +67,23 @@
 | `<C-e>`     | Insert | Dismiss menu (built-in)      |
 | `<C-Space>` | Insert | Trigger omni completion      |
 
-## Telescope
+## Fuzzy Finder (fzf-lua)
 
-| Keymap       | Mode               | Action                   |
-| ------------ | ------------------ | ------------------------ |
-| `<leader>ff` | Normal             | Find files               |
-| `<leader>fr` | Normal             | Recent files             |
-| `<leader>fs` | Normal             | Live grep                |
-| `<leader>fg` | Normal             | Git files                |
-| `<leader>fc` | Normal             | Grep string under cursor |
-| `<leader>ft` | Normal             | Find todos               |
-| `<leader>fk` | Normal             | Find keymaps             |
-| `<C-k>`      | Insert (Telescope) | Selection up             |
-| `<C-j>`      | Insert (Telescope) | Selection down           |
-| `<C-q>`      | Insert (Telescope) | Send to quickfix         |
-| `<C-t>`      | Insert (Telescope) | Open in Trouble          |
+| Keymap       | Mode   | Action                   |
+| ------------ | ------ | ------------------------ |
+| `<leader>ff` | Normal | Find files               |
+| `<leader>fr` | Normal | Recent files             |
+| `<leader>fs` | Normal | Live grep                |
+| `<leader>fg` | Normal | Git files                |
+| `<leader>fc` | Normal | Grep string under cursor |
+| `<leader>fk` | Normal | Find keymaps             |
+| `<leader>fb` | Normal | Find buffers             |
 
 ## File Explorer
 
-| Keymap       | Mode   | Action              |
-| ------------ | ------ | ------------------- |
-| `<leader>ee` | Normal | Toggle Neo-tree     |
-| `<leader>ef` | Normal | Reveal current file |
+| Keymap       | Mode   | Action             |
+| ------------ | ------ | ------------------ |
+| `<leader>ee` | Normal | Open netrw explorer |
 
 ## Trouble
 
@@ -98,7 +93,6 @@
 | `<leader>xd` | Normal | Document diagnostics  |
 | `<leader>xq` | Normal | Quickfix list         |
 | `<leader>xl` | Normal | Location list         |
-| `<leader>xt` | Normal | Todos                 |
 
 ## Git
 
@@ -110,22 +104,6 @@
 | `<leader>hr` | Normal | Reset hunk   |
 | `<leader>hp` | Normal | Preview hunk |
 | `<leader>hb` | Normal | Blame line   |
-
-## Debug (DAP)
-
-| Keymap       | Mode   | Action                 |
-| ------------ | ------ | ---------------------- |
-| `<M-1>`      | Normal | Continue               |
-| `<M-2>`      | Normal | Step over              |
-| `<M-3>`      | Normal | Step into              |
-| `<M-4>`      | Normal | Step out               |
-| `<leader>db` | Normal | Toggle breakpoint      |
-| `<leader>dB` | Normal | Conditional breakpoint |
-| `<leader>dc` | Normal | Clear breakpoints      |
-| `<leader>dr` | Normal | Open REPL              |
-| `<leader>dl` | Normal | Run last               |
-| `<leader>dt` | Normal | Terminate              |
-| `<leader>du` | Normal | Toggle DAP UI          |
 
 ## Formatting
 

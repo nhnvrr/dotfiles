@@ -54,10 +54,10 @@ local postico = "at.eggerapps.Postico"
 local slack = "com.tinyspeck.slackmacgap"
 local personalBrowser = "Dia"
 
--- Cmd+Option+1: Gather left 2/9, Chrome right 7/9
+-- Cmd+Option+1: Slack left 2/9, Chrome right 7/9
 hs.hotkey.bind({ "cmd", "alt" }, "1", function()
 	layout({
-		{ name = "Gather", rect = function(f) return left(f, 2/9) end },
+		{ id = slack, rect = function(f) return left(f, 2/9) end },
 		{ id = chrome, rect = function(f) return right(f, 7/9) end },
 	})
 end)

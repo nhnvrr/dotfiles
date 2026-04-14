@@ -55,7 +55,7 @@ This repo configures:
 
 Current window layout bindings:
 
-- `Cmd+Option+1`: `Gather` left `2/9`, `Chrome` right `7/9`
+- `Cmd+Option+1`: `Slack` left `2/9`, `Chrome` right `7/9`
 - `Cmd+Option+2`: `Terminal` left `1/3`, `Chrome` right `2/3`
 - `Cmd+Option+3`: `Terminal` left `2/7`, `Postico 2` right `5/7`
 - `Cmd+Option+9`: `Dia` left `5/7`, `Terminal` right `2/7`
@@ -95,7 +95,6 @@ Current window layout bindings:
 - `claude-code`
 - `codex`
 - `docker-desktop`
-- `gather`
 - `ghostty`
 - `hammerspoon`
 - `ledger-wallet`
@@ -103,10 +102,9 @@ Current window layout bindings:
 - `nordvpn`
 - `ollama`
 - `postico`
-- `thebrowsercompany-dia`
+- `slack`
 - `telegram`
 - `visual-studio-code`
-- `zed`
 - `zen`
 
 ### Fonts

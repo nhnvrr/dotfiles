@@ -111,8 +111,10 @@ if [[ "${SKIP_BREW}" == false ]]; then
     bash
     bat
     delve
+    fd
     fnm
     fish
+    fzf
     gh
     git
     go
@@ -143,18 +145,16 @@ if [[ "${SKIP_BREW}" == false ]]; then
     "claude-code"
     "ghostty"
     "ledger-wallet"
-    "gather"
     "telegram"
     "docker-desktop"
-    "thebrowsercompany-dia"
     "nordvpn"
     "linear-linear"
     "aws-vpn-client"
     "visual-studio-code"
-    "zed"
     "zen"
     "hammerspoon"
     "postico"
+    "slack"
   )
   install_missing_casks "${apps[@]}"
 
