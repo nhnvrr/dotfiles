@@ -47,8 +47,12 @@ keymap.set("n", "<leader>fk", "<cmd>FzfLua keymaps<cr>", { desc = "Find keymaps"
 
 -- file explorer (netrw)
 keymap.set("n", "<leader>ee", function()
-  vim.cmd("Explore " .. vim.fn.getcwd())
-end, { desc = "Open file explorer at project root" })
+  if vim.bo.filetype == "netrw" then
+    vim.cmd("Rex")
+  else
+    vim.cmd("Explore " .. vim.fn.getcwd())
+  end
+end, { desc = "Toggle file explorer at project root" })
 
 -- trouble
 keymap.set("n", "<leader>xw", "<cmd>Trouble diagnostics toggle<CR>", { desc = "Workspace diagnostics" })
