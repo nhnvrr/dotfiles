@@ -45,22 +45,23 @@ bash ./install.sh
 This repo configures:
 
 - `fish` as the default shell, with aliases, `fnm`, and `bun` path setup
-- `ghostty` with `Monaspace Neon`, custom light/dark themes, roomier padding, and `Cmd+Shift+R` to reload config
 - `starship` as the shell prompt
 - `tmux` with vi-style navigation, clipboard integration, and fish as the default shell inside tmux
 - `neovim` with LSP, Treesitter, Telescope, Neo-tree, formatting, DAP, and Mason-managed tools
-- `hammerspoon` for a few app layout hotkeys
+- `hammerspoon` for app launcher hotkeys
 
 ### Hammerspoon shortcuts
 
-Current window layout bindings:
+Current app shortcuts:
 
-- `Cmd+Option+1`: `Slack` left `2/9`, `Chrome` right `7/9`
-- `Cmd+Option+2`: `Terminal` left `1/3`, `Chrome` right `2/3`
-- `Cmd+Option+3`: `Terminal` left `2/7`, `Postico 2` right `5/7`
-- `Cmd+Option+9`: `Dia` left `5/7`, `Terminal` right `2/7`
-- `Cmd+Option+0`: `Terminal` left `5/7`, `Dia` right `2/7`
-- `Cmd+Option+-`: `VS Code` left `5/7`, `Dia` right `2/7`
+- `Cmd+Option+1`: `Terminal.app`
+- `Cmd+Option+2`: `Google Chrome`
+- `Cmd+Option+3`: `Visual Studio Code`
+- `Cmd+Option+4`: `Postico`
+- `Cmd+Option+5`: `Postman`
+- `Cmd+Option+9`: `Brave Browser`
+- `Cmd+Option+0`: `Linear`
+- `Ctrl+Cmd+Option+R`: reload Hammerspoon
 
 ### Homebrew formulae
 
@@ -69,13 +70,15 @@ Current window layout bindings:
 - `awscli`
 - `bash`
 - `bat`
-- `btop`
 - `delve`
+- `fd`
 - `fish`
 - `fnm`
+- `fzf`
 - `gh`
 - `git`
 - `go`
+- `htop`
 - `jq`
 - `neovim`
 - `pnpm`
@@ -86,6 +89,12 @@ Current window layout bindings:
 - `terraform`
 - `tmux`
 
+### Other installed tools
+
+`install.sh` also installs these tools outside Homebrew when they are missing:
+
+- `bun` via the official install script
+
 ### Apps and desktop tools
 
 `install.sh` installs these casks when missing:
@@ -94,18 +103,19 @@ Current window layout bindings:
 - `claude`
 - `claude-code`
 - `codex`
+- `brave-browser`
 - `docker-desktop`
-- `ghostty`
+- `google-chrome`
 - `hammerspoon`
 - `ledger-wallet`
 - `linear-linear`
 - `nordvpn`
-- `ollama`
+- `ollama-app`
 - `postico`
-- `slack`
+- `postman`
 - `telegram`
+- `whatsapp`
 - `visual-studio-code`
-- `zen`
 
 ### Fonts
 
@@ -120,9 +130,6 @@ These files are linked into your home directory:
 
 - [`fish/config.fish`](./fish/config.fish) -> `$HOME/.config/fish/config.fish`
 - [`fish/completions/aws.fish`](./fish/completions/aws.fish) -> `$HOME/.config/fish/completions/aws.fish`
-- [`ghostty/config.ghostty`](./ghostty/config.ghostty) -> `$HOME/.config/ghostty/config.ghostty`
-- [`ghostty/themes/nh-light`](./ghostty/themes/nh-light) -> `$HOME/.config/ghostty/themes/nh-light`
-- [`ghostty/themes/nh-dark`](./ghostty/themes/nh-dark) -> `$HOME/.config/ghostty/themes/nh-dark`
 - [`tmux/tmux.conf`](./tmux/tmux.conf) -> `$HOME/.tmux.conf`
 - [`starship/starship.toml`](./starship/starship.toml) -> `$HOME/.config/starship.toml`
 - [`hammerspoon/init.lua`](./hammerspoon/init.lua) -> `$HOME/.hammerspoon/init.lua`

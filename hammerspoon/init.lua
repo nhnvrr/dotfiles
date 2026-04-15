@@ -1,162 +1,35 @@
--- Auto-reload on config change
-hs.pathwatcher.new(os.getenv("HOME") .. "/.hammerspoon/", hs.reload):start()
-hs.alert.show("Hammerspoon loaded")
+local config = {
+	appModifiers = { "cmd", "alt" },
+	reloadModifiers = { "cmd", "alt", "ctrl" },
+	reloadKey = "R",
+}
 
-local gap = 2
+local shortcuts = {
+	{ key = "1", name = "Terminal", id = "com.apple.Terminal" },
+	{ key = "2", name = "Google Chrome", id = "com.google.Chrome" },
+	{ key = "3", name = "Visual Studio Code", id = "com.microsoft.VSCode" },
+	{ key = "4", name = "Postico", id = "at.eggerapps.Postico" },
+	{ key = "5", name = "Postman", id = "com.postmanlabs.mac" },
+	{ key = "9", name = "Brave Browser", id = "com.brave.Browser" },
+	{ key = "0", name = "Linear" },
+}
 
-local function layout(apps)
-	local f = hs.screen.mainScreen():frame()
-
-	for _, app in ipairs(apps) do
-		if app.id then
-			hs.application.launchOrFocusByBundleID(app.id)
-		else
-			hs.application.launchOrFocus(app.name)
-		end
+local function launchOrFocus(app)
+	if app.id and hs.application.launchOrFocusByBundleID(app.id) then
+		return
 	end
 
-	hs.timer.doAfter(0.5, function()
-		for _, app in ipairs(apps) do
-			local a = app.id and hs.application.get(app.id) or hs.application.find(app.name)
-			if a and a:mainWindow() then
-				a:mainWindow():setFrame(app.rect(f))
-			end
-		end
+	hs.application.launchOrFocus(app.name)
+end
+
+local reloadWatcher = hs.pathwatcher.new(os.getenv("HOME") .. "/.hammerspoon/", hs.reload)
+reloadWatcher:start()
+
+for _, shortcut in ipairs(shortcuts) do
+	hs.hotkey.bind(config.appModifiers, shortcut.key, function()
+		launchOrFocus(shortcut)
 	end)
 end
 
-local function left(f, ratio)
-	return hs.geometry.rect(f.x, f.y, f.w * ratio - gap, f.h)
-end
-
-local function right(f, ratio)
-	local split = f.w * (1 - ratio)
-	return hs.geometry.rect(f.x + split + gap, f.y, f.w * ratio - gap, f.h)
-end
-
-local function topLeft(f, wRatio, hRatio)
-	return hs.geometry.rect(f.x, f.y, f.w * wRatio - gap, f.h * hRatio - gap)
-end
-
-local function bottomLeft(f, wRatio, hRatio)
-	return hs.geometry.rect(f.x, f.y + f.h * (1 - hRatio) + gap, f.w * wRatio - gap, f.h * hRatio - gap)
-end
-
-local function full(f)
-	return hs.geometry.rect(f.x, f.y, f.w, f.h)
-end
-
-local chrome = "com.google.Chrome"
-local vscode = "com.microsoft.VSCode"
-local terminal = "com.mitchellh.ghostty"
-local postico = "at.eggerapps.Postico"
-local slack = "com.tinyspeck.slackmacgap"
-
--- Cmd+Option+1: Slack left 2/9, Chrome right 7/9
-hs.hotkey.bind({ "cmd", "alt" }, "1", function()
-	layout({
-		{
-			id = slack,
-			rect = function(f)
-				return left(f, 2 / 9)
-			end,
-		},
-		{
-			id = chrome,
-			rect = function(f)
-				return right(f, 7 / 9)
-			end,
-		},
-	})
-end)
-
--- Cmd+Option+2: Terminal left 1/3, Chrome right 2/3
-hs.hotkey.bind({ "cmd", "alt" }, "2", function()
-	layout({
-		{
-			id = terminal,
-			rect = function(f)
-				return left(f, 1 / 3)
-			end,
-		},
-		{
-			id = chrome,
-			rect = function(f)
-				return right(f, 2 / 3)
-			end,
-		},
-	})
-end)
-
--- Cmd+Option+3: Terminal left 2/7, Postico 2 right 5/7
-hs.hotkey.bind({ "cmd", "alt" }, "3", function()
-	layout({
-		{
-			id = terminal,
-			rect = function(f)
-				return left(f, 2 / 7)
-			end,
-		},
-		{
-			id = postico,
-			rect = function(f)
-				return right(f, 5 / 7)
-			end,
-		},
-	})
-end)
-
--- Cmd+Option+9: Chrome left 5/7, Terminal right 2/7
-hs.hotkey.bind({ "cmd", "alt" }, "9", function()
-	layout({
-		{
-			id = terminal,
-			rect = function(f)
-				return right(f, 2 / 7)
-			end,
-		},
-		{
-			id = chrome,
-			rect = function(f)
-				return left(f, 5 / 7)
-			end,
-		},
-	})
-end)
-
--- Cmd+Option+0: Terminal left 5/7, Chrome right 2/7
-hs.hotkey.bind({ "cmd", "alt" }, "0", function()
-	layout({
-		{
-			id = chrome,
-			rect = function(f)
-				return right(f, 2 / 7)
-			end,
-		},
-		{
-			id = terminal,
-			rect = function(f)
-				return left(f, 5 / 7)
-			end,
-		},
-	})
-end)
-
--- Cmd+Option+-: VS Code left 5/7, Chrome right 2/7
-hs.hotkey.bind({ "cmd", "alt" }, "-", function()
-	layout({
-		{
-			id = chrome,
-			rect = function(f)
-				return right(f, 2 / 7)
-			end,
-		},
-		{
-			id = vscode,
-			rect = function(f)
-				return left(f, 5 / 7)
-			end,
-		},
-	})
-end)
-
+hs.hotkey.bind(config.reloadModifiers, config.reloadKey, hs.reload)
+hs.alert.show("Hammerspoon loaded")

@@ -118,7 +118,7 @@ if [[ "${SKIP_BREW}" == false ]]; then
     gh
     git
     go
-    btop
+    htop
     jq
     neovim
     pnpm
@@ -139,22 +139,23 @@ if [[ "${SKIP_BREW}" == false ]]; then
   fi
 
   apps=(
-    "ollama"
+    "ollama-app"
     "codex"
     "claude"
     "claude-code"
-    "ghostty"
+    "brave-browser"
+    "google-chrome"
     "ledger-wallet"
     "telegram"
+    "whatsapp"
     "docker-desktop"
     "nordvpn"
     "linear-linear"
     "aws-vpn-client"
     "visual-studio-code"
-    "zen"
     "hammerspoon"
     "postico"
-    "slack"
+    "postman"
   )
   install_missing_casks "${apps[@]}"
 
@@ -193,9 +194,6 @@ fi
 echo "Linking config files..."
 link_file "${CONFIG_DIR}/fish/config.fish" "${HOME}/.config/fish/config.fish"
 link_file "${CONFIG_DIR}/fish/completions/aws.fish" "${HOME}/.config/fish/completions/aws.fish"
-link_file "${CONFIG_DIR}/ghostty/config.ghostty" "${HOME}/.config/ghostty/config.ghostty"
-link_file "${CONFIG_DIR}/ghostty/themes/nh-light" "${HOME}/.config/ghostty/themes/nh-light"
-link_file "${CONFIG_DIR}/ghostty/themes/nh-dark" "${HOME}/.config/ghostty/themes/nh-dark"
 link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.tmux.conf"
 link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
 copy_dir "${CONFIG_DIR}/nvim" "${HOME}/.config/nvim"
