@@ -10,7 +10,7 @@
 | `<leader>-`  | Normal | Decrement number                |
 | `q`          | Normal | Close buffer (help/man/qf only) |
 
-## Windows & Tabs
+## Windows & Terminal
 
 | Keymap       | Mode   | Action                     |
 | ------------ | ------ | -------------------------- |
@@ -18,22 +18,15 @@
 | `<leader>sh` | Normal | Split horizontal           |
 | `<leader>se` | Normal | Make splits equal size     |
 | `<leader>sx` | Normal | Close current split        |
-| `<leader>to` | Normal | New tab                    |
-| `<leader>tx` | Normal | Close tab                  |
-| `<leader>tn` | Normal | Next tab                   |
-| `<leader>tp` | Normal | Previous tab               |
-| `<leader>tf` | Normal | Current buffer in new tab  |
 | `<leader>tv` | Normal | Terminal in vertical split |
+| `<leader>th` | Normal | Terminal in horizontal split |
 
 ## LSP (custom)
 
 | Keymap       | Mode   | Action                  |
 | ------------ | ------ | ----------------------- |
 | `gd`         | Normal | Definitions (fzf-lua)   |
-| `gD`         | Normal | Declaration             |
-| `gR`         | Normal | References (fzf-lua)    |
 | `GD`         | Normal | Definition in new tab   |
-| `K`          | Normal | Hover documentation     |
 | `<leader>rs` | Normal | Restart LSP             |
 
 ## LSP (Neovim 0.12 defaults)
@@ -46,6 +39,8 @@
 | `gra`    | Normal/Visual | Code actions     |
 | `grt`    | Normal        | Type definition  |
 | `gO`     | Normal        | Document symbols |
+| `gD`     | Normal        | Declaration      |
+| `K`      | Normal        | Hover documentation |
 | `Ctrl-S` | Insert        | Signature help   |
 
 ## Diagnostics
@@ -57,7 +52,7 @@
 | `gl`        | Normal | Diagnostic float               |
 | `<leader>D` | Normal | Buffer diagnostics (fzf-lua)   |
 
-## Completion (native 0.12
+## Completion (native 0.12)
 
 | Keymap      | Mode   | Action                       |
 | ----------- | ------ | ---------------------------- |
@@ -83,7 +78,7 @@
 
 | Keymap       | Mode   | Action             |
 | ------------ | ------ | ------------------ |
-| `<leader>ee` | Normal | Open netrw explorer |
+| `<leader>ee` | Normal | Toggle netrw explorer at project root |
 
 ## Trouble
 

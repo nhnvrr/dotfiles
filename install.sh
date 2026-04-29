@@ -47,7 +47,7 @@ link_file() {
 copy_dir() {
   local src="$1" dst="$2"
   mkdir -p "${dst}"
-  rsync -a "${src}/" "${dst}/"
+  rsync -a --delete "${src}/" "${dst}/"
 }
 
 brew_has_formula() {
@@ -107,55 +107,39 @@ if [[ "${SKIP_BREW}" == false ]]; then
   "${BREW_BIN}" update
 
   cli_tools=(
-    awscli
-    bash
     bat
-    delve
     fd
-    fnm
-    fish
     fzf
     gh
     git
-    go
-    htop
     jq
+    mise
     neovim
-    pnpm
-    postgresql
-    rust
-    sentry-cli
     starship
-    terraform
     tmux
   )
   install_missing_formulas "${cli_tools[@]}"
-
-  if command -v bun >/dev/null 2>&1 || [[ -x "${HOME}/.bun/bin/bun" ]]; then
-    echo "Skipping bun; already installed."
-  else
-    echo "Installing bun..."
-    curl -fsSL https://bun.sh/install | bash
-  fi
 
   apps=(
     "ollama-app"
     "codex"
     "claude"
     "claude-code"
-    "brave-browser"
+    "chatgpt"
     "google-chrome"
+    "kap"
     "ledger-wallet"
-    "telegram"
-    "whatsapp"
+    "maccy"
     "docker-desktop"
     "nordvpn"
-    "linear-linear"
+    "nosql-workbench"
     "aws-vpn-client"
     "visual-studio-code"
-    "hammerspoon"
-    "postico"
-    "postman"
+    "telegram"
+    "warp"
+    "whatsapp"
+    "tableplus"
+    "zed"
   )
   install_missing_casks "${apps[@]}"
 
@@ -180,38 +164,33 @@ if [[ "${SKIP_BREW}" == false ]]; then
   git config --global alias.prettylog "log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(r) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative"
   git config --global alias.root "rev-parse --show-toplevel"
 
-  echo "Configuring Go environment..."
-  GOENV_PATH="${HOME}/Develop/go/goenv"
-  mkdir -p "$(dirname "${GOENV_PATH}")"
-  export GOENV="${GOENV_PATH}"
-  mkdir -p "${HOME}/Develop/go"
-  go env -w GOPATH="${HOME}/Develop/go"
-  go env -w GOPRIVATE="github.com/nhnvrr"
+  echo "Preparing Go workspace..."
+  mkdir -p "${HOME}/Develop/go/bin"
 else
   echo "Skipping Homebrew setup and tool installation (--skipBrew); only copying configuration."
 fi
 
 echo "Linking config files..."
-link_file "${CONFIG_DIR}/fish/config.fish" "${HOME}/.config/fish/config.fish"
-link_file "${CONFIG_DIR}/fish/completions/aws.fish" "${HOME}/.config/fish/completions/aws.fish"
+link_file "${CONFIG_DIR}/zsh/zshrc" "${HOME}/.zshrc"
+link_file "${CONFIG_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"
 link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.tmux.conf"
 link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
 copy_dir "${CONFIG_DIR}/nvim" "${HOME}/.config/nvim"
 if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
   link_file "${CONFIG_DIR}/gh/config.yml" "${HOME}/.config/gh/config.yml"
 fi
-link_file "${CONFIG_DIR}/hammerspoon/init.lua" "${HOME}/.hammerspoon/init.lua"
 
-if command -v fish >/dev/null 2>&1; then
-  FISH_BIN="$(command -v fish)"
-  if ! grep -qF "${FISH_BIN}" /etc/shells; then
-    echo "Adding fish to /etc/shells..."
-    echo "${FISH_BIN}" | sudo tee -a /etc/shells
-  fi
-  if [[ "${SHELL:-}" != "${FISH_BIN}" ]]; then
-    echo "Changing default shell to fish..."
-    chsh -s "${FISH_BIN}"
-  fi
+if [[ "${SKIP_BREW}" == false ]] && command -v mise >/dev/null 2>&1; then
+  echo "Installing mise-managed tools..."
+  mise install
+  echo "Enabling pnpm via Corepack..."
+  mise exec -- corepack enable pnpm
+fi
+
+ZSH_BIN="/bin/zsh"
+if [[ -x "${ZSH_BIN}" && "${SHELL:-}" != "${ZSH_BIN}" ]]; then
+  echo "Changing default shell to zsh..."
+  chsh -s "${ZSH_BIN}"
 fi
 
 echo "macOS standalone setup complete. 🧉"

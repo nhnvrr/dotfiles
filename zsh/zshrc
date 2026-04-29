@@ -1,0 +1,83 @@
+# Locale and editor settings.
+export LANG="en_US.UTF-8"
+export LC_ALL="en_US.UTF-8"
+export EDITOR="nvim"
+export VISUAL="nvim"
+
+# Keep common bin directories near the front of PATH without duplicates.
+typeset -U path PATH
+path=(
+  /opt/homebrew/bin
+  /opt/homebrew/sbin
+  /usr/local/bin
+  "$HOME/.local/bin"
+  "${path[@]}"
+)
+
+# Essential aliases.
+alias ll="ls -l"
+alias l="ll"
+alias la="ls -la"
+alias cl="clear"
+alias code="code --new-window"
+alias grep="grep --color=auto"
+
+# Git essentials.
+alias gst="git status -sb"
+alias gc="git commit -m"
+alias gp="git push origin HEAD"
+alias gco="git checkout"
+alias ga="git add"
+
+# History.
+HISTFILE="$HOME/.zsh_history"
+HISTSIZE=100000
+SAVEHIST=100000
+setopt append_history
+setopt extended_history
+setopt hist_ignore_dups
+setopt hist_ignore_space
+setopt hist_reduce_blanks
+setopt inc_append_history
+setopt share_history
+
+# Completion.
+autoload -Uz compinit
+zmodload zsh/complist
+zstyle ":completion:*" matcher-list "m:{a-z}={A-Z}"
+zstyle ":completion:*" menu select
+compinit -i -d "$HOME/.zcompdump"
+
+if command -v aws_completer >/dev/null 2>&1; then
+  autoload -Uz bashcompinit
+  bashcompinit
+  complete -C "$(command -v aws_completer)" aws
+fi
+
+# Tool/runtime version manager.
+if command -v mise >/dev/null 2>&1; then
+  eval "$(mise activate zsh)"
+fi
+
+# Go workspace.
+export GOPATH="$HOME/Develop/go"
+export GOPRIVATE="github.com/nhnvrr"
+path=("$GOPATH/bin" "${path[@]}")
+
+if [[ -o interactive ]]; then
+  # Let Ctrl-S/Ctrl-Q work in tmux and zsh keybindings.
+  stty -ixon 2>/dev/null
+
+  bindkey -e
+  autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
+  zle -N up-line-or-beginning-search
+  zle -N down-line-or-beginning-search
+  bindkey "^P" up-line-or-beginning-search
+  bindkey "^N" down-line-or-beginning-search
+  bindkey "^R" history-incremental-search-backward
+  bindkey "^S" history-incremental-search-forward
+
+  if command -v starship >/dev/null 2>&1; then
+    eval "$(starship init zsh)"
+  fi
+fi

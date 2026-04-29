@@ -71,7 +71,7 @@ vim.lsp.config("cssls", {
 
 vim.lsp.config("tailwindcss", {
   cmd = { "tailwindcss-language-server", "--stdio" },
-  filetypes = { "html", "css", "javascriptreact", "typescriptreact", "svelte" },
+  filetypes = { "html", "css", "javascriptreact", "typescriptreact" },
   root_markers = { "tailwind.config.js", "tailwind.config.ts", "tailwind.config.cjs", "tailwind.config.mjs" },
 })
 
@@ -80,7 +80,7 @@ vim.lsp.config("eslint", {
   filetypes = {
     "javascript", "typescript", "html",
     "typescriptreact", "javascriptreact",
-    "css", "sass", "scss", "less", "svelte",
+    "css", "sass", "scss", "less",
   },
   root_markers = { "eslint.config.js", ".eslintrc.cjs", ".eslintrc.js", ".eslintrc.json", ".eslintrc", "package.json" },
   settings = {
@@ -100,15 +100,9 @@ vim.lsp.config("eslint", {
   },
 })
 
-vim.lsp.config("graphql", {
-  cmd = { "graphql-lsp", "server", "-m", "stream" },
-  filetypes = { "graphql", "gql", "svelte", "typescriptreact", "javascriptreact" },
-  root_markers = { ".graphqlrc*", "graphql.config.*", ".git" },
-})
-
 vim.lsp.config("emmet_ls", {
   cmd = { "emmet-ls", "--stdio" },
-  filetypes = { "html", "typescriptreact", "javascriptreact", "css", "sass", "scss", "less", "svelte" },
+  filetypes = { "html", "typescriptreact", "javascriptreact", "css", "sass", "scss", "less" },
   root_markers = { ".git" },
 })
 
@@ -158,20 +152,6 @@ vim.lsp.config("gopls", {
   },
 })
 
-vim.lsp.config("svelte", {
-  cmd = { "svelteserver", "--stdio" },
-  filetypes = { "svelte" },
-  root_markers = { "svelte.config.js", "svelte.config.cjs", ".git" },
-  on_attach = function(client, bufnr)
-    vim.api.nvim_create_autocmd("BufWritePost", {
-      pattern = { "*.js", "*.ts" },
-      callback = function(ctx)
-        client:notify("$/onDidChangeTsOrJsFile", { uri = ctx.match })
-      end,
-    })
-  end,
-})
-
 -- Enable all servers
 vim.lsp.enable({
   "lua_ls",
@@ -180,11 +160,9 @@ vim.lsp.enable({
   "cssls",
   "tailwindcss",
   "eslint",
-  "graphql",
   "emmet_ls",
   "prismals",
   "yamlls",
   "marksman",
   "gopls",
-  "svelte",
 })
