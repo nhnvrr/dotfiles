@@ -8,7 +8,7 @@ if ts_install_ok then
     "json", "javascript", "typescript", "tsx",
     "yaml", "html", "css", "prisma",
     "markdown", "markdown_inline",
-    "svelte", "graphql", "bash", "lua", "vim",
+    "bash", "lua", "vim",
     "dockerfile", "gitignore", "query", "vimdoc",
     "c", "go", "gomod", "gosum", "gowork",
   })
