@@ -41,63 +41,11 @@ ensure_brew() {
 link_file() {
   local src="$1" dst="$2"
   mkdir -p "$(dirname "${dst}")"
-  ln -sf "${src}" "${dst}"
-}
-
-copy_dir() {
-  local src="$1" dst="$2"
-  mkdir -p "${dst}"
-  rsync -a --delete "${src}/" "${dst}/"
-}
-
-brew_has_formula() {
-  "${BREW_BIN}" list --formula "$1" >/dev/null 2>&1
-}
-
-brew_has_cask() {
-  "${BREW_BIN}" list --cask "$1" >/dev/null 2>&1
-}
-
-install_missing_formulas() {
-  local missing=()
-  local formula
-
-  for formula in "$@"; do
-    if brew_has_formula "${formula}"; then
-      echo "Skipping ${formula}; already installed."
-    else
-      missing+=("${formula}")
-    fi
-  done
-
-  if [[ ${#missing[@]} -eq 0 ]]; then
-    echo "All Homebrew formulae are already installed."
-    return
+  # Replace existing regular files/dirs with a symlink (idempotent for symlinks).
+  if [[ -e "${dst}" && ! -L "${dst}" ]]; then
+    rm -rf "${dst}"
   fi
-
-  echo "Installing missing Homebrew formulae: ${missing[*]}"
-  "${BREW_BIN}" install --formula "${missing[@]}"
-}
-
-install_missing_casks() {
-  local missing=()
-  local cask
-
-  for cask in "$@"; do
-    if brew_has_cask "${cask}"; then
-      echo "Skipping ${cask}; already installed."
-    else
-      missing+=("${cask}")
-    fi
-  done
-
-  if [[ ${#missing[@]} -eq 0 ]]; then
-    echo "All Homebrew casks are already installed."
-    return
-  fi
-
-  echo "Installing missing Homebrew casks: ${missing[*]}"
-  "${BREW_BIN}" install --cask "${missing[@]}"
+  ln -sfn "${src}" "${dst}"
 }
 
 if [[ "${SKIP_BREW}" == false ]]; then
@@ -106,45 +54,8 @@ if [[ "${SKIP_BREW}" == false ]]; then
   eval "$("${BREW_BIN}" shellenv)"
   "${BREW_BIN}" update
 
-  cli_tools=(
-    bat
-    fd
-    fzf
-    gh
-    git
-    jq
-    mise
-    neovim
-    starship
-    tmux
-  )
-  install_missing_formulas "${cli_tools[@]}"
-
-  apps=(
-    "ollama-app"
-    "codex"
-    "claude"
-    "claude-code"
-    "chatgpt"
-    "google-chrome"
-    "kap"
-    "ledger-wallet"
-    "maccy"
-    "docker-desktop"
-    "nordvpn"
-    "nosql-workbench"
-    "aws-vpn-client"
-    "visual-studio-code"
-    "telegram"
-    "warp"
-    "whatsapp"
-    "tableplus"
-    "zed"
-  )
-  install_missing_casks "${apps[@]}"
-
-  echo "Installing fonts..."
-  install_missing_casks font-monaspace font-jetbrains-mono-nerd-font
+  echo "Applying Brewfile..."
+  "${BREW_BIN}" bundle --file="${CONFIG_DIR}/Brewfile"
 
   echo "Configuring git..."
   # so force Git to use a writable ~/.gitconfig for this setup.
@@ -167,15 +78,18 @@ if [[ "${SKIP_BREW}" == false ]]; then
   echo "Preparing Go workspace..."
   mkdir -p "${HOME}/Develop/go/bin"
 else
-  echo "Skipping Homebrew setup and tool installation (--skipBrew); only copying configuration."
+  echo "Skipping Homebrew setup and tool installation (--skipBrew); only linking configuration."
 fi
 
 echo "Linking config files..."
-link_file "${CONFIG_DIR}/zsh/zshrc" "${HOME}/.zshrc"
+link_file "${CONFIG_DIR}/fish/config.fish" "${HOME}/.config/fish/config.fish"
 link_file "${CONFIG_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"
 link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.tmux.conf"
 link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
-copy_dir "${CONFIG_DIR}/nvim" "${HOME}/.config/nvim"
+link_file "${CONFIG_DIR}/ghostty/config" "${HOME}/.config/ghostty/config"
+link_file "${CONFIG_DIR}/nvim/init.lua"   "${HOME}/.config/nvim/init.lua"
+link_file "${CONFIG_DIR}/nvim/lua"        "${HOME}/.config/nvim/lua"
+link_file "${CONFIG_DIR}/nvim/keymaps.md" "${HOME}/.config/nvim/keymaps.md"
 if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
   link_file "${CONFIG_DIR}/gh/config.yml" "${HOME}/.config/gh/config.yml"
 fi
@@ -187,10 +101,14 @@ if [[ "${SKIP_BREW}" == false ]] && command -v mise >/dev/null 2>&1; then
   mise exec -- corepack enable pnpm
 fi
 
-ZSH_BIN="/bin/zsh"
-if [[ -x "${ZSH_BIN}" && "${SHELL:-}" != "${ZSH_BIN}" ]]; then
-  echo "Changing default shell to zsh..."
-  chsh -s "${ZSH_BIN}"
+FISH_BIN="$(command -v fish || true)"
+if [[ -n "${FISH_BIN}" && "${SHELL:-}" != "${FISH_BIN}" ]]; then
+  if ! grep -qx "${FISH_BIN}" /etc/shells; then
+    echo "Adding ${FISH_BIN} to /etc/shells (requires sudo)..."
+    echo "${FISH_BIN}" | sudo tee -a /etc/shells >/dev/null
+  fi
+  echo "Changing default shell to fish..."
+  chsh -s "${FISH_BIN}"
 fi
 
 echo "macOS standalone setup complete. 🧉"

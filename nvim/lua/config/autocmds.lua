@@ -23,3 +23,14 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.keymap.set("n", "q", "<cmd>close<CR>", { buffer = args.buf, silent = true })
   end,
 })
+
+-- vim-dadbod-completion: route omnifunc to the connection-aware completer
+-- (otherwise Vim defaults to the built-in sqlcomplete#Complete).
+-- Also narrow 'complete' so other open buffers don't pollute SQL suggestions.
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "sql", "mysql", "plsql" },
+  callback = function(args)
+    vim.bo[args.buf].omnifunc = "vim_dadbod_completion#omni"
+    vim.bo[args.buf].complete = ".,o"
+  end,
+})

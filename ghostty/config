@@ -1,0 +1,39 @@
+# Font
+font-family = JetBrainsMono Nerd Font Propo
+font-size = 13
+
+# Theme
+theme = light:Nord Light,dark:Nord
+background = 1c1c1c
+background-opacity = 0.93
+background-blur-radius = 20
+
+# Window
+window-padding-x = 2
+window-padding-y = 2
+macos-titlebar-style = transparent
+window-save-state = always
+
+# Start in fullscreen (non-native: keeps current Space, like Alacritty's SimpleFullscreen)
+window-fullscreen = true
+macos-non-native-fullscreen = visible-menu
+
+# Cursor
+cursor-style = bar
+cursor-style-blink = true
+
+# Shell
+shell-integration = fish
+shell-integration-features = cursor,sudo,title
+
+# Send Option as Alt (so nvim/tmux see it)
+macos-option-as-alt = true
+
+# Drop-down quick terminal (toggle: cmd+grave)
+quick-terminal-position = top
+quick-terminal-screen = main
+
+# UX
+audible-bell = false
+confirm-close-surface = false
+copy-on-select = clipboard

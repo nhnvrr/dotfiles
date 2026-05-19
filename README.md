@@ -8,17 +8,14 @@ Running [`install.sh`](./install.sh) on macOS will:
 
 - install Homebrew if it is missing
 - run `brew update`
-- install missing Homebrew formulae
-- install missing Homebrew casks
-- install missing font casks
-- install globally configured `mise` tools
+- install everything declared in [`Brewfile`](./Brewfile) via `brew bundle`
+- install globally configured `mise` tools (pinned in [`mise/config.toml`](./mise/config.toml))
 - configure global Git settings
 - prepare the Go workspace
-- link shell config files into `$HOME`
-- copy the Neovim config into `$HOME/.config/nvim`
-- switch the default shell to macOS `zsh` if needed
+- link config files into `$HOME` (Neovim config included)
+- switch the default shell to `fish` if needed (adds it to `/etc/shells` first)
 
-The script is intended to be rerunnable. Formulae, casks, fonts, and `mise` tools are checked before installation.
+The script is intended to be rerunnable. `brew bundle` and `mise install` are idempotent.
 
 ## Commands
 
@@ -44,81 +41,39 @@ bash ./install.sh
 
 This repo configures:
 
-- macOS `zsh` as the default shell, with aliases, history, completion, `mise`, and Go workspace setup
+- `fish` as the default shell, with aliases, git abbreviations, `mise`, and Go workspace setup
 - `starship` as the shell prompt
-- `tmux` with vi-style navigation, clipboard integration, and zsh as the default shell inside tmux
+- `tmux` with vi-style navigation and clipboard integration
 - `neovim` with LSP, Treesitter, fzf-lua, formatting, diagnostics, and Mason-managed tools
 
-### Homebrew formulae
+### Homebrew packages
 
-`install.sh` installs these formulae when missing:
+All Homebrew formulae, casks, and fonts are declared in [`Brewfile`](./Brewfile). To inspect or update the list, edit that file directly.
 
-- `bat`
-- `fd`
-- `fzf`
-- `gh`
-- `git`
-- `jq`
-- `mise`
-- `neovim`
-- `starship`
-- `tmux`
+Useful commands:
+
+```bash
+brew bundle check --file=./Brewfile     # report what's missing
+brew bundle --file=./Brewfile           # install missing items
+brew bundle cleanup --file=./Brewfile   # uninstall what's not in the Brewfile
+```
 
 ### Mise tools
 
-`install.sh` installs these globally configured tools through `mise`:
-
-- `node`
-- `aws-cli`
-- `bun`
-- `go`
-- `terraform`
-
-`pnpm` is enabled through Node's Corepack after `mise install`.
-
-### Apps and desktop tools
-
-`install.sh` installs these casks when missing:
-
-- `aws-vpn-client`
-- `chatgpt`
-- `claude`
-- `claude-code`
-- `codex`
-- `docker-desktop`
-- `google-chrome`
-- `kap`
-- `ledger-wallet`
-- `maccy`
-- `nordvpn`
-- `nosql-workbench`
-- `ollama-app`
-- `tableplus`
-- `telegram`
-- `visual-studio-code`
-- `warp`
-- `whatsapp`
-- `zed`
-
-### Fonts
-
-The script installs these font casks when missing:
-
-- `font-monaspace`
-- `font-jetbrains-mono-nerd-font`
+Pinned in [`mise/config.toml`](./mise/config.toml): `node`, `aws-cli`, `bun`, `go`, `terraform`. `pnpm` is enabled through Node's Corepack after `mise install`.
 
 ## Managed files
 
 These files are linked into your home directory:
 
-- [`zsh/zshrc`](./zsh/zshrc) -> `$HOME/.zshrc`
+- [`fish/config.fish`](./fish/config.fish) -> `$HOME/.config/fish/config.fish`
 - [`mise/config.toml`](./mise/config.toml) -> `$HOME/.config/mise/config.toml`
 - [`tmux/tmux.conf`](./tmux/tmux.conf) -> `$HOME/.tmux.conf`
 - [`starship/starship.toml`](./starship/starship.toml) -> `$HOME/.config/starship.toml`
-
-This directory is copied:
-
-- [`nvim`](./nvim) -> `$HOME/.config/nvim`
+- [`ghostty/config`](./ghostty/config) -> `$HOME/.config/ghostty/config`
+- [`nvim/init.lua`](./nvim/init.lua) -> `$HOME/.config/nvim/init.lua`
+- [`nvim/lua`](./nvim/lua) -> `$HOME/.config/nvim/lua`
+- [`nvim/keymaps.md`](./nvim/keymaps.md) -> `$HOME/.config/nvim/keymaps.md`
 
 If present, this file is also linked:
 
@@ -128,5 +83,4 @@ If present, this file is also linked:
 
 - The setup only supports macOS.
 - The script may prompt when changing your login shell with `chsh`.
-- Because the Neovim config is copied, rerunning the script will resync `$HOME/.config/nvim` from this repo.
-- [`One Dark Half.terminal`](./One%20Dark%20Half.terminal) is included as a Terminal theme file but is not imported automatically.
+- The Neovim config is symlinked, so edits in `$HOME/.config/nvim` are reflected directly in this repo. `lazy.nvim`'s `lazy-lock.json` is gitignored.

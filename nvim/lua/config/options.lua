@@ -19,7 +19,6 @@ opt.smartcase = true
 
 -- appearance
 opt.cursorline = true
-opt.cmdheight = 1
 opt.termguicolors = true
 opt.background = "dark"
 opt.signcolumn = "yes"
@@ -30,13 +29,13 @@ opt.fillchars = { horiz = "─", horizup = "┴", horizdown = "┬", vert = "│
 opt.autocomplete = true
 opt.pumborder = "rounded"
 opt.pummaxwidth = 40
-opt.completeopt = "menu,menuone,noselect,nearest"
+opt.completeopt = "menu,menuone,noselect,fuzzy,popup"
 
 -- backspace
 opt.backspace = "indent,eol,start"
 
 -- clipboard
-opt.clipboard:append("unnamedplus")
+opt.clipboard = "unnamedplus"
 
 -- splits
 opt.splitright = true

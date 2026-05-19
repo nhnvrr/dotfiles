@@ -1,6 +1,6 @@
 [tools]
-node = "lts"
-aws-cli = "latest"
-bun = "latest"
-go = "latest"
-terraform = "latest"
+node = "24"
+aws-cli = "2.34"
+bun = "1.3"
+go = "1.26"
+terraform = "1.14"
