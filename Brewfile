@@ -17,7 +17,7 @@ cask "font-monaspace"
 cask "font-jetbrains-mono-nerd-font"
 
 # Terminals and editors.
-cask "ghostty"
+cask "alacritty"
 cask "visual-studio-code"
 
 # AI tools.
@@ -37,6 +37,7 @@ cask "tableplus"
 cask "nosql-workbench"
 cask "aws-vpn-client"
 cask "postman"
+cask "proxyman"
 
 # Productivity.
 cask "linear"
@@ -44,6 +45,7 @@ cask "kap"
 cask "1password"
 cask "1password-cli"
 cask "obsidian"
+cask "hammerspoon"
 
 # Communication.
 cask "slack"

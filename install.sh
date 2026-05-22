@@ -86,10 +86,11 @@ link_file "${CONFIG_DIR}/fish/config.fish" "${HOME}/.config/fish/config.fish"
 link_file "${CONFIG_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"
 link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.tmux.conf"
 link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
-link_file "${CONFIG_DIR}/ghostty/config" "${HOME}/.config/ghostty/config"
+link_file "${CONFIG_DIR}/alacritty/alacritty.toml" "${HOME}/.config/alacritty/alacritty.toml"
 link_file "${CONFIG_DIR}/nvim/init.lua"   "${HOME}/.config/nvim/init.lua"
 link_file "${CONFIG_DIR}/nvim/lua"        "${HOME}/.config/nvim/lua"
 link_file "${CONFIG_DIR}/nvim/keymaps.md" "${HOME}/.config/nvim/keymaps.md"
+link_file "${CONFIG_DIR}/hammerspoon/init.lua" "${HOME}/.hammerspoon/init.lua"
 if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
   link_file "${CONFIG_DIR}/gh/config.yml" "${HOME}/.config/gh/config.yml"
 fi

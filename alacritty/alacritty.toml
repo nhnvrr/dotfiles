@@ -1,0 +1,163 @@
+# ─── General ────────────────────────────────────────────
+[general]
+live_config_reload = true
+
+# ─── Font ───────────────────────────────────────────────
+[font]
+size = 13.0
+# Box-drawing built-in: renderiza ─ │ ┌ ┐ sin gaps de hinting en tmux/htop.
+builtin_box_drawing = true
+
+[font.normal]
+family = "Monaspace Neon"
+style = "Regular"
+
+[font.bold]
+family = "Monaspace Neon"
+style = "Bold"
+
+[font.italic]
+family = "Monaspace Neon"
+style = "Italic"
+
+# ─── Window ─────────────────────────────────────────────
+[window]
+startup_mode = "SimpleFullscreen"
+decorations = "None"
+# Match con paleta oscura — evita el title bar claro de Aqua sobre Kanso.
+decorations_theme_variant = "Dark"
+opacity = 0.89
+# Habilita el blur del compositor; sin esto, opacity baja se ve "sucia".
+blur = true
+padding = { x = 4, y = 4 }
+dynamic_padding = true
+option_as_alt = "Both"
+# Snap a grilla de celdas al redimensionar — sin medio-caracter de borde.
+resize_increments = true
+
+# ─── Cursor ─────────────────────────────────────────────
+[cursor]
+# Hueco cuando la ventana pierde foco — saber al instante qué terminal está activa.
+unfocused_hollow = true
+# Beam por default (0.15) se ve fino; 0.20 mejora legibilidad sin gritar.
+thickness = 0.20
+
+[cursor.style]
+shape = "Beam"
+# Off: menos parpadeo periférico = menos fatiga en sesiones largas.
+blinking = "Off"
+
+# ─── Mouse ──────────────────────────────────────────────
+[mouse]
+hide_when_typing = true
+
+# ─── Shell ──────────────────────────────────────────────
+[terminal.shell]
+program = "/opt/homebrew/bin/fish"
+args = ["-l"]
+
+# ─── Scrollback ─────────────────────────────────────────
+[scrolling]
+history = 100000
+# Multiplier alto = más líneas por evento. Suma cuando NO estás en tmux
+# (tmux toma control via alternate-screen). Default es 3, 5 da feel más
+# ágil con trackpad sin volverse over-scroll.
+multiplier = 5
+
+# ─── Selection ──────────────────────────────────────────
+[selection]
+save_to_clipboard = true
+# +/, \, ;, = → double-click selecciona paths completos, URLs, KEY=value.
+semantic_escape_chars = ",│`|:\"' ()[]{}<>\t/\\;="
+
+# ─── Bell: flash visual sutil en vez de audio ───────────
+[bell]
+animation = "EaseOutExpo"
+duration = 100
+color = "#FFA066"
+
+# ─── Colors: Kanso Mist ─────────────────────────────────
+[colors.primary]
+background = "#22262D"
+foreground = "#C5C9C7"
+
+[colors.cursor]
+text   = "#22262D"
+cursor = "#FFA066"
+
+# Naranja del tema (mismo que mode-style de tmux): contraste alto sobre el
+# fondo #22262D. El #43464E anterior era casi invisible — gris sobre gris.
+[colors.selection]
+text       = "#22262D"
+background = "#FFA066"
+
+[colors.normal]
+black   = "#22262D"
+red     = "#C4746E"
+green   = "#8A9A7B"
+yellow  = "#C4B28A"
+blue    = "#8BA4B0"
+magenta = "#A292A3"
+cyan    = "#8EA4A2"
+white   = "#A4A7A4"
+
+[colors.bright]
+black   = "#5C6066"
+red     = "#E46876"
+green   = "#87A987"
+yellow  = "#E6C384"
+blue    = "#7FB4CA"
+magenta = "#938AA9"
+cyan    = "#7AA89F"
+white   = "#C5C9C7"
+
+[[colors.indexed_colors]]
+index = 16
+color = "#B6927B"
+
+[[colors.indexed_colors]]
+index = 17
+color = "#B98D7B"
+
+# ─── Keybindings ────────────────────────────────────────
+# Toggle del mismo modo en que arranca (SimpleFullscreen): cubre la pantalla
+# sin entrar al Space dedicado de macOS. ToggleFullscreen (native) no andaba
+# bien acá porque mezclaba los dos modos y dejaba la ventana inconsistente.
+[[keyboard.bindings]]
+key = "F"
+mods = "Command|Control"
+action = "ToggleSimpleFullscreen"
+
+# Tamaño de fuente — útil para pairing, demos, o ajuste por monitor.
+[[keyboard.bindings]]
+key = "Equals"
+mods = "Command"
+action = "IncreaseFontSize"
+
+[[keyboard.bindings]]
+key = "Minus"
+mods = "Command"
+action = "DecreaseFontSize"
+
+[[keyboard.bindings]]
+key = "Key0"
+mods = "Command"
+action = "ResetFontSize"
+
+# Nueva ventana — AeroSpace la tilea al lado automáticamente.
+[[keyboard.bindings]]
+key = "N"
+mods = "Command"
+action = "SpawnNewInstance"
+
+# Búsqueda en scrollback.
+[[keyboard.bindings]]
+key = "F"
+mods = "Command"
+action = "SearchForward"
+
+# Vi mode para navegar el scrollback con hjkl, copiar con y, buscar con /.
+[[keyboard.bindings]]
+key = "Escape"
+mods = "Shift"
+action = "ToggleViMode"

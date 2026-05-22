@@ -71,6 +71,11 @@ end
 
 # Interactive-only setup.
 if status is-interactive
+    # Hybrid key bindings: defaults emacs (Ctrl+A/E/W/U/K/R, Alt+B/F) +
+    # vi mode disponible apretando Esc. Sin perder muscle memory, ganás
+    # navegación vi (h/j/k/l, w/b, /, ?, v, y) sobre comandos largos.
+    fish_hybrid_key_bindings
+
     # Let Ctrl-S/Ctrl-Q reach the shell instead of being eaten by the terminal.
     stty -ixon 2>/dev/null
 

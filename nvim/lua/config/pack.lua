@@ -9,7 +9,6 @@ vim.pack.add({
 
 	-- fuzzy finder (tracks main)
 	"https://github.com/ibhagwan/fzf-lua",
-	"https://github.com/nvim-tree/nvim-web-devicons",
 
 	-- lsp & mason
 	{ src = "https://github.com/williamboman/mason.nvim", version = "stable" },
@@ -133,6 +132,10 @@ end, { desc = "Close every DBUI buffer (drawer, queries, results)" })
 require("fzf-lua").register_ui_select()
 require("fzf-lua").setup({
 	"telescope",
+	defaults = {
+		file_icons = false,
+		git_icons = false,
+	},
 	keymap = {
 		fzf = {
 			["ctrl-j"] = "down",
