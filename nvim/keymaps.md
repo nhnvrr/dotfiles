@@ -23,11 +23,11 @@
 
 ## LSP (custom)
 
-| Keymap       | Mode   | Action                  |
-| ------------ | ------ | ----------------------- |
-| `gd`         | Normal | Definitions (fzf-lua)   |
-| `GD`         | Normal | Definition in new tab   |
-| `<leader>rs` | Normal | Restart LSP             |
+| Keymap       | Mode   | Action                |
+| ------------ | ------ | --------------------- |
+| `gd`         | Normal | Definitions (fzf-lua) |
+| `GD`         | Normal | Definition in new tab |
+| `<leader>rs` | Normal | Restart LSP           |
 
 ## LSP (Neovim 0.12 defaults)
 
@@ -50,7 +50,7 @@
 | `[d`        | Normal | Previous diagnostic            |
 | `]d`        | Normal | Next diagnostic                |
 | `gl`        | Normal | Diagnostic float               |
-| `<leader>D` | Normal | Buffer diagnostics (fzf-lua)   |
+| `<leader>D` | Normal | Buffer diagnostics (fzf-lua) |
 
 ## Completion (native 0.12)
 

@@ -7,7 +7,7 @@ vim.pack.add({
 	-- treesitter (parser installation only; main branch is the new architecture, keep on master)
 	{ src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "master" },
 
-	-- fuzzy finder (tracks main)
+	-- fuzzy finder: fzf-lua (usa binario fzf nativo, sin plenary, sin build steps)
 	"https://github.com/ibhagwan/fzf-lua",
 
 	-- lsp & mason
@@ -33,11 +33,6 @@ vim.pack.add({
 	-- tmux
 	{ src = "https://github.com/christoomey/vim-tmux-navigator", version = "v1.0" },
 
-	-- database
-	"https://github.com/tpope/vim-dadbod",
-	"https://github.com/kristijanhusak/vim-dadbod-ui",
-	"https://github.com/kristijanhusak/vim-dadbod-completion",
-
 	-- dap
 	"https://github.com/mfussenegger/nvim-dap",
 	"https://github.com/rcarriga/nvim-dap-ui",
@@ -47,8 +42,8 @@ vim.pack.add({
 })
 
 -- Theme
-require("kanso").setup({ transparent = true })
-vim.cmd.colorscheme("kanso-mist")
+require("kanso").setup({ minimal = true })
+vim.cmd.colorscheme("kanso-zen")
 vim.api.nvim_set_hl(0, "WinSeparator", { fg = "#8a9a7b" })
 
 -- Plugin setup calls (simple opts-only plugins)
@@ -105,44 +100,27 @@ require("gitsigns").setup({
 
 require("trouble").setup({ focus = true })
 
--- vim-dadbod-ui
-vim.g.db_ui_use_nerd_fonts = 1
-vim.g.db_ui_show_help = 0
-vim.g.db_ui_win_position = "left"
-vim.g.db_ui_winwidth = 40
-vim.g.db_ui_execute_on_save = 0  -- :w should only save, not run the query
-
--- Close every DBUI-related buffer at once (drawer + query buffers + result panes).
-vim.api.nvim_create_user_command("DBCloseAll", function()
-  local closed = 0
-  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-    if vim.api.nvim_buf_is_valid(buf) then
-      local ft = vim.bo[buf].filetype
-      local has_dbui_marker = pcall(vim.api.nvim_buf_get_var, buf, "dbui_db_key_name")
-      if ft == "dbui" or ft == "dbout" or has_dbui_marker then
-        vim.api.nvim_buf_delete(buf, { force = true })
-        closed = closed + 1
-      end
-    end
-  end
-  vim.notify(("Closed %d DBUI buffer(s)"):format(closed))
-end, { desc = "Close every DBUI buffer (drawer, queries, results)" })
-
--- fzf-lua (telescope profile = horizontal preview, prompt at bottom, icons)
-require("fzf-lua").register_ui_select()
-require("fzf-lua").setup({
-	"telescope",
-	defaults = {
-		file_icons = false,
-		git_icons = false,
+-- fzf-lua: usa fzf nativo, sin plenary, sin build steps.
+-- register_ui_select enruta vim.ui.select (code actions, etc.) por fzf.
+local fzf = require("fzf-lua")
+fzf.setup({
+	"default",
+	winopts = { height = 0.85, width = 0.85, preview = { layout = "flex" } },
+	files = {
+		fd_opts = "--type f --hidden --follow --exclude .git",
+	},
+	grep = {
+		-- ripgrep con exclusiones a nivel de la herramienta (no post-filtro en Lua)
+		rg_opts = "--column --line-number --no-heading --color=always --smart-case --hidden "
+			.. "--glob=!.git/ --glob=!node_modules/ --glob=!dist/ --glob=!.DS_Store",
 	},
 	keymap = {
+		-- ctrl-j/k para navegar, ctrl-q manda la selección al quickfix list.
 		fzf = {
 			["ctrl-j"] = "down",
 			["ctrl-k"] = "up",
 			["ctrl-q"] = "select-all+accept",
 		},
 	},
-	files = { fd_opts = "--type f --hidden --exclude .git --exclude node_modules --exclude .DS_Store" },
-	grep = { rg_opts = "--hidden --glob '!.git/' --glob '!node_modules/' --glob '!.DS_Store' --column --line-number --no-heading --color=always --smart-case" },
 })
+fzf.register_ui_select()

@@ -9,27 +9,31 @@ size = 13.0
 builtin_box_drawing = true
 
 [font.normal]
-family = "Monaspace Neon"
+family = "JetBrainsMono Nerd Font"
 style = "Regular"
 
 [font.bold]
-family = "Monaspace Neon"
+family = "JetBrainsMono Nerd Font"
 style = "Bold"
 
 [font.italic]
-family = "Monaspace Neon"
+family = "JetBrainsMono Nerd Font"
 style = "Italic"
 
 # ─── Window ─────────────────────────────────────────────
 [window]
 startup_mode = "SimpleFullscreen"
-decorations = "None"
+# Full = title bar opaca CON semáforos. "Transparent" deja el contenido
+# dibujarse por debajo de la barra y los semáforos pisan la primera línea;
+# "Full" empuja el contenido debajo de un header sólido, sin solapamiento.
+# decorations_theme_variant = "Dark" lo mantiene oscuro, sin barra de Aqua.
+decorations = "Full"
 # Match con paleta oscura — evita el title bar claro de Aqua sobre Kanso.
 decorations_theme_variant = "Dark"
-opacity = 0.89
+opacity = 0.93
 # Habilita el blur del compositor; sin esto, opacity baja se ve "sucia".
 blur = true
-padding = { x = 4, y = 4 }
+padding = { x = 0, y = 0 }
 dynamic_padding = true
 option_as_alt = "Both"
 # Snap a grilla de celdas al redimensionar — sin medio-caracter de borde.
@@ -44,8 +48,7 @@ thickness = 0.20
 
 [cursor.style]
 shape = "Beam"
-# Off: menos parpadeo periférico = menos fatiga en sesiones largas.
-blinking = "Off"
+blinking = "On"
 
 # ─── Mouse ──────────────────────────────────────────────
 [mouse]
@@ -76,33 +79,31 @@ animation = "EaseOutExpo"
 duration = 100
 color = "#FFA066"
 
-# ─── Colors: Kanso Mist ─────────────────────────────────
+# ─── Colors: Kanso Zen ──────────────────────────────────
 [colors.primary]
-background = "#22262D"
+background = "#090E13"
 foreground = "#C5C9C7"
 
 [colors.cursor]
-text   = "#22262D"
+text   = "#090E13"
 cursor = "#FFA066"
 
-# Naranja del tema (mismo que mode-style de tmux): contraste alto sobre el
-# fondo #22262D. El #43464E anterior era casi invisible — gris sobre gris.
 [colors.selection]
-text       = "#22262D"
-background = "#FFA066"
+text       = "#C5C9C7"
+background = "#393B44"
 
 [colors.normal]
-black   = "#22262D"
+black   = "#090E13"
 red     = "#C4746E"
 green   = "#8A9A7B"
 yellow  = "#C4B28A"
 blue    = "#8BA4B0"
 magenta = "#A292A3"
 cyan    = "#8EA4A2"
-white   = "#A4A7A4"
+white   = "#C8C093"
 
 [colors.bright]
-black   = "#5C6066"
+black   = "#32343C"
 red     = "#E46876"
 green   = "#87A987"
 yellow  = "#E6C384"

@@ -63,9 +63,21 @@ end
 -- separado: setFrame() a veces aplica solo posición. Partimos en setSize
 -- + setTopLeft, con tamaño primero para que la posición opere sobre las
 -- dimensiones finales.
-local function applyFrame(win, rect)
+-- Gather aplica setSize a medias en una sola pasada — la ventana queda
+-- a mitad de camino y hay que reintentar. Aplicamos el frame, verificamos
+-- contra el objetivo y, si no cuadra (tolerancia 4px), reintentamos solo
+-- hasta 6 veces. Así el atajo basta una vez sin insistir a mano.
+local function applyFrame(win, rect, attempt)
+  attempt = attempt or 1
   win:setSize(hs.geometry.size(rect.w, rect.h))
   win:setTopLeft(hs.geometry.point(rect.x, rect.y))
+  if attempt >= 6 then return end
+  hs.timer.doAfter(0.12, function()
+    local fr = win:frame()
+    local ok = math.abs(fr.w - rect.w) < 4 and math.abs(fr.h - rect.h) < 4
+           and math.abs(fr.x - rect.x) < 4 and math.abs(fr.y - rect.y) < 4
+    if not ok then applyFrame(win, rect, attempt + 1) end
+  end)
 end
 
 -- macOS ignora setSize si la ventana está en native-fullscreen o "zoomed"
@@ -91,8 +103,21 @@ local function placeApp(bundleID, xR, yR, wR, hR)
   local rect = frameFor(xR, yR, wR, hR)
   local app = hs.application.get(bundleID)
   if app and app:mainWindow() then
-    placeWindow(app:mainWindow(), rect)
-    app:activate()
+    -- Una app escondida ignora setSize/setTopLeft: hay que mostrarla
+    -- primero y darle al WindowServer un respiro para traer la ventana
+    -- de vuelta antes de re-posicionarla. Sin esto, venir de un layout
+    -- que escondió esta app obliga a pulsar el atajo dos veces.
+    if app:isHidden() then
+      app:unhide()
+      hs.timer.doAfter(0.15, function()
+        local win = app:mainWindow()
+        if win then placeWindow(win, rect) end
+        app:activate()
+      end)
+    else
+      placeWindow(app:mainWindow(), rect)
+      app:activate()
+    end
     return
   end
   pendingPlacements[bundleID] = rect
@@ -187,9 +212,9 @@ hs.hotkey.bind({"cmd", "alt"}, "0", function()
   hs.application.launchOrFocusByBundleID(APPS.alacritty)
 end)
 hs.hotkey.bind({"cmd", "alt"}, "-", function()
-  hideAllExcept({APPS.alacritty, APPS.claude})
-  placeApp(APPS.claude,    4/6, 0, 2/6, 1)
-  placeApp(APPS.alacritty, 0,   0, 4/6, 1)
+  hideAllExcept({APPS.vscode, APPS.claude})
+  placeApp(APPS.claude, 7/11, 0, 4/11, 1)
+  placeApp(APPS.vscode, 0,    0, 7/11, 1)
 end)
 hs.hotkey.bind({"cmd", "alt"}, "9", function()
   hideAllExcept({APPS.tableplus, APPS.chrome})
