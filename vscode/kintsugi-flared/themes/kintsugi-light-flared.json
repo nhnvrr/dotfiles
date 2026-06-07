@@ -362,7 +362,7 @@
         "keyword.other.unit",
         "keyword.other.use-as"
       ],
-      "settings": { "foreground": "#b84020", "fontStyle": "bold" }
+      "settings": { "foreground": "#b84020" }
     },
     {
       "name": "Storage & Bolded Items",
@@ -374,7 +374,7 @@
         "variable.language.self",
         "meta.qualified_type.cpp entity.name.type.cpp"
       ],
-      "settings": { "foreground": "#9a7820", "fontStyle": "bold" }
+      "settings": { "foreground": "#9a7820" }
     },
     {
       "name": "Language-Specific Constructs",
@@ -491,12 +491,12 @@
     {
       "name": "JSX/TSX Tags",
       "scope": ["entity.name.tag.tsx", "entity.name.tag.jsx"],
-      "settings": { "foreground": "#9a7820", "fontStyle": "bold" }
+      "settings": { "foreground": "#9a7820" }
     },
     {
       "name": "Invalid",
       "scope": ["invalid", "invalid.deprecated"],
-      "settings": { "foreground": "#8a5050", "fontStyle": "italic bold" }
+      "settings": { "foreground": "#8a5050", "fontStyle": "italic" }
     },
     {
       "name": "Diff: Header",
@@ -530,7 +530,7 @@
     {
       "name": "Markdown: Titles & Bold Text",
       "scope": ["markup.heading", "entity.name.section", "markup.bold"],
-      "settings": { "foreground": "#9a7820", "fontStyle": "bold" }
+      "settings": { "foreground": "#9a7820" }
     },
     {
       "name": "Markdown: Raw Code",
