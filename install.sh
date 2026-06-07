@@ -82,13 +82,14 @@ else
 fi
 
 echo "Linking config files..."
-link_file "${CONFIG_DIR}/fish/config.fish" "${HOME}/.config/fish/config.fish"
+link_file "${CONFIG_DIR}/zsh/zshrc" "${HOME}/.zshrc"
 link_file "${CONFIG_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"
 link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.tmux.conf"
 link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
 link_file "${CONFIG_DIR}/alacritty/alacritty.toml" "${HOME}/.config/alacritty/alacritty.toml"
 link_file "${CONFIG_DIR}/nvim/init.lua"   "${HOME}/.config/nvim/init.lua"
 link_file "${CONFIG_DIR}/nvim/lua"        "${HOME}/.config/nvim/lua"
+link_file "${CONFIG_DIR}/nvim/colors"     "${HOME}/.config/nvim/colors"
 link_file "${CONFIG_DIR}/nvim/keymaps.md" "${HOME}/.config/nvim/keymaps.md"
 link_file "${CONFIG_DIR}/hammerspoon/init.lua" "${HOME}/.hammerspoon/init.lua"
 if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
@@ -102,14 +103,22 @@ if [[ "${SKIP_BREW}" == false ]] && command -v mise >/dev/null 2>&1; then
   mise exec -- corepack enable pnpm
 fi
 
-FISH_BIN="$(command -v fish || true)"
-if [[ -n "${FISH_BIN}" && "${SHELL:-}" != "${FISH_BIN}" ]]; then
-  if ! grep -qx "${FISH_BIN}" /etc/shells; then
-    echo "Adding ${FISH_BIN} to /etc/shells (requires sudo)..."
-    echo "${FISH_BIN}" | sudo tee -a /etc/shells >/dev/null
-  fi
-  echo "Changing default shell to fish..."
-  chsh -s "${FISH_BIN}"
+# Ioskeley Term Nerd Font — terminal-optimized monospace (sin ligaturas + íconos
+# Nerd Font forzados a 1 celda). No hay cask oficial; bajamos del release de GitHub.
+# Idempotente: si ya están las TTFs en ~/Library/Fonts, no descarga de nuevo.
+if ! ls "${HOME}/Library/Fonts/"IoskeleyMonoTermNerdFont*.ttf >/dev/null 2>&1; then
+  echo "Installing Ioskeley Term Nerd Font..."
+  IOSKELEY_TMP="$(mktemp -d)"
+  curl -sSL -o "${IOSKELEY_TMP}/ioskeley.zip" \
+    "https://github.com/ahatem/IoskeleyMono/releases/download/v2.0.0/IoskeleyMono-Term-NerdFont.zip"
+  unzip -q -o "${IOSKELEY_TMP}/ioskeley.zip" -d "${IOSKELEY_TMP}/extract"
+  find "${IOSKELEY_TMP}/extract" -name "*.ttf" -exec cp {} "${HOME}/Library/Fonts/" \;
+  rm -rf "${IOSKELEY_TMP}"
+fi
+
+if [[ "${SHELL:-}" != "/bin/zsh" ]]; then
+  echo "Changing default shell to zsh..."
+  chsh -s /bin/zsh
 fi
 
 echo "macOS standalone setup complete. 🧉"

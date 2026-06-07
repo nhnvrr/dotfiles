@@ -32,7 +32,7 @@ style = "green"
 format = "[$symbol$branch]($style) "
 
 [git_state]
-style = "blue"
+style = "purple"
 format = "[$state( $progress_current/$progress_total)]($style) "
 
 [git_status]
@@ -65,7 +65,7 @@ vimcmd_symbol = "[❮](bold blue)"
 
 [cmd_duration]
 min_time = 2000
-style = "blue"
+style = "cyan"
 format = "[⏱ $duration]($style) "
 
 [aws]

@@ -1,0 +1,146 @@
+# ─── Locale & editor ────────────────────────────────────
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+export EDITOR=nvim
+export VISUAL=nvim
+
+# ─── PATH (dedup automático con typeset -U) ─────────────
+typeset -U path PATH
+path=(
+  /opt/homebrew/bin
+  /opt/homebrew/sbin
+  /opt/homebrew/opt/libpq/bin
+  /usr/local/bin
+  $HOME/.local/bin
+  $path
+)
+
+# ─── Go workspace ───────────────────────────────────────
+export GOPATH=$HOME/Develop/go
+export GOPRIVATE=github.com/nhnvrr
+path=($GOPATH/bin $path)
+
+# ─── History ────────────────────────────────────────────
+HISTFILE=$HOME/.zsh_history
+HISTSIZE=100000
+SAVEHIST=100000
+setopt SHARE_HISTORY HIST_IGNORE_DUPS HIST_IGNORE_SPACE HIST_REDUCE_BLANKS INC_APPEND_HISTORY
+setopt INTERACTIVE_COMMENTS AUTO_CD
+
+# ─── Aliases ────────────────────────────────────────────
+alias ll='ls -l'
+alias l='ll'
+alias la='ls -la'
+alias cl='clear'
+alias code='code --new-window'
+
+# Git aliases (zsh no tiene abbreviations como fish — usamos alias).
+alias gst='git status -sb'
+alias gc='git commit -m'
+alias gp='git push origin HEAD'
+alias gco='git checkout'
+alias ga='git add'
+
+# tmux helper: open or create a named session (switch if already inside tmux).
+__tx() {
+  local name=$1 dir
+  case $name in
+    dev)   dir=$HOME/develop ;;
+    vesto) dir=$HOME/vesto ;;
+    spexs) dir=$HOME/spexs/spexs-ai ;;
+    *)     echo "__tx: unknown session '$name'" >&2; return 1 ;;
+  esac
+
+  tmux has-session -t=$name 2>/dev/null || tmux new-session -d -s $name -c $dir
+
+  if [[ -z "$TMUX" ]]; then
+    tmux attach-session -t $name
+  else
+    tmux switch-client -t $name
+  fi
+}
+alias dev='__tx dev'
+alias vesto='__tx vesto'
+alias spexs='__tx spexs'
+
+# ─── mise (tool/runtime version manager) ────────────────
+if command -v mise >/dev/null 2>&1; then
+  eval "$(mise activate zsh)"
+fi
+
+# ─── Interactive-only setup ─────────────────────────────
+if [[ $- == *i* ]]; then
+  # Let Ctrl-S/Ctrl-Q reach the shell instead of being eaten by the terminal.
+  stty -ixon 2>/dev/null
+
+  # Default emacs keybindings (Ctrl+A/E/W/U/K/R, Alt+B/F).
+  bindkey -e
+
+  # ─── Completion system (debe ir antes de cualquier complete/compdef) ──
+  autoload -Uz compinit && compinit
+  zstyle ':completion:*' menu select
+  zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+
+  # AWS CLI completion (necesita bashcompinit que necesita compinit).
+  if command -v aws_completer >/dev/null 2>&1; then
+    autoload -Uz bashcompinit && bashcompinit
+    complete -C aws_completer aws
+  fi
+
+  # Ctrl-P/Ctrl-N: prefix history search (escribís "git ", Ctrl-P trae solo
+  # comandos que empiezan con "git "). Muscle memory de toda la vida.
+  autoload -Uz history-search-end
+  zle -N history-beginning-search-backward-end history-search-end
+  zle -N history-beginning-search-forward-end history-search-end
+  bindkey '^P' history-beginning-search-backward-end
+  bindkey '^N' history-beginning-search-forward-end
+
+  # Ctrl-O: edit current command line in $EDITOR (nvim).
+  autoload -Uz edit-command-line
+  zle -N edit-command-line
+  bindkey '^O' edit-command-line
+
+  # ─── Starship prompt ──────────────────────────────────
+  if command -v starship >/dev/null 2>&1; then
+    eval "$(starship init zsh)"
+  fi
+
+  # ─── fzf: Ctrl-R history, Ctrl-T files, Alt-C dirs ────
+  if command -v fzf >/dev/null 2>&1; then
+    # fd respeta .gitignore, ignora hidden por default, archi-más-rápido que find.
+    export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+    export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+    export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
+
+    # Layout: pane abajo, reversa (input arriba), 40% height, borde sutil.
+    # --bind: Ctrl-/ togglea preview, Ctrl-y copia la selección al clipboard.
+    export FZF_DEFAULT_OPTS='
+      --height 40% --layout=reverse --border=rounded
+      --bind="ctrl-/:toggle-preview,ctrl-y:execute-silent(echo {} | pbcopy)+abort"
+      --color=bg+:#2a313a,fg+:#dddddd,hl:#d4a943,hl+:#ebcb8b,info:#6ac6f2,prompt:#a3be8c,pointer:#b38f8f,marker:#d4a943,border:#444444,header:#6ac6f2'
+
+    # Preview con bat (que ya tenés) para Ctrl-T y completion de archivos.
+    export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always --line-range :200 {}'"
+    # Preview con tree para Alt-C (cd a subdir).
+    export FZF_ALT_C_OPTS="--preview 'ls -la {} | head -100'"
+    # Ctrl-R: ver el comando completo cuando es multilínea.
+    export FZF_CTRL_R_OPTS='--preview "echo {}" --preview-window=down:3:wrap'
+
+    source <(fzf --zsh)
+  fi
+
+  # ─── Plugins (order matters: syntax-highlighting LAST) ─
+  # zsh-autosuggestions: además del history, mira el sistema de completion
+  # (ej. branches de git que nunca tipeaste todavía).
+  ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+  # No correr en buffers gigantes (paste de un blob, etc.).
+  ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
+  [[ -f /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]] && \
+    source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+
+  # zsh-syntax-highlighting: main (verde/rojo en comandos) + brackets (match
+  # de paréntesis/llaves balanceadas en vivo).
+  ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
+  [[ -f /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] && \
+    source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+fi

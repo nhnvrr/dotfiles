@@ -1,23 +1,24 @@
 # ─── General ────────────────────────────────────────────
 [general]
 live_config_reload = true
+import = ["~/Develop/dotfiles/alacritty/themes/kintsugi-flared.toml"]
 
 # ─── Font ───────────────────────────────────────────────
 [font]
-size = 13.0
+size = 16.0
 # Box-drawing built-in: renderiza ─ │ ┌ ┐ sin gaps de hinting en tmux/htop.
 builtin_box_drawing = true
 
 [font.normal]
-family = "JetBrainsMono Nerd Font"
+family = "IoskeleyMonoTerm Nerd Font"
 style = "Regular"
 
 [font.bold]
-family = "JetBrainsMono Nerd Font"
+family = "IoskeleyMonoTerm Nerd Font"
 style = "Bold"
 
 [font.italic]
-family = "JetBrainsMono Nerd Font"
+family = "IoskeleyMonoTerm Nerd Font"
 style = "Italic"
 
 # ─── Window ─────────────────────────────────────────────
@@ -56,7 +57,7 @@ hide_when_typing = true
 
 # ─── Shell ──────────────────────────────────────────────
 [terminal.shell]
-program = "/opt/homebrew/bin/fish"
+program = "/bin/zsh"
 args = ["-l"]
 
 # ─── Scrollback ─────────────────────────────────────────
@@ -77,48 +78,7 @@ semantic_escape_chars = ",│`|:\"' ()[]{}<>\t/\\;="
 [bell]
 animation = "EaseOutExpo"
 duration = 100
-color = "#FFA066"
-
-# ─── Colors: Kanso Zen ──────────────────────────────────
-[colors.primary]
-background = "#090E13"
-foreground = "#C5C9C7"
-
-[colors.cursor]
-text   = "#090E13"
-cursor = "#FFA066"
-
-[colors.selection]
-text       = "#C5C9C7"
-background = "#393B44"
-
-[colors.normal]
-black   = "#090E13"
-red     = "#C4746E"
-green   = "#8A9A7B"
-yellow  = "#C4B28A"
-blue    = "#8BA4B0"
-magenta = "#A292A3"
-cyan    = "#8EA4A2"
-white   = "#C8C093"
-
-[colors.bright]
-black   = "#32343C"
-red     = "#E46876"
-green   = "#87A987"
-yellow  = "#E6C384"
-blue    = "#7FB4CA"
-magenta = "#938AA9"
-cyan    = "#7AA89F"
-white   = "#C5C9C7"
-
-[[colors.indexed_colors]]
-index = 16
-color = "#B6927B"
-
-[[colors.indexed_colors]]
-index = 17
-color = "#B98D7B"
+color = "#dbad49"
 
 # ─── Keybindings ────────────────────────────────────────
 # Toggle del mismo modo en que arranca (SimpleFullscreen): cubre la pantalla

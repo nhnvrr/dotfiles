@@ -1,9 +1,6 @@
 -- Plugins pinned to a stable branch or semver tag where available.
 -- Plain strings track the default branch (HEAD).
 vim.pack.add({
-	-- colorscheme (no tags, tracks main)
-	"https://github.com/webhooked/kanso.nvim",
-
 	-- treesitter (parser installation only; main branch is the new architecture, keep on master)
 	{ src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "master" },
 
@@ -42,9 +39,7 @@ vim.pack.add({
 })
 
 -- Theme
-require("kanso").setup({ minimal = true })
-vim.cmd.colorscheme("kanso-zen")
-vim.api.nvim_set_hl(0, "WinSeparator", { fg = "#8a9a7b" })
+vim.cmd.colorscheme("kintsugi-flared")
 
 -- Plugin setup calls (simple opts-only plugins)
 require("mason").setup({
