@@ -46,8 +46,8 @@ __tx() {
   local name=$1 dir
   case $name in
     dev)   dir=$HOME/develop ;;
-    vesto) dir=$HOME/vesto ;;
-    spexs) dir=$HOME/spexs/spexs-ai ;;
+    work)  dir=$HOME/work ;;
+    side)  dir=$HOME/side ;;
     *)     echo "__tx: unknown session '$name'" >&2; return 1 ;;
   esac
 
@@ -60,8 +60,8 @@ __tx() {
   fi
 }
 alias dev='__tx dev'
-alias vesto='__tx vesto'
-alias spexs='__tx spexs'
+alias work='__tx work'
+alias side='__tx side'
 
 # ─── mise (tool/runtime version manager) ────────────────
 if command -v mise >/dev/null 2>&1; then
