@@ -70,7 +70,7 @@ format = "[⏱ $duration]($style) "
 
 [aws]
 symbol = "aws:"
-style = "bold yellow"
+style = "italic yellow"
 format = "[($profile)(\\($region\\)) $symbol]($style) "
 
 [docker_context]

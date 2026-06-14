@@ -2,55 +2,74 @@
 
 macOS dotfiles and bootstrap script for terminal, editor, and shell setup.
 
-## What `install.sh` does
+## Prerequisites
 
-Running [`install.sh`](./install.sh) on macOS will:
-
-- install Homebrew if it is missing
-- run `brew update`
-- install everything declared in [`Brewfile`](./Brewfile) via `brew bundle`
-- install globally configured `mise` tools (pinned in [`mise/config.toml`](./mise/config.toml))
-- configure global Git settings
-- prepare the Go workspace
-- link config files into `$HOME` (Neovim config included)
-- switch the default shell to `fish` if needed (adds it to `/etc/shells` first)
-
-The script is intended to be rerunnable. `brew bundle` and `mise install` are idempotent.
-
-## Commands
-
-Run from the repository root:
+You need Apple's command-line developer tools (provides `git`, `make`, `clang`, etc.) before running `install.sh`:
 
 ```bash
+xcode-select --install
+```
+
+That's the only thing the script does **not** do for you.
+
+## Quick start
+
+```bash
+git clone git@github.com:nhnvrr/dotfiles.git ~/Develop/dotfiles
+cd ~/Develop/dotfiles
 ./install.sh
 ```
 
-Skip Homebrew package and app installation and only apply config files:
+The script is idempotent — re-run it anytime to bring a machine back in sync. Run with `--skipBrew` to only re-link config files (skip Homebrew + tool installation):
 
 ```bash
 ./install.sh --skipBrew
 ```
 
-If the script is not executable in a fresh checkout:
+## What `install.sh` does
 
-```bash
-bash ./install.sh
-```
+- Installs Homebrew (if missing) and applies [`Brewfile`](./Brewfile) via `brew bundle`
+- Installs mise-managed runtimes pinned in [`mise/config.toml`](./mise/config.toml) (Node, Bun, Go, AWS CLI, Terraform)
+- Configures global `~/.gitconfig` (identity, aliases, pull-rebase, SSH commit signing, histogram diff, zdiff3 conflict style)
+- Generates an `ed25519` SSH key if missing, registers it with the macOS Keychain via `~/.ssh/config`, and copies the pubkey to the clipboard for GitHub
+- Symlinks all config files into `$HOME` (see [Managed files](#managed-files))
+- Applies a small set of macOS defaults (fast key-repeat, no press-and-hold, Finder show extensions, Dock autohide, screenshots into `~/Pictures/Screenshots`)
+- Installs the Ioskeley Term Nerd Font from its GitHub release (no Homebrew cask available)
+- Switches the login shell to `/bin/zsh` if needed (uses `dscl` to read the real login shell, not `$SHELL`)
+
+The `link_file` helper backs up any pre-existing regular file at the destination to `<dst>.bak.<timestamp>` before replacing it with a symlink — your hand-edited configs won't disappear silently.
+
+## First run on a fresh Mac
+
+After `install.sh` exits cleanly:
+
+1. **Paste the SSH pubkey on GitHub** — it's already on your clipboard. Add it at <https://github.com/settings/ssh/new> as both an authentication key AND a signing key (so your signed commits show up as Verified).
+2. **Authenticate the GitHub CLI:** `gh auth login` (script reminds you if not authenticated).
+3. **Grant Accessibility permission to Hammerspoon** on first launch (System Settings → Privacy & Security → Accessibility). Required for window management hotkeys.
+4. **Restart your terminal** so the new login shell, fonts, and macOS defaults all take effect.
 
 ## Tooling
 
-This repo configures:
+| Layer | Tool | Config file |
+|---|---|---|
+| Shell | zsh | [`zsh/zshrc`](./zsh/zshrc) |
+| Prompt | starship | [`starship/starship.toml`](./starship/starship.toml) |
+| Terminal | Alacritty | [`alacritty/alacritty.toml`](./alacritty/alacritty.toml) |
+| Multiplexer | tmux | [`tmux/tmux.conf`](./tmux/tmux.conf) |
+| Editor | Neovim (LSP, treesitter, conform, gitsigns, fzf-lua, mason) | [`nvim/`](./nvim/) |
+| Window mgmt | Hammerspoon | [`hammerspoon/init.lua`](./hammerspoon/init.lua) |
+| Runtime mgr | mise | [`mise/config.toml`](./mise/config.toml) |
+| Font | IoskeleyMonoTerm Nerd Font | installed from GitHub release |
+| Theme | Kintsugi Flared (cohesive across all surfaces) | [`alacritty/themes/`](./alacritty/themes/), [`nvim/colors/`](./nvim/colors/), [`vscode/kintsugi-flared/`](./vscode/kintsugi-flared/) |
 
-- `fish` as the default shell, with aliases, git abbreviations, `mise`, and Go workspace setup
-- `starship` as the shell prompt
-- `tmux` with vi-style navigation and clipboard integration
-- `neovim` with LSP, Treesitter, fzf-lua, formatting, diagnostics, and Mason-managed tools
+`zsh/zshrc` notes:
+- Defines `dev` / `work` / `side` aliases that spawn (or switch to) a named tmux session with a fixed CWD.
+- Auto-exports `AWS_PROFILE=work` when inside the `work` tmux session (inside the interactive block only — non-interactive subshells don't inherit it).
+- Wraps `claude` so that `CLAUDE_CONFIG_DIR=~/.claude-work` is used in the `work` session, letting two Claude Code subscriptions stay logged in side-by-side.
 
-### Homebrew packages
+## Homebrew packages
 
-All Homebrew formulae, casks, and fonts are declared in [`Brewfile`](./Brewfile). To inspect or update the list, edit that file directly.
-
-Useful commands:
+All formulae, casks, and fonts are declared in [`Brewfile`](./Brewfile). To inspect or update:
 
 ```bash
 brew bundle check --file=./Brewfile     # report what's missing
@@ -58,29 +77,34 @@ brew bundle --file=./Brewfile           # install missing items
 brew bundle cleanup --file=./Brewfile   # uninstall what's not in the Brewfile
 ```
 
-### Mise tools
-
-Pinned in [`mise/config.toml`](./mise/config.toml): `node`, `aws-cli`, `bun`, `go`, `terraform`. `pnpm` is enabled through Node's Corepack after `mise install`.
-
 ## Managed files
 
-These files are linked into your home directory:
+These are symlinked from the repo into `$HOME`:
 
-- [`fish/config.fish`](./fish/config.fish) -> `$HOME/.config/fish/config.fish`
-- [`mise/config.toml`](./mise/config.toml) -> `$HOME/.config/mise/config.toml`
-- [`tmux/tmux.conf`](./tmux/tmux.conf) -> `$HOME/.tmux.conf`
-- [`starship/starship.toml`](./starship/starship.toml) -> `$HOME/.config/starship.toml`
-- [`ghostty/config`](./ghostty/config) -> `$HOME/.config/ghostty/config`
-- [`nvim/init.lua`](./nvim/init.lua) -> `$HOME/.config/nvim/init.lua`
-- [`nvim/lua`](./nvim/lua) -> `$HOME/.config/nvim/lua`
-- [`nvim/keymaps.md`](./nvim/keymaps.md) -> `$HOME/.config/nvim/keymaps.md`
+| Repo path | Destination |
+|---|---|
+| `zsh/zshrc` | `~/.zshrc` |
+| `tmux/tmux.conf` | `~/.tmux.conf` |
+| `starship/starship.toml` | `~/.config/starship.toml` |
+| `alacritty/alacritty.toml` | `~/.config/alacritty/alacritty.toml` |
+| `mise/config.toml` | `~/.config/mise/config.toml` |
+| `nvim/init.lua` | `~/.config/nvim/init.lua` |
+| `nvim/lua` | `~/.config/nvim/lua` |
+| `nvim/colors` | `~/.config/nvim/colors` |
+| `nvim/keymaps.md` | `~/.config/nvim/keymaps.md` |
+| `hammerspoon/init.lua` | `~/.hammerspoon/init.lua` |
+| `gh/config.yml` (if present) | `~/.config/gh/config.yml` |
 
-If present, this file is also linked:
+The Neovim config is symlinked, so edits inside `~/.config/nvim` are reflected directly in the repo.
 
-- `gh/config.yml` -> `$HOME/.config/gh/config.yml`
+## What is NOT managed
+
+- **VSCode `settings.json` / `keybindings.json`** — only the Kintsugi theme is versioned here; everything else is unmanaged (`Settings Sync` lives elsewhere).
+- **`~/.aws/config`** — keep your own AWS profiles where you want them; the repo only sets `AWS_PROFILE` based on tmux session.
+- **`~/.claude/`** (and the optional `~/.claude-work/`) — Claude Code config is user-level state, not versioned. Bootstrap a work account with `CLAUDE_CONFIG_DIR=~/.claude-work claude` then `/login`.
 
 ## Notes
 
-- The setup only supports macOS.
-- The script may prompt when changing your login shell with `chsh`.
-- The Neovim config is symlinked, so edits in `$HOME/.config/nvim` are reflected directly in this repo. `lazy.nvim`'s `lazy-lock.json` is gitignored.
+- Supports macOS only.
+- The script may prompt for your password when `chsh` runs.
+- Designed to be safe to rerun: every step either no-ops or moves existing state aside before replacing it.

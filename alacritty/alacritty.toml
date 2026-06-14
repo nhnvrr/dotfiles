@@ -19,7 +19,11 @@ style = "Bold"
 
 [font.italic]
 family = "IoskeleyMonoTerm Nerd Font"
-style = "Italic"
+style = "SemiLight Italic"
+
+[font.bold_italic]
+family = "IoskeleyMonoTerm Nerd Font"
+style = "Bold Italic"
 
 # ─── Window ─────────────────────────────────────────────
 [window]

@@ -33,7 +33,7 @@ local APPS = {
   vscode    = "com.microsoft.VSCode",
   alacritty = "org.alacritty",
   obsidian  = "md.obsidian",
-  postico   = "at.eggerapps.Postico2",
+  tableplus = "com.tinyapp.TablePlus",
   claude    = "com.anthropic.claudefordesktop",
 }
 
@@ -217,8 +217,8 @@ hs.hotkey.bind({"cmd", "alt"}, "-", function()
   placeApp(APPS.vscode, 0,    0, 7/11, 1)
 end)
 hs.hotkey.bind({"cmd", "alt"}, "9", function()
-  hideAllExcept({APPS.postico, APPS.chrome})
-  placeApp(APPS.postico, 0,   0, 0.5, 1)
+  hideAllExcept({APPS.tableplus, APPS.chrome})
+  placeApp(APPS.tableplus, 0,   0, 0.5, 1)
   placeApp(APPS.chrome,  0.5, 0, 0.5, 1)
 end)
 hs.hotkey.bind({"cmd", "alt", "ctrl"}, "R", hs.reload)

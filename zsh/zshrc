@@ -40,6 +40,27 @@ alias gc='git commit -m'
 alias gp='git push origin HEAD'
 alias gco='git checkout'
 alias ga='git add'
+alias gd='git diff'
+alias gl='git log --oneline -20'
+alias gb='git branch'
+alias gca='git commit --amend'
+alias gcan='git commit --amend --no-edit'
+
+# Quality-of-life helpers.
+mkcd() { mkdir -p "$1" && cd "$1"; }
+extract() {
+  case "$1" in
+    *.tar.bz2|*.tbz2) tar xjf "$1" ;;
+    *.tar.gz|*.tgz)   tar xzf "$1" ;;
+    *.tar.xz)         tar xJf "$1" ;;
+    *.tar)            tar xf  "$1" ;;
+    *.bz2)            bunzip2 "$1" ;;
+    *.gz)             gunzip  "$1" ;;
+    *.zip)            unzip   "$1" ;;
+    *.7z)             7z x    "$1" ;;
+    *) echo "extract: unsupported archive '$1'" >&2; return 1 ;;
+  esac
+}
 
 # tmux helper: open or create a named session (switch if already inside tmux).
 __tx() {
@@ -62,6 +83,20 @@ __tx() {
 alias dev='__tx dev'
 alias work='__tx work'
 alias side='__tx side'
+
+# Wrapper de Claude Code para alternar suscripción personal/work por sesión tmux.
+# CLAUDE_CONFIG_DIR es env var oficial (verificado en el binario): cada proceso
+# claude lee/escribe en SU dir. Cero estado global mutable, cero traps.
+# Bootstrap (1 vez): CLAUDE_CONFIG_DIR=~/.claude-work claude  → /login con la cuenta.
+claude() {
+  local session config
+  session=$(tmux display-message -p '#S' 2>/dev/null)
+  case "$session" in
+    work) config="$HOME/.claude-work" ;;
+    *)    config="$HOME/.claude" ;;
+  esac
+  CLAUDE_CONFIG_DIR="$config" command claude "$@"
+}
 
 # ─── mise (tool/runtime version manager) ────────────────
 if command -v mise >/dev/null 2>&1; then
@@ -99,6 +134,17 @@ if [[ $- == *i* ]]; then
   autoload -Uz edit-command-line
   zle -N edit-command-line
   bindkey '^O' edit-command-line
+
+  # Auto-export AWS_PROFILE cuando la sesión tmux es "work".
+  # Solo interactivo: subshells y scripts no heredan el profile sin querer.
+  if [[ -n "$TMUX" ]] && [[ "$(tmux display-message -p '#S' 2>/dev/null)" == "work" ]]; then
+    export AWS_PROFILE=work
+  fi
+
+  # zoxide: `z <substring>` salta a un dir frecuente. `zi` con fzf.
+  if command -v zoxide >/dev/null 2>&1; then
+    eval "$(zoxide init zsh)"
+  fi
 
   # ─── Starship prompt ──────────────────────────────────
   if command -v starship >/dev/null 2>&1; then
