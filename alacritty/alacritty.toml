@@ -1,12 +1,11 @@
 # ─── General ────────────────────────────────────────────
 [general]
 live_config_reload = true
-import = ["~/Develop/dotfiles/alacritty/themes/kintsugi-flared.toml"]
+import = ["~/.config/alacritty/theme.toml"]
 
 # ─── Font ───────────────────────────────────────────────
 [font]
 size = 16.0
-# Box-drawing built-in: renderiza ─ │ ┌ ┐ sin gaps de hinting en tmux/htop.
 builtin_box_drawing = true
 
 [font.normal]
@@ -28,27 +27,20 @@ style = "Bold Italic"
 # ─── Window ─────────────────────────────────────────────
 [window]
 startup_mode = "SimpleFullscreen"
-# Full = title bar opaca CON semáforos. "Transparent" deja el contenido
-# dibujarse por debajo de la barra y los semáforos pisan la primera línea;
-# "Full" empuja el contenido debajo de un header sólido, sin solapamiento.
-# decorations_theme_variant = "Dark" lo mantiene oscuro, sin barra de Aqua.
-decorations = "Full"
-# Match con paleta oscura — evita el title bar claro de Aqua sobre Kanso.
-decorations_theme_variant = "Dark"
-opacity = 0.93
-# Habilita el blur del compositor; sin esto, opacity baja se ve "sucia".
+# None = sin title bar del todo (ni borde ni semáforos). "Buttonless" escondía los
+# botones, pero ToggleSimpleFullscreen (Ctrl+Cmd+F) resetea el style mask de la
+# ventana y macOS los re-agrega; con None no hay barra donde puedan reaparecer.
+# Sin barra no se arrastra con el mouse, pero usás SimpleFullscreen + AeroSpace.
+decorations = "None"
 blur = true
-padding = { x = 0, y = 0 }
+padding = { x = 2, y = 2 }
 dynamic_padding = true
 option_as_alt = "Both"
-# Snap a grilla de celdas al redimensionar — sin medio-caracter de borde.
 resize_increments = true
 
 # ─── Cursor ─────────────────────────────────────────────
 [cursor]
-# Hueco cuando la ventana pierde foco — saber al instante qué terminal está activa.
 unfocused_hollow = true
-# Beam por default (0.15) se ve fino; 0.20 mejora legibilidad sin gritar.
 thickness = 0.20
 
 [cursor.style]
@@ -67,27 +59,21 @@ args = ["-l"]
 # ─── Scrollback ─────────────────────────────────────────
 [scrolling]
 history = 100000
-# Multiplier alto = más líneas por evento. Suma cuando NO estás en tmux
-# (tmux toma control via alternate-screen). Default es 3, 5 da feel más
-# ágil con trackpad sin volverse over-scroll.
 multiplier = 5
 
 # ─── Selection ──────────────────────────────────────────
 [selection]
 save_to_clipboard = true
-# +/, \, ;, = → double-click selecciona paths completos, URLs, KEY=value.
 semantic_escape_chars = ",│`|:\"' ()[]{}<>\t/\\;="
 
 # ─── Bell: flash visual sutil en vez de audio ───────────
 [bell]
 animation = "EaseOutExpo"
 duration = 100
-color = "#dbad49"
+# Amarillo Nord (aurora) — flash cohesivo con el theme.
+color = "#ebcb8b"
 
 # ─── Keybindings ────────────────────────────────────────
-# Toggle del mismo modo en que arranca (SimpleFullscreen): cubre la pantalla
-# sin entrar al Space dedicado de macOS. ToggleFullscreen (native) no andaba
-# bien acá porque mezclaba los dos modos y dejaba la ventana inconsistente.
 [[keyboard.bindings]]
 key = "F"
 mods = "Command|Control"

@@ -33,7 +33,7 @@ local APPS = {
   vscode    = "com.microsoft.VSCode",
   alacritty = "org.alacritty",
   obsidian  = "md.obsidian",
-  tableplus = "com.tinyapp.TablePlus",
+  datagrip  = "com.jetbrains.datagrip",
   claude    = "com.anthropic.claudefordesktop",
 }
 
@@ -45,7 +45,7 @@ local APPS = {
 -- arriba, abajo y a los costados. Insettamos primero el frame de pantalla
 -- por GAP/2, después cada ventana por GAP/2 — total = GAP en cualquier
 -- frontera. Subirlo a 8-12 para un look estilo Rectangle/yabai.
-local GAP = 2
+local GAP = 8
 
 local function frameFor(xR, yR, wR, hR)
   local f = hs.screen.mainScreen():frame()
@@ -124,15 +124,31 @@ local function placeApp(bundleID, xR, yR, wR, hR)
   hs.application.launchOrFocusByBundleID(bundleID)
 end
 
--- Watcher único: cuando una app con placement pendiente reporta `launched`,
--- polleamos su ventana principal con backoff acotado. El evento `launched`
--- se dispara cuando arranca el proceso, pero la ventana puede no estar
--- lista todavía (Chrome puede tardar ~800ms en mostrarla).
+-- Apps que NO se auto-maximizan al arrancar. Agregá bundle IDs acá para
+-- excluir (utilidades con ventanas chicas, paneles flotantes, etc.).
+local AUTO_MAX_EXCLUDE = {
+  ["org.hammerspoon.Hammerspoon"] = true,
+}
+
+-- Watcher único de lanzamiento. Cuando una app reporta `launched`:
+--   • Si un layout dejó un placement pendiente, usamos ESE rect.
+--   • Si no, la maximizamos al frame completo (menos GAP) — "todas las apps
+--     arrancan a pantalla casi completa", dejando dock y menubar visibles.
+-- El evento se dispara al arrancar el proceso, pero la ventana puede no estar
+-- lista todavía (Chrome puede tardar ~800ms): polleamos con backoff acotado.
 local appWatcher = hs.application.watcher.new(function(_, eventType, appObject)
   if eventType ~= hs.application.watcher.launched then return end
   local bid = appObject:bundleID()
-  local rect = pendingPlacements[bid]
-  if not rect then return end
+  if not bid then return end
+
+  -- Sin placement de layout: maximizamos solo apps con UI real (kind 1) y que
+  -- no estén excluidas. Las del layout siguen su rect tal cual (no las filtra
+  -- el kind/exclude, para no romper layouts si kind() se reporta tarde).
+  local pending = pendingPlacements[bid]
+  if not pending then
+    if AUTO_MAX_EXCLUDE[bid] or appObject:kind() ~= 1 then return end
+  end
+  local rect = pending or frameFor(0, 0, 1, 1)
 
   local attempts = 0
   local poll
@@ -208,8 +224,13 @@ hs.hotkey.bind({"cmd", "alt"}, "2", function() layoutGatherWith(APPS.vscode) end
 hs.hotkey.bind({"cmd", "alt"}, "3", function() zoom(APPS.slack) end)
 hs.hotkey.bind({"cmd", "alt"}, "4", function() zoom(APPS.obsidian) end)
 hs.hotkey.bind({"cmd", "alt"}, "§", function() zoom(APPS.gather) end)
+-- Layout "dev": Alacritty arriba-izq, Obsidian abajo-izq, Chrome a la derecha.
+-- Columna izquierda 60% (Alacritty 60% alto / Obsidian 40%), Chrome 40% derecha.
 hs.hotkey.bind({"cmd", "alt"}, "0", function()
-  hs.application.launchOrFocusByBundleID(APPS.alacritty)
+  hideAllExcept({APPS.alacritty, APPS.obsidian, APPS.chrome})
+  placeApp(APPS.alacritty, 0,   0,   0.6, 0.6)
+  placeApp(APPS.obsidian,  0,   0.6, 0.6, 0.4)
+  placeApp(APPS.chrome,    0.6, 0,   0.4, 1)
 end)
 hs.hotkey.bind({"cmd", "alt"}, "-", function()
   hideAllExcept({APPS.vscode, APPS.claude})
@@ -217,10 +238,41 @@ hs.hotkey.bind({"cmd", "alt"}, "-", function()
   placeApp(APPS.vscode, 0,    0, 7/11, 1)
 end)
 hs.hotkey.bind({"cmd", "alt"}, "9", function()
-  hideAllExcept({APPS.tableplus, APPS.chrome})
-  placeApp(APPS.tableplus, 0,   0, 0.5, 1)
+  hideAllExcept({APPS.datagrip, APPS.chrome})
+  placeApp(APPS.datagrip, 0,   0, 0.5, 1)
   placeApp(APPS.chrome,  0.5, 0, 0.5, 1)
 end)
+-- Zoom toggle: ocupa el área disponible (sin dock/menubar, menos GAP) la
+-- ventana enfocada; si ya está maximizada, la restaura a su tamaño previo.
+local zoomPrev = {}
+hs.hotkey.bind({"ctrl", "alt"}, "F", function()
+  local win = hs.window.focusedWindow()
+  if not win then return end
+  local id = win:id()
+  local target = frameFor(0, 0, 1, 1)
+  local fr = win:frame()
+  local isMax = math.abs(fr.w - target.w) < 4 and math.abs(fr.h - target.h) < 4
+            and math.abs(fr.x - target.x) < 4 and math.abs(fr.y - target.y) < 4
+  if isMax and zoomPrev[id] then
+    applyFrame(win, zoomPrev[id])
+    zoomPrev[id] = nil
+  else
+    zoomPrev[id] = fr
+    placeWindow(win, target)
+  end
+end)
+
+-- Terminal lateral: Alacritty en el 1/5 derecho y la app principal que estés
+-- usando (VSCode, Chrome, DataGrip, Claude…) en el 4/5 restante a la izquierda.
+-- Tomamos la ventana enfocada como "principal" antes de mover el foco al terminal.
+hs.hotkey.bind({"ctrl", "alt"}, "M", function()
+  local main = hs.window.focusedWindow()
+  if main and main:application():bundleID() ~= APPS.alacritty then
+    placeWindow(main, frameFor(0, 0, 4/5, 1))
+  end
+  placeApp(APPS.alacritty, 4/5, 0, 1/5, 1)
+end)
+
 hs.hotkey.bind({"cmd", "alt", "ctrl"}, "R", hs.reload)
 
 hs.alert.show("Hammerspoon config loaded")

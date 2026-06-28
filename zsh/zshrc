@@ -46,6 +46,10 @@ alias gb='git branch'
 alias gca='git commit --amend'
 alias gcan='git commit --amend --no-edit'
 
+# TUIs: lazygit (git) y lazydocker (containers).
+alias lg='lazygit'
+alias lzd='lazydocker'
+
 # Quality-of-life helpers.
 mkcd() { mkdir -p "$1" && cd "$1"; }
 extract() {
@@ -151,8 +155,18 @@ if [[ $- == *i* ]]; then
     eval "$(starship init zsh)"
   fi
 
+  # ─── Cursor: beam parpadeante en cada prompt ──────────
+  # nvim deja el cursor en block al salir; lo restauramos antes de cada prompt.
+  autoload -Uz add-zsh-hook
+  _cursor_beam() { print -n '\e[5 q' }
+  add-zsh-hook precmd _cursor_beam
+
   # ─── fzf: Ctrl-R history, Ctrl-T files, Alt-C dirs ────
   if command -v fzf >/dev/null 2>&1; then
+    # bat: usar la paleta ANSI del terminal (Alacritty) en vez del theme propio
+    # de bat → el preview de fzf matchea el resto y sigue solo el light/dark.
+    export BAT_THEME=ansi
+
     # fd respeta .gitignore, ignora hidden por default, archi-más-rápido que find.
     export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
     export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
@@ -163,7 +177,7 @@ if [[ $- == *i* ]]; then
     export FZF_DEFAULT_OPTS='
       --height 40% --layout=reverse --border=rounded
       --bind="ctrl-/:toggle-preview,ctrl-y:execute-silent(echo {} | pbcopy)+abort"
-      --color=bg+:#2a313a,fg+:#dddddd,hl:#d4a943,hl+:#ebcb8b,info:#6ac6f2,prompt:#a3be8c,pointer:#b38f8f,marker:#d4a943,border:#444444,header:#6ac6f2'
+      --color=bg+:#434c5e,fg:#d8dee9,fg+:#eceff4,hl:#88c0d0,hl+:#8fbcbb,info:#616e88,prompt:#81a1c1,pointer:#bf616a,marker:#a3be8c,border:#4c566a,header:#81a1c1,spinner:#88c0d0'
 
     # Preview con bat (que ya tenés) para Ctrl-T y completion de archivos.
     export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always --line-range :200 {}'"
@@ -190,3 +204,8 @@ if [[ $- == *i* ]]; then
   [[ -f /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] && \
     source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 fi
+# The following lines have been added by Docker Desktop to enable Docker CLI completions.
+fpath=(/Users/nhnvrr/.docker/completions $fpath)
+autoload -Uz compinit
+compinit
+# End of Docker CLI completions

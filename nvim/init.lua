@@ -1,5 +1,4 @@
 require("config.options")
-require("config.statusline")
 require("config.pack")
 require("config.keymaps")
 require("config.diagnostics")

@@ -1,4 +1,3 @@
-# CLI tools.
 brew "bat"
 brew "fd"
 brew "fzf"
@@ -9,50 +8,40 @@ brew "zsh-syntax-highlighting"
 brew "gh"
 brew "git"
 brew "jq"
+brew "lazygit"
 brew "libpq"
 brew "mise"
 brew "neovim"
 brew "starship"
 brew "tmux"
 
-# Fonts.
-# Ioskeley NL Nerd Font (sin ligaturas + Nerd Font glyphs) — no hay cask oficial,
-# se instala desde el release de GitHub via install.sh.
-
-# Terminals and editors.
 cask "alacritty"
 cask "visual-studio-code"
 
-# AI tools.
 cask "ollama-app"
 cask "claude"
-cask "claude-code"
+cask "claude-code@latest"
 cask "chatgpt"
 
-# Browsers.
 cask "google-chrome"
 
-# Dev / infra.
+brew "container"
+brew "lazydocker"
 cask "docker-desktop"
-cask "tableplus"
-cask "nosql-workbench"
+cask "datagrip"
+cask "bruno"
 cask "aws-vpn-client"
-cask "proxyman"
 
-# Productivity.
 cask "linear"
-cask "kap"
 cask "cap"
 cask "obsidian"
 cask "notion"
 cask "hammerspoon"
 
-# Communication.
 cask "slack"
 cask "telegram"
 cask "whatsapp"
 cask "gather"
 
-# Personal.
 cask "ledger-wallet"
 cask "nordvpn"

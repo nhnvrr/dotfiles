@@ -38,8 +38,6 @@ ensure_brew() {
   fi
 }
 
-# Replace dst with a symlink to src. If dst exists as a regular file/dir,
-# backup to dst.bak.<timestamp> instead of nuking it (safer than rm -rf).
 link_file() {
   local src="$1" dst="$2"
   mkdir -p "$(dirname "${dst}")"
@@ -51,10 +49,6 @@ link_file() {
   ln -sfn "${src}" "${dst}"
 }
 
-# ────────────────────────────────────────────────────────────
-# Brew shellenv: must load BEFORE anything that uses brew-installed tools
-# (mise, font extraction tools, etc.). Independent of --skipBrew.
-# ────────────────────────────────────────────────────────────
 if [[ -n "${BREW_BIN}" ]]; then
   eval "$("${BREW_BIN}" shellenv)"
 elif [[ "${SKIP_BREW}" == false ]]; then
@@ -72,9 +66,6 @@ else
   echo "Skipping Homebrew setup (--skipBrew); only linking configuration."
 fi
 
-# ────────────────────────────────────────────────────────────
-# Git configuration — always idempotent.
-# ────────────────────────────────────────────────────────────
 echo "Configuring git..."
 export GIT_CONFIG_GLOBAL="${HOME}/.gitconfig"
 touch "${GIT_CONFIG_GLOBAL}"
@@ -97,11 +88,6 @@ git config --global alias.cleanup "!git branch --merged | grep -v '\\*\\|master\
 git config --global alias.prettylog "log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(r) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative"
 git config --global alias.root "rev-parse --show-toplevel"
 
-# ────────────────────────────────────────────────────────────
-# SSH key + GitHub bootstrap.
-# Generates an ed25519 key if missing, registers it with the macOS Keychain,
-# and copies the pubkey to clipboard so it's one paste away from GitHub.
-# ────────────────────────────────────────────────────────────
 SSH_KEY="${HOME}/.ssh/id_ed25519"
 SSH_PUB="${SSH_KEY}.pub"
 
@@ -131,13 +117,11 @@ EOF
   fi
 fi
 
-# Git SSH commit signing (uses the SSH key above).
 git config --global gpg.format "ssh"
 git config --global user.signingkey "${SSH_PUB}"
 git config --global commit.gpgsign "true"
 git config --global tag.gpgsign "true"
 
-# GitHub CLI auth check.
 if command -v gh >/dev/null 2>&1 && ! gh auth status >/dev/null 2>&1; then
   echo "  → Run 'gh auth login' to authenticate with GitHub."
 fi
@@ -145,9 +129,6 @@ fi
 echo "Preparing Go workspace..."
 mkdir -p "${HOME}/Develop/go/bin"
 
-# ────────────────────────────────────────────────────────────
-# Symlinks.
-# ────────────────────────────────────────────────────────────
 echo "Linking config files..."
 link_file "${CONFIG_DIR}/zsh/zshrc" "${HOME}/.zshrc"
 link_file "${CONFIG_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"
@@ -156,16 +137,18 @@ link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
 link_file "${CONFIG_DIR}/alacritty/alacritty.toml" "${HOME}/.config/alacritty/alacritty.toml"
 link_file "${CONFIG_DIR}/nvim/init.lua"   "${HOME}/.config/nvim/init.lua"
 link_file "${CONFIG_DIR}/nvim/lua"        "${HOME}/.config/nvim/lua"
-link_file "${CONFIG_DIR}/nvim/colors"     "${HOME}/.config/nvim/colors"
 link_file "${CONFIG_DIR}/nvim/keymaps.md" "${HOME}/.config/nvim/keymaps.md"
 link_file "${CONFIG_DIR}/hammerspoon/init.lua" "${HOME}/.hammerspoon/init.lua"
 if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
   link_file "${CONFIG_DIR}/gh/config.yml" "${HOME}/.config/gh/config.yml"
 fi
 
-# ────────────────────────────────────────────────────────────
-# Mise-managed tool installations.
-# ────────────────────────────────────────────────────────────
+# Theme: Nord (dark-only, sin toggle). Symlink directo al repo → editar nord.toml
+# / nord.tmux se refleja solo. theme.toml lo importa alacritty.toml; theme.tmux lo
+# sourcea tmux.conf.
+link_file "${CONFIG_DIR}/alacritty/themes/nord.toml" "${HOME}/.config/alacritty/theme.toml"
+link_file "${CONFIG_DIR}/tmux/nord.tmux" "${HOME}/.config/tmux/theme.tmux"
+
 if [[ "${SKIP_BREW}" == false ]] && command -v mise >/dev/null 2>&1; then
   echo "Installing mise-managed tools..."
   mise install
@@ -173,39 +156,25 @@ if [[ "${SKIP_BREW}" == false ]] && command -v mise >/dev/null 2>&1; then
   mise exec -- corepack enable pnpm
 fi
 
-# ────────────────────────────────────────────────────────────
-# macOS defaults — productivity wins. Idempotent.
-# ────────────────────────────────────────────────────────────
 echo "Applying macOS defaults..."
-# Key repeat: faster than the slowest "vim-friendly" preset.
 defaults write NSGlobalDomain InitialKeyRepeat -int 15
 defaults write NSGlobalDomain KeyRepeat -int 2
-# Disable press-and-hold accent popup so vim's hjkl repeats normally.
 defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
-# Finder: show all extensions and hidden files.
 defaults write com.apple.finder AppleShowAllExtensions -bool true
 defaults write com.apple.finder AppleShowAllFiles -bool true
 defaults write NSGlobalDomain AppleShowAllExtensions -bool true
-# Dock: autohide, no show-delay.
 defaults write com.apple.dock autohide -bool true
+# Sin delay al revelar y animación casi instantánea — autohide usable, no molesto.
 defaults write com.apple.dock autohide-delay -float 0
-defaults write com.apple.dock autohide-time-modifier -float 0.25
+defaults write com.apple.dock autohide-time-modifier -float 0.15
 defaults write com.apple.dock show-recents -bool false
-# Screenshots into ~/Pictures/Screenshots instead of cluttering the Desktop.
-mkdir -p "${HOME}/Pictures/Screenshots"
-defaults write com.apple.screencapture location "${HOME}/Pictures/Screenshots"
+mkdir -p "${HOME}/Screenshots"
+defaults write com.apple.screencapture location "${HOME}/Screenshots"
 defaults write com.apple.screencapture type -string "png"
-# Restart affected services (silent if not running).
 killall Dock 2>/dev/null || true
 killall Finder 2>/dev/null || true
 killall SystemUIServer 2>/dev/null || true
 
-# ────────────────────────────────────────────────────────────
-# Ioskeley Term Nerd Font — terminal-optimized monospace (sin ligaturas +
-# íconos Nerd Font forzados a 1 celda). No hay cask oficial; bajamos del
-# release de GitHub. Idempotente: si ya están las TTFs en ~/Library/Fonts,
-# no descarga de nuevo. Uso curl -f para fallar fuerte en HTTP errors.
-# ────────────────────────────────────────────────────────────
 if ! ls "${HOME}/Library/Fonts/"IoskeleyMonoTermNerdFont*.ttf >/dev/null 2>&1; then
   echo "Installing Ioskeley Term Nerd Font..."
   IOSKELEY_TMP="$(mktemp -d)"
@@ -219,15 +188,10 @@ if ! ls "${HOME}/Library/Fonts/"IoskeleyMonoTermNerdFont*.ttf >/dev/null 2>&1; t
   rm -rf "${IOSKELEY_TMP}"
 fi
 
-# ────────────────────────────────────────────────────────────
-# Login shell: read from Directory Services (not $SHELL, which is the
-# CURRENT shell, not the login shell — can give the wrong answer when
-# install.sh runs from within zsh on a bash-login Mac).
-# ────────────────────────────────────────────────────────────
 LOGIN_SHELL="$(dscl . -read "/Users/${USER}" UserShell 2>/dev/null | awk '{print $2}')"
 if [[ "${LOGIN_SHELL}" != "/bin/zsh" ]]; then
   echo "Changing login shell to /bin/zsh (chsh will prompt for your password)..."
   chsh -s /bin/zsh
 fi
 
-echo "macOS standalone setup complete. 🧉"
+echo "macOS standalone setup complete. Happy Coding 🧉"

@@ -7,6 +7,18 @@ vim.pack.add({
 	-- fuzzy finder: fzf-lua (usa binario fzf nativo, sin plenary, sin build steps)
 	"https://github.com/ibhagwan/fzf-lua",
 
+	-- icons (devicons) — los consumen fzf-lua, nvim-tree y lualine
+	"https://github.com/nvim-tree/nvim-web-devicons",
+
+	-- file explorer: nvim-tree (sidebar árbol, solo depende de devicons)
+	"https://github.com/nvim-tree/nvim-tree.lua",
+
+	-- statusline
+	"https://github.com/nvim-lualine/lualine.nvim",
+
+	-- theme
+	"https://github.com/gbprod/nord.nvim",
+
 	-- lsp & mason
 	{ src = "https://github.com/williamboman/mason.nvim", version = "stable" },
 	"https://github.com/WhoIsSethDaniel/mason-tool-installer.nvim",
@@ -38,8 +50,8 @@ vim.pack.add({
 	"https://github.com/jay-babu/mason-nvim-dap.nvim",
 })
 
--- Theme
-vim.cmd.colorscheme("kintsugi-flared")
+-- Theme: Nord (dark-only)
+require("config.theme").setup()
 
 -- Plugin setup calls (simple opts-only plugins)
 require("mason").setup({
@@ -95,11 +107,69 @@ require("gitsigns").setup({
 
 require("trouble").setup({ focus = true })
 
+-- devicons: glyphs por filetype (los lee fzf-lua, nvim-tree y lualine). Necesita
+-- una Nerd Font (IoskeleyMonoTerm ya lo es). color_icons → cada icono con su color.
+require("nvim-web-devicons").setup({ color_icons = true })
+
+-- nvim-tree: sidebar árbol. Deshabilitar netrw ANTES del setup (recomendado por
+-- el plugin) para que no compita por abrir directorios.
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+require("nvim-tree").setup({
+	hijack_cursor = true, -- el cursor sigue al nombre del archivo, no a la columna 0
+	view = { width = 32, signcolumn = "yes" },
+	renderer = {
+		-- colapsa carpetas con un solo hijo (src/main/java → menos ruido).
+		group_empty = true,
+		-- sin la línea con la ruta absoluta arriba del árbol → más limpio.
+		root_folder_label = false,
+		-- líneas guía de indentación: jerarquía clara sin recargar.
+		indent_markers = { enable = true },
+		icons = {
+			git_placement = "after",
+			show = { file = true, folder = true, folder_arrow = true, git = true },
+		},
+	},
+	-- mostrar dotfiles; respetar .gitignore lo maneja git, no el filtro.
+	filters = { dotfiles = false, git_ignored = false },
+	git = { enable = true },
+	-- diagnostics LSP en el árbol, pero solo en archivos (no marcar carpetas enteras).
+	diagnostics = { enable = true, show_on_dirs = false },
+	actions = { open_file = { quit_on_open = false } },
+})
+
+-- lualine: statusline. theme "auto" toma los colores del colorscheme activo
+-- (everforest) y se refresca solo al cambiar light/dark. globalstatus = una sola
+-- barra global (reemplaza laststatus=3 del statusline manual anterior).
+require("lualine").setup({
+	options = {
+		theme = "auto",
+		globalstatus = true,
+		section_separators = "",   -- sin separadores curvos → look plano y limpio
+		component_separators = "",
+	},
+	sections = {
+		lualine_a = { "mode" },
+		lualine_b = { "branch" },
+		lualine_c = {
+			{ "filename", path = 1 }, -- ruta relativa al cwd
+			{ "diagnostics", sources = { "nvim_diagnostic" } },
+		},
+		lualine_x = { "filetype" },
+		lualine_y = { "progress" },
+		lualine_z = { "location" },
+	},
+	-- nvim-tree no necesita su propia barra; lualine la oculta ahí.
+	extensions = { "nvim-tree" },
+})
+
 -- fzf-lua: usa fzf nativo, sin plenary, sin build steps.
 -- register_ui_select enruta vim.ui.select (code actions, etc.) por fzf.
 local fzf = require("fzf-lua")
 fzf.setup({
 	"default",
+	-- iconos: file_icons (devicons por filetype) + git_icons (estado git) + color.
+	defaults = { file_icons = true, git_icons = true, color_icons = true },
 	winopts = { height = 0.85, width = 0.85, preview = { layout = "flex" } },
 	files = {
 		fd_opts = "--type f --hidden --follow --exclude .git",

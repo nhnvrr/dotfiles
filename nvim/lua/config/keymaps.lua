@@ -45,14 +45,10 @@ keymap.set("n", "<leader>fg", "<cmd>FzfLua git_files<cr>", { desc = "Git files" 
 keymap.set("n", "<leader>fc", "<cmd>FzfLua grep_cword<cr>", { desc = "Find string under cursor" })
 keymap.set("n", "<leader>fk", "<cmd>FzfLua keymaps<cr>", { desc = "Find keymaps" })
 
--- file explorer (netrw)
-keymap.set("n", "<leader>ee", function()
-  if vim.bo.filetype == "netrw" then
-    vim.cmd("Rex")
-  else
-    vim.cmd("Explore " .. vim.fn.getcwd())
-  end
-end, { desc = "Toggle file explorer at project root" })
+-- file explorer (nvim-tree)
+keymap.set("n", "<leader>ee", "<cmd>NvimTreeToggle<cr>", { desc = "Toggle file explorer" })
+keymap.set("n", "<leader>ef", "<cmd>NvimTreeFindFileToggle<cr>", { desc = "Toggle explorer on current file" })
+keymap.set("n", "<leader>ec", "<cmd>NvimTreeCollapse<cr>", { desc = "Collapse file explorer" })
 
 -- trouble
 keymap.set("n", "<leader>xw", "<cmd>Trouble diagnostics toggle<CR>", { desc = "Workspace diagnostics" })

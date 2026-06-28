@@ -78,7 +78,9 @@
 
 | Keymap       | Mode   | Action             |
 | ------------ | ------ | ------------------ |
-| `<leader>ee` | Normal | Toggle netrw explorer at project root |
+| `<leader>ee` | Normal | Toggle nvim-tree explorer |
+| `<leader>ef` | Normal | Toggle explorer focused on current file |
+| `<leader>ec` | Normal | Collapse explorer tree |
 
 ## Trouble
 

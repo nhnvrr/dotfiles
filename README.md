@@ -60,12 +60,13 @@ After `install.sh` exits cleanly:
 | Window mgmt | Hammerspoon | [`hammerspoon/init.lua`](./hammerspoon/init.lua) |
 | Runtime mgr | mise | [`mise/config.toml`](./mise/config.toml) |
 | Font | IoskeleyMonoTerm Nerd Font | installed from GitHub release |
-| Theme | Kintsugi Flared (cohesive across all surfaces) | [`alacritty/themes/`](./alacritty/themes/), [`nvim/colors/`](./nvim/colors/), [`vscode/kintsugi-flared/`](./vscode/kintsugi-flared/) |
+| Theme | Nord (dark-only) — Alacritty + nvim (`gbprod/nord.nvim`) + tmux; `light`/`dark` aplican el mismo Nord; starship/bat/fzf siguen la paleta ANSI; editores GUI: theme a nivel usuario | [`alacritty/themes/`](./alacritty/themes/) |
 
 `zsh/zshrc` notes:
 - Defines `dev` / `work` / `side` aliases that spawn (or switch to) a named tmux session with a fixed CWD.
 - Auto-exports `AWS_PROFILE=work` when inside the `work` tmux session (inside the interactive block only — non-interactive subshells don't inherit it).
 - Wraps `claude` so that `CLAUDE_CONFIG_DIR=~/.claude-work` is used in the `work` session, letting two Claude Code subscriptions stay logged in side-by-side.
+- `light` / `dark` switch the theme (GitHub Light ↔ Dark Dimmed) for Alacritty **and** nvim at once. Source of truth is `~/.config/theme-mode`; Alacritty imports `~/.config/alacritty/theme.toml` (live reload) and nvim watches the mode file (live reload too).
 
 ## Homebrew packages
 
@@ -90,7 +91,6 @@ These are symlinked from the repo into `$HOME`:
 | `mise/config.toml` | `~/.config/mise/config.toml` |
 | `nvim/init.lua` | `~/.config/nvim/init.lua` |
 | `nvim/lua` | `~/.config/nvim/lua` |
-| `nvim/colors` | `~/.config/nvim/colors` |
 | `nvim/keymaps.md` | `~/.config/nvim/keymaps.md` |
 | `hammerspoon/init.lua` | `~/.hammerspoon/init.lua` |
 | `gh/config.yml` (if present) | `~/.config/gh/config.yml` |
@@ -99,7 +99,8 @@ The Neovim config is symlinked, so edits inside `~/.config/nvim` are reflected d
 
 ## What is NOT managed
 
-- **VSCode `settings.json` / `keybindings.json`** — only the Kintsugi theme is versioned here; everything else is unmanaged (`Settings Sync` lives elsewhere).
+- **VS Code** — config (`settings.json`, keybindings, theme) es a nivel usuario, no versionada (`Settings Sync` vive en otro lado).
+- **IdeaVim (DataGrip)** — `~/.ideavimrc` es config a nivel usuario; no se versiona acá.
 - **`~/.aws/config`** — keep your own AWS profiles where you want them; the repo only sets `AWS_PROFILE` based on tmux session.
 - **`~/.claude/`** (and the optional `~/.claude-work/`) — Claude Code config is user-level state, not versioned. Bootstrap a work account with `CLAUDE_CONFIG_DIR=~/.claude-work claude` then `/login`.
 
