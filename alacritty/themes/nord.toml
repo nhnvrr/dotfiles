@@ -1,8 +1,8 @@
 # Nord — dark frío/azulado (arctic, north-bluish). Paleta oficial. Mismo palette
-# que nvim. Fondo sólido (opacity 1.0). Nord es dark-only: light y dark lo usan.
+# que nvim. Nord es dark-only: light y dark lo usan. La opacity la maneja
+# alacritty.toml (este theme solo define colores) para no pisar la transparencia.
 
 [window]
-opacity = 1.0
 decorations_theme_variant = "Dark"
 
 [colors.primary]

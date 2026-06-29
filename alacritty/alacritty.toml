@@ -32,6 +32,9 @@ startup_mode = "SimpleFullscreen"
 # ventana y macOS los re-agrega; con None no hay barra donde puedan reaparecer.
 # Sin barra no se arrastra con el mouse, pero usás SimpleFullscreen + AeroSpace.
 decorations = "None"
+# opacity < 1.0 deja ver (y difuminar con blur) lo que hay detrás de la ventana.
+# Sutil para no perder legibilidad; bajalo a 0.85 si querés más transparencia.
+opacity = 0.93
 blur = true
 padding = { x = 2, y = 2 }
 dynamic_padding = true

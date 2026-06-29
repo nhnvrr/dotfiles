@@ -125,9 +125,25 @@ require("nvim-tree").setup({
 		root_folder_label = false,
 		-- líneas guía de indentación: jerarquía clara sin recargar.
 		indent_markers = { enable = true },
+		-- nombre del archivo coloreado según su estado git (modificado/nuevo/etc.).
+		highlight_git = "name",
 		icons = {
-			git_placement = "after",
+			-- marcador de git en la signcolumn (columna izquierda del todo),
+			-- separado del nombre en vez de pegado antes.
+			git_placement = "signcolumn",
 			show = { file = true, folder = true, folder_arrow = true, git = true },
+			-- glyphs distintos por estado git (coloreados en theme.lua).
+			glyphs = {
+				git = {
+					unstaged = "●", -- modificado
+					staged = "✓", -- en stage
+					unmerged = "", -- conflicto de merge
+					renamed = "➜", -- renombrado
+					untracked = "?", -- nuevo / sin trackear
+					deleted = "✗", -- borrado
+					ignored = "◌", -- ignorado
+				},
+			},
 		},
 	},
 	-- mostrar dotfiles; respetar .gitignore lo maneja git, no el filtro.
