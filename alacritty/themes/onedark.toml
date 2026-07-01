@@ -1,0 +1,39 @@
+# OneDark — paleta de joshdick/onedark.vim, con fondo más negro (#1b1d23) que el
+# default de OneDark (#282c34). Mismo palette que nvim. Dark-only: light y dark lo
+# usan igual. La opacity la maneja alacritty.toml (este theme solo define colores)
+# para no pisar la transparencia.
+
+[window]
+decorations_theme_variant = "Dark"
+
+[colors.primary]
+background = "#1b1d23"
+foreground = "#abb2bf"
+
+[colors.cursor]
+cursor = "#abb2bf"
+text   = "#1b1d23"
+
+[colors.selection]
+background = "#3e4452"
+text       = "#abb2bf"
+
+[colors.normal]
+black   = "#282c34"
+red     = "#e06c75"
+green   = "#98c379"
+yellow  = "#e5c07b"
+blue    = "#61afef"
+magenta = "#c678dd"
+cyan    = "#56b6c2"
+white   = "#abb2bf"
+
+[colors.bright]
+black   = "#5c6370"
+red     = "#e06c75"
+green   = "#98c379"
+yellow  = "#d19a66"
+blue    = "#61afef"
+magenta = "#c678dd"
+cyan    = "#56b6c2"
+white   = "#ffffff"

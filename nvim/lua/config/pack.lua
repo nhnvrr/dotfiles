@@ -17,7 +17,7 @@ vim.pack.add({
 	"https://github.com/nvim-lualine/lualine.nvim",
 
 	-- theme
-	"https://github.com/gbprod/nord.nvim",
+	"https://github.com/navarasu/onedark.nvim",
 
 	-- lsp & mason
 	{ src = "https://github.com/williamboman/mason.nvim", version = "stable" },
@@ -155,7 +155,7 @@ require("nvim-tree").setup({
 })
 
 -- lualine: statusline. theme "auto" toma los colores del colorscheme activo
--- (everforest) y se refresca solo al cambiar light/dark. globalstatus = una sola
+-- (Nord) y se refresca solo al cambiar light/dark. globalstatus = una sola
 -- barra global (reemplaza laststatus=3 del statusline manual anterior).
 require("lualine").setup({
 	options = {

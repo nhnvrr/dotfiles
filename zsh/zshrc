@@ -177,7 +177,7 @@ if [[ $- == *i* ]]; then
     export FZF_DEFAULT_OPTS='
       --height 40% --layout=reverse --border=rounded
       --bind="ctrl-/:toggle-preview,ctrl-y:execute-silent(echo {} | pbcopy)+abort"
-      --color=bg+:#434c5e,fg:#d8dee9,fg+:#eceff4,hl:#88c0d0,hl+:#8fbcbb,info:#616e88,prompt:#81a1c1,pointer:#bf616a,marker:#a3be8c,border:#4c566a,header:#81a1c1,spinner:#88c0d0'
+      --color=bg+:#3e4452,fg:#abb2bf,fg+:#ffffff,hl:#61afef,hl+:#56b6c2,info:#5c6370,prompt:#61afef,pointer:#e06c75,marker:#98c379,border:#5c6370,header:#61afef,spinner:#56b6c2'
 
     # Preview con bat (que ya tenés) para Ctrl-T y completion de archivos.
     export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always --line-range :200 {}'"

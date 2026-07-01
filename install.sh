@@ -143,11 +143,11 @@ if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
   link_file "${CONFIG_DIR}/gh/config.yml" "${HOME}/.config/gh/config.yml"
 fi
 
-# Theme: Nord (dark-only, sin toggle). Symlink directo al repo → editar nord.toml
-# / nord.tmux se refleja solo. theme.toml lo importa alacritty.toml; theme.tmux lo
-# sourcea tmux.conf.
-link_file "${CONFIG_DIR}/alacritty/themes/nord.toml" "${HOME}/.config/alacritty/theme.toml"
-link_file "${CONFIG_DIR}/tmux/nord.tmux" "${HOME}/.config/tmux/theme.tmux"
+# Theme: OneDark (dark-only, sin toggle). Symlink directo al repo → editar
+# onedark.toml / onedark.tmux se refleja solo. theme.toml lo importa alacritty.toml;
+# theme.tmux lo sourcea tmux.conf.
+link_file "${CONFIG_DIR}/alacritty/themes/onedark.toml" "${HOME}/.config/alacritty/theme.toml"
+link_file "${CONFIG_DIR}/tmux/onedark.tmux" "${HOME}/.config/tmux/theme.tmux"
 
 if [[ "${SKIP_BREW}" == false ]] && command -v mise >/dev/null 2>&1; then
   echo "Installing mise-managed tools..."

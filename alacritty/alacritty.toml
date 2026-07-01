@@ -5,7 +5,7 @@ import = ["~/.config/alacritty/theme.toml"]
 
 # ─── Font ───────────────────────────────────────────────
 [font]
-size = 16.0
+size = 13.00
 builtin_box_drawing = true
 
 [font.normal]
@@ -27,13 +27,7 @@ style = "Bold Italic"
 # ─── Window ─────────────────────────────────────────────
 [window]
 startup_mode = "SimpleFullscreen"
-# None = sin title bar del todo (ni borde ni semáforos). "Buttonless" escondía los
-# botones, pero ToggleSimpleFullscreen (Ctrl+Cmd+F) resetea el style mask de la
-# ventana y macOS los re-agrega; con None no hay barra donde puedan reaparecer.
-# Sin barra no se arrastra con el mouse, pero usás SimpleFullscreen + AeroSpace.
 decorations = "None"
-# opacity < 1.0 deja ver (y difuminar con blur) lo que hay detrás de la ventana.
-# Sutil para no perder legibilidad; bajalo a 0.85 si querés más transparencia.
 opacity = 0.93
 blur = true
 padding = { x = 2, y = 2 }
@@ -73,8 +67,8 @@ semantic_escape_chars = ",│`|:\"' ()[]{}<>\t/\\;="
 [bell]
 animation = "EaseOutExpo"
 duration = 100
-# Amarillo Nord (aurora) — flash cohesivo con el theme.
-color = "#ebcb8b"
+# Amarillo OneDark — flash cohesivo con el theme.
+color = "#e5c07b"
 
 # ─── Keybindings ────────────────────────────────────────
 [[keyboard.bindings]]
