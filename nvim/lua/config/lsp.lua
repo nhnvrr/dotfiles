@@ -21,6 +21,11 @@ vim.api.nvim_create_autocmd("LspAttach", {
     opts.desc = "Show LSP definitions (fzf-lua)"
     vim.keymap.set("n", "gd", "<cmd>FzfLua lsp_definitions<CR>", opts)
 
+    opts.desc = "Toggle inlay hints"
+    vim.keymap.set("n", "<leader>th", function()
+      vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
+    end, opts)
+
     opts.desc = "Restart LSP"
     vim.keymap.set("n", "<leader>rs", ":LspRestart<CR>", opts)
   end,

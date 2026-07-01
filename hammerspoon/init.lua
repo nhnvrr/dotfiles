@@ -275,4 +275,42 @@ end)
 
 hs.hotkey.bind({"cmd", "alt", "ctrl"}, "R", hs.reload)
 
+-- ==================================================================
+-- Workspace modes: resolución de pantalla + dock en un solo atajo.
+-- Resoluciones "looks like" de System Settings → Displays (scale=2, Retina).
+-- ==================================================================
+
+-- Cambia la resolución de la pantalla principal. setMode requiere w, h, scale,
+-- freq y depth (los 5). Reusamos freq/depth del modo actual: es el mismo panel
+-- físico, así que son válidos para ambas resoluciones escaladas. scale=2 (Retina).
+local function setResolution(w, h)
+  local screen = hs.screen.mainScreen()
+  local cur = screen:currentMode()
+  screen:setMode(w, h, 2, cur.freq, cur.depth)
+end
+
+-- Dock autohide vía System Events (en vivo, sin reiniciar el Dock).
+-- hidden=true → oculto; false → visible.
+local function setDockAutohide(hidden)
+  hs.osascript.applescript(
+    ('tell application "System Events" to set autohide of dock preferences to %s')
+      :format(hidden and "true" or "false")
+  )
+end
+
+-- Default: pantalla 1512×982 (UI más grande), dock visible y esconde todas las apps.
+hs.hotkey.bind({"ctrl", "alt", "cmd"}, "0", function()
+  setResolution(1512, 982)
+  setDockAutohide(false)
+  hideAllExcept({})
+  hs.alert.show("Default · dock visible · apps ocultas")
+end)
+
+-- More Space: pantalla 1800×1169 (UI más chica, más espacio) y dock oculto.
+hs.hotkey.bind({"ctrl", "alt", "cmd"}, "9", function()
+  setResolution(1800, 1169)
+  setDockAutohide(true)
+  hs.alert.show("More Space · dock oculto")
+end)
+
 hs.alert.show("Hammerspoon config loaded")

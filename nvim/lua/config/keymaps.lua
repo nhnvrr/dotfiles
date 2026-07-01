@@ -21,9 +21,25 @@ keymap.set("n", "<leader>se", "<C-w>=", { desc = "Make splits equal size" })
 keymap.set("n", "<leader>sx", "<cmd>close<CR>", { desc = "Close current split" })
 
 -- buffers
+keymap.set("n", "<leader>bn", "<cmd>enew<CR>", { desc = "New empty buffer" })
 keymap.set("n", "<Tab>", "<cmd>bnext<CR>", { desc = "Next buffer" })
 keymap.set("n", "<S-Tab>", "<cmd>bprevious<CR>", { desc = "Previous buffer" })
-keymap.set("n", "<leader>bd", "<cmd>bdelete<CR>", { desc = "Close buffer" })
+keymap.set("n", "<leader>bd", function()
+  -- Cierra el buffer actual sin cerrar la ventana/split:
+  -- salta a otro buffer (o crea uno vacío) y recién ahí borra el actual.
+  local cur = vim.api.nvim_get_current_buf()
+  local alt = vim.fn.bufnr("#")
+  if alt ~= -1 and vim.fn.buflisted(alt) == 1 then
+    vim.cmd("buffer #")
+  else
+    vim.cmd("bprevious")
+  end
+  -- si seguimos en el mismo buffer, no había otro: abrimos uno vacío
+  if vim.api.nvim_get_current_buf() == cur then
+    vim.cmd("enew")
+  end
+  vim.cmd("bdelete " .. cur)
+end, { desc = "Close buffer (keep window)" })
 keymap.set("n", "<leader>fb", "<cmd>FzfLua buffers<cr>", { desc = "Find buffers" })
 
 -- terminal
