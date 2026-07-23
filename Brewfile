@@ -17,7 +17,6 @@ brew "tmux"
 
 cask "visual-studio-code"
 
-cask "ollama-app"
 cask "claude"
 cask "claude-code@latest"
 cask "chatgpt"
@@ -27,8 +26,8 @@ cask "google-chrome"
 brew "container"
 brew "lazydocker"
 cask "docker-desktop"
-cask "datagrip"
 cask "bruno"
+cask "postman"
 cask "aws-vpn-client"
 
 cask "linear"
