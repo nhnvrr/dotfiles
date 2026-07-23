@@ -161,11 +161,11 @@ if [[ $- == *i* ]]; then
   _cursor_beam() { print -n '\e[5 q' }
   add-zsh-hook precmd _cursor_beam
 
-  # ─── Notificación de comandos largos (>30s) ───────────
+  # ─── Notificación de comandos largos (>15s) ───────────
   # Bell (→ flag "!" de tmux + Dock de Terminal.app) siempre; notificación
   # macOS solo si Terminal no está en primer plano. lsappinfo no pide
   # permisos de Automation y solo corre tras comandos largos.
-  _notify_threshold=30
+  _notify_threshold=15
   _notify_ignore=(nvim vim less man ssh tmux lazygit lzd lg claude fzf watch htop top tail dev work side)
 
   _notify_preexec() {
