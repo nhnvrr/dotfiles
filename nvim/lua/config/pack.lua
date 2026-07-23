@@ -50,7 +50,7 @@ vim.pack.add({
 	"https://github.com/jay-babu/mason-nvim-dap.nvim",
 })
 
--- Theme: Nord (dark-only)
+-- Theme: OneDark (dark-only)
 require("config.theme").setup()
 
 -- Plugin setup calls (simple opts-only plugins)
