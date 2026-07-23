@@ -54,19 +54,18 @@ After `install.sh` exits cleanly:
 |---|---|---|
 | Shell | zsh | [`zsh/zshrc`](./zsh/zshrc) |
 | Prompt | starship | [`starship/starship.toml`](./starship/starship.toml) |
-| Terminal | Alacritty | [`alacritty/alacritty.toml`](./alacritty/alacritty.toml) |
+| Terminal | Terminal.app | — (config a nivel usuario) |
 | Multiplexer | tmux | [`tmux/tmux.conf`](./tmux/tmux.conf) |
 | Editor | Neovim (LSP, treesitter, conform, gitsigns, fzf-lua, mason) | [`nvim/`](./nvim/) |
 | Window mgmt | Hammerspoon | [`hammerspoon/init.lua`](./hammerspoon/init.lua) |
 | Runtime mgr | mise | [`mise/config.toml`](./mise/config.toml) |
 | Font | IoskeleyMonoTerm Nerd Font | installed from GitHub release |
-| Theme | Nord (dark-only) — Alacritty + nvim (`gbprod/nord.nvim`) + tmux; `light`/`dark` aplican el mismo Nord; starship/bat/fzf siguen la paleta ANSI; editores GUI: theme a nivel usuario | [`alacritty/themes/`](./alacritty/themes/) |
+| Theme | Per-app (dark-only). nvim: OneDark. tmux: colores default. Terminal.app: profile a nivel usuario. starship/bat/fzf siguen la paleta ANSI. Editores GUI: theme a nivel usuario | — |
 
 `zsh/zshrc` notes:
 - Defines `dev` / `work` / `side` aliases that spawn (or switch to) a named tmux session with a fixed CWD.
 - Auto-exports `AWS_PROFILE=work` when inside the `work` tmux session (inside the interactive block only — non-interactive subshells don't inherit it).
 - Wraps `claude` so that `CLAUDE_CONFIG_DIR=~/.claude-work` is used in the `work` session, letting two Claude Code subscriptions stay logged in side-by-side.
-- `light` / `dark` switch the theme (GitHub Light ↔ Dark Dimmed) for Alacritty **and** nvim at once. Source of truth is `~/.config/theme-mode`; Alacritty imports `~/.config/alacritty/theme.toml` (live reload) and nvim watches the mode file (live reload too).
 
 ## Homebrew packages
 
@@ -87,7 +86,6 @@ These are symlinked from the repo into `$HOME`:
 | `zsh/zshrc` | `~/.zshrc` |
 | `tmux/tmux.conf` | `~/.tmux.conf` |
 | `starship/starship.toml` | `~/.config/starship.toml` |
-| `alacritty/alacritty.toml` | `~/.config/alacritty/alacritty.toml` |
 | `mise/config.toml` | `~/.config/mise/config.toml` |
 | `nvim/init.lua` | `~/.config/nvim/init.lua` |
 | `nvim/lua` | `~/.config/nvim/lua` |

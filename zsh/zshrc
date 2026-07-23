@@ -163,7 +163,7 @@ if [[ $- == *i* ]]; then
 
   # ─── fzf: Ctrl-R history, Ctrl-T files, Alt-C dirs ────
   if command -v fzf >/dev/null 2>&1; then
-    # bat: usar la paleta ANSI del terminal (Alacritty) en vez del theme propio
+    # bat: usar la paleta ANSI del terminal en vez del theme propio
     # de bat → el preview de fzf matchea el resto y sigue solo el light/dark.
     export BAT_THEME=ansi
 

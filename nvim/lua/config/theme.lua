@@ -1,4 +1,4 @@
--- Tema: OneDark (dark-only). Antes había sync light/dark con Alacritty vía
+-- Tema: OneDark (dark-only). Antes había sync light/dark con el terminal vía
 -- ~/.config/theme-mode + fs-watcher; se dejó fijo, así que el theme es único y
 -- los comandos zsh `light`/`dark` aplican el mismo OneDark.
 local M = {}
@@ -6,10 +6,10 @@ local M = {}
 function M.setup()
 	require("onedark").setup({
 		style = "dark",
-		-- transparent: usa el fondo del terminal → matchea Alacritty (#1b1d23, sólido).
+		-- transparent: usa el fondo del terminal en vez de pintar uno propio.
 		transparent = true,
 		term_colors = true,
-		-- fondo más negro que el default de OneDark (#282c34), consistente con Alacritty.
+		-- fondo más negro que el default de OneDark (#282c34) para cuando no es transparent.
 		colors = { bg0 = "#1b1d23", bg1 = "#1b1d23" },
 	})
 	-- nvim-tree: color semántico OneDark para todos los estados git (icono + nombre).

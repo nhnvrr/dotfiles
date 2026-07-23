@@ -27,46 +27,40 @@ end
 -- (ej. "Code"), causando que hs.application.find falle silenciosamente.
 -- Bundle IDs son estables y únicos.
 local APPS = {
-  gather    = "com.gather.Gather",
-  slack     = "com.tinyspeck.slackmacgap",
   chrome    = "com.google.Chrome",
   vscode    = "com.microsoft.VSCode",
-  alacritty = "org.alacritty",
-  obsidian  = "md.obsidian",
-  datagrip  = "com.jetbrains.datagrip",
-  claude    = "com.anthropic.claudefordesktop",
+  terminal  = "com.apple.Terminal",
+  tableplus = "com.tinyapp.TablePlus",
 }
 
 -- ==================================================================
 -- Window placement helpers
 -- ==================================================================
 
--- Gap uniforme: la misma distancia entre ventana-ventana y ventana-borde,
--- arriba, abajo y a los costados. Insettamos primero el frame de pantalla
--- por GAP/2, después cada ventana por GAP/2 — total = GAP en cualquier
--- frontera. Subirlo a 8-12 para un look estilo Rectangle/yabai.
-local GAP = 8
+-- Gap uniforme entre ventana-ventana y ventana-borde, solo en layouts;
+-- el auto-maximizado al abrir apps va sin gap (pantalla completa).
+local LAYOUT_GAP = 2
 
-local function frameFor(xR, yR, wR, hR)
+local function frameFor(xR, yR, wR, hR, gap)
+  gap = gap or 0
   local f = hs.screen.mainScreen():frame()
-  local fx, fy = f.x + GAP/2, f.y + GAP/2
-  local fw, fh = f.w - GAP,   f.h - GAP
+  local fx, fy = f.x + gap/2, f.y + gap/2
+  local fw, fh = f.w - gap,   f.h - gap
   return hs.geometry.rect(
-    fx + fw * xR + GAP/2,
-    fy + fh * yR + GAP/2,
-    fw * wR - GAP,
-    fh * hR - GAP
+    fx + fw * xR + gap/2,
+    fy + fh * yR + gap/2,
+    fw * wR - gap,
+    fh * hR - gap
   )
 end
 
--- Apps Electron (Gather, Slack, VSCode) manejan AXSize y AXPosition por
--- separado: setFrame() a veces aplica solo posición. Partimos en setSize
--- + setTopLeft, con tamaño primero para que la posición opere sobre las
--- dimensiones finales.
--- Gather aplica setSize a medias en una sola pasada — la ventana queda
--- a mitad de camino y hay que reintentar. Aplicamos el frame, verificamos
--- contra el objetivo y, si no cuadra (tolerancia 4px), reintentamos solo
--- hasta 6 veces. Así el atajo basta una vez sin insistir a mano.
+-- Apps Electron (VSCode, etc.) manejan AXSize y AXPosition por separado:
+-- setFrame() a veces aplica solo posición. Partimos en setSize + setTopLeft,
+-- con tamaño primero para que la posición opere sobre las dimensiones
+-- finales. Algunas apps aplican setSize a medias en una sola pasada — la
+-- ventana queda a mitad de camino y hay que reintentar. Aplicamos el frame,
+-- verificamos contra el objetivo y, si no cuadra (tolerancia 4px),
+-- reintentamos solo hasta 6 veces.
 local function applyFrame(win, rect, attempt)
   attempt = attempt or 1
   win:setSize(hs.geometry.size(rect.w, rect.h))
@@ -80,14 +74,13 @@ local function applyFrame(win, rect, attempt)
   end)
 end
 
--- macOS ignora setSize si la ventana está en native-fullscreen o "zoomed"
--- (ocupa toda la pantalla útil pero no en un Space dedicado). Detectamos
--- ambos casos heurísticamente y salimos del estado antes de re-posicionar.
+-- macOS ignora setSize si la ventana está en native-fullscreen: hay que
+-- salir del Space fullscreen (transición animada, ~0.7s) antes de
+-- posicionar. Solo el fullscreen real necesita el camino lento — una
+-- ventana grande "zoomed" se resizea normal, y los reintentos de
+-- applyFrame cubren cualquier caso terco.
 local function placeWindow(win, rect)
-  local fr = win:frame()
-  local sc = win:screen():frame()
-  local zoomed = fr.w >= sc.w - 1 and fr.h >= sc.h - 1
-  if win:isFullScreen() or zoomed then
+  if win:isFullScreen() then
     win:setFullScreen(false)
     hs.timer.doAfter(0.7, function() applyFrame(win, rect) end)
   else
@@ -99,8 +92,8 @@ end
 -- aparezca su ventana principal.
 local pendingPlacements = {}
 
-local function placeApp(bundleID, xR, yR, wR, hR)
-  local rect = frameFor(xR, yR, wR, hR)
+local function placeApp(bundleID, xR, yR, wR, hR, gap)
+  local rect = frameFor(xR, yR, wR, hR, gap)
   local app = hs.application.get(bundleID)
   if app and app:mainWindow() then
     -- Una app escondida ignora setSize/setTopLeft: hay que mostrarla
@@ -132,8 +125,8 @@ local AUTO_MAX_EXCLUDE = {
 
 -- Watcher único de lanzamiento. Cuando una app reporta `launched`:
 --   • Si un layout dejó un placement pendiente, usamos ESE rect.
---   • Si no, la maximizamos al frame completo (menos GAP) — "todas las apps
---     arrancan a pantalla casi completa", dejando dock y menubar visibles.
+--   • Si no, la maximizamos al frame completo — "todas las apps arrancan
+--     a pantalla completa", dejando dock y menubar visibles.
 -- El evento se dispara al arrancar el proceso, pero la ventana puede no estar
 -- lista todavía (Chrome puede tardar ~800ms): polleamos con backoff acotado.
 local appWatcher = hs.application.watcher.new(function(_, eventType, appObject)
@@ -173,9 +166,8 @@ appWatcher:start()
 -- Hide-all helper
 -- ==================================================================
 
--- Apps que NUNCA escondemos: Finder mantiene el desktop, Hammerspoon
--- no se puede esconder a sí mismo, y los demás de la lista son menubar
--- helpers que serían molestos de ocultar.
+-- Apps que NUNCA escondemos: Finder mantiene el desktop y Hammerspoon
+-- no se puede esconder a sí mismo.
 local NEVER_HIDE = {
   ["com.apple.finder"] = true,
   ["org.hammerspoon.Hammerspoon"] = true,
@@ -199,118 +191,61 @@ end
 -- Layouts
 -- ==================================================================
 
--- LEFT = 1/4 (450px en 1800px) — apenas arriba del mínimo de Gather (400px)
--- y le deja 3/4 a Chrome/VSCode en el panel derecho.
-local LEFT  = 1/4
-local RIGHT = 3/4
+-- Layout de dos apps lado a lado: `left` ocupa `leftW`, `right` el resto.
+-- Primero se esconde TODO (incluidas las apps del layout) para una
+-- transición limpia: la pantalla queda vacía y las dos apps aparecen ya
+-- posicionadas — placeApp maneja el unhide. La app izquierda se posiciona
+-- última → queda con el foco.
+-- Guardamos el layout activo para poder rotarlo (⌘⌥R).
+local currentLayout = nil
 
-local function layoutGatherWith(otherBundleID)
-  hideAllExcept({APPS.gather, otherBundleID})
-  placeApp(otherBundleID, 0,     0, RIGHT, 1)
-  placeApp(APPS.gather,   RIGHT, 0, LEFT,  1)
+local function sideBySide(left, right, leftW)
+  currentLayout = { left = left, right = right, leftW = leftW }
+  hideAllExcept({})
+  placeApp(right, leftW, 0, 1 - leftW, 1, LAYOUT_GAP)
+  placeApp(left,  0,     0, leftW,     1, LAYOUT_GAP)
 end
 
-local function zoom(bundleID)
-  hideAllExcept({bundleID})
-  placeApp(bundleID, 0, 0, 1, 1)
+-- Rota el layout activo (⌘⌥R): las apps intercambian de lado, los frames
+-- quedan iguales (en 70/30 la que estaba a la izquierda pasa al 30 derecho).
+local function rotateLayout()
+  if not currentLayout then return end
+  sideBySide(currentLayout.right, currentLayout.left, currentLayout.leftW)
 end
 
 -- ==================================================================
 -- Hotkeys
 -- ==================================================================
 
-hs.hotkey.bind({"cmd", "alt"}, "1", function() layoutGatherWith(APPS.chrome) end)
-hs.hotkey.bind({"cmd", "alt"}, "2", function() layoutGatherWith(APPS.vscode) end)
-hs.hotkey.bind({"cmd", "alt"}, "3", function() zoom(APPS.slack) end)
-hs.hotkey.bind({"cmd", "alt"}, "4", function() zoom(APPS.obsidian) end)
-hs.hotkey.bind({"cmd", "alt"}, "§", function() zoom(APPS.gather) end)
--- Layout "dev": Alacritty arriba-izq, Obsidian abajo-izq, Chrome a la derecha.
--- Columna izquierda 60% (Alacritty 60% alto / Obsidian 40%), Chrome 40% derecha.
-hs.hotkey.bind({"cmd", "alt"}, "0", function()
-  hideAllExcept({APPS.alacritty, APPS.obsidian, APPS.chrome})
-  placeApp(APPS.alacritty, 0,   0,   0.6, 0.6)
-  placeApp(APPS.obsidian,  0,   0.6, 0.6, 0.4)
-  placeApp(APPS.chrome,    0.6, 0,   0.4, 1)
-end)
-hs.hotkey.bind({"cmd", "alt"}, "-", function()
-  hideAllExcept({APPS.vscode, APPS.claude})
-  placeApp(APPS.claude, 7/11, 0, 4/11, 1)
-  placeApp(APPS.vscode, 0,    0, 7/11, 1)
-end)
-hs.hotkey.bind({"cmd", "alt"}, "9", function()
-  hideAllExcept({APPS.datagrip, APPS.chrome})
-  placeApp(APPS.datagrip, 0,   0, 0.5, 1)
-  placeApp(APPS.chrome,  0.5, 0, 0.5, 1)
-end)
--- Zoom toggle: ocupa el área disponible (sin dock/menubar, menos GAP) la
--- ventana enfocada; si ya está maximizada, la restaura a su tamaño previo.
-local zoomPrev = {}
-hs.hotkey.bind({"ctrl", "alt"}, "F", function()
+hs.hotkey.bind({"cmd", "alt"}, "1", function() sideBySide(APPS.vscode,    APPS.chrome, 0.7) end)
+hs.hotkey.bind({"cmd", "alt"}, "2", function() sideBySide(APPS.terminal,  APPS.chrome, 0.7) end)
+hs.hotkey.bind({"cmd", "alt"}, "3", function() sideBySide(APPS.tableplus, APPS.vscode, 0.5) end)
+hs.hotkey.bind({"cmd", "alt"}, "R", rotateLayout)
+
+-- Zoom toggle de la ventana con foco (⌘⌥F): la maximiza a pantalla
+-- completa (dock y menubar visibles) guardando su frame previo; si ya
+-- está maximizada, la restaura a como estaba. La comparación usa
+-- tolerancia 4px, igual que applyFrame, porque algunas apps no aplican
+-- el frame pedido con exactitud.
+local zoomedFrames = {}
+
+hs.hotkey.bind({"cmd", "alt"}, "F", function()
   local win = hs.window.focusedWindow()
   if not win then return end
-  local id = win:id()
-  local target = frameFor(0, 0, 1, 1)
+  local full = frameFor(0, 0, 1, 1)
   local fr = win:frame()
-  local isMax = math.abs(fr.w - target.w) < 4 and math.abs(fr.h - target.h) < 4
-            and math.abs(fr.x - target.x) < 4 and math.abs(fr.y - target.y) < 4
-  if isMax and zoomPrev[id] then
-    applyFrame(win, zoomPrev[id])
-    zoomPrev[id] = nil
+  local isZoomed = math.abs(fr.w - full.w) < 4 and math.abs(fr.h - full.h) < 4
+               and math.abs(fr.x - full.x) < 4 and math.abs(fr.y - full.y) < 4
+  local saved = zoomedFrames[win:id()]
+  if isZoomed and saved then
+    placeWindow(win, saved)
+    zoomedFrames[win:id()] = nil
   else
-    zoomPrev[id] = fr
-    placeWindow(win, target)
+    zoomedFrames[win:id()] = fr
+    placeWindow(win, full)
   end
-end)
-
--- Terminal lateral: Alacritty en el 1/5 derecho y la app principal que estés
--- usando (VSCode, Chrome, DataGrip, Claude…) en el 4/5 restante a la izquierda.
--- Tomamos la ventana enfocada como "principal" antes de mover el foco al terminal.
-hs.hotkey.bind({"ctrl", "alt"}, "M", function()
-  local main = hs.window.focusedWindow()
-  if main and main:application():bundleID() ~= APPS.alacritty then
-    placeWindow(main, frameFor(0, 0, 4/5, 1))
-  end
-  placeApp(APPS.alacritty, 4/5, 0, 1/5, 1)
 end)
 
 hs.hotkey.bind({"cmd", "alt", "ctrl"}, "R", hs.reload)
-
--- ==================================================================
--- Workspace modes: resolución de pantalla + dock en un solo atajo.
--- Resoluciones "looks like" de System Settings → Displays (scale=2, Retina).
--- ==================================================================
-
--- Cambia la resolución de la pantalla principal. setMode requiere w, h, scale,
--- freq y depth (los 5). Reusamos freq/depth del modo actual: es el mismo panel
--- físico, así que son válidos para ambas resoluciones escaladas. scale=2 (Retina).
-local function setResolution(w, h)
-  local screen = hs.screen.mainScreen()
-  local cur = screen:currentMode()
-  screen:setMode(w, h, 2, cur.freq, cur.depth)
-end
-
--- Dock autohide vía System Events (en vivo, sin reiniciar el Dock).
--- hidden=true → oculto; false → visible.
-local function setDockAutohide(hidden)
-  hs.osascript.applescript(
-    ('tell application "System Events" to set autohide of dock preferences to %s')
-      :format(hidden and "true" or "false")
-  )
-end
-
--- Default: pantalla 1512×982 (UI más grande), dock visible y esconde todas las apps.
-hs.hotkey.bind({"ctrl", "alt", "cmd"}, "0", function()
-  setResolution(1512, 982)
-  setDockAutohide(false)
-  hideAllExcept({})
-  hs.alert.show("Default · dock visible · apps ocultas")
-end)
-
--- More Space: pantalla 1800×1169 (UI más chica, más espacio) y dock oculto.
-hs.hotkey.bind({"ctrl", "alt", "cmd"}, "9", function()
-  setResolution(1800, 1169)
-  setDockAutohide(true)
-  hs.alert.show("More Space · dock oculto")
-end)
 
 hs.alert.show("Hammerspoon config loaded")

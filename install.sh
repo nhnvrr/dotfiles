@@ -134,7 +134,6 @@ link_file "${CONFIG_DIR}/zsh/zshrc" "${HOME}/.zshrc"
 link_file "${CONFIG_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"
 link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.tmux.conf"
 link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
-link_file "${CONFIG_DIR}/alacritty/alacritty.toml" "${HOME}/.config/alacritty/alacritty.toml"
 link_file "${CONFIG_DIR}/nvim/init.lua"   "${HOME}/.config/nvim/init.lua"
 link_file "${CONFIG_DIR}/nvim/lua"        "${HOME}/.config/nvim/lua"
 link_file "${CONFIG_DIR}/nvim/keymaps.md" "${HOME}/.config/nvim/keymaps.md"
@@ -143,11 +142,7 @@ if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
   link_file "${CONFIG_DIR}/gh/config.yml" "${HOME}/.config/gh/config.yml"
 fi
 
-# Theme: OneDark (dark-only, sin toggle). Symlink directo al repo → editar
-# onedark.toml / onedark.tmux se refleja solo. theme.toml lo importa alacritty.toml;
-# theme.tmux lo sourcea tmux.conf.
-link_file "${CONFIG_DIR}/alacritty/themes/onedark.toml" "${HOME}/.config/alacritty/theme.toml"
-link_file "${CONFIG_DIR}/tmux/onedark.tmux" "${HOME}/.config/tmux/theme.tmux"
+# Theme tmux: colores default de tmux (sin custom).
 
 if [[ "${SKIP_BREW}" == false ]] && command -v mise >/dev/null 2>&1; then
   echo "Installing mise-managed tools..."

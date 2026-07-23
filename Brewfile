@@ -15,7 +15,6 @@ brew "neovim"
 brew "starship"
 brew "tmux"
 
-cask "alacritty"
 cask "visual-studio-code"
 
 cask "ollama-app"
@@ -41,7 +40,6 @@ cask "hammerspoon"
 cask "slack"
 cask "telegram"
 cask "whatsapp"
-cask "gather"
 
 cask "ledger-wallet"
 cask "nordvpn"
