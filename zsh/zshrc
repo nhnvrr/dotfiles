@@ -161,10 +161,9 @@ if [[ $- == *i* ]]; then
   _cursor_beam() { print -n '\e[5 q' }
   add-zsh-hook precmd _cursor_beam
 
-  # ─── Notificación de comandos largos (>10s) ───────────
-  # Bell (→ flag "!" de tmux + Dock de Terminal.app) siempre; notificación
-  # macOS solo si Terminal no está en primer plano. lsappinfo no pide
-  # permisos de Automation y solo corre tras comandos largos.
+  # ─── Bell en comandos largos (>10s) ───────────────────
+  # Solo bell → status bar naranja de tmux + Dock de Terminal.app.
+  # Sin notificación macOS (osascript resultaba ruidoso).
   _notify_threshold=10
   _notify_ignore=(nvim vim less man ssh tmux lazygit lzd lg claude fzf watch htop top tail dev work side)
 
@@ -180,9 +179,6 @@ if [[ $- == *i* ]]; then
     (( elapsed >= _notify_threshold )) || return
     (( ${_notify_ignore[(Ie)$cmd]} )) && return
     printf '\a'
-    if [[ "$(lsappinfo info -only name "$(lsappinfo front)" 2>/dev/null)" != *Terminal* ]]; then
-      osascript -e "display notification \"${cmd} terminó (${elapsed}s)\" with title \"Terminal\"" &>/dev/null
-    fi
   }
   add-zsh-hook preexec _notify_preexec
   add-zsh-hook precmd _notify_precmd
