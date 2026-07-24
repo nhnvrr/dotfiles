@@ -144,7 +144,7 @@ set -g tide_time_format '%H:%M'
 # Así el fuente es legible y sobrevive cualquier copy/paste.
 # Catálogo: nerdfonts.com/cheat-sheet
 # Para averiguar el codepoint de un glyph: printf '%s' 'X' | xxd
-set -g tide_git_icon (printf '\U0000F1D3')
+set -g tide_git_icon (printf '\U0000F126') # nf-fa-code_branch
 set -g tide_os_icon (printf '\U0000F179') # apple
 set -g tide_pwd_icon (printf '\U0000F07C') # carpeta
 set -g tide_cmd_duration_icon (printf '\U0000F252') # reloj de arena
@@ -155,7 +155,7 @@ set -g tide_go_icon (printf '\U0000E627')
 set -g tide_rustc_icon (printf '\U0000E7A8')
 set -g tide_python_icon (printf '\U000F0320')
 set -g tide_terraform_icon (printf '\U000F1062')
-set -g tide_aws_icon (printf '\U0000F270')
+set -g tide_aws_icon (printf '\U0000E7AD') # nf-dev-aws
 set -g tide_docker_icon (printf '\U0000F308')
 
 # El character no es Nerd Font sino Unicode común, y cambia según el modo vi
