@@ -1,8 +1,15 @@
-# Font — Geist Mono (Vercel), parcheada como Nerd Font para los glyphs de
-# devicons/lualine/tide. Cask: font-geist-mono-nerd-font.
-# El nombre de familia es el que reporta `ghostty +list-fonts`: el cask instala
-# la variante Mono (NFM) y la Propo (NFP), y solo la Mono es monoespaciada.
-font-family = GeistMono Nerd Font Mono
+# Font — Source Code Pro (Adobe), parcheada como Nerd Font: los glyphs los
+# necesita el prompt Tide (iconos de git, os, aws…).
+# Cask: font-sauce-code-pro-nerd-font — "Sauce Code" es como Nerd Fonts
+# renombra a Source Code Pro, no es un typo.
+#
+# El nombre de familia es el que reporta `ghostty +list-fonts`. El cask instala
+# tres: NF (proporcional en los glyphs anchos), NFM (Mono, todo a ancho fijo) y
+# NFP (Propo). Para terminal va la Mono: si un icono ocupa doble ancho, se
+# desalinean las columnas del prompt y de cualquier TUI.
+#
+# Sin ligaduras, a diferencia de JetBrains Mono o Fira Code.
+font-family = SauceCodePro Nerd Font Mono
 font-size = 14
 
 # Theme — Nord Wave, dark-only: misma paleta Nord (aurora/frost/snow storm) pero

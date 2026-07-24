@@ -66,7 +66,7 @@ Note: the script prompts for your password twice — once for `sudo` (to add fis
 | Git | versioned config, SSH-signed commits | [`git/gitconfig`](./git/gitconfig) |
 | Window mgmt | Hammerspoon (app-pair layouts) + Raycast (launcher, clipboard, simple windows) | [`hammerspoon/init.lua`](./hammerspoon/init.lua) |
 | Runtime mgr | mise — global versions plus per-project `.nvmrc` | [`mise/config.toml`](./mise/config.toml) |
-| Font | GeistMono Nerd Font (Vercel) | cask `font-geist-mono-nerd-font` |
+| Font | Source Code Pro, Nerd Font patched — no ligatures. Use the `Mono` family so wide glyphs don't break column alignment | cask `font-sauce-code-pro-nerd-font` |
 | Theme | Nord Wave (dark-only): Nord palette on a neutral `#212121` background. Ghostty owns it; nvim (transparent), fzf and Tide follow in truecolor hex. tmux keeps its stock theme and `bat` the terminal's ANSI palette. GUI editors keep their own user-level theme | — |
 
 `fish/config.fish` notes:
