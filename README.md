@@ -107,7 +107,7 @@ These are symlinked from the repo into `$HOME`:
 | `git/ignore` | `~/.config/git/ignore` |
 | `git/allowed_signers` | `~/.config/git/allowed_signers` |
 | `psql/psqlrc` | `~/.psqlrc` |
-| `gh/config.yml` (if present) | `~/.config/gh/config.yml` |
+| `gh/config.yml` | `~/.config/gh/config.yml` |
 
 The Neovim config is symlinked, so edits inside `~/.config/nvim` are reflected directly in the repo.
 

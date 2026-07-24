@@ -1,2 +1,6 @@
 .DS_Store
 nvim.log
+
+# gh guarda el token de GitHub en hosts.yml. Solo config.yml (preferencias)
+# se versiona; esta regla es la red por si alguna vez se copia el otro.
+gh/hosts.yml
