@@ -62,6 +62,19 @@ if [[ "${SKIP_BREW}" == false ]]; then
 
   echo "Applying Brewfile..."
   "${BREW_BIN}" bundle --file="${CONFIG_DIR}/Brewfile"
+
+  # Fisher (plugin manager de fish) + Tide (prompt). Los plugins se instalan
+  # explícitos en vez de con un manifiesto fish_plugins symlinkeado: Fisher
+  # REESCRIBE ese archivo, y reemplazaría el symlink por un archivo regular.
+  # Ambos comandos son idempotentes.
+  if command -v fish >/dev/null 2>&1; then
+    echo "Installing fish plugins (fisher + tide)..."
+    fish -c 'functions -q fisher; or curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher'
+    fish -c 'fisher install IlanCosman/tide@v6'
+    # Siembra la config base de tide (que vive en variables universales).
+    # fish/config.fish la sobreescribe después con `set -g` — el repo manda.
+    fish -c 'tide configure --auto --style=Lean --prompt_colors="True color" --show_time="24-hour format" --lean_prompt_height="Two lines" --prompt_connection=Disconnected --prompt_connection_andor_frame_color=Lightest --prompt_spacing=Sparse --icons="Many icons" --transient=Yes'
+  fi
 else
   echo "Skipping Homebrew setup (--skipBrew); only linking configuration."
 fi
@@ -130,19 +143,26 @@ echo "Preparing Go workspace..."
 mkdir -p "${HOME}/Develop/go/bin"
 
 echo "Linking config files..."
-link_file "${CONFIG_DIR}/zsh/zshrc" "${HOME}/.zshrc"
+# Solo config.fish: ~/.config/fish/{functions,completions,conf.d} los ESCRIBEN
+# Fisher y Tide, así que symlinkearlos al repo lo ensuciaría con plugins.
+link_file "${CONFIG_DIR}/fish/config.fish" "${HOME}/.config/fish/config.fish"
+link_file "${CONFIG_DIR}/ghostty/config" "${HOME}/.config/ghostty/config"
 link_file "${CONFIG_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"
 link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.tmux.conf"
-link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
 link_file "${CONFIG_DIR}/nvim/init.lua"   "${HOME}/.config/nvim/init.lua"
-link_file "${CONFIG_DIR}/nvim/lua"        "${HOME}/.config/nvim/lua"
-link_file "${CONFIG_DIR}/nvim/keymaps.md" "${HOME}/.config/nvim/keymaps.md"
 link_file "${CONFIG_DIR}/hammerspoon/init.lua" "${HOME}/.hammerspoon/init.lua"
 if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
   link_file "${CONFIG_DIR}/gh/config.yml" "${HOME}/.config/gh/config.yml"
 fi
 
-# Theme tmux: colores default de tmux (sin custom).
+# Symlinks huérfanos de la migración zsh+starship → fish+tide. Solo se borran
+# si apuntan a este repo: un ~/.zshrc propio del usuario queda intacto.
+for stale in "${HOME}/.zshrc" "${HOME}/.config/starship.toml"; do
+  if [[ -L "${stale}" && "$(readlink "${stale}")" == "${CONFIG_DIR}"/* ]]; then
+    rm -f "${stale}"
+    echo "  removed stale symlink ${stale}"
+  fi
+done
 
 if [[ "${SKIP_BREW}" == false ]] && command -v mise >/dev/null 2>&1; then
   echo "Installing mise-managed tools..."
@@ -170,23 +190,23 @@ killall Dock 2>/dev/null || true
 killall Finder 2>/dev/null || true
 killall SystemUIServer 2>/dev/null || true
 
-if ! ls "${HOME}/Library/Fonts/"IoskeleyMonoTermNerdFont*.ttf >/dev/null 2>&1; then
-  echo "Installing Ioskeley Term Nerd Font..."
-  IOSKELEY_TMP="$(mktemp -d)"
-  if curl -fsSL -o "${IOSKELEY_TMP}/ioskeley.zip" \
-      "https://github.com/ahatem/IoskeleyMono/releases/download/v2.0.0/IoskeleyMono-Term-NerdFont.zip"; then
-    unzip -q -o "${IOSKELEY_TMP}/ioskeley.zip" -d "${IOSKELEY_TMP}/extract"
-    find "${IOSKELEY_TMP}/extract" -name "*.ttf" -exec cp {} "${HOME}/Library/Fonts/" \;
-  else
-    echo "  ⚠ font download failed (continuing). Re-run install.sh to retry."
-  fi
-  rm -rf "${IOSKELEY_TMP}"
-fi
+# Fuente: GeistMono Nerd Font llega por cask (font-geist-mono-nerd-font).
 
-LOGIN_SHELL="$(dscl . -read "/Users/${USER}" UserShell 2>/dev/null | awk '{print $2}')"
-if [[ "${LOGIN_SHELL}" != "/bin/zsh" ]]; then
-  echo "Changing login shell to /bin/zsh (chsh will prompt for your password)..."
-  chsh -s /bin/zsh
+# Login shell → fish. chsh rechaza shells que no estén en /etc/shells, así que
+# hay que registrarlo primero (pide sudo). dscl lee el login shell real, no $SHELL.
+FISH_BIN="$(command -v fish || true)"
+if [[ -n "${FISH_BIN}" ]]; then
+  if ! grep -qx "${FISH_BIN}" /etc/shells; then
+    echo "Registering ${FISH_BIN} in /etc/shells (sudo required)..."
+    echo "${FISH_BIN}" | sudo tee -a /etc/shells >/dev/null
+  fi
+  LOGIN_SHELL="$(dscl . -read "/Users/${USER}" UserShell 2>/dev/null | awk '{print $2}')"
+  if [[ "${LOGIN_SHELL}" != "${FISH_BIN}" ]]; then
+    echo "Changing login shell to ${FISH_BIN} (chsh will prompt for your password)..."
+    chsh -s "${FISH_BIN}"
+  fi
+else
+  echo "  ⚠ fish not found; login shell left as-is. Run without --skipBrew to install it."
 fi
 
 echo "macOS standalone setup complete. Happy Coding 🧉"
