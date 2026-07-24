@@ -18,7 +18,10 @@ keybind = cmd+shift+o=toggle_background_opacity
 window-padding-x = 0
 window-padding-y = 0
 
-macos-titlebar-style = tabs
+# native: título en una sola línea. `tabs` integraba la tab bar de Ghostty en
+# el titlebar y agregaba un segundo renglón — inútil acá, porque las pestañas
+# las maneja tmux, no Ghostty.
+macos-titlebar-style = native
 window-save-state = never
 resize-overlay = never
 adjust-cell-height = 8%
