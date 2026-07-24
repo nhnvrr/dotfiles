@@ -209,7 +209,7 @@ local RESOLUTIONS = {
 -- que es el mismo panel físico. Devuelve false si el modo no existe: hay que
 -- mirarlo porque `availableModes()` reporta 0 en macOS 27, así que este es el
 -- único aviso de que una resolución no está disponible.
-hs.hotkey.bind({ "ctrl", "alt", "cmd" }, "0", function()
+hs.hotkey.bind({ "cmd", "alt" }, "0", function()
   local screen = hs.screen.mainScreen()
   local cur = screen:currentMode()
   local target = cur.w == RESOLUTIONS[1].w and RESOLUTIONS[2] or RESOLUTIONS[1]
