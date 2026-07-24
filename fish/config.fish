@@ -134,6 +134,8 @@ set -g tide_prompt_add_newline_before true
 set -g tide_prompt_transient_enabled true
 set -g tide_cmd_duration_threshold 2000
 set -g tide_time_format '%H:%M'
+# Nombre de rama completo: Tide lo trunca a 24 por default. 0 = sin truncar.
+set -g tide_git_truncation_length 0
 
 # Iconos. Igual que los colores, vivían solo en variables universales, o sea
 # fuera del repo. Van solo los de los items que están en el prompt.
@@ -304,5 +306,14 @@ if status is-interactive
         set -gx FZF_CTRL_R_OPTS '--preview "echo {}" --preview-window=down:3:wrap'
 
         fzf --fish | source
+
+        # Ctrl-; para el historial, además del Ctrl-R que deja `fzf --fish`.
+        # `\e[59;5u` es la secuencia CSI-u de Ctrl+; (59 = ';', 5 = Ctrl). Solo
+        # llega si Ghostty manda el protocolo Kitty Y tmux tiene extended-keys
+        # on con extkeys en terminal-features (ambos ya configurados en
+        # tmux.conf). Fuera de ese combo, Ctrl+; sigue siendo un ';' normal.
+        for mode in insert default
+            bind -M $mode \e\[59\;5u fzf-history-widget
+        end
     end
 end
