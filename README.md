@@ -47,7 +47,7 @@ After `install.sh` exits cleanly:
 1. **Paste the SSH pubkey on GitHub** — it's already on your clipboard. Add it at <https://github.com/settings/ssh/new> as both an authentication key AND a signing key (so your signed commits show up as Verified).
 2. **Authenticate the GitHub CLI:** `gh auth login` (script reminds you if not authenticated).
 3. **Grant Accessibility permission to Hammerspoon** on first launch (System Settings → Privacy & Security → Accessibility). Required for window management hotkeys.
-4. **Open Ghostty** (not Terminal.app) — it picks up `ghostty/config`, the Geist Mono Nerd Font, and fish as the login shell.
+4. **Open Ghostty** (not Terminal.app) — it picks up `ghostty/config`, the Source Code Pro Nerd Font, and fish as the login shell.
 
 Note: the script prompts for your password twice — once for `sudo` (to add fish to `/etc/shells`) and once for `chsh`.
 
@@ -124,7 +124,7 @@ Only `config.fish` is symlinked out of `~/.config/fish/` — Fisher and Tide **w
   chmod 600 ~/.pgpass
   ```
 
-- **VS Code / Cursor** — config (`settings.json`, keybindings, theme) es a nivel usuario, no versionada (`Settings Sync` vive en otro lado).
+- **Zed / VS Code** — config (`settings.json`, keybindings, theme) es a nivel usuario, no versionada (`Settings Sync` vive en otro lado).
 - **IdeaVim (DataGrip)** — `~/.ideavimrc` es config a nivel usuario; no se versiona acá.
 - **`~/.aws/config`** — keep your own AWS profiles where you want them; the repo only sets `AWS_PROFILE` based on tmux session.
 - **`~/.claude/`** (and the optional `~/.claude-work/`) — Claude Code config is user-level state, not versioned. Bootstrap a work account with `CLAUDE_CONFIG_DIR=~/.claude-work claude` then `/login`.
