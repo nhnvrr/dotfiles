@@ -197,46 +197,28 @@ local function toggleZoom()
   end
 end
 
--- ─── Modos de workspace ───────────────────────────────────────────
--- Resolución + dock en un solo atajo. Los valores son los "looks like" de
+-- ─── Resolución ───────────────────────────────────────────────────
+-- Un solo atajo que alterna entre las dos. Valores "looks like" de
 -- System Settings → Displays, con scale 2 (Retina).
+local RESOLUTIONS = {
+  { w = 1512, h = 982 },  -- UI más grande
+  { w = 1800, h = 1169 }, -- más espacio útil
+}
 
--- setMode pide los cinco parámetros. freq y depth se reusan del modo actual:
--- es el mismo panel físico, así que valen para cualquiera de las dos escalas.
--- Devuelve false si el modo no existe; el original no lo miraba y fallaba en
--- silencio. `availableModes()` reporta 0 en macOS 27, así que este chequeo es
--- la única forma de enterarse.
-local function setResolution(w, h)
+-- setMode pide los cinco parámetros; freq y depth se reusan del modo actual,
+-- que es el mismo panel físico. Devuelve false si el modo no existe: hay que
+-- mirarlo porque `availableModes()` reporta 0 en macOS 27, así que este es el
+-- único aviso de que una resolución no está disponible.
+hs.hotkey.bind({ "ctrl", "alt", "cmd" }, "0", function()
   local screen = hs.screen.mainScreen()
   local cur = screen:currentMode()
-  if not screen:setMode(w, h, 2, cur.freq, cur.depth) then
-    hs.alert.show(("No se pudo aplicar %dx%d"):format(w, h))
-    return false
+  local target = cur.w == RESOLUTIONS[1].w and RESOLUTIONS[2] or RESOLUTIONS[1]
+
+  if screen:setMode(target.w, target.h, 2, cur.freq, cur.depth) then
+    hs.alert.show(("%dx%d"):format(target.w, target.h))
+  else
+    hs.alert.show(("No se pudo aplicar %dx%d"):format(target.w, target.h))
   end
-  return true
-end
-
--- Autohide del dock en vivo, sin reiniciarlo. Necesita permiso de Automation
--- para System Events (macOS lo pide la primera vez).
-local function setDockAutohide(hidden)
-  hs.osascript.applescript(
-    ('tell application "System Events" to set autohide of dock preferences to %s')
-      :format(hidden and "true" or "false"))
-end
-
--- ⌃⌥⌘0 — Default: UI más grande, dock visible, y esconde todas las apps.
-hs.hotkey.bind({ "ctrl", "alt", "cmd" }, "0", function()
-  setResolution(1512, 982)
-  setDockAutohide(false)
-  hideAllExcept({})
-  hs.alert.show("Default · dock visible · apps ocultas")
-end)
-
--- ⌃⌥⌘9 — More Space: UI más chica, más área útil, dock oculto.
-hs.hotkey.bind({ "ctrl", "alt", "cmd" }, "9", function()
-  setResolution(1800, 1169)
-  setDockAutohide(true)
-  hs.alert.show("More Space · dock oculto")
 end)
 
 -- ─── Atajos ───────────────────────────────────────────────────────
