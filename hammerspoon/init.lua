@@ -1,183 +1,136 @@
--- ==================================================================
--- Hammerspoon init.lua — layouts y atajos de window-management
--- ==================================================================
+-- Layouts de dos apps y zoom, por atajo de teclado.
+-- Regla: nunca esperar un tiempo fijo, esperar a que la condición sea cierta.
 
--- Setup global -----------------------------------------------------
--- Resize instantáneo, sin animación.
 hs.window.animationDuration = 0
 
--- IPC + AppleScript habilitados para diagnóstico remoto.
 require("hs.ipc")
 if hs.ipc and hs.ipc.cliInstall then hs.ipc.cliInstall() end
-hs.allowAppleScript(true)
 
 local log = hs.logger.new("layouts", "info")
 
--- Accessibility es requisito para mover ventanas de otras apps.
 if not hs.accessibilityState(true) then
-  hs.alert.show(
-    "⚠️  Hammerspoon necesita Accessibility.\n" ..
-    "Settings → Privacy & Security → Accessibility → Hammerspoon ON",
-    { textSize = 18 }, 8
-  )
+  hs.alert.show("⚠️  Hammerspoon necesita Accessibility.\n" ..
+    "Settings → Privacy & Security → Accessibility → Hammerspoon ON", { textSize = 18 }, 8)
 end
 
--- Apps identificadas por bundle ID. Los nombres de display (ej. "Visual
--- Studio Code") no siempre coinciden con el nombre interno del bundle
--- (ej. "Code"), causando que hs.application.find falle silenciosamente.
--- Bundle IDs son estables y únicos.
--- `editor` en vez de `vscode`: el editor ya cambió varias veces (VS Code →
--- Cursor → Zed) y la key no debería nombrar a un producto puntual.
+-- Bundle IDs, no nombres de display: "Visual Studio Code" internamente es
+-- "Code" y hs.application.find falla callado.
 local APPS = {
   chrome    = "com.google.Chrome",
-  editor    = "dev.zed.Zed",
-  terminal  = "com.mitchellh.ghostty",
+  ghostty   = "com.mitchellh.ghostty",
+  zed       = "dev.zed.Zed",
   tableplus = "com.tinyapp.TablePlus",
 }
 
--- ==================================================================
--- Window placement helpers
--- ==================================================================
+local GAP = 2
 
--- Gap uniforme entre ventana-ventana y ventana-borde, solo en layouts;
--- el auto-maximizado al abrir apps va sin gap (pantalla completa).
-local LAYOUT_GAP = 2
+-- ─── Primitivas ───────────────────────────────────────────────────
+
+local function waitFor(cond, onReady, timeout)
+  local ok = cond()
+  if ok then onReady(ok) return end
+
+  local elapsed, timer = 0, nil
+  timer = hs.timer.doEvery(0.05, function()
+    local value = cond()
+    if value then timer:stop() onReady(value) return end
+    elapsed = elapsed + 0.05
+    if elapsed >= (timeout or 5) then timer:stop() log.w("timeout") end
+  end)
+end
 
 local function frameFor(xR, yR, wR, hR, gap)
   gap = gap or 0
   local f = hs.screen.mainScreen():frame()
-  local fx, fy = f.x + gap/2, f.y + gap/2
-  local fw, fh = f.w - gap,   f.h - gap
-  return hs.geometry.rect(
-    fx + fw * xR + gap/2,
-    fy + fh * yR + gap/2,
-    fw * wR - gap,
-    fh * hR - gap
-  )
+  local fx, fy = f.x + gap / 2, f.y + gap / 2
+  local fw, fh = f.w - gap, f.h - gap
+  return hs.geometry.rect(fx + fw * xR + gap / 2, fy + fh * yR + gap / 2,
+    fw * wR - gap, fh * hR - gap)
 end
 
--- Apps Electron (VSCode, etc.) manejan AXSize y AXPosition por separado:
--- setFrame() a veces aplica solo posición. Partimos en setSize + setTopLeft,
--- con tamaño primero para que la posición opere sobre las dimensiones
--- finales. Algunas apps aplican setSize a medias en una sola pasada — la
--- ventana queda a mitad de camino y hay que reintentar. Aplicamos el frame,
--- verificamos contra el objetivo y, si no cuadra (tolerancia 4px),
--- reintentamos solo hasta 6 veces.
-local function applyFrame(win, rect, attempt)
-  attempt = attempt or 1
+-- 4px de tolerancia: varias apps no aplican exacto el frame pedido.
+local function frameMatches(a, b)
+  return math.abs(a.w - b.w) < 4 and math.abs(a.h - b.h) < 4
+     and math.abs(a.x - b.x) < 4 and math.abs(a.y - b.y) < 4
+end
+
+-- mainWindow() puede dar nil o un diálogo en vez de la ventana real.
+local function windowOf(app)
+  if not app then return nil end
+  local win = app:mainWindow()
+  if win and win:isStandard() then return win end
+  for _, w in ipairs(app:allWindows()) do
+    if w:isStandard() then return w end
+  end
+  return nil
+end
+
+-- Electron maneja AXSize y AXPosition por separado, así que setFrame() a veces
+-- aplica solo una. Se parte en dos y se verifica. El corte es un deadline, no
+-- un contador de intentos: contar intentos castigaba al caso lento (app fría).
+local function applyFrame(win, rect, deadline)
+  deadline = deadline or (hs.timer.secondsSinceEpoch() + 2)
   win:setSize(hs.geometry.size(rect.w, rect.h))
   win:setTopLeft(hs.geometry.point(rect.x, rect.y))
-  if attempt >= 6 then return end
-  hs.timer.doAfter(0.12, function()
-    local fr = win:frame()
-    local ok = math.abs(fr.w - rect.w) < 4 and math.abs(fr.h - rect.h) < 4
-           and math.abs(fr.x - rect.x) < 4 and math.abs(fr.y - rect.y) < 4
-    if not ok then applyFrame(win, rect, attempt + 1) end
+
+  hs.timer.doAfter(0.1, function()
+    if not win:isVisible() then return end
+    if frameMatches(win:frame(), rect) then return end
+    if hs.timer.secondsSinceEpoch() >= deadline then log.w("no se pudo posicionar") return end
+    applyFrame(win, rect, deadline)
   end)
 end
 
--- macOS ignora setSize si la ventana está en native-fullscreen: hay que
--- salir del Space fullscreen (transición animada, ~0.7s) antes de
--- posicionar. Solo el fullscreen real necesita el camino lento — una
--- ventana grande "zoomed" se resizea normal, y los reintentos de
--- applyFrame cubren cualquier caso terco.
+-- macOS ignora setSize en native-fullscreen. Salir del Space es animado, así
+-- que se espera a que isFullScreen() sea falso en vez de adivinar el tiempo.
 local function placeWindow(win, rect)
-  if win:isFullScreen() then
-    win:setFullScreen(false)
-    hs.timer.doAfter(0.7, function() applyFrame(win, rect) end)
-  else
-    applyFrame(win, rect)
-  end
+  if not win:isFullScreen() then applyFrame(win, rect) return end
+  win:setFullScreen(false)
+  waitFor(function() return not win:isFullScreen() end,
+    function() applyFrame(win, rect) end, 3)
 end
 
--- Cola para apps que están arrancando. El watcher las posiciona cuando
--- aparezca su ventana principal.
-local pendingPlacements = {}
+-- ─── Colocación ───────────────────────────────────────────────────
 
-local function placeApp(bundleID, xR, yR, wR, hR, gap)
-  local rect = frameFor(xR, yR, wR, hR, gap)
+-- Apps que un layout está colocando; el watcher las saltea para no pisarle
+-- el frame.
+local claimed = {}
+
+-- Un solo camino para los cuatro casos: no corre, corre escondida, corre sin
+-- ventanas, corre con ventana. Tratarlos por separado producía el bug de la
+-- app abierta sin ventanas: quedaba un placement esperando un evento
+-- `launched` que no llegaba nunca, porque la app ya estaba corriendo.
+local function placeApp(bundleID, rect, onPlaced)
+  claimed[bundleID] = true
+
   local app = hs.application.get(bundleID)
-  if app and app:mainWindow() then
-    -- Una app escondida ignora setSize/setTopLeft: hay que mostrarla
-    -- primero y darle al WindowServer un respiro para traer la ventana
-    -- de vuelta antes de re-posicionarla. Sin esto, venir de un layout
-    -- que escondió esta app obliga a pulsar el atajo dos veces.
-    if app:isHidden() then
-      app:unhide()
-      hs.timer.doAfter(0.15, function()
-        local win = app:mainWindow()
-        if win then placeWindow(win, rect) end
-        app:activate()
-      end)
-    else
-      placeWindow(app:mainWindow(), rect)
-      app:activate()
-    end
-    return
+  if not app then
+    hs.application.launchOrFocusByBundleID(bundleID)
+  else
+    if app:isHidden() then app:unhide() end
+    if not windowOf(app) then hs.application.launchOrFocusByBundleID(bundleID) end
   end
-  pendingPlacements[bundleID] = rect
-  hs.application.launchOrFocusByBundleID(bundleID)
+
+  waitFor(function()
+    local a = hs.application.get(bundleID)
+    if not a or a:isHidden() then return nil end
+    return windowOf(a)
+  end, function(win)
+    placeWindow(win, rect)
+    claimed[bundleID] = nil
+    if onPlaced then onPlaced(win) end
+  end, 8)
+
+  hs.timer.doAfter(9, function() claimed[bundleID] = nil end)
 end
 
--- Apps que NO se auto-maximizan al arrancar. Agregá bundle IDs acá para
--- excluir (utilidades con ventanas chicas, paneles flotantes, etc.).
-local AUTO_MAX_EXCLUDE = {
-  ["org.hammerspoon.Hammerspoon"] = true,
-}
+-- ─── Layouts ──────────────────────────────────────────────────────
 
--- Watcher único de lanzamiento. Cuando una app reporta `launched`:
---   • Si un layout dejó un placement pendiente, usamos ESE rect.
---   • Si no, la maximizamos al frame completo — "todas las apps arrancan
---     a pantalla completa", dejando dock y menubar visibles.
--- El evento se dispara al arrancar el proceso, pero la ventana puede no estar
--- lista todavía (Chrome puede tardar ~800ms): polleamos con backoff acotado.
-local appWatcher = hs.application.watcher.new(function(_, eventType, appObject)
-  if eventType ~= hs.application.watcher.launched then return end
-  local bid = appObject:bundleID()
-  if not bid then return end
-
-  -- Sin placement de layout: maximizamos solo apps con UI real (kind 1) y que
-  -- no estén excluidas. Las del layout siguen su rect tal cual (no las filtra
-  -- el kind/exclude, para no romper layouts si kind() se reporta tarde).
-  local pending = pendingPlacements[bid]
-  if not pending then
-    if AUTO_MAX_EXCLUDE[bid] or appObject:kind() ~= 1 then return end
-  end
-  local rect = pending or frameFor(0, 0, 1, 1)
-
-  local attempts = 0
-  local poll
-  poll = hs.timer.doEvery(0.15, function()
-    attempts = attempts + 1
-    local win = appObject:mainWindow()
-    if win then
-      placeWindow(win, rect)
-      appObject:activate()
-      pendingPlacements[bid] = nil
-      poll:stop()
-    elseif attempts >= 30 then
-      log.w("placement timeout for " .. bid)
-      pendingPlacements[bid] = nil
-      poll:stop()
-    end
-  end)
-end)
-appWatcher:start()
-
--- ==================================================================
--- Hide-all helper
--- ==================================================================
-
--- Apps que NUNCA escondemos: Finder mantiene el desktop y Hammerspoon
--- no se puede esconder a sí mismo.
 local NEVER_HIDE = {
   ["com.apple.finder"] = true,
   ["org.hammerspoon.Hammerspoon"] = true,
 }
 
--- Esconde todas las apps con UI excepto las pasadas en `keep` (lista de
--- bundle IDs). Filtramos por `app:kind() == 1` para tocar solo apps con
--- ventanas reales, no background services ni menubar widgets.
 local function hideAllExcept(keep)
   local keepSet = {}
   for _, bid in ipairs(keep) do keepSet[bid] = true end
@@ -189,65 +142,68 @@ local function hideAllExcept(keep)
   end
 end
 
--- ==================================================================
--- Layouts
--- ==================================================================
-
--- Layout de dos apps lado a lado: `left` ocupa `leftW`, `right` el resto.
--- Primero se esconde TODO (incluidas las apps del layout) para una
--- transición limpia: la pantalla queda vacía y las dos apps aparecen ya
--- posicionadas — placeApp maneja el unhide. La app izquierda se posiciona
--- última → queda con el foco.
--- Guardamos el layout activo para poder rotarlo (⌘⌥R).
 local currentLayout = nil
 
+-- Esconde todo MENOS las dos apps del layout. Antes escondía todo y después
+-- las volvía a mostrar: ese hide→unhide era la causa de tener que apretar el
+-- atajo dos veces, porque el setSize llegaba con la app todavía escondida.
 local function sideBySide(left, right, leftW)
   currentLayout = { left = left, right = right, leftW = leftW }
-  hideAllExcept({})
-  placeApp(right, leftW, 0, 1 - leftW, 1, LAYOUT_GAP)
-  placeApp(left,  0,     0, leftW,     1, LAYOUT_GAP)
+  hideAllExcept({ left, right })
+  placeApp(right, frameFor(leftW, 0, 1 - leftW, 1, GAP))
+  placeApp(left, frameFor(0, 0, leftW, 1, GAP), function(win) win:focus() end)
 end
 
--- Rota el layout activo (⌘⌥R): las apps intercambian de lado, los frames
--- quedan iguales (en 70/30 la que estaba a la izquierda pasa al 30 derecho).
 local function rotateLayout()
   if not currentLayout then return end
   sideBySide(currentLayout.right, currentLayout.left, currentLayout.leftW)
 end
 
--- ==================================================================
--- Hotkeys
--- ==================================================================
+-- ─── Auto-maximizar al abrir ──────────────────────────────────────
 
-hs.hotkey.bind({"cmd", "alt"}, "1", function() sideBySide(APPS.editor,    APPS.chrome, 0.7) end)
-hs.hotkey.bind({"cmd", "alt"}, "2", function() sideBySide(APPS.terminal,  APPS.chrome, 0.7) end)
-hs.hotkey.bind({"cmd", "alt"}, "3", function() sideBySide(APPS.tableplus, APPS.editor, 0.5) end)
-hs.hotkey.bind({"cmd", "alt"}, "R", rotateLayout)
+hs.application.watcher.new(function(_, event, app)
+  if event ~= hs.application.watcher.launched then return end
+  local bid = app:bundleID()
+  if not bid or claimed[bid] or bid == "org.hammerspoon.Hammerspoon" then return end
+  if app:kind() ~= 1 then return end
 
--- Zoom toggle de la ventana con foco (⌘⌥F): la maximiza a pantalla
--- completa (dock y menubar visibles) guardando su frame previo; si ya
--- está maximizada, la restaura a como estaba. La comparación usa
--- tolerancia 4px, igual que applyFrame, porque algunas apps no aplican
--- el frame pedido con exactitud.
-local zoomedFrames = {}
+  local rect = frameFor(0, 0, 1, 1)
+  waitFor(function() return windowOf(app) end, function(win)
+    if claimed[bid] then return end
+    placeWindow(win, rect)
+  end, 5)
+end):start()
 
-hs.hotkey.bind({"cmd", "alt"}, "F", function()
+-- ─── Zoom toggle ──────────────────────────────────────────────────
+
+local savedFrames = {}
+
+local function toggleZoom()
   local win = hs.window.focusedWindow()
   if not win then return end
-  local full = frameFor(0, 0, 1, 1)
-  local fr = win:frame()
-  local isZoomed = math.abs(fr.w - full.w) < 4 and math.abs(fr.h - full.h) < 4
-               and math.abs(fr.x - full.x) < 4 and math.abs(fr.y - full.y) < 4
-  local saved = zoomedFrames[win:id()]
-  if isZoomed and saved then
-    placeWindow(win, saved)
-    zoomedFrames[win:id()] = nil
+
+  -- Limpiar ids de ventanas ya cerradas; antes esta tabla crecía para siempre.
+  for id in pairs(savedFrames) do
+    if not hs.window.get(id) then savedFrames[id] = nil end
+  end
+
+  local id, full, current = win:id(), frameFor(0, 0, 1, 1), win:frame()
+  if frameMatches(current, full) and savedFrames[id] then
+    placeWindow(win, savedFrames[id])
+    savedFrames[id] = nil
   else
-    zoomedFrames[win:id()] = fr
+    savedFrames[id] = current
     placeWindow(win, full)
   end
-end)
+end
 
-hs.hotkey.bind({"cmd", "alt", "ctrl"}, "R", hs.reload)
+-- ─── Atajos ───────────────────────────────────────────────────────
 
-hs.alert.show("Hammerspoon config loaded")
+hs.hotkey.bind({ "cmd", "alt" }, "1", function() sideBySide(APPS.zed, APPS.chrome, 0.7) end)
+hs.hotkey.bind({ "cmd", "alt" }, "2", function() sideBySide(APPS.ghostty, APPS.chrome, 0.7) end)
+hs.hotkey.bind({ "cmd", "alt" }, "3", function() sideBySide(APPS.tableplus, APPS.zed, 0.5) end)
+hs.hotkey.bind({ "cmd", "alt" }, "R", rotateLayout)
+hs.hotkey.bind({ "cmd", "alt" }, "F", toggleZoom)
+hs.hotkey.bind({ "cmd", "alt", "ctrl" }, "R", hs.reload)
+
+hs.alert.show("Hammerspoon cargado")

@@ -1,106 +1,35 @@
-# Font — Source Code Pro (Adobe), parcheada como Nerd Font: los glyphs los
-# necesita el prompt Tide (iconos de git, os, aws…).
-# Cask: font-sauce-code-pro-nerd-font — "Sauce Code" es como Nerd Fonts
-# renombra a Source Code Pro, no es un typo.
-#
-# El nombre de familia es el que reporta `ghostty +list-fonts`. El cask instala
-# tres variantes, que se diferencian SOLO en cómo tratan los iconos:
-#   NFM  Mono: comprime todo icono a una celda. Alineación garantizada en el
-#        prompt y en cualquier TUI. Es la que usamos.
-#   NF   ancho natural: los iconos anchos ocupan dos celdas y se ven más
-#        grandes, a costa de poder correr columnas.
-#   NFP  Propo: espaciado proporcional, pensada para fuera del terminal.
 font-family = SauceCodePro Nerd Font Mono
-
-# Ligaduras apagadas. Source Code Pro no trae ligaduras de programación, así
-# que hoy esto no cambia nada visible — está para que la garantía sobreviva a
-# un cambio de fuente: si algún día ponés una con ligaduras, no aparecen solas.
-# -calt es el feature típico de ligaduras de programación; -liga y -dlig cubren
-# las estándar y las discrecionales.
 font-feature = -calt, -liga, -dlig
 font-size = 14
-
-# Theme — Nord Wave, dark-only: misma paleta Nord (aurora/frost/snow storm) pero
-# con fondo neutro #212121 en vez del #2E3440 azulado del Nord original.
-# Nombre exacto de `ghostty +list-themes` (case-sensitive).
-# Sin `background`/`background-opacity` propios: manda el tema, fondo sólido.
 theme = Nord Wave
 
-# Nord Wave define palette 8 (bright black) = #4c566a, que sobre su propio fondo
-# #212121 da 2.18:1 — por debajo del 3:1 mínimo para texto no-cuerpo. Es el color
-# con el que salen los hashes de `git log --oneline`, la metadata de `ls`, `man`
-# y los headers de delta: todo el texto "dim" del sistema, ilegible.
-# #616E88 (el "comment" de Nord) llega a 3.14:1 y sigue leyéndose como
-# secundario. Mismo criterio que ya aplica fish/config.fish para Tide.
-# palette 0 (#3b4252, 1.6:1) queda como está: es el negro normal y lo usan como
-# FONDO las apps TUI, así que subirlo rompe más de lo que arregla.
 palette = 8=#616E88
 
-# Transparencia
-# 0.92 es deliberadamente sutil: el fondo se insinúa sin competir con el texto.
-# `background-blur` desenfoca lo que hay detrás — sin eso, una ventana con
-# contenido variado atrás vuelve ilegible el texto tenue.
-# `background-opacity-cells = false` (default) deja opacos los fondos de celda,
-# así la selección y los resaltados siguen sólidos sobre el fondo translúcido.
-#
-# OJO con dos efectos:
-#   · nvim corre con transparent = true, así que hereda ESTE fondo: el código
-#     se ve sobre el escritorio, no sobre un color.
-#   · los contrastes medidos contra #212121 (el gris #616E88 a 3.14:1) dejan de
-#     valer, porque el fondo efectivo pasa a depender de lo que haya detrás.
-# Por eso el toggle de abajo: apagarla cuando la legibilidad importa.
 background-opacity = 0.92
 background-blur = true
 keybind = cmd+shift+o=toggle_background_opacity
 
-# Window
-# Sin padding: el texto arranca en el borde. Con `window-padding-color` en su
-# default (background), el fondo igual llega hasta el borde de la ventana.
 window-padding-x = 0
 window-padding-y = 0
 
-# Titlebar `tabs`: barra custom que integra la tab bar y toma el color de fondo
-# del terminal — no hay una franja gris separada arriba.
-# El otro extremo es `hidden`, que la saca del todo; no lo puse porque entonces
-# la ventana ya no se puede arrastrar desde arriba (hay que hacer option+click
-# en el borde), y eso se siente roto. Si querés probarlo, es cambiar la palabra.
 macos-titlebar-style = tabs
-
-# tmux ya persiste las sesiones; restaurar ventanas de Ghostty duplicaría estado.
 window-save-state = never
-
-# El cartel con el tamaño en filas×columnas al redimensionar es ruido.
 resize-overlay = never
-
-# Interlineado: +8% de alto de celda. Source Code Pro es compacta de fábrica y
-# en sesiones largas el texto se apelmaza. Es el único "aire" que queda ahora
-# que el padding está en 0, y a diferencia del padding sí ayuda a leer.
-# Bajalo a 0% si preferís máxima densidad.
 adjust-cell-height = 8%
 
-# Cursor — beam parpadeante. Ojo: esto define el cursor del TERMINAL, pero una
-# app puede pedir otra forma vía DECSCUSR. nvim lo hace (ver su guicursor).
 cursor-style = bar
 cursor-style-blink = true
 
-# Shell
 shell-integration = fish
 shell-integration-features = cursor,sudo,title
 
-# Send Option as Alt — necesario para que Alt-C (fzf) llegue al shell.
 macos-option-as-alt = true
-
-# Drop-down quick terminal (toggle: cmd+grave)
 quick-terminal-position = top
 quick-terminal-screen = main
+# `global:` para que funcione sin Ghostty en foco. La tecla es `backquote`,
+# no `grave`: ese nombre Ghostty lo rechaza con error.InvalidFormat.
+keybind = global:cmd+backquote=toggle_quick_terminal
 
-# UX
-# Bell: el BEL lo maneja tmux (barra naranja) + el Dock. Explícito para no
-# depender de los defaults de Ghostty:
-#   no-audio    → sin sonido
-#   no-system   → sin notificación de macOS (osascript resultaba ruidoso)
-#   attention   → rebota el ícono del Dock cuando Ghostty está en background
-#   title       → marca el título de la ventana
 bell-features = no-audio,no-system,attention,title,no-border
 confirm-close-surface = false
 copy-on-select = clipboard
