@@ -66,6 +66,20 @@ vim.api.nvim_create_user_command("WQ", "wq", {})
 vim.keymap.set("i", "jk", "<Esc>", { desc = "Salir de insert" })
 vim.keymap.set("n", "<leader>nh", "<cmd>nohlsearch<cr>", { desc = "Limpiar highlight de búsqueda" })
 
+-- ─── Explorador de archivos ─────────────────────────────
+-- netrw, que ya viene con nvim: cero plugins. neo-tree necesitaría cuatro
+-- (neo-tree + plenary + nui + devicons) y nvim-tree dos.
+--   liststyle 3  vista de árbol en vez de lista plana
+--   banner 0     sin el cartel de ayuda de 6 líneas arriba
+--   winsize 25   ancho del sidebar, en % de la ventana
+-- `:Lexplore` es toggle: la misma tecla abre y cierra.
+-- Adentro: <CR> abre, `-` sube un nivel, `%` archivo nuevo, `d` directorio,
+-- `D` borra, `R` renombra, `i` cicla vistas.
+vim.g.netrw_liststyle = 3
+vim.g.netrw_banner = 0
+vim.g.netrw_winsize = 25
+vim.keymap.set("n", "<leader>e", "<cmd>Lexplore<cr>", { desc = "Explorador de archivos" })
+
 -- ─── Autocmds ───────────────────────────────────────────
 -- Flash sobre el texto copiado: confirma qué entró al yank sin tener que mirar.
 vim.api.nvim_create_autocmd("TextYankPost", {
