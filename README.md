@@ -47,7 +47,7 @@ After `install.sh` exits cleanly:
 1. **Paste the SSH pubkey on GitHub** — it's already on your clipboard. Add it at <https://github.com/settings/ssh/new> as both an authentication key AND a signing key (so your signed commits show up as Verified).
 2. **Authenticate the GitHub CLI:** `gh auth login` (script reminds you if not authenticated).
 3. **Grant Accessibility permission to Hammerspoon** on first launch (System Settings → Privacy & Security → Accessibility). Required for window management hotkeys.
-4. **Open Ghostty** (not Terminal.app) — it picks up `ghostty/config`, the Source Code Pro Nerd Font, and fish as the login shell.
+4. **Open Ghostty** (not Terminal.app) — it picks up `ghostty/config`, the JetBrains Mono Nerd Font, and fish as the login shell.
 
 Note: the script prompts for your password twice — once for `sudo` (to add fish to `/etc/shells`) and once for `chsh`.
 
@@ -66,8 +66,8 @@ Note: the script prompts for your password twice — once for `sudo` (to add fis
 | Git | versioned config, SSH-signed commits | [`git/gitconfig`](./git/gitconfig) |
 | Window mgmt | Hammerspoon (app-pair layouts) + Raycast (launcher, clipboard, simple windows) | [`hammerspoon/init.lua`](./hammerspoon/init.lua) |
 | Runtime mgr | mise — global versions plus per-project `.nvmrc` | [`mise/config.toml`](./mise/config.toml) |
-| Font | Source Code Pro, Nerd Font patched — no ligatures. Use the `Mono` family so wide glyphs don't break column alignment | cask `font-sauce-code-pro-nerd-font` |
-| Theme | Nord Wave (dark-only): Nord palette on a neutral `#212121` background. Ghostty owns it; nvim (transparent), fzf and Tide follow in truecolor hex. tmux keeps its stock theme and `bat` the terminal's ANSI palette. GUI editors keep their own user-level theme | — |
+| Font | JetBrains Mono, Nerd Font patched, ligatures off. The `Mono` family — Ghostty only accepts monospaced fonts, so the proportional `Propo` variant is not an option | cask `font-jetbrains-mono-nerd-font` |
+| Theme | kanso-zen (dark-only): green-tinted palette on a near-black `#090E13` background. Ghostty owns it (theme file in `ghostty/themes/`); nvim runs `kanso.nvim` (transparent), fzf and Tide follow in truecolor hex. tmux and `bat` inherit the terminal's ANSI palette. GUI editors keep their own user-level theme | [`ghostty/themes/kanso-zen`](./ghostty/themes/kanso-zen) |
 
 `fish/config.fish` notes:
 - Defines `dev` / `work` / `side` aliases that spawn (or switch to) a named tmux session with a fixed CWD.

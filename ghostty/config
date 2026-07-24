@@ -1,4 +1,7 @@
-font-family = SauceCodePro Nerd Font Mono
+# JetBrains Mono, variante Mono (NFM). La Propo NO se puede: es proporcional y
+# Ghostty solo acepta monoespaciadas (la ignora y cae a un fallback sin avisar).
+# JetBrains trae ligaduras; -calt/-liga/-dlig las apagan.
+font-family = JetBrainsMono Nerd Font Mono
 font-feature = -calt, -liga, -dlig
 font-size = 21
 theme = kanso-zen

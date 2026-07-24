@@ -180,7 +180,7 @@ killall Dock 2>/dev/null || true
 killall Finder 2>/dev/null || true
 killall SystemUIServer 2>/dev/null || true
 
-# Fuente: Source Code Pro Nerd Font llega por cask (font-sauce-code-pro-nerd-font).
+# Fuente: JetBrains Mono Nerd Font llega por cask (font-jetbrains-mono-nerd-font).
 
 # Login shell → fish. chsh rechaza shells que no estén en /etc/shells, así que
 # hay que registrarlo primero (pide sudo). dscl lee el login shell real, no $SHELL.

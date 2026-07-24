@@ -41,9 +41,9 @@ brew "fastfetch"
 
 # ─── Terminal y fuente ──────────────────────────────────
 cask "ghostty"
-# Source Code Pro parcheada con Nerd Font ("Sauce Code" es como la renombra
-# Nerd Fonts). Los glyphs los usa el prompt Tide.
-cask "font-sauce-code-pro-nerd-font"
+# JetBrains Mono parcheada con Nerd Font. Los glyphs los usa el prompt Tide.
+# Se usa la variante Mono (no Propo): Ghostty solo acepta monoespaciadas.
+cask "font-jetbrains-mono-nerd-font"
 
 # ─── Editor ─────────────────────────────────────────────
 # VS Code se queda hasta confirmar que AWS Toolkit y Remote-SSH funcionan en
