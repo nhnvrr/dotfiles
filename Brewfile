@@ -1,19 +1,23 @@
+# fd y ripgrep no se tipean casi nunca: son los motores de fzf (Ctrl-T/Alt-C)
+# y de fzf-lua adentro de nvim. Medir su uso por historial da 0 y engaña.
 brew "bat"
 brew "fd"
+brew "fish"
 brew "fzf"
 brew "ripgrep"
-brew "zoxide"
-brew "zsh-autosuggestions"
-brew "zsh-syntax-highlighting"
 brew "gh"
 brew "git"
 brew "jq"
 brew "lazygit"
 brew "libpq"
 brew "mise"
+# nvim es solo $EDITOR (commits, Ctrl-O de fish, ediciones sueltas): un init.lua
+# de ~90 líneas con un plugin. Sin treesitter, así que tampoco hace falta el CLI.
 brew "neovim"
-brew "starship"
 brew "tmux"
+
+cask "ghostty"
+cask "font-geist-mono-nerd-font"
 
 cask "visual-studio-code"
 
@@ -23,8 +27,6 @@ cask "chatgpt"
 
 cask "google-chrome"
 
-brew "container"
-brew "lazydocker"
 cask "docker-desktop"
 cask "bruno"
 cask "postman"
@@ -37,7 +39,6 @@ cask "notion"
 cask "hammerspoon"
 
 cask "slack"
-cask "telegram"
 cask "whatsapp"
 
 cask "ledger-wallet"
