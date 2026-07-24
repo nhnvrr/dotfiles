@@ -22,7 +22,6 @@ fish_add_path -g $GOPATH/bin /opt/homebrew/bin /opt/homebrew/sbin \
 # cada uno contra 13 de `ls` y 12 de `clear` — el alias perdió contra el
 # comando real, así que era ruido.
 alias code 'code --new-window'
-alias lg 'lazygit'
 
 # ─── Git abbreviations ──────────────────────────────────
 # abbr expande en pantalla al apretar espacio: ves el comando real antes de
@@ -158,7 +157,7 @@ set -g tide_docker_default_contexts default desktop-linux
 # Solo bell → status bar naranja de tmux + Dock. Sin notificación macOS
 # (osascript resultaba ruidoso). $CMD_DURATION lo da fish gratis, en ms.
 set -g _notify_threshold 10000
-set -g _notify_ignore nvim less man ssh tmux lazygit lg claude fzf watch top tail dev work side
+set -g _notify_ignore nvim less man ssh tmux claude fzf watch top tail dev work side
 
 function _notify_long_command --on-event fish_postexec --description 'Bell tras un comando largo'
     test -n "$argv[1]"; or return
@@ -192,10 +191,17 @@ if status is-interactive
     # Let Ctrl-S/Ctrl-Q reach the shell instead of being eaten by the terminal.
     stty -ixon 2>/dev/null
 
-    # Auto-export AWS_PROFILE cuando la sesión tmux es "work".
-    # Solo interactivo: subshells y scripts no heredan el profile sin querer.
+    # AWS_PROFILE siempre explícito, según la sesión tmux.
+    # Antes solo se seteaba en la sesión "work" y en el resto quedaba vacío:
+    # como ~/.aws/config no tiene un perfil [default], todo comando aws fuera
+    # de esa sesión fallaba con NoCredentials hasta exportarlo a mano.
+    # Además el item `aws` de Tide solo se dibuja cuando la variable existe,
+    # así que tenerla siempre puesta = ver siempre contra qué cuenta estás.
+    # Solo interactivo: subshells y scripts no lo heredan sin querer.
     if test -n "$TMUX"; and test (tmux display-message -p '#S' 2>/dev/null) = work
         set -gx AWS_PROFILE work
+    else
+        set -gx AWS_PROFILE personal
     end
 
     # ─── fzf: Ctrl-R history, Ctrl-T files, Alt-C dirs ────
