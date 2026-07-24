@@ -28,6 +28,23 @@ theme = Nord Wave
 # FONDO las apps TUI, así que subirlo rompe más de lo que arregla.
 palette = 8=#616E88
 
+# Transparencia
+# 0.92 es deliberadamente sutil: el fondo se insinúa sin competir con el texto.
+# `background-blur` desenfoca lo que hay detrás — sin eso, una ventana con
+# contenido variado atrás vuelve ilegible el texto tenue.
+# `background-opacity-cells = false` (default) deja opacos los fondos de celda,
+# así la selección y los resaltados siguen sólidos sobre el fondo translúcido.
+#
+# OJO con dos efectos:
+#   · nvim corre con transparent = true, así que hereda ESTE fondo: el código
+#     se ve sobre el escritorio, no sobre un color.
+#   · los contrastes medidos contra #212121 (el gris #616E88 a 3.14:1) dejan de
+#     valer, porque el fondo efectivo pasa a depender de lo que haya detrás.
+# Por eso el toggle de abajo: apagarla cuando la legibilidad importa.
+background-opacity = 0.92
+background-blur = true
+keybind = cmd+shift+o=toggle_background_opacity
+
 # Window
 window-padding-x = 2
 window-padding-y = 2
