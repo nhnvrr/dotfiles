@@ -225,7 +225,7 @@ end)
 
 hs.hotkey.bind({ "cmd", "alt" }, "1", function() sideBySide(APPS.zed, APPS.chrome, 0.7) end)
 hs.hotkey.bind({ "cmd", "alt" }, "2", function() sideBySide(APPS.ghostty, APPS.chrome, 0.7) end)
-hs.hotkey.bind({ "cmd", "alt" }, "3", function() sideBySide(APPS.tableplus, APPS.zed, 0.5) end)
+hs.hotkey.bind({ "cmd", "alt" }, "3", function() sideBySide(APPS.tableplus, APPS.chrome, 0.7) end)
 hs.hotkey.bind({ "cmd", "alt" }, "R", rotateLayout)
 hs.hotkey.bind({ "cmd", "alt" }, "F", toggleZoom)
 hs.hotkey.bind({ "cmd", "alt", "ctrl" }, "R", hs.reload)
