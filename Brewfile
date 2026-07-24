@@ -49,7 +49,10 @@ cask "font-sauce-code-pro-nerd-font"
 # VS Code se queda hasta confirmar que AWS Toolkit y Remote-SSH funcionan en
 # Cursor: Cursor usa Open VSX como marketplace y AWS Toolkit no está publicado
 # ahí. Ese es el motivo por el que se eligió VS Code en su momento.
-cask "cursor"
+cask "zed"
+# VS Code se queda como respaldo para el laburo de EC2: Zed tiene remote
+# development por SSH, pero no equivalente de AWS Toolkit ni sesiones SSM, que
+# es justamente por lo que en su momento se había elegido VS Code sobre Zed.
 cask "visual-studio-code"
 
 # ─── Ventanas y lanzador ────────────────────────────────

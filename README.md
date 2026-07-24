@@ -59,7 +59,7 @@ Note: the script prompts for your password twice — once for `sudo` (to add fis
 | Prompt | Tide (fish plugin, via Fisher) | overrides in [`fish/config.fish`](./fish/config.fish) |
 | Terminal | Ghostty | [`ghostty/config`](./ghostty/config) |
 | Multiplexer | tmux | [`tmux/tmux.conf`](./tmux/tmux.conf) |
-| Editor | Cursor / VS Code (user-level config, not versioned here) | — |
+| Editor | Zed (`e` = `zed -n`). VS Code stays as the fallback for EC2 work — Zed has SSH remote development but no AWS Toolkit or SSM sessions. Both configs are user-level, not versioned here | — |
 | `$EDITOR` | Neovim — commits, `git rebase -i`, fish's Ctrl-O. One file, one plugin (the theme), no LSP | [`nvim/init.lua`](./nvim/init.lua) |
 | Database | `psql` as the primary client; TablePlus as the visual complement | [`psql/psqlrc`](./psql/psqlrc) |
 | HTTP | `curl` via the `req` function; Bruno for exploratory work | [`fish/config.fish`](./fish/config.fish) |

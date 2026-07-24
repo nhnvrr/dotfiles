@@ -22,6 +22,10 @@ fish_add_path -g $GOPATH/bin /opt/homebrew/bin /opt/homebrew/sbin \
 # Solo lo que el historial muestra en uso. `ll`/`la`/`cl` se borraron: 1 uso
 # cada uno contra 13 de `ls` y 12 de `clear` — el alias perdió contra el
 # comando real, así que era ruido.
+# El editor es Zed. `-n` abre ventana nueva en vez de reusar la actual, igual
+# que el `--new-window` que tenía el alias de VS Code.
+alias e 'zed -n'
+# VS Code sigue instalado como respaldo para el laburo de EC2 (AWS Toolkit + SSM).
 alias code 'code --new-window'
 
 # ─── Git abbreviations ──────────────────────────────────

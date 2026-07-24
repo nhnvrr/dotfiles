@@ -26,9 +26,11 @@ end
 -- Studio Code") no siempre coinciden con el nombre interno del bundle
 -- (ej. "Code"), causando que hs.application.find falle silenciosamente.
 -- Bundle IDs son estables y únicos.
+-- `editor` en vez de `vscode`: el editor ya cambió varias veces (VS Code →
+-- Cursor → Zed) y la key no debería nombrar a un producto puntual.
 local APPS = {
   chrome    = "com.google.Chrome",
-  vscode    = "com.microsoft.VSCode",
+  editor    = "dev.zed.Zed",
   terminal  = "com.mitchellh.ghostty",
   tableplus = "com.tinyapp.TablePlus",
 }
@@ -217,9 +219,9 @@ end
 -- Hotkeys
 -- ==================================================================
 
-hs.hotkey.bind({"cmd", "alt"}, "1", function() sideBySide(APPS.vscode,    APPS.chrome, 0.7) end)
+hs.hotkey.bind({"cmd", "alt"}, "1", function() sideBySide(APPS.editor,    APPS.chrome, 0.7) end)
 hs.hotkey.bind({"cmd", "alt"}, "2", function() sideBySide(APPS.terminal,  APPS.chrome, 0.7) end)
-hs.hotkey.bind({"cmd", "alt"}, "3", function() sideBySide(APPS.tableplus, APPS.vscode, 0.5) end)
+hs.hotkey.bind({"cmd", "alt"}, "3", function() sideBySide(APPS.tableplus, APPS.editor, 0.5) end)
 hs.hotkey.bind({"cmd", "alt"}, "R", rotateLayout)
 
 -- Zoom toggle de la ventana con foco (⌘⌥F): la maximiza a pantalla
