@@ -132,9 +132,38 @@ set -g tide_left_prompt_items os pwd git newline character
 set -g tide_right_prompt_items status cmd_duration context jobs node bun go rustc python terraform aws docker time
 set -g tide_prompt_add_newline_before true
 set -g tide_prompt_transient_enabled true
-set -g tide_character_icon '❯'
 set -g tide_cmd_duration_threshold 2000
 set -g tide_time_format '%H:%M'
+
+# Iconos. Igual que los colores, vivían solo en variables universales, o sea
+# fuera del repo. Van solo los de los items que están en el prompt.
+#
+# Se definen por CODEPOINT y no pegando el glyph: los de Nerd Font viven en la
+# zona de uso privado (U+E000-F8FF y U+F0000+) y se pierden al copiarlos entre
+# editores, terminales o herramientas — quedan como string vacío sin avisar.
+# Así el fuente es legible y sobrevive cualquier copy/paste.
+# Catálogo: nerdfonts.com/cheat-sheet
+# Para averiguar el codepoint de un glyph: printf '%s' 'X' | xxd
+set -g tide_git_icon (printf '\U0000F1D3')
+set -g tide_os_icon (printf '\U0000F179') # apple
+set -g tide_pwd_icon (printf '\U0000F07C') # carpeta
+set -g tide_cmd_duration_icon (printf '\U0000F252') # reloj de arena
+set -g tide_jobs_icon (printf '\U0000F013') # engranaje
+set -g tide_node_icon (printf '\U0000E24F')
+set -g tide_bun_icon (printf '\U000F0CD3')
+set -g tide_go_icon (printf '\U0000E627')
+set -g tide_rustc_icon (printf '\U0000E7A8')
+set -g tide_python_icon (printf '\U000F0320')
+set -g tide_terraform_icon (printf '\U000F1062')
+set -g tide_aws_icon (printf '\U0000F270')
+set -g tide_docker_icon (printf '\U0000F308')
+
+# El character no es Nerd Font sino Unicode común, y cambia según el modo vi
+# (usás fish_hybrid_key_bindings): ❯ insert, ❮ normal, ▶ replace, V visual.
+set -g tide_character_icon '❯'
+set -g tide_character_vi_icon_default '❮'
+set -g tide_character_vi_icon_replace '▶'
+set -g tide_character_vi_icon_visual 'V'
 
 # Nord: frost para paths, aurora para estado git.
 # Nota sobre el gris apagado: nord3 (#4C566A) daba 1.7:1 de contraste sobre el
