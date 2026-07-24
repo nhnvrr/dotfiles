@@ -34,8 +34,9 @@ The script is idempotent — re-run it anytime to bring a machine back in sync. 
 - Generates an `ed25519` SSH key if missing, registers it with the macOS Keychain via `~/.ssh/config`, and copies the pubkey to the clipboard for GitHub
 - Symlinks all config files into `$HOME` (see [Managed files](#managed-files))
 - Applies a small set of macOS defaults (fast key-repeat, no press-and-hold, Finder show extensions, Dock autohide, screenshots into `~/Pictures/Screenshots`)
-- Installs the Ioskeley Term Nerd Font from its GitHub release (no Homebrew cask available)
-- Switches the login shell to `/bin/zsh` if needed (uses `dscl` to read the real login shell, not `$SHELL`)
+- Installs [Fisher](https://github.com/jorgebucaran/fisher) and the [Tide](https://github.com/IlanCosman/tide) prompt into fish, then seeds Tide's base config via `tide configure --auto`
+- Registers fish in `/etc/shells` (needs `sudo`) and switches the login shell to it (uses `dscl` to read the real login shell, not `$SHELL`)
+- Removes the stale `~/.zshrc` / `~/.config/starship.toml` symlinks left by the previous zsh + starship setup (only if they point into this repo)
 
 The `link_file` helper backs up any pre-existing regular file at the destination to `<dst>.bak.<timestamp>` before replacing it with a symlink — your hand-edited configs won't disappear silently.
 
@@ -46,26 +47,35 @@ After `install.sh` exits cleanly:
 1. **Paste the SSH pubkey on GitHub** — it's already on your clipboard. Add it at <https://github.com/settings/ssh/new> as both an authentication key AND a signing key (so your signed commits show up as Verified).
 2. **Authenticate the GitHub CLI:** `gh auth login` (script reminds you if not authenticated).
 3. **Grant Accessibility permission to Hammerspoon** on first launch (System Settings → Privacy & Security → Accessibility). Required for window management hotkeys.
-4. **Restart your terminal** so the new login shell, fonts, and macOS defaults all take effect.
+4. **Open Ghostty** (not Terminal.app) — it picks up `ghostty/config`, the Geist Mono Nerd Font, and fish as the login shell.
+
+Note: the script prompts for your password twice — once for `sudo` (to add fish to `/etc/shells`) and once for `chsh`.
 
 ## Tooling
 
 | Layer | Tool | Config file |
 |---|---|---|
-| Shell | zsh | [`zsh/zshrc`](./zsh/zshrc) |
-| Prompt | starship | [`starship/starship.toml`](./starship/starship.toml) |
-| Terminal | Terminal.app | — (config a nivel usuario) |
+| Shell | fish | [`fish/config.fish`](./fish/config.fish) |
+| Prompt | Tide (fish plugin, via Fisher) | overrides in [`fish/config.fish`](./fish/config.fish) |
+| Terminal | Ghostty | [`ghostty/config`](./ghostty/config) |
 | Multiplexer | tmux | [`tmux/tmux.conf`](./tmux/tmux.conf) |
-| Editor | Neovim (LSP, treesitter, conform, gitsigns, fzf-lua, mason) | [`nvim/`](./nvim/) |
+| Editor | VS Code (user-level config, not versioned here) | — |
+| `$EDITOR` | Neovim — commits, `git rebase -i`, fish's Ctrl-O. One file, one plugin (the theme), no LSP | [`nvim/init.lua`](./nvim/init.lua) |
 | Window mgmt | Hammerspoon | [`hammerspoon/init.lua`](./hammerspoon/init.lua) |
 | Runtime mgr | mise | [`mise/config.toml`](./mise/config.toml) |
-| Font | IoskeleyMonoTerm Nerd Font | installed from GitHub release |
-| Theme | Per-app (dark-only). nvim: OneDark. tmux: colores default. Terminal.app: profile a nivel usuario. starship/bat/fzf siguen la paleta ANSI. Editores GUI: theme a nivel usuario | — |
+| Font | GeistMono Nerd Font (Vercel) | cask `font-geist-mono-nerd-font` |
+| Theme | Nord Wave (dark-only): Nord palette on a neutral `#212121` background. Ghostty owns it; nvim (transparent), fzf and Tide follow in truecolor hex. tmux keeps its stock theme and `bat` the terminal's ANSI palette. GUI editors keep their own user-level theme | — |
 
-`zsh/zshrc` notes:
+`fish/config.fish` notes:
 - Defines `dev` / `work` / `side` aliases that spawn (or switch to) a named tmux session with a fixed CWD.
-- Auto-exports `AWS_PROFILE=work` when inside the `work` tmux session (inside the interactive block only — non-interactive subshells don't inherit it).
+- Auto-exports `AWS_PROFILE=work` when inside the `work` tmux session (inside the `status is-interactive` block only — non-interactive subshells don't inherit it).
 - Wraps `claude` so that `CLAUDE_CONFIG_DIR=~/.claude-work` is used in the `work` session, letting two Claude Code subscriptions stay logged in side-by-side.
+- Uses `abbr` (not `alias`) for the git shortcuts — they expand in place so you see the real command before running it, and the history stores the expanded form.
+- Pins Tide's appearance with `set -g tide_*`. Tide itself stores config in *universal* variables, which aren't versionable; a global shadows a universal in fish's scoping, so this file stays the source of truth. `install.sh` only seeds the base config.
+
+### Why fish
+
+fish ships autosuggestions, syntax highlighting, prefix history search and completions natively — the previous zsh setup needed two Homebrew plugins plus ~40 lines of `zshrc` to get the same. `$CMD_DURATION` also replaced the hand-rolled `$SECONDS` timing hook for the long-command bell.
 
 ## Homebrew packages
 
@@ -83,17 +93,17 @@ These are symlinked from the repo into `$HOME`:
 
 | Repo path | Destination |
 |---|---|
-| `zsh/zshrc` | `~/.zshrc` |
+| `fish/config.fish` | `~/.config/fish/config.fish` |
+| `ghostty/config` | `~/.config/ghostty/config` |
 | `tmux/tmux.conf` | `~/.tmux.conf` |
-| `starship/starship.toml` | `~/.config/starship.toml` |
 | `mise/config.toml` | `~/.config/mise/config.toml` |
 | `nvim/init.lua` | `~/.config/nvim/init.lua` |
-| `nvim/lua` | `~/.config/nvim/lua` |
-| `nvim/keymaps.md` | `~/.config/nvim/keymaps.md` |
 | `hammerspoon/init.lua` | `~/.hammerspoon/init.lua` |
 | `gh/config.yml` (if present) | `~/.config/gh/config.yml` |
 
 The Neovim config is symlinked, so edits inside `~/.config/nvim` are reflected directly in the repo.
+
+Only `config.fish` is symlinked out of `~/.config/fish/` — Fisher and Tide **write** into `functions/`, `completions/` and `conf.d/`, so symlinking those would let a plugin install dirty the repo.
 
 ## What is NOT managed
 
@@ -105,5 +115,6 @@ The Neovim config is symlinked, so edits inside `~/.config/nvim` are reflected d
 ## Notes
 
 - Supports macOS only.
-- The script may prompt for your password when `chsh` runs.
+- The script prompts for your password twice: `sudo` (adding fish to `/etc/shells`) and `chsh` (switching the login shell).
+- Rollback: `chsh -s /bin/zsh` restores the previous login shell. The old `zshrc` and `starship.toml` are still in git history.
 - Designed to be safe to rerun: every step either no-ops or moves existing state aside before replacing it.
