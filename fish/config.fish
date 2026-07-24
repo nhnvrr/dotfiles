@@ -248,16 +248,16 @@ function fish_user_key_bindings
 end
 set -g fish_key_bindings fish_hybrid_key_bindings
 
-# Cursor: beam parpadeante en TODOS los modos vi.
-# Con bindings vi (o hybrid) fish maneja el cursor él mismo vía fish_vi_cursor,
-# y su default en modo normal es `block` — eso es lo que pisaba el beam que
-# configuran Ghostty y tmux, y por qué el cursor quedaba cuadrado al apretar Esc.
-# `line`+`blink` emite \e[5 q, el mismo escape que pide tmux con blinking-bar.
-# El modo se sigue distinguiendo por el caracter del prompt: ❯ insert, ❮ normal.
-for _m in default insert replace replace_one visual external unknown
-    set -g fish_cursor_$_m line blink
-end
-set -e _m
+# Cursor por modo vi: beam parpadeante al escribir (insert), block al navegar
+# (normal/visual). El block es el indicador de modo — se ve de un vistazo si
+# estás en insert o no, sin mirar el caracter del prompt.
+# Con bindings hybrid, fish maneja el cursor vía fish_vi_cursor; sin esto su
+# default ya es block en normal, pero lo fijamos explícito para el resto.
+set -g fish_cursor_insert line blink        # escribiendo → beam
+set -g fish_cursor_replace_one underscore   # reemplazar un char → subrayado
+set -g fish_cursor_default block            # normal → block
+set -g fish_cursor_visual block             # visual → block
+set -g fish_cursor_external block
 
 # ─── Interactive-only setup ─────────────────────────────
 if status is-interactive

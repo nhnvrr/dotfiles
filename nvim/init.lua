@@ -30,10 +30,12 @@ opt.expandtab = true
 opt.ignorecase = true
 opt.smartcase = true
 
--- Cursor: beam parpadeante en TODOS los modos. El default de nvim es
--- `n-v-c-sm:block,i-ci-ve:ver25,...` — o sea bloque en normal/visual/command,
--- que pisaba el beam configurado en Ghostty y en tmux. `a:` aplica a todo.
-opt.guicursor = "a:ver25-blinkwait700-blinkon400-blinkoff250"
+-- Cursor: block en normal/visual/command, beam parpadeante en insert. Es el
+-- indicador de modo — de un vistazo sabés si estás editando o navegando.
+--   n-v-c  block
+--   i-ci-ve  ver25 (beam) con parpadeo
+--   r-cr-o   hor20 (subrayado) al reemplazar
+opt.guicursor = "n-v-c:block,i-ci-ve:ver25-blinkwait700-blinkon400-blinkoff250,r-cr-o:hor20"
 
 opt.termguicolors = true
 opt.cursorline = true
