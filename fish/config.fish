@@ -307,13 +307,12 @@ if status is-interactive
 
         fzf --fish | source
 
-        # Ctrl-; para el historial, además del Ctrl-R que deja `fzf --fish`.
-        # `\e[59;5u` es la secuencia CSI-u de Ctrl+; (59 = ';', 5 = Ctrl). Solo
-        # llega si Ghostty manda el protocolo Kitty Y tmux tiene extended-keys
-        # on con extkeys en terminal-features (ambos ya configurados en
-        # tmux.conf). Fuera de ese combo, Ctrl+; sigue siendo un ';' normal.
+        # Ctrl-L para el historial, además del Ctrl-R que deja `fzf --fish`.
+        # Ctrl-L es un control char real (0x0c), así que funciona en cualquier
+        # terminal sin protocolo Kitty ni extended-keys. Pisa el clear-screen
+        # que fish le da por default, pero en Ghostty eso lo hace cmd+k.
         for mode in insert default
-            bind -M $mode \e\[59\;5u fzf-history-widget
+            bind -M $mode ctrl-l fzf-history-widget
         end
     end
 end
