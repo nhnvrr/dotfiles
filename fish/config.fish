@@ -36,6 +36,33 @@ abbr -a ga 'git add' # 27
 abbr -a gb 'git branch' # 10
 abbr -a gd 'git diff' # 3
 
+# ─── HTTP: curl para trabajo de API ─────────────────────
+# A propósito NO hay ~/.curlrc: ese archivo lo lee TODA invocación de curl,
+# incluida la del instalador de Homebrew en install.sh y la de cualquier script
+# de terceros. Meter --silent o --location ahí cambiaría el comportamiento de
+# cosas que hoy funcionan. Los flags viven acá, aplicados solo si los pedís.
+#
+#   --show-error   errores visibles aunque --silent apague la barra de progreso
+#   --location     seguir redirects
+#   --compressed   aceptar gzip
+#   --globoff      que [] y {} en la URL no se interpreten como globs
+#   timeouts       para que no cuelgue una terminal esperando para siempre
+#
+# Los argumentos se pasan tal cual, así que -i, -X POST, -d, -H funcionan.
+function req --description 'curl con flags sanos; formatea la respuesta si es JSON'
+    set -l out (curl --silent --show-error --location --compressed \
+        --connect-timeout 10 --max-time 60 --globoff $argv | string collect)
+    set -l code $pipestatus[1]
+    test $code -ne 0; and return $code
+
+    # jq solo si la respuesta parsea como JSON; si no, sale tal cual.
+    if command -q jq; and printf '%s' $out | jq -e . >/dev/null 2>&1
+        printf '%s' $out | jq .
+    else
+        printf '%s\n' $out
+    end
+end
+
 # ─── tmux: abrir o crear una sesión con nombre ──────────
 function __tx --argument-names name --description 'Attach/create una sesión tmux fija'
     set -l dir

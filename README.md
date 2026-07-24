@@ -30,7 +30,7 @@ The script is idempotent — re-run it anytime to bring a machine back in sync. 
 
 - Installs Homebrew (if missing) and applies [`Brewfile`](./Brewfile) via `brew bundle`
 - Installs mise-managed runtimes pinned in [`mise/config.toml`](./mise/config.toml) (Node, Bun, Go, AWS CLI, Terraform)
-- Configures global `~/.gitconfig` (identity, aliases, pull-rebase, SSH commit signing, histogram diff, zdiff3 conflict style)
+- Symlinks [`git/gitconfig`](./git/gitconfig) to `~/.gitconfig`, plus the global ignore and the allowed-signers file it references
 - Generates an `ed25519` SSH key if missing, registers it with the macOS Keychain via `~/.ssh/config`, and copies the pubkey to the clipboard for GitHub
 - Symlinks all config files into `$HOME` (see [Managed files](#managed-files))
 - Applies a small set of macOS defaults (fast key-repeat, no press-and-hold, Finder show extensions, Dock autohide, screenshots into `~/Pictures/Screenshots`)
@@ -59,16 +59,20 @@ Note: the script prompts for your password twice — once for `sudo` (to add fis
 | Prompt | Tide (fish plugin, via Fisher) | overrides in [`fish/config.fish`](./fish/config.fish) |
 | Terminal | Ghostty | [`ghostty/config`](./ghostty/config) |
 | Multiplexer | tmux | [`tmux/tmux.conf`](./tmux/tmux.conf) |
-| Editor | VS Code (user-level config, not versioned here) | — |
+| Editor | Cursor / VS Code (user-level config, not versioned here) | — |
 | `$EDITOR` | Neovim — commits, `git rebase -i`, fish's Ctrl-O. One file, one plugin (the theme), no LSP | [`nvim/init.lua`](./nvim/init.lua) |
-| Window mgmt | Hammerspoon | [`hammerspoon/init.lua`](./hammerspoon/init.lua) |
-| Runtime mgr | mise | [`mise/config.toml`](./mise/config.toml) |
+| Database | `psql` as the primary client; TablePlus as the visual complement | [`psql/psqlrc`](./psql/psqlrc) |
+| HTTP | `curl` via the `req` function; Bruno for exploratory work | [`fish/config.fish`](./fish/config.fish) |
+| Git | versioned config, SSH-signed commits | [`git/gitconfig`](./git/gitconfig) |
+| Window mgmt | Hammerspoon (app-pair layouts) + Raycast (launcher, clipboard, simple windows) | [`hammerspoon/init.lua`](./hammerspoon/init.lua) |
+| Runtime mgr | mise — global versions plus per-project `.nvmrc` | [`mise/config.toml`](./mise/config.toml) |
 | Font | GeistMono Nerd Font (Vercel) | cask `font-geist-mono-nerd-font` |
 | Theme | Nord Wave (dark-only): Nord palette on a neutral `#212121` background. Ghostty owns it; nvim (transparent), fzf and Tide follow in truecolor hex. tmux keeps its stock theme and `bat` the terminal's ANSI palette. GUI editors keep their own user-level theme | — |
 
 `fish/config.fish` notes:
 - Defines `dev` / `work` / `side` aliases that spawn (or switch to) a named tmux session with a fixed CWD.
-- Auto-exports `AWS_PROFILE=work` when inside the `work` tmux session (inside the `status is-interactive` block only — non-interactive subshells don't inherit it).
+- Always exports an explicit `AWS_PROFILE` — `work` inside the `work` tmux session, `personal` everywhere else (inside the `status is-interactive` block only, so non-interactive subshells don't inherit it). `~/.aws/config` has no `[default]` profile, so leaving it unset means every `aws` command fails with `NoCredentials`; setting it always also means Tide's `aws` item always draws, which is how you see which account you're pointed at.
+- Provides `req` — curl with sane flags, piping the response through `jq` when it parses as JSON. There is deliberately no `~/.curlrc`: that file is read by *every* curl invocation, including the Homebrew installer's and any third-party script's.
 - Wraps `claude` so that `CLAUDE_CONFIG_DIR=~/.claude-work` is used in the `work` session, letting two Claude Code subscriptions stay logged in side-by-side.
 - Uses `abbr` (not `alias`) for the git shortcuts — they expand in place so you see the real command before running it, and the history stores the expanded form.
 - Pins Tide's appearance with `set -g tide_*`. Tide itself stores config in *universal* variables, which aren't versionable; a global shadows a universal in fish's scoping, so this file stays the source of truth. `install.sh` only seeds the base config.
@@ -99,15 +103,28 @@ These are symlinked from the repo into `$HOME`:
 | `mise/config.toml` | `~/.config/mise/config.toml` |
 | `nvim/init.lua` | `~/.config/nvim/init.lua` |
 | `hammerspoon/init.lua` | `~/.hammerspoon/init.lua` |
+| `git/gitconfig` | `~/.gitconfig` |
+| `git/ignore` | `~/.config/git/ignore` |
+| `git/allowed_signers` | `~/.config/git/allowed_signers` |
+| `psql/psqlrc` | `~/.psqlrc` |
 | `gh/config.yml` (if present) | `~/.config/gh/config.yml` |
 
 The Neovim config is symlinked, so edits inside `~/.config/nvim` are reflected directly in the repo.
+
+Because `~/.gitconfig` is a symlink, any `git config --global …` you run writes straight into `git/gitconfig` in this repo. That's deliberate — the change gets versioned instead of drifting in `$HOME` — but it does mean the repo shows as dirty after you touch git config.
 
 Only `config.fish` is symlinked out of `~/.config/fish/` — Fisher and Tide **write** into `functions/`, `completions/` and `conf.d/`, so symlinking those would let a plugin install dirty the repo.
 
 ## What is NOT managed
 
-- **VS Code** — config (`settings.json`, keybindings, theme) es a nivel usuario, no versionada (`Settings Sync` vive en otro lado).
+- **Database credentials** — `~/.pgpass` holds them so `psql` doesn't prompt. It is a secrets file and is **never** versioned. Create it by hand, one connection per line, and lock it down or Postgres refuses to read it:
+
+  ```
+  hostname:port:database:username:password     # * works as a wildcard
+  chmod 600 ~/.pgpass
+  ```
+
+- **VS Code / Cursor** — config (`settings.json`, keybindings, theme) es a nivel usuario, no versionada (`Settings Sync` vive en otro lado).
 - **IdeaVim (DataGrip)** — `~/.ideavimrc` es config a nivel usuario; no se versiona acá.
 - **`~/.aws/config`** — keep your own AWS profiles where you want them; the repo only sets `AWS_PROFILE` based on tmux session.
 - **`~/.claude/`** (and the optional `~/.claude-work/`) — Claude Code config is user-level state, not versioned. Bootstrap a work account with `CLAUDE_CONFIG_DIR=~/.claude-work claude` then `/login`.

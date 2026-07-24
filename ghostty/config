@@ -11,6 +11,16 @@ font-size = 14
 # Sin `background`/`background-opacity` propios: manda el tema, fondo sólido.
 theme = Nord Wave
 
+# Nord Wave define palette 8 (bright black) = #4c566a, que sobre su propio fondo
+# #212121 da 2.18:1 — por debajo del 3:1 mínimo para texto no-cuerpo. Es el color
+# con el que salen los hashes de `git log --oneline`, la metadata de `ls`, `man`
+# y los headers de delta: todo el texto "dim" del sistema, ilegible.
+# #616E88 (el "comment" de Nord) llega a 3.14:1 y sigue leyéndose como
+# secundario. Mismo criterio que ya aplica fish/config.fish para Tide.
+# palette 0 (#3b4252, 1.6:1) queda como está: es el negro normal y lo usan como
+# FONDO las apps TUI, así que subirlo rompe más de lo que arregla.
+palette = 8=#616E88
+
 # Window
 window-padding-x = 2
 window-padding-y = 2
