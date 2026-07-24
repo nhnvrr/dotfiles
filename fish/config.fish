@@ -165,50 +165,49 @@ set -g tide_character_vi_icon_default '❮'
 set -g tide_character_vi_icon_replace '▶'
 set -g tide_character_vi_icon_visual 'V'
 
-# Nord: frost para paths, aurora para estado git.
-# Nota sobre el gris apagado: nord3 (#4C566A) daba 1.7:1 de contraste sobre el
-# viejo fondo #2E3440 y 2.2:1 sobre el #212121 de Nord Wave — ilegible en ambos.
-# Se usa #616E88 (el "comment" de Nord) que llega a 3.1:1, el mínimo para texto
-# no-cuerpo. Sigue leyéndose como secundario pero se lee.
-set -l nord_muted 616E88
+# Paleta kanso-zen, mapeada desde Nord por rol. El gris apagado es el
+# bright-black de kanso (#5C6066): sobre el fondo #090E13 da 3.06:1, arriba del
+# 3:1 mínimo para texto no-cuerpo. Se lee como secundario pero se lee.
+set -l muted 5C6066
 
-set -g tide_pwd_color_dirs 81A1C1 # nord9  frost
-set -g tide_pwd_color_anchors 88C0D0 # nord8  frost
-set -g tide_pwd_color_truncated_dirs $nord_muted
-set -g tide_git_color_branch A3BE8C # nord14 green
-set -g tide_git_color_dirty EBCB8B # nord13 yellow
-set -g tide_git_color_untracked B48EAD # nord15 purple
-set -g tide_git_color_conflicted BF616A # nord11 red
-set -g tide_git_color_staged A3BE8C
-set -g tide_git_color_upstream 88C0D0
+set -g tide_pwd_color_dirs 8ba4b0 # blue
+set -g tide_pwd_color_anchors 7aa89f # bright cyan
+set -g tide_pwd_color_truncated_dirs $muted
+set -g tide_git_color_branch 87a987 # bright green
+set -g tide_git_color_dirty e6c384 # bright yellow
+set -g tide_git_color_untracked 938aa9 # bright magenta
+set -g tide_git_color_conflicted e46876 # bright red
+set -g tide_git_color_staged 87a987
+set -g tide_git_color_upstream 7aa89f
 # Rebase/merge/cherry-pick en curso y stash pendiente: sin esto quedaban en los
 # defaults 256-color de `tide configure --auto` (#FF0000 y #5FD700), los dos
 # únicos colores crudos que seguían apareciendo en el prompt.
-set -g tide_git_color_operation D08770 # nord12 orange → operación en curso
-set -g tide_git_color_stash 8FBCBB # nord7  frost  → hay stash
-set -g tide_character_color A3BE8C
-set -g tide_character_color_failure BF616A
-set -g tide_cmd_duration_color 88C0D0
-set -g tide_status_color A3BE8C
-set -g tide_status_color_failure BF616A
-set -g tide_context_color_default $nord_muted
-set -g tide_context_color_ssh D08770 # nord12 orange
-set -g tide_context_color_root BF616A # nord11 red → root, mismo peso que un error
-set -g tide_jobs_color 81A1C1
-set -g tide_aws_color EBCB8B
-set -g tide_node_color A3BE8C
-set -g tide_bun_color E5E9F0
-set -g tide_go_color 88C0D0
-set -g tide_rustc_color BF616A
-set -g tide_python_color EBCB8B
-set -g tide_terraform_color B48EAD
-set -g tide_docker_color 88C0D0
-set -g tide_time_color $nord_muted
+# kanso no tiene naranja, así que la operación en curso usa el rojo apagado.
+set -g tide_git_color_operation c4746e # red apagado → operación en curso
+set -g tide_git_color_stash 8ea4a2 # cyan → hay stash
+set -g tide_character_color 87a987
+set -g tide_character_color_failure e46876
+set -g tide_cmd_duration_color 7aa89f
+set -g tide_status_color 87a987
+set -g tide_status_color_failure e46876
+set -g tide_context_color_default $muted
+set -g tide_context_color_ssh c4746e # red apagado
+set -g tide_context_color_root e46876 # bright red → root, mismo peso que un error
+set -g tide_jobs_color 8ba4b0
+set -g tide_aws_color e6c384
+set -g tide_node_color 87a987
+set -g tide_bun_color c5c9c7 # fg
+set -g tide_go_color 7aa89f
+set -g tide_rustc_color e46876
+set -g tide_python_color e6c384
+set -g tide_terraform_color 938aa9
+set -g tide_docker_color 7aa89f
+set -g tide_time_color $muted
 
 # Cromo del prompt (no son items, se pintan aparte): el relleno entre prompt
 # izquierdo y derecho, y el separador entre items adyacentes del mismo color.
-set -g tide_prompt_color_frame_and_connection 434C5E # nord2
-set -g tide_prompt_color_separator_same_color $nord_muted
+set -g tide_prompt_color_frame_and_connection 22262D # selection, estructura tenue
+set -g tide_prompt_color_separator_same_color $muted
 
 # El contexto de docker solo interesa cuando NO es el local: sin esto, el
 # prompt muestra "desktop-linux" permanentemente.
@@ -289,15 +288,13 @@ if status is-interactive
 
         # Layout: pane abajo, reversa (input arriba), 40% height, borde sutil.
         # --bind: Ctrl-/ togglea preview, Ctrl-y copia la selección al clipboard.
-        # Colores sobre el fondo #212121 de Nord Wave:
-        #   bg+ (fila seleccionada) #3B4252 daba 1.60:1 — casi invisible.
-        #     Con #4C566A queda en 2.18:1 y la selección se distingue.
-        #   info/border #4C566A daban 2.18:1 → #616E88 los lleva a 3.14:1,
-        #     el mismo gris que usa el prompt Tide.
+        # Paleta kanso-zen sobre el fondo #090E13. bg+ (fila seleccionada) e
+        # info/border usan el bright-black #5C6066: 3.06:1, se distingue sin
+        # gritar. El resto mapea al mismo rol que el prompt Tide.
         set -gx FZF_DEFAULT_OPTS '
           --height 40% --layout=reverse --border=rounded
           --bind="ctrl-/:toggle-preview,ctrl-y:execute-silent(echo {} | pbcopy)+abort"
-          --color=bg+:#4C566A,fg:#D8DEE9,fg+:#ECEFF4,hl:#88C0D0,hl+:#8FBCBB,info:#616E88,prompt:#81A1C1,pointer:#BF616A,marker:#A3BE8C,border:#616E88,header:#81A1C1,spinner:#8FBCBB'
+          --color=bg+:#5C6066,fg:#a4a7a4,fg+:#c5c9c7,hl:#7aa89f,hl+:#8ea4a2,info:#5C6066,prompt:#8ba4b0,pointer:#e46876,marker:#87a987,border:#5C6066,header:#8ba4b0,spinner:#8ea4a2'
 
         # Preview con bat para Ctrl-T y completion de archivos.
         set -gx FZF_CTRL_T_OPTS "--preview 'bat --style=numbers --color=always --line-range :200 {}'"
