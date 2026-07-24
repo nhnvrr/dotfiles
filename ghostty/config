@@ -46,14 +46,32 @@ background-blur = true
 keybind = cmd+shift+o=toggle_background_opacity
 
 # Window
-window-padding-x = 2
-window-padding-y = 2
-macos-titlebar-style = transparent
+# Sin padding: el texto arranca en el borde. Con `window-padding-color` en su
+# default (background), el fondo igual llega hasta el borde de la ventana.
+window-padding-x = 0
+window-padding-y = 0
+
+# Titlebar `tabs`: barra custom que integra la tab bar y toma el color de fondo
+# del terminal — no hay una franja gris separada arriba.
+# El otro extremo es `hidden`, que la saca del todo; no lo puse porque entonces
+# la ventana ya no se puede arrastrar desde arriba (hay que hacer option+click
+# en el borde), y eso se siente roto. Si querés probarlo, es cambiar la palabra.
+macos-titlebar-style = tabs
+
 # tmux ya persiste las sesiones; restaurar ventanas de Ghostty duplicaría estado.
 window-save-state = never
 
-# Cursor — beam parpadeante. Reemplaza el hook `\e[5 q` que tenía el zshrc:
-# shell-integration se lo comunica a la shell y sobrevive a salir de nvim.
+# El cartel con el tamaño en filas×columnas al redimensionar es ruido.
+resize-overlay = never
+
+# Interlineado: +8% de alto de celda. Source Code Pro es compacta de fábrica y
+# en sesiones largas el texto se apelmaza. Es el único "aire" que queda ahora
+# que el padding está en 0, y a diferencia del padding sí ayuda a leer.
+# Bajalo a 0% si preferís máxima densidad.
+adjust-cell-height = 8%
+
+# Cursor — beam parpadeante. Ojo: esto define el cursor del TERMINAL, pero una
+# app puede pedir otra forma vía DECSCUSR. nvim lo hace (ver su guicursor).
 cursor-style = bar
 cursor-style-blink = true
 
