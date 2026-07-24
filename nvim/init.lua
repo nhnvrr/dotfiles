@@ -10,12 +10,12 @@
 vim.g.mapleader = " "
 
 -- ─── Theme ──────────────────────────────────────────────
--- transparent = true ⇒ el fondo lo pone el terminal (#212121 de Nord Wave),
--- así que cambiar de variante Nord en Ghostty no requiere tocar nada acá.
-vim.pack.add({ "https://github.com/gbprod/nord.nvim" })
-require("nord").setup({ transparent = true, terminal_colors = true })
+-- kanso (variante Zen), el mismo que Ghostty. transparent = true ⇒ el fondo lo
+-- pone el terminal, así que nvim hereda el #090E13 de kanso-zen sin fijarlo.
+vim.pack.add({ "https://github.com/webhooked/kanso.nvim" })
+require("kanso").setup({ transparent = true, theme = "zen" })
 vim.o.background = "dark"
-vim.cmd.colorscheme("nord")
+vim.cmd.colorscheme("kanso-zen")
 
 -- ─── Options ────────────────────────────────────────────
 local opt = vim.opt

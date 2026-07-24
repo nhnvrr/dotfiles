@@ -1,9 +1,8 @@
 font-family = SauceCodePro Nerd Font Mono
 font-feature = -calt, -liga, -dlig
 font-size = 21
-theme = Nord Wave
+theme = kanso-zen
 
-palette = 8=#616E88
 
 background-opacity = 0.92
 background-blur = true
