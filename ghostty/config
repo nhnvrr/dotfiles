@@ -5,19 +5,19 @@
 #
 # El nombre de familia es el que reporta `ghostty +list-fonts`. El cask instala
 # tres variantes, que se diferencian SOLO en cómo tratan los iconos:
-#   NF   ancho natural — los iconos anchos ocupan dos celdas y se ven a tamaño
-#        real. Es la que usamos.
-#   NFM  Mono: comprime todo icono a una celda. Garantiza alineación pero los
-#        deja apretados.
+#   NFM  Mono: comprime todo icono a una celda. Alineación garantizada en el
+#        prompt y en cualquier TUI. Es la que usamos.
+#   NF   ancho natural: los iconos anchos ocupan dos celdas y se ven más
+#        grandes, a costa de poder correr columnas.
 #   NFP  Propo: espaciado proporcional, pensada para fuera del terminal.
-#
-# Ghostty resuelve bien los glyphs de doble ancho (grapheme-width-method =
-# unicode), así que la NF se ve mejor sin romper columnas. Si alguna vez notás
-# el prompt de Tide corrido o una TUI desalineada, cambiá a "Mono" — es la
-# única diferencia entre las dos.
-#
-# Sin ligaduras, a diferencia de JetBrains Mono o Fira Code.
-font-family = SauceCodePro Nerd Font
+font-family = SauceCodePro Nerd Font Mono
+
+# Ligaduras apagadas. Source Code Pro no trae ligaduras de programación, así
+# que hoy esto no cambia nada visible — está para que la garantía sobreviva a
+# un cambio de fuente: si algún día ponés una con ligaduras, no aparecen solas.
+# -calt es el feature típico de ligaduras de programación; -liga y -dlig cubren
+# las estándar y las discrecionales.
+font-feature = -calt, -liga, -dlig
 font-size = 14
 
 # Theme — Nord Wave, dark-only: misma paleta Nord (aurora/frost/snow storm) pero
