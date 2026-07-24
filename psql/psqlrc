@@ -1,0 +1,81 @@
+-- ~/.psqlrc — psql es el cliente principal de base de datos.
+-- TablePlus queda como complemento visual, no como camino por defecto.
+--
+-- OJO con los scripts: psql lee este archivo también cuando no es interactivo.
+-- Un script que parsee la salida (`psql -t -A -c ...`) va a ver el '∅' de NULL
+-- y el formato unicode de abajo. Para scripts, usar `psql -X` (ignora psqlrc).
+
+-- QUIET evita que cada \set y \pset imprima su confirmación al arrancar.
+\set QUIET 1
+
+-- ─── Prompt ─────────────────────────────────────────────
+-- La pieza de seguridad del archivo. Sin esto, una sesión contra un RDS de
+-- producción se ve exactamente igual que una contra localhost.
+--   %n usuario · %m host (hasta el primer punto: el identificador del RDS)
+--   %/ base    · %# '=' normal, '#' si sos superusuario
+-- El host va en amarillo porque es el dato que más importa mirar antes de
+-- escribir algo destructivo.
+\set PROMPT1 '%[%033[36m%]%n%[%033[0m%]@%[%033[1;33m%]%m%[%033[0m%]/%[%033[32m%]%/%[%033[0m%]%[%033[1m%]%#%[%033[0m%] '
+-- PROMPT2 es la continuación de una query multilínea.
+\set PROMPT2 '%[%033[2m%]...%[%033[0m%]%# '
+
+-- ─── Salida ─────────────────────────────────────────────
+-- Toda query reporta cuánto tardó, sin acordarse de activarlo.
+\timing on
+
+-- NULL visible: sin esto, NULL y string vacío se ven idénticos.
+\pset null '∅'
+
+\pset linestyle unicode
+\pset border 2
+
+-- Pager:
+--   -S  no wrapea → las tablas anchas se navegan lateral en vez de volverse
+--       una papilla de líneas partidas
+--   -R  respeta los colores
+--   -X  no limpia la pantalla al salir (el resultado queda a la vista)
+--   -F  si el resultado entra en una pantalla, ni abre el pager
+\setenv PAGER 'less -SRXF'
+\pset pager on
+
+-- ─── Historial ──────────────────────────────────────────
+-- Uno por base, en vez de un único archivo que mezcla queries de todas.
+-- install.sh crea ~/.local/state/psql/ — sin ese directorio falla en silencio.
+\set HISTFILE ~/.local/state/psql/history-:DBNAME
+\set HISTSIZE 5000
+\set HISTCONTROL ignoredups
+
+-- ─── Comportamiento ─────────────────────────────────────
+-- Autocompletar palabras clave en MAYÚSCULA.
+\set COMP_KEYWORD_CASE upper
+
+-- Un typo dentro de una transacción aborta solo esa sentencia, no tira abajo
+-- todo el trabajo previo de la transacción.
+\set ON_ERROR_ROLLBACK interactive
+
+-- Errores con detalle: constraint, tabla y columna involucradas.
+\set VERBOSITY verbose
+
+-- ─── Atajos ─────────────────────────────────────────────
+-- Se invocan con :nombre — sin backslash y sin punto y coma.
+-- Solo funcionan en sesión interactiva o por stdin: `psql -c ':conns'` NO
+-- interpola variables y falla con "syntax error at or near :". Es cómo
+-- funciona -c en psql, no un problema de este archivo.
+
+-- :conns — qué está corriendo ahora, lo más lento primero.
+\set conns 'SELECT pid, usename, application_name, client_addr, state, wait_event_type, now() - query_start AS duration, left(query, 60) AS query FROM pg_stat_activity WHERE pid <> pg_backend_pid() AND state <> ''idle'' ORDER BY duration DESC NULLS LAST;'
+
+-- :blocking — quién está bloqueando a quién. Lo primero que se mira cuando
+-- algo "se colgó".
+\set blocking 'SELECT blocked.pid AS blocked_pid, blocked.query AS blocked_query, blocking.pid AS blocking_pid, blocking.query AS blocking_query FROM pg_stat_activity blocked JOIN pg_stat_activity blocking ON blocking.pid = ANY(pg_blocking_pids(blocked.pid)) WHERE cardinality(pg_blocking_pids(blocked.pid)) > 0;'
+
+-- :locks — locks otorgados y pendientes.
+\set locks 'SELECT l.pid, l.locktype, l.mode, l.granted, c.relname, left(a.query, 50) AS query FROM pg_locks l LEFT JOIN pg_class c ON c.oid = l.relation LEFT JOIN pg_stat_activity a ON a.pid = l.pid WHERE l.pid <> pg_backend_pid() ORDER BY l.granted, l.pid;'
+
+-- :sizes — tablas por tamaño, incluyendo índices.
+\set sizes 'SELECT schemaname AS schema, relname AS table, pg_size_pretty(pg_total_relation_size(relid)) AS total, pg_size_pretty(pg_relation_size(relid)) AS data, pg_size_pretty(pg_indexes_size(relid)) AS indexes FROM pg_catalog.pg_statio_user_tables ORDER BY pg_total_relation_size(relid) DESC LIMIT 25;'
+
+-- :whoami — contra qué estás conectado, en texto plano.
+\set whoami 'SELECT current_user AS user, current_database() AS database, inet_server_addr() AS host, version() AS version;'
+
+\unset QUIET

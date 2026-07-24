@@ -80,26 +80,12 @@ else
 fi
 
 echo "Configuring git..."
-export GIT_CONFIG_GLOBAL="${HOME}/.gitconfig"
-touch "${GIT_CONFIG_GLOBAL}"
-git config --global user.name "Nicolas Navarro"
-git config --global user.email "navarropaeznicolas@gmail.com"
-git config --global init.defaultBranch "main"
-git config --global push.default "tracking"
-git config --global push.autoSetupRemote "true"
-git config --global pull.rebase "true"
-git config --global branch.autosetuprebase "always"
-git config --global rerere.enabled "true"
-git config --global color.ui "true"
-git config --global core.askPass ""
-git config --global core.editor "nvim"
-git config --global credential.helper "osxkeychain"
-git config --global diff.algorithm "histogram"
-git config --global merge.conflictstyle "zdiff3"
-git config --global github.user "nhnvrr"
-git config --global alias.cleanup "!git branch --merged | grep -v '\\*\\|master\\|develop\\|main' | xargs -n 1 -r git branch -d"
-git config --global alias.prettylog "log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(r) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative"
-git config --global alias.root "rev-parse --show-toplevel"
+# Antes esto eran 23 llamadas `git config --global` que producían un
+# ~/.gitconfig no versionado ni diffable. Ahora los archivos son la fuente de
+# verdad y se symlinkean como el resto de la config.
+link_file "${CONFIG_DIR}/git/gitconfig"        "${HOME}/.gitconfig"
+link_file "${CONFIG_DIR}/git/ignore"           "${HOME}/.config/git/ignore"
+link_file "${CONFIG_DIR}/git/allowed_signers"  "${HOME}/.config/git/allowed_signers"
 
 SSH_KEY="${HOME}/.ssh/id_ed25519"
 SSH_PUB="${SSH_KEY}.pub"
@@ -107,21 +93,7 @@ SSH_PUB="${SSH_KEY}.pub"
 if [[ ! -f "${SSH_KEY}" ]]; then
   echo "Generating SSH key (ed25519)..."
   mkdir -p "${HOME}/.ssh" && chmod 700 "${HOME}/.ssh"
-  ssh-keygen -t ed25519 -C "$(git config --global user.email)" -f "${SSH_KEY}" -N ""
-
-  # Configure ~/.ssh/config so the key is loaded into agent + Keychain on demand.
-  if ! grep -q "UseKeychain yes" "${HOME}/.ssh/config" 2>/dev/null; then
-    cat >> "${HOME}/.ssh/config" <<'EOF'
-
-Host *
-  AddKeysToAgent yes
-  UseKeychain yes
-  IdentityFile ~/.ssh/id_ed25519
-EOF
-    chmod 600 "${HOME}/.ssh/config"
-  fi
-
-  ssh-add --apple-use-keychain "${SSH_KEY}" 2>/dev/null || true
+  ssh-keygen -t ed25519 -C "$(git config --get user.email)" -f "${SSH_KEY}" -N ""
 
   if command -v pbcopy >/dev/null 2>&1; then
     pbcopy < "${SSH_PUB}"
@@ -130,10 +102,22 @@ EOF
   fi
 fi
 
-git config --global gpg.format "ssh"
-git config --global user.signingkey "${SSH_PUB}"
-git config --global commit.gpgsign "true"
-git config --global tag.gpgsign "true"
+# FUERA del `if` de arriba a propósito: antes estaba adentro, así que en una
+# máquina donde la key ya existía este bloque nunca corría y ~/.ssh/config
+# terminaba sin crearse. El grep evita duplicar la entrada al reejecutar.
+mkdir -p "${HOME}/.ssh" && chmod 700 "${HOME}/.ssh"
+if ! grep -q "UseKeychain yes" "${HOME}/.ssh/config" 2>/dev/null; then
+  echo "Configuring ~/.ssh/config (agent + Keychain)..."
+  cat >> "${HOME}/.ssh/config" <<'EOF'
+
+Host *
+  AddKeysToAgent yes
+  UseKeychain yes
+  IdentityFile ~/.ssh/id_ed25519
+EOF
+  chmod 600 "${HOME}/.ssh/config"
+fi
+ssh-add --apple-use-keychain "${SSH_KEY}" 2>/dev/null || true
 
 if command -v gh >/dev/null 2>&1 && ! gh auth status >/dev/null 2>&1; then
   echo "  → Run 'gh auth login' to authenticate with GitHub."
@@ -151,6 +135,10 @@ link_file "${CONFIG_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"
 link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.tmux.conf"
 link_file "${CONFIG_DIR}/nvim/init.lua"   "${HOME}/.config/nvim/init.lua"
 link_file "${CONFIG_DIR}/hammerspoon/init.lua" "${HOME}/.hammerspoon/init.lua"
+# psqlrc guarda el historial en ~/.local/state/psql/history-<base>. Si el
+# directorio no existe, psql no lo crea: falla en silencio y no guarda nada.
+mkdir -p "${HOME}/.local/state/psql"
+link_file "${CONFIG_DIR}/psql/psqlrc" "${HOME}/.psqlrc"
 if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
   link_file "${CONFIG_DIR}/gh/config.yml" "${HOME}/.config/gh/config.yml"
 fi

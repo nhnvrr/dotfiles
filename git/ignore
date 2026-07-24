@@ -1,0 +1,20 @@
+# Gitignore global: aplica a TODOS los repos, no solo a este.
+# Referenciado por core.excludesfile en git/gitconfig.
+#
+# Va solo lo que genera el sistema operativo o el editor — nunca artefactos de
+# build (node_modules, dist, etc.), que son decisión de cada proyecto y tienen
+# que estar en su propio .gitignore para que le sirva a todo el equipo.
+
+# macOS — Finder los genera solo, y install.sh además activa AppleShowAllFiles
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Índices de Spotlight y basura de volúmenes externos
+.Spotlight-V100
+.Trashes
+
+# Vim / Neovim
+*.swp
+*.swo

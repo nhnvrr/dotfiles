@@ -1,6 +1,7 @@
 # ─── Locale & editor ────────────────────────────────────
+# Solo LANG: LC_ALL pisa TODAS las categorías LC_* de golpe y no deja
+# override puntual (ej. LC_TIME distinto). LANG es el fallback de todas.
 set -gx LANG en_US.UTF-8
-set -gx LC_ALL en_US.UTF-8
 set -gx EDITOR nvim
 set -gx VISUAL nvim
 
@@ -217,10 +218,15 @@ if status is-interactive
 
         # Layout: pane abajo, reversa (input arriba), 40% height, borde sutil.
         # --bind: Ctrl-/ togglea preview, Ctrl-y copia la selección al clipboard.
+        # Colores sobre el fondo #212121 de Nord Wave:
+        #   bg+ (fila seleccionada) #3B4252 daba 1.60:1 — casi invisible.
+        #     Con #4C566A queda en 2.18:1 y la selección se distingue.
+        #   info/border #4C566A daban 2.18:1 → #616E88 los lleva a 3.14:1,
+        #     el mismo gris que usa el prompt Tide.
         set -gx FZF_DEFAULT_OPTS '
           --height 40% --layout=reverse --border=rounded
           --bind="ctrl-/:toggle-preview,ctrl-y:execute-silent(echo {} | pbcopy)+abort"
-          --color=bg+:#3B4252,fg:#D8DEE9,fg+:#ECEFF4,hl:#88C0D0,hl+:#8FBCBB,info:#4C566A,prompt:#81A1C1,pointer:#BF616A,marker:#A3BE8C,border:#4C566A,header:#81A1C1,spinner:#8FBCBB'
+          --color=bg+:#4C566A,fg:#D8DEE9,fg+:#ECEFF4,hl:#88C0D0,hl+:#8FBCBB,info:#616E88,prompt:#81A1C1,pointer:#BF616A,marker:#A3BE8C,border:#616E88,header:#81A1C1,spinner:#8FBCBB'
 
         # Preview con bat para Ctrl-T y completion de archivos.
         set -gx FZF_CTRL_T_OPTS "--preview 'bat --style=numbers --color=always --line-range :200 {}'"

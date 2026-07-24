@@ -1,0 +1,74 @@
+# ~/.gitconfig — symlinkeado desde el repo por install.sh.
+#
+# OJO: al ser un symlink, cualquier `git config --global ...` que corras
+# escribe DIRECTO en este archivo del repo. Eso es a propósito — los cambios
+# quedan versionados en vez de perderse en el home — pero significa que
+# después de tocar config vas a ver el repo sucio.
+
+[user]
+	name = Nicolas Navarro
+	email = navarropaeznicolas@gmail.com
+	signingkey = ~/.ssh/id_ed25519.pub
+
+[init]
+	defaultBranch = main
+
+[core]
+	editor = nvim
+	askPass =
+	# .DS_Store y demás basura de macOS, ignorada en TODOS los repos en vez de
+	# tener que repetirla en cada .gitignore.
+	excludesfile = ~/.config/git/ignore
+
+[push]
+	# "tracking" era un sinónimo deprecado de "upstream".
+	default = upstream
+	autoSetupRemote = true
+
+[pull]
+	rebase = true
+
+[branch]
+	autosetuprebase = always
+
+[merge]
+	# zdiff3 muestra la base común además de los dos lados: en un conflicto se
+	# ve qué cambió cada rama respecto del ancestro, no solo el resultado.
+	conflictstyle = zdiff3
+
+[diff]
+	# histogram detecta mejor los bloques movidos que el algoritmo por defecto.
+	algorithm = histogram
+
+[rerere]
+	# Recuerda cómo resolviste un conflicto y lo reaplica solo si reaparece.
+	# Con pull.rebase = true, eso pasa seguido.
+	enabled = true
+
+[color]
+	ui = true
+
+[credential]
+	helper = osxkeychain
+
+[github]
+	user = nhnvrr
+
+# ─── Firma de commits con SSH ───────────────────────────
+[gpg]
+	format = ssh
+
+[gpg "ssh"]
+	# Sin esto los commits se firman igual, pero git no puede VERIFICARLOS
+	# localmente: `git log --show-signature` falla con
+	# "allowedSignersFile needs to be configured and exist".
+	allowedSignersFile = ~/.config/git/allowed_signers
+
+[commit]
+	gpgsign = true
+
+[tag]
+	gpgsign = true
+
+[alias]
+	prettylog = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(r) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
