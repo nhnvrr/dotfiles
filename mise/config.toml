@@ -1,6 +1,17 @@
+# Versiones globales: el fallback cuando un proyecto no pide nada.
 [tools]
 node = "24"
 aws-cli = "2.34"
 bun = "1.3"
 go = "1.26"
 terraform = "1.14"
+rust = "stable"
+python = "3.14"
+
+[settings]
+# mise dejó de leer los "idiomatic version files" (.nvmrc, .python-version,
+# .go-version…) por default, y sin esto ignoraba los 16 .nvmrc del laburo:
+# proyectos que piden node 14/16/20/22 corrían todos con el 24 global.
+# Solo se habilita para node, que es donde están los archivos; para el resto
+# la versión global alcanza y evita que mise se ponga a adivinar.
+idiomatic_version_file_enable_tools = ["node"]
