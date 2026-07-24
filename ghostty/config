@@ -1,0 +1,47 @@
+# Font — Geist Mono (Vercel), parcheada como Nerd Font para los glyphs de
+# devicons/lualine/tide. Cask: font-geist-mono-nerd-font.
+# El nombre de familia es el que reporta `ghostty +list-fonts`: el cask instala
+# la variante Mono (NFM) y la Propo (NFP), y solo la Mono es monoespaciada.
+font-family = GeistMono Nerd Font Mono
+font-size = 14
+
+# Theme — Nord Wave, dark-only: misma paleta Nord (aurora/frost/snow storm) pero
+# con fondo neutro #212121 en vez del #2E3440 azulado del Nord original.
+# Nombre exacto de `ghostty +list-themes` (case-sensitive).
+# Sin `background`/`background-opacity` propios: manda el tema, fondo sólido.
+theme = Nord Wave
+
+# Window
+window-padding-x = 2
+window-padding-y = 2
+macos-titlebar-style = transparent
+# tmux ya persiste las sesiones; restaurar ventanas de Ghostty duplicaría estado.
+window-save-state = never
+
+# Cursor — beam parpadeante. Reemplaza el hook `\e[5 q` que tenía el zshrc:
+# shell-integration se lo comunica a la shell y sobrevive a salir de nvim.
+cursor-style = bar
+cursor-style-blink = true
+
+# Shell
+shell-integration = fish
+shell-integration-features = cursor,sudo,title
+
+# Send Option as Alt — necesario para que Alt-C (fzf) llegue al shell.
+macos-option-as-alt = true
+
+# Drop-down quick terminal (toggle: cmd+grave)
+quick-terminal-position = top
+quick-terminal-screen = main
+
+# UX
+# Bell: el BEL lo maneja tmux (barra naranja) + el Dock. Explícito para no
+# depender de los defaults de Ghostty:
+#   no-audio    → sin sonido
+#   no-system   → sin notificación de macOS (osascript resultaba ruidoso)
+#   attention   → rebota el ícono del Dock cuando Ghostty está en background
+#   title       → marca el título de la ventana
+bell-features = no-audio,no-system,attention,title,no-border
+confirm-close-surface = false
+copy-on-select = clipboard
+mouse-hide-while-typing = true

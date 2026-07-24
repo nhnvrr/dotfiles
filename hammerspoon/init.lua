@@ -29,7 +29,7 @@ end
 local APPS = {
   chrome    = "com.google.Chrome",
   vscode    = "com.microsoft.VSCode",
-  terminal  = "com.apple.Terminal",
+  terminal  = "com.mitchellh.ghostty",
   tableplus = "com.tinyapp.TablePlus",
 }
 
