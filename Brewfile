@@ -1,93 +1,69 @@
-# Fuente de verdad de las herramientas de la máquina.
-# `brew bundle cleanup --force` desinstala TODO lo que no esté declarado acá,
-# así que agregar algo a mano con `brew install` y no anotarlo = perderlo.
+# Source of truth for this machine's tooling.
+# `brew bundle cleanup --force` uninstalls ANYTHING not declared here.
 #
-# Los runtimes (node, go, rust, python, terraform, bun, aws-cli) NO van acá:
-# los gestiona mise por proyecto — ver mise/config.toml.
+# Where a tool goes: does its version need to match the project's?
+#   yes -> mise/config.toml   (node, go, rust, python, terraform, bun, aws-cli)
+#   no  -> here               (jq, fzf, ripgrep, git, bat)
+# Having them in both places makes the version depend on where you run: inside
+# fish mise wins, in a script with a clean PATH brew wins.
 
-# ─── Terminal ───────────────────────────────────────────
 brew "fish"
 brew "tmux"
-# nvim es solo $EDITOR (commits, Ctrl-O de fish, ediciones sueltas): un
-# init.lua de ~90 líneas con un plugin. Sin treesitter, ni CLI de tree-sitter.
 brew "neovim"
 
-# ─── Búsqueda y lectura ─────────────────────────────────
-# fzf, fd y ripgrep no se tipean casi nunca: fd y rg son los motores de fzf
-# (Ctrl-T/Alt-C) y fzf corre desde keybindings. Medir su uso por historial da
-# 0 y engaña.
 brew "fzf"
 brew "fd"
 brew "ripgrep"
 brew "bat"
 brew "jq"
+brew "zoxide"
 
-# ─── Git ────────────────────────────────────────────────
 brew "git"
 brew "gh"
+brew "git-delta"
 
-# ─── Base de datos ──────────────────────────────────────
-# libpq trae psql (el cliente) sin el servidor de Postgres. El camino
-# principal para DB es la terminal; TablePlus queda como complemento visual.
+# libpq ships psql without the Postgres server.
 brew "libpq"
 
-# ─── Runtimes ───────────────────────────────────────────
 brew "mise"
 
-# ─── Utilidades ─────────────────────────────────────────
 brew "yt-dlp"
 brew "htop"
 brew "fastfetch"
 
-# ─── Terminal y fuente ──────────────────────────────────
-cask "ghostty"
-# JetBrains Mono parcheada con Nerd Font. Los glyphs los usa el prompt Tide.
-# Se usa la variante Mono (no Propo): Ghostty solo acepta monoespaciadas.
+cask "alacritty"
+# Mono variant (NFM): icons take one cell, so `ls -la` columns stay aligned.
 cask "font-jetbrains-mono-nerd-font"
 
-# ─── Editor ─────────────────────────────────────────────
-# VS Code se queda hasta confirmar que AWS Toolkit y Remote-SSH funcionan en
-# Cursor: Cursor usa Open VSX como marketplace y AWS Toolkit no está publicado
-# ahí. Ese es el motivo por el que se eligió VS Code en su momento.
-cask "zed"
-# VS Code se queda como respaldo para el laburo de EC2: Zed tiene remote
-# development por SSH, pero no equivalente de AWS Toolkit ni sesiones SSM, que
-# es justamente por lo que en su momento se había elegido VS Code sobre Zed.
 cask "visual-studio-code"
 
-# ─── Ventanas y lanzador ────────────────────────────────
-# Raycast cubre lanzador, clipboard, snippets y ventanas simples. Hammerspoon
-# se queda por los layouts de apps pareadas (⌘⌥1/2/3), que Raycast no hace.
 cask "raycast"
 cask "hammerspoon"
 
-# ─── Navegador ──────────────────────────────────────────
 cask "google-chrome"
 
-# ─── Desarrollo ─────────────────────────────────────────
 cask "docker-desktop"
 cask "tableplus"
 cask "bruno"
 cask "proxyman"
+cask "utm"
 
-# ─── AWS ────────────────────────────────────────────────
 cask "aws-vpn-client"
+cask "nosql-workbench"
 
-# ─── IA ─────────────────────────────────────────────────
 cask "claude"
 cask "claude-code@latest"
 cask "chatgpt"
+# The terminal agent. `codex-app`, the desktop app, is discontinued upstream.
+cask "codex"
 
-# ─── Notas y captura ────────────────────────────────────
-# Obsidian es la herramienta principal de notas. Linear y Notion se usan
-# desde la web.
-cask "obsidian"
 cask "cap"
+cask "linear"
+cask "notion"
 
-# ─── Comunicación ───────────────────────────────────────
 cask "slack"
 cask "whatsapp"
+cask "telegram"
 
-# ─── Otros ──────────────────────────────────────────────
 cask "ledger-wallet"
 cask "nordvpn"

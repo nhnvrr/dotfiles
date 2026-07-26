@@ -18,3 +18,5 @@
 # Vim / Neovim
 *.swp
 *.swo
+
+**/.claude/settings.local.json

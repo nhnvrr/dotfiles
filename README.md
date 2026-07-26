@@ -33,7 +33,7 @@ The script is idempotent — re-run it anytime to bring a machine back in sync. 
 - Symlinks [`git/gitconfig`](./git/gitconfig) to `~/.gitconfig`, plus the global ignore and the allowed-signers file it references
 - Generates an `ed25519` SSH key if missing, registers it with the macOS Keychain via `~/.ssh/config`, and copies the pubkey to the clipboard for GitHub
 - Symlinks all config files into `$HOME` (see [Managed files](#managed-files))
-- Applies a small set of macOS defaults (fast key-repeat, no press-and-hold, Finder show extensions, Dock autohide, screenshots into `~/Pictures/Screenshots`)
+- Applies a small set of macOS defaults (fast key-repeat, no press-and-hold, Finder show extensions, screenshots into `~/Screenshots`). The Dock is deliberately left alone — it's a visual preference, set it from System Settings
 - Installs [Fisher](https://github.com/jorgebucaran/fisher) and the [Tide](https://github.com/IlanCosman/tide) prompt into fish, then seeds Tide's base config via `tide configure --auto`
 - Registers fish in `/etc/shells` (needs `sudo`) and switches the login shell to it (uses `dscl` to read the real login shell, not `$SHELL`)
 - Removes the stale `~/.zshrc` / `~/.config/starship.toml` symlinks left by the previous zsh + starship setup (only if they point into this repo)
@@ -47,7 +47,7 @@ After `install.sh` exits cleanly:
 1. **Paste the SSH pubkey on GitHub** — it's already on your clipboard. Add it at <https://github.com/settings/ssh/new> as both an authentication key AND a signing key (so your signed commits show up as Verified).
 2. **Authenticate the GitHub CLI:** `gh auth login` (script reminds you if not authenticated).
 3. **Grant Accessibility permission to Hammerspoon** on first launch (System Settings → Privacy & Security → Accessibility). Required for window management hotkeys.
-4. **Open Ghostty** (not Terminal.app) — it picks up `ghostty/config`, the JetBrains Mono Nerd Font, and fish as the login shell.
+4. **Open Alacritty** (not Terminal.app) — it picks up `alacritty/alacritty.toml`, JetBrains Mono Nerd Font, and fish as the login shell.
 
 Note: the script prompts for your password twice — once for `sudo` (to add fish to `/etc/shells`) and once for `chsh`.
 
@@ -57,17 +57,17 @@ Note: the script prompts for your password twice — once for `sudo` (to add fis
 |---|---|---|
 | Shell | fish | [`fish/config.fish`](./fish/config.fish) |
 | Prompt | Tide (fish plugin, via Fisher) | overrides in [`fish/config.fish`](./fish/config.fish) |
-| Terminal | Ghostty | [`ghostty/config`](./ghostty/config) |
+| Terminal | Alacritty | [`alacritty/alacritty.toml`](./alacritty/alacritty.toml) |
 | Multiplexer | tmux | [`tmux/tmux.conf`](./tmux/tmux.conf) |
-| Editor | Zed (`e` = `zed -n`). VS Code stays as the fallback for EC2 work — Zed has SSH remote development but no AWS Toolkit or SSM sessions. Both configs are user-level, not versioned here | — |
+| Editor | VS Code (`e` = `code --new-window`) — it's what handles the EC2 work: Remote-SSH, AWS Toolkit and SSM sessions. It's also what Hammerspoon's `cmd+alt+1` layout pairs with Chrome. Its config is user-level, not versioned here | — |
 | `$EDITOR` | Neovim — commits, `git rebase -i`, fish's Ctrl-O. One file, one plugin (the theme), no LSP | [`nvim/init.lua`](./nvim/init.lua) |
 | Database | `psql` as the primary client; TablePlus as the visual complement | [`psql/psqlrc`](./psql/psqlrc) |
 | HTTP | `curl` via the `req` function; Bruno for exploratory work | [`fish/config.fish`](./fish/config.fish) |
 | Git | versioned config, SSH-signed commits | [`git/gitconfig`](./git/gitconfig) |
 | Window mgmt | Hammerspoon (app-pair layouts) + Raycast (launcher, clipboard, simple windows) | [`hammerspoon/init.lua`](./hammerspoon/init.lua) |
 | Runtime mgr | mise — global versions plus per-project `.nvmrc` | [`mise/config.toml`](./mise/config.toml) |
-| Font | JetBrains Mono, Nerd Font patched, ligatures off. The `Mono` family — Ghostty only accepts monospaced fonts, so the proportional `Propo` variant is not an option | cask `font-jetbrains-mono-nerd-font` |
-| Theme | kanso-zen (dark-only): green-tinted palette on a near-black `#090E13` background. Ghostty owns it (theme file in `ghostty/themes/`); nvim runs `kanso.nvim` (transparent), fzf and Tide follow in truecolor hex. tmux and `bat` inherit the terminal's ANSI palette. GUI editors keep their own user-level theme | [`ghostty/themes/kanso-zen`](./ghostty/themes/kanso-zen) |
+| Font | JetBrains Mono, Nerd Font patched, size 15. The `Mono` (NFM) variant — its icons occupy a single cell, so `ls -la` columns stay aligned | cask `font-jetbrains-mono-nerd-font` |
+| Theme | kanso-zen (dark-only): green-tinted palette on a near-black `#090E13` background. Alacritty defines the palette directly; nvim runs `kanso.nvim` (transparent), fzf and Tide follow in truecolor hex. tmux and `bat` inherit the terminal's ANSI palette. GUI editors keep their own user-level theme | [`alacritty/alacritty.toml`](./alacritty/alacritty.toml) |
 
 `fish/config.fish` notes:
 - Defines `dev` / `work` / `side` aliases that spawn (or switch to) a named tmux session with a fixed CWD.
@@ -98,7 +98,7 @@ These are symlinked from the repo into `$HOME`:
 | Repo path | Destination |
 |---|---|
 | `fish/config.fish` | `~/.config/fish/config.fish` |
-| `ghostty/config` | `~/.config/ghostty/config` |
+| `alacritty/alacritty.toml` | `~/.config/alacritty/alacritty.toml` |
 | `tmux/tmux.conf` | `~/.tmux.conf` |
 | `mise/config.toml` | `~/.config/mise/config.toml` |
 | `nvim/init.lua` | `~/.config/nvim/init.lua` |
@@ -124,8 +124,7 @@ Only `config.fish` is symlinked out of `~/.config/fish/` — Fisher and Tide **w
   chmod 600 ~/.pgpass
   ```
 
-- **Zed / VS Code** — config (`settings.json`, keybindings, theme) es a nivel usuario, no versionada (`Settings Sync` vive en otro lado).
-- **IdeaVim (DataGrip)** — `~/.ideavimrc` es config a nivel usuario; no se versiona acá.
+- **VS Code** — config (`settings.json`, keybindings, theme) is user-level and not versioned here; Settings Sync lives elsewhere.
 - **`~/.aws/config`** — keep your own AWS profiles where you want them; the repo only sets `AWS_PROFILE` based on tmux session.
 - **`~/.claude/`** (and the optional `~/.claude-work/`) — Claude Code config is user-level state, not versioned. Bootstrap a work account with `CLAUDE_CONFIG_DIR=~/.claude-work claude` then `/login`.
 

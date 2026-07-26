@@ -63,16 +63,15 @@ if [[ "${SKIP_BREW}" == false ]]; then
   echo "Applying Brewfile..."
   "${BREW_BIN}" bundle --file="${CONFIG_DIR}/Brewfile"
 
-  # Fisher (plugin manager de fish) + Tide (prompt). Los plugins se instalan
-  # explícitos en vez de con un manifiesto fish_plugins symlinkeado: Fisher
-  # REESCRIBE ese archivo, y reemplazaría el symlink por un archivo regular.
-  # Ambos comandos son idempotentes.
+  # Plugins are installed explicitly rather than via a symlinked fish_plugins
+  # manifest: Fisher REWRITES that file and would replace the symlink with a
+  # regular file. Both commands are idempotent.
   if command -v fish >/dev/null 2>&1; then
     echo "Installing fish plugins (fisher + tide)..."
     fish -c 'functions -q fisher; or curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher'
     fish -c 'fisher install IlanCosman/tide@v6'
-    # Siembra la config base de tide (que vive en variables universales).
-    # fish/config.fish la sobreescribe después con `set -g` — el repo manda.
+    # Seeds Tide's base config, which lives in universal variables.
+    # fish/config.fish shadows it afterwards with `set -g`.
     fish -c 'tide configure --auto --style=Lean --prompt_colors="True color" --show_time="24-hour format" --lean_prompt_height="Two lines" --prompt_connection=Disconnected --prompt_connection_andor_frame_color=Lightest --prompt_spacing=Sparse --icons="Many icons" --transient=Yes'
   fi
 else
@@ -80,9 +79,6 @@ else
 fi
 
 echo "Configuring git..."
-# Antes esto eran 23 llamadas `git config --global` que producían un
-# ~/.gitconfig no versionado ni diffable. Ahora los archivos son la fuente de
-# verdad y se symlinkean como el resto de la config.
 link_file "${CONFIG_DIR}/git/gitconfig"        "${HOME}/.gitconfig"
 link_file "${CONFIG_DIR}/git/ignore"           "${HOME}/.config/git/ignore"
 link_file "${CONFIG_DIR}/git/allowed_signers"  "${HOME}/.config/git/allowed_signers"
@@ -102,9 +98,8 @@ if [[ ! -f "${SSH_KEY}" ]]; then
   fi
 fi
 
-# FUERA del `if` de arriba a propósito: antes estaba adentro, así que en una
-# máquina donde la key ya existía este bloque nunca corría y ~/.ssh/config
-# terminaba sin crearse. El grep evita duplicar la entrada al reejecutar.
+# Deliberately OUTSIDE the block above: on a machine where the key already
+# exists this still has to run. The grep avoids duplicating the entry.
 mkdir -p "${HOME}/.ssh" && chmod 700 "${HOME}/.ssh"
 if ! grep -q "UseKeychain yes" "${HOME}/.ssh/config" 2>/dev/null; then
   echo "Configuring ~/.ssh/config (agent + Keychain)..."
@@ -127,26 +122,31 @@ echo "Preparing Go workspace..."
 mkdir -p "${HOME}/Develop/go/bin"
 
 echo "Linking config files..."
-# Solo config.fish: ~/.config/fish/{functions,completions,conf.d} los ESCRIBEN
-# Fisher y Tide, así que symlinkearlos al repo lo ensuciaría con plugins.
+# config.fish only: Fisher and Tide WRITE into ~/.config/fish/{functions,
+# completions,conf.d}, so symlinking those would dirty the repo with plugins.
 link_file "${CONFIG_DIR}/fish/config.fish" "${HOME}/.config/fish/config.fish"
-link_file "${CONFIG_DIR}/ghostty/config" "${HOME}/.config/ghostty/config"
-# Themes propios (ej. kanso-zen). Ghostty los busca en este dir por nombre.
-link_file "${CONFIG_DIR}/ghostty/themes" "${HOME}/.config/ghostty/themes"
+link_file "${CONFIG_DIR}/alacritty/alacritty.toml" "${HOME}/.config/alacritty/alacritty.toml"
+# Symlinks from the previous terminal, removed only if they point into this repo.
+for stale in "${HOME}/.config/ghostty/config" "${HOME}/.config/ghostty/themes"; do
+  if [[ -L "${stale}" && "$(readlink "${stale}")" == "${CONFIG_DIR}"/ghostty/* ]]; then
+    rm -f "${stale}"
+    echo "  removed stale Ghostty symlink ${stale}"
+  fi
+done
 link_file "${CONFIG_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"
 link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.tmux.conf"
 link_file "${CONFIG_DIR}/nvim/init.lua"   "${HOME}/.config/nvim/init.lua"
 link_file "${CONFIG_DIR}/hammerspoon/init.lua" "${HOME}/.hammerspoon/init.lua"
-# psqlrc guarda el historial en ~/.local/state/psql/history-<base>. Si el
-# directorio no existe, psql no lo crea: falla en silencio y no guarda nada.
+# psqlrc writes history to ~/.local/state/psql/history-<db>. psql won't create
+# that directory: without it, history fails silently.
 mkdir -p "${HOME}/.local/state/psql"
 link_file "${CONFIG_DIR}/psql/psqlrc" "${HOME}/.psqlrc"
 if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
   link_file "${CONFIG_DIR}/gh/config.yml" "${HOME}/.config/gh/config.yml"
 fi
 
-# Symlinks huérfanos de la migración zsh+starship → fish+tide. Solo se borran
-# si apuntan a este repo: un ~/.zshrc propio del usuario queda intacto.
+# Orphans from the zsh+starship → fish+tide migration. Removed only if they
+# point into this repo, so a hand-written ~/.zshrc stays untouched.
 for stale in "${HOME}/.zshrc" "${HOME}/.config/starship.toml"; do
   if [[ -L "${stale}" && "$(readlink "${stale}")" == "${CONFIG_DIR}"/* ]]; then
     rm -f "${stale}"
@@ -168,22 +168,16 @@ defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
 defaults write com.apple.finder AppleShowAllExtensions -bool true
 defaults write com.apple.finder AppleShowAllFiles -bool true
 defaults write NSGlobalDomain AppleShowAllExtensions -bool true
-defaults write com.apple.dock autohide -bool true
-# Sin delay al revelar y animación casi instantánea — autohide usable, no molesto.
-defaults write com.apple.dock autohide-delay -float 0
-defaults write com.apple.dock autohide-time-modifier -float 0.15
-defaults write com.apple.dock show-recents -bool false
+# The Dock is deliberately left alone: it's a visual preference, set it from
+# System Settings. This script only touches what affects working.
 mkdir -p "${HOME}/Screenshots"
 defaults write com.apple.screencapture location "${HOME}/Screenshots"
 defaults write com.apple.screencapture type -string "png"
-killall Dock 2>/dev/null || true
 killall Finder 2>/dev/null || true
 killall SystemUIServer 2>/dev/null || true
 
-# Fuente: JetBrains Mono Nerd Font llega por cask (font-jetbrains-mono-nerd-font).
-
-# Login shell → fish. chsh rechaza shells que no estén en /etc/shells, así que
-# hay que registrarlo primero (pide sudo). dscl lee el login shell real, no $SHELL.
+# chsh rejects shells missing from /etc/shells, so register it first (needs
+# sudo). dscl reads the real login shell, not $SHELL.
 FISH_BIN="$(command -v fish || true)"
 if [[ -n "${FISH_BIN}" ]]; then
   if ! grep -qx "${FISH_BIN}" /etc/shells; then

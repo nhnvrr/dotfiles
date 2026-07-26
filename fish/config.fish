@@ -1,65 +1,37 @@
-# ─── Locale & editor ────────────────────────────────────
-# Solo LANG: LC_ALL pisa TODAS las categorías LC_* de golpe y no deja
-# override puntual (ej. LC_TIME distinto). LANG es el fallback de todas.
+# LANG only: LC_ALL overrides every LC_* category and blocks per-category tweaks.
 set -gx LANG en_US.UTF-8
 set -gx EDITOR nvim
 set -gx VISUAL nvim
 
-# Sin banner de bienvenida al abrir una shell.
 set -g fish_greeting
 
-# ─── PATH ───────────────────────────────────────────────
-# fish_add_path -g: modifica $PATH global de la sesión en vez de escribir la
-# variable universal $fish_user_paths. config.fish corre en cada shell, así que
-# el repo queda como única fuente de verdad (sin estado universal que derive).
-# Los paths se prependan en el orden dado: el primero queda primero.
+# fish_add_path -g, not -U: writes the session $PATH instead of the universal
+# $fish_user_paths, which is state outside the repo and drifts.
 set -gx GOPATH $HOME/Develop/go
 set -gx GOPRIVATE github.com/nhnvrr
 fish_add_path -g $GOPATH/bin /opt/homebrew/bin /opt/homebrew/sbin \
     /opt/homebrew/opt/libpq/bin /usr/local/bin $HOME/.local/bin
 
-# ─── Aliases ────────────────────────────────────────────
-# Solo lo que el historial muestra en uso. `ll`/`la`/`cl` se borraron: 1 uso
-# cada uno contra 13 de `ls` y 12 de `clear` — el alias perdió contra el
-# comando real, así que era ruido.
-# El editor es Zed. `-n` abre ventana nueva en vez de reusar la actual, igual
-# que el `--new-window` que tenía el alias de VS Code.
-alias e 'zed -n'
-# VS Code sigue instalado como respaldo para el laburo de EC2 (AWS Toolkit + SSM).
+alias e 'code --new-window'
 alias code 'code --new-window'
 
-# ─── Git abbreviations ──────────────────────────────────
-# abbr expande en pantalla al apretar espacio: ves el comando real antes de
-# ejecutarlo, y queda expandido en el historial. Es lo que zsh no tenía.
-# Ojo al medir uso: como se expanden, en el historial figura la forma larga.
-# Estas cinco son las que tienen tracción real (usos sobre 1222 comandos);
-# gst/gp/gl/gca/gcan tenían 0 y se fueron.
-abbr -a gc 'git commit -m' # 134
-abbr -a gco 'git checkout' # 89
-abbr -a ga 'git add' # 27
-abbr -a gb 'git branch' # 10
-abbr -a gd 'git diff' # 3
+# abbr, not alias: expands on screen when you hit space, so you see the real
+# command before running it and history stores the expanded form.
+abbr -a gc 'git commit -m'
+abbr -a gco 'git checkout'
+abbr -a ga 'git add'
+abbr -a gb 'git branch'
+abbr -a gd 'git diff'
 
-# ─── HTTP: curl para trabajo de API ─────────────────────
-# A propósito NO hay ~/.curlrc: ese archivo lo lee TODA invocación de curl,
-# incluida la del instalador de Homebrew en install.sh y la de cualquier script
-# de terceros. Meter --silent o --location ahí cambiaría el comportamiento de
-# cosas que hoy funcionan. Los flags viven acá, aplicados solo si los pedís.
-#
-#   --show-error   errores visibles aunque --silent apague la barra de progreso
-#   --location     seguir redirects
-#   --compressed   aceptar gzip
-#   --globoff      que [] y {} en la URL no se interpreten como globs
-#   timeouts       para que no cuelgue una terminal esperando para siempre
-#
-# Los argumentos se pasan tal cual, así que -i, -X POST, -d, -H funcionan.
-function req --description 'curl con flags sanos; formatea la respuesta si es JSON'
+# Deliberately no ~/.curlrc: that file is read by EVERY curl invocation,
+# including Homebrew's installer and any third-party script.
+function req --description 'curl with sane flags; pretty-prints JSON responses'
     set -l out (curl --silent --show-error --location --compressed \
         --connect-timeout 10 --max-time 60 --globoff $argv | string collect)
+    # pipestatus[1] is curl's exit code, not jq's.
     set -l code $pipestatus[1]
     test $code -ne 0; and return $code
 
-    # jq solo si la respuesta parsea como JSON; si no, sale tal cual.
     if command -q jq; and printf '%s' $out | jq -e . >/dev/null 2>&1
         printf '%s' $out | jq .
     else
@@ -67,8 +39,7 @@ function req --description 'curl con flags sanos; formatea la respuesta si es JS
     end
 end
 
-# ─── tmux: abrir o crear una sesión con nombre ──────────
-function __tx --argument-names name --description 'Attach/create una sesión tmux fija'
+function __tx --argument-names name --description 'Attach or create a fixed tmux session'
     set -l dir
     switch $name
         case dev
@@ -85,6 +56,7 @@ function __tx --argument-names name --description 'Attach/create una sesión tmu
     tmux has-session -t=$name 2>/dev/null
     or tmux new-session -d -s $name -c $dir
 
+    # Attaching nested breaks; inside tmux you have to switch instead.
     if test -z "$TMUX"
         tmux attach-session -t $name
     else
@@ -96,109 +68,90 @@ alias dev '__tx dev'
 alias work '__tx work'
 alias side '__tx side'
 
-# ─── Claude Code: cuenta por sesión tmux ────────────────
-# CLAUDE_CONFIG_DIR es env var oficial (verificado en el binario): cada proceso
-# claude lee/escribe en SU dir. Cero estado global mutable, cero traps.
-# Bootstrap (1 vez): CLAUDE_CONFIG_DIR=~/.claude-work claude → /login con la cuenta.
-function claude --description 'Claude Code con config según la sesión tmux'
+# One-time bootstrap for the work account:
+#   CLAUDE_CONFIG_DIR=~/.claude-work claude
+function claude --description 'Claude Code, config picked by tmux session'
     set -l session (tmux display-message -p '#S' 2>/dev/null)
     set -lx CLAUDE_CONFIG_DIR $HOME/.claude
     test "$session" = work; and set -lx CLAUDE_CONFIG_DIR $HOME/.claude-work
     command claude $argv
 end
 
-# ─── mise (tool/runtime version manager) ────────────────
-if command -q mise
-    mise activate fish | source
-end
+# mise is NOT activated here: /opt/homebrew/share/fish/vendor_conf.d/
+# mise-activate.fish already does it and runs earlier. Activating twice cost
+# ~20ms per shell and per prompt fork. To disable the vendor one:
+# MISE_FISH_AUTO_ACTIVATE=0.
 
-# ─── AWS CLI completion ─────────────────────────────────
 if command -q aws_completer
     complete -c aws -f -a "(env COMP_LINE=(commandline -pc) aws_completer | sed 's/ \$//')"
 end
 
-# ─── Docker Desktop completion ──────────────────────────
 set -l docker_completion /Applications/Docker.app/Contents/Resources/etc/docker.fish-completion
 test -f $docker_completion; and source $docker_completion
 
-# ─── Tide prompt ────────────────────────────────────────
-# Tide guarda su config en variables universales (set -U), que no son
-# versionables. install.sh siembra la base con `tide configure --auto`; acá
-# fijamos lo que nos importa con `set -g`, que sombrea al universal en el
-# scoping de fish → el repo manda. Los hex van sin '#' (formato de set_color).
-# Los nombres de item son los de `_tide_item_*` (ojo: es `rustc`, no `rust`).
-# Cada uno solo se muestra si el proyecto lo amerita.
+# Tide keeps its config in universal variables, which aren't versionable.
+# install.sh seeds the base; these `set -g` shadow it (global beats universal)
+# so the repo stays the source of truth. Hex values go without '#'.
 set -g tide_left_prompt_items os pwd git newline character
 set -g tide_right_prompt_items status cmd_duration context jobs node bun go rustc python terraform aws docker time
 set -g tide_prompt_add_newline_before true
 set -g tide_prompt_transient_enabled true
 set -g tide_cmd_duration_threshold 2000
 set -g tide_time_format '%H:%M'
-# Nombre de rama completo: Tide lo trunca a 24 por default. 0 = sin truncar.
+# 0 = don't truncate the branch name (Tide cuts at 24 by default).
 set -g tide_git_truncation_length 0
 
-# Iconos. Igual que los colores, vivían solo en variables universales, o sea
-# fuera del repo. Van solo los de los items que están en el prompt.
-#
-# Se definen por CODEPOINT y no pegando el glyph: los de Nerd Font viven en la
-# zona de uso privado (U+E000-F8FF y U+F0000+) y se pierden al copiarlos entre
-# editores, terminales o herramientas — quedan como string vacío sin avisar.
-# Así el fuente es legible y sobrevive cualquier copy/paste.
-# Catálogo: nerdfonts.com/cheat-sheet
-# Para averiguar el codepoint de un glyph: printf '%s' 'X' | xxd
-set -g tide_git_icon (printf '\U0000F126') # nf-fa-code_branch
-set -g tide_os_icon (printf '\U0000F179') # apple
-set -g tide_pwd_icon (printf '\U0000F07C') # carpeta
-set -g tide_cmd_duration_icon (printf '\U0000F252') # reloj de arena
-set -g tide_jobs_icon (printf '\U0000F013') # engranaje
+# Icons go by CODEPOINT rather than pasting the glyph: Nerd Font glyphs live in
+# the private use area and get lost when copied between editors or terminals,
+# silently becoming an empty string.
+# Catalog: nerdfonts.com/cheat-sheet · codepoint of a glyph: printf '%s' 'X' | xxd
+set -g tide_git_icon (printf '\U0000F126')
+set -g tide_os_icon (printf '\U0000F179')
+set -g tide_pwd_icon (printf '\U0000F07C')
+set -g tide_cmd_duration_icon (printf '\U0000F252')
+set -g tide_jobs_icon (printf '\U0000F013')
 set -g tide_node_icon (printf '\U0000E24F')
 set -g tide_bun_icon (printf '\U000F0CD3')
 set -g tide_go_icon (printf '\U0000E627')
 set -g tide_rustc_icon (printf '\U0000E7A8')
 set -g tide_python_icon (printf '\U000F0320')
 set -g tide_terraform_icon (printf '\U000F1062')
-set -g tide_aws_icon (printf '\U0000E7AD') # nf-dev-aws
+set -g tide_aws_icon (printf '\U0000E7AD')
 set -g tide_docker_icon (printf '\U0000F308')
 
-# El character no es Nerd Font sino Unicode común, y cambia según el modo vi
-# (usás fish_hybrid_key_bindings): ❯ insert, ❮ normal, ▶ replace, V visual.
+# Plain Unicode, not Nerd Font. Changes with the hybrid bindings' vi mode.
 set -g tide_character_icon '❯'
 set -g tide_character_vi_icon_default '❮'
 set -g tide_character_vi_icon_replace '▶'
 set -g tide_character_vi_icon_visual 'V'
 
-# Paleta kanso-zen, mapeada desde Nord por rol. El gris apagado es el
-# bright-black de kanso (#5C6066): sobre el fondo #090E13 da 3.06:1, arriba del
-# 3:1 mínimo para texto no-cuerpo. Se lee como secundario pero se lee.
+# kanso-zen palette by role. The grey is kanso's bright-black #5C6066: against
+# the #090E13 background that's 3.06:1, above the 3:1 floor for non-body text.
 set -l muted 5C6066
 
-set -g tide_pwd_color_dirs 8ba4b0 # blue
-set -g tide_pwd_color_anchors 7aa89f # bright cyan
+set -g tide_pwd_color_dirs 8ba4b0
+set -g tide_pwd_color_anchors 7aa89f
 set -g tide_pwd_color_truncated_dirs $muted
-set -g tide_git_color_branch 87a987 # bright green
-set -g tide_git_color_dirty e6c384 # bright yellow
-set -g tide_git_color_untracked 938aa9 # bright magenta
-set -g tide_git_color_conflicted e46876 # bright red
+set -g tide_git_color_branch 87a987
+set -g tide_git_color_dirty e6c384
+set -g tide_git_color_untracked 938aa9
+set -g tide_git_color_conflicted e46876
 set -g tide_git_color_staged 87a987
 set -g tide_git_color_upstream 7aa89f
-# Rebase/merge/cherry-pick en curso y stash pendiente: sin esto quedaban en los
-# defaults 256-color de `tide configure --auto` (#FF0000 y #5FD700), los dos
-# únicos colores crudos que seguían apareciendo en el prompt.
-# kanso no tiene naranja, así que la operación en curso usa el rojo apagado.
-set -g tide_git_color_operation c4746e # red apagado → operación en curso
-set -g tide_git_color_stash 8ea4a2 # cyan → hay stash
+set -g tide_git_color_operation c4746e
+set -g tide_git_color_stash 8ea4a2
 set -g tide_character_color 87a987
 set -g tide_character_color_failure e46876
 set -g tide_cmd_duration_color 7aa89f
 set -g tide_status_color 87a987
 set -g tide_status_color_failure e46876
 set -g tide_context_color_default $muted
-set -g tide_context_color_ssh c4746e # red apagado
-set -g tide_context_color_root e46876 # bright red → root, mismo peso que un error
+set -g tide_context_color_ssh c4746e
+set -g tide_context_color_root e46876
 set -g tide_jobs_color 8ba4b0
 set -g tide_aws_color e6c384
 set -g tide_node_color 87a987
-set -g tide_bun_color c5c9c7 # fg
+set -g tide_bun_color c5c9c7
 set -g tide_go_color 7aa89f
 set -g tide_rustc_color e46876
 set -g tide_python_color e6c384
@@ -206,111 +159,108 @@ set -g tide_terraform_color 938aa9
 set -g tide_docker_color 7aa89f
 set -g tide_time_color $muted
 
-# Cromo del prompt (no son items, se pintan aparte): el relleno entre prompt
-# izquierdo y derecho, y el separador entre items adyacentes del mismo color.
-set -g tide_prompt_color_frame_and_connection 22262D # selection, estructura tenue
+set -g tide_prompt_color_frame_and_connection 22262D
 set -g tide_prompt_color_separator_same_color $muted
 
-# El contexto de docker solo interesa cuando NO es el local: sin esto, el
-# prompt muestra "desktop-linux" permanentemente.
+# Tide's bun item only looks for `bun.lockb`, the binary lockfile Bun stopped
+# writing by default in 1.2 — since then it's `bun.lock`.
+function _tide_item_bun --description 'bun version, detecting bun.lock and bun.lockb'
+    if path is $_tide_parent_dirs/bun.lock $_tide_parent_dirs/bun.lockb
+        bun --version | string match -qr "(?<v>.*)"
+        _tide_print_item bun $tide_bun_icon' ' $v
+    end
+end
+
+# Same Bun change: markers are what paint a directory as a project root.
+set -g tide_pwd_markers $tide_pwd_markers bun.lock
+
 set -g tide_docker_default_contexts default desktop-linux
 
-# ─── Bell en comandos largos (>10s) ─────────────────────
-# Solo bell → status bar naranja de tmux + Dock. Sin notificación macOS
-# (osascript resultaba ruidoso). $CMD_DURATION lo da fish gratis, en ms.
+# Tide's item shells out to `docker context inspect`: 126ms of Go CLI startup to
+# read something already in ~/.docker/config.json. Reading the file takes 69us.
+# $DOCKER_CONTEXT wins over the file, which is docker's real precedence.
+function _tide_item_docker --description 'docker context without invoking the CLI'
+    set -l ctx $DOCKER_CONTEXT
+    if test -z "$ctx"; and test -r $HOME/.docker/config.json
+        set ctx (string match -rg '"currentContext"\s*:\s*"([^"]+)"' < $HOME/.docker/config.json)
+    end
+    test -z "$ctx"; and set ctx default
+    contains -- $ctx $tide_docker_default_contexts; and return
+    _tide_print_item docker $tide_docker_icon' ' $ctx
+end
+
+# tmux catches the bell: `monitor-bell on` turns the status bar orange.
 set -g _notify_threshold 10000
 set -g _notify_ignore nvim less man ssh tmux claude fzf watch top tail dev work side
 
-function _notify_long_command --on-event fish_postexec --description 'Bell tras un comando largo'
+function _notify_long_command --on-event fish_postexec --description 'Bell after a long command'
     test -n "$argv[1]"; or return
     set -l cmd (string split -f1 ' ' -- (string trim -- $argv[1]))
     contains -- $cmd $_notify_ignore; and return
     test $CMD_DURATION -ge $_notify_threshold; and printf '\a'
 end
 
-# ─── Key bindings ───────────────────────────────────────
-# Hybrid: defaults emacs (Ctrl+A/E/W/U/K/R, Alt+B/F) + vi mode apretando Esc.
-# Sin perder muscle memory, ganás navegación vi sobre comandos largos.
-# fish llama a fish_user_key_bindings después del binding function, así que
-# nuestros binds sobreviven a los defaults. Se bindea en insert y default para
-# que funcionen de los dos lados del hybrid.
+# Hybrid: emacs defaults plus vi mode on Esc. The binds live inside
+# fish_user_key_bindings because fish calls it AFTER applying the defaults;
+# loose, they'd be overwritten. Bound in insert and default to cover both sides.
 function fish_user_key_bindings
     for mode in insert default
-        # Ctrl-P/Ctrl-N: búsqueda de historial por prefijo (escribís "git ",
-        # Ctrl-P trae solo comandos que empiezan con "git ").
-        # Ojo: esto le saca a Ctrl-N el accept-autosuggestion que fish trae por
-        # default. La autosugerencia se sigue aceptando con → o Ctrl-F.
+        # Ctrl-P/N: prefix history search. Costs Ctrl-N its
+        # accept-autosuggestion, which stays on → or Ctrl-F.
         bind -M $mode ctrl-p up-or-search
         bind -M $mode ctrl-n down-or-search
-        # Ctrl-O: editar la línea actual en $EDITOR (nvim).
         bind -M $mode ctrl-o edit_command_buffer
     end
 end
 set -g fish_key_bindings fish_hybrid_key_bindings
 
-# Cursor por modo vi: beam parpadeante al escribir (insert), block al navegar
-# (normal/visual). El block es el indicador de modo — se ve de un vistazo si
-# estás en insert o no, sin mirar el caracter del prompt.
-# Con bindings hybrid, fish maneja el cursor vía fish_vi_cursor; sin esto su
-# default ya es block en normal, pero lo fijamos explícito para el resto.
-set -g fish_cursor_insert line blink        # escribiendo → beam
-set -g fish_cursor_replace_one underscore   # reemplazar un char → subrayado
-set -g fish_cursor_default block            # normal → block
-set -g fish_cursor_visual block             # visual → block
-set -g fish_cursor_external block
+set -g fish_cursor_insert line blink
+set -g fish_cursor_replace_one underscore
+set -g fish_cursor_default block
+set -g fish_cursor_visual block
+# external is the cursor left while an external command runs. Beam, not block:
+# apps that set their own override it anyway, but Claude Code inherits this one.
+set -g fish_cursor_external line blink
 
-# ─── Interactive-only setup ─────────────────────────────
 if status is-interactive
-    # Let Ctrl-S/Ctrl-Q reach the shell instead of being eaten by the terminal.
+    # Frees Ctrl-S/Ctrl-Q, which the terminal was swallowing.
     stty -ixon 2>/dev/null
 
-    # AWS_PROFILE siempre explícito, según la sesión tmux.
-    # Antes solo se seteaba en la sesión "work" y en el resto quedaba vacío:
-    # como ~/.aws/config no tiene un perfil [default], todo comando aws fuera
-    # de esa sesión fallaba con NoCredentials hasta exportarlo a mano.
-    # Además el item `aws` de Tide solo se dibuja cuando la variable existe,
-    # así que tenerla siempre puesta = ver siempre contra qué cuenta estás.
-    # Solo interactivo: subshells y scripts no lo heredan sin querer.
+    # Always explicit: ~/.aws/config has no [default] profile, so without this
+    # every aws command outside the work session fails with NoCredentials.
+    # Interactive only, so scripts and subshells don't inherit it.
     if test -n "$TMUX"; and test (tmux display-message -p '#S' 2>/dev/null) = work
         set -gx AWS_PROFILE work
     else
         set -gx AWS_PROFILE personal
     end
 
-    # ─── fzf: Ctrl-R history, Ctrl-T files, Alt-C dirs ────
+    if command -q zoxide
+        zoxide init fish | source
+    end
+
     if command -q fzf
-        # bat: usar la paleta ANSI del terminal en vez del theme propio de bat
-        # → el preview de fzf matchea el resto y sigue al tema del terminal.
+        # ansi: bat uses the terminal palette, so previews match the theme.
         set -gx BAT_THEME ansi
 
-        # fd respeta .gitignore, ignora hidden por default, más rápido que find.
         set -gx FZF_DEFAULT_COMMAND 'fd --type f --hidden --follow --exclude .git'
         set -gx FZF_CTRL_T_COMMAND $FZF_DEFAULT_COMMAND
         set -gx FZF_ALT_C_COMMAND 'fd --type d --hidden --follow --exclude .git'
 
-        # Layout: pane abajo, reversa (input arriba), 40% height, borde sutil.
-        # --bind: Ctrl-/ togglea preview, Ctrl-y copia la selección al clipboard.
-        # Paleta kanso-zen sobre el fondo #090E13. bg+ (fila seleccionada) e
-        # info/border usan el bright-black #5C6066: 3.06:1, se distingue sin
-        # gritar. El resto mapea al mismo rol que el prompt Tide.
+        # Ctrl-/ toggles preview, Ctrl-y copies the selection to the clipboard.
         set -gx FZF_DEFAULT_OPTS '
           --height 40% --layout=reverse --border=rounded
           --bind="ctrl-/:toggle-preview,ctrl-y:execute-silent(echo {} | pbcopy)+abort"
           --color=bg+:#5C6066,fg:#a4a7a4,fg+:#c5c9c7,hl:#7aa89f,hl+:#8ea4a2,info:#5C6066,prompt:#8ba4b0,pointer:#e46876,marker:#87a987,border:#5C6066,header:#8ba4b0,spinner:#8ea4a2'
 
-        # Preview con bat para Ctrl-T y completion de archivos.
         set -gx FZF_CTRL_T_OPTS "--preview 'bat --style=numbers --color=always --line-range :200 {}'"
-        # Preview con ls para Alt-C (cd a subdir).
         set -gx FZF_ALT_C_OPTS "--preview 'ls -la {} | head -100'"
-        # Ctrl-R: ver el comando completo cuando es multilínea.
         set -gx FZF_CTRL_R_OPTS '--preview "echo {}" --preview-window=down:3:wrap'
 
         fzf --fish | source
 
-        # Ctrl-L para el historial, además del Ctrl-R que deja `fzf --fish`.
-        # Ctrl-L es un control char real (0x0c), así que funciona en cualquier
-        # terminal sin protocolo Kitty ni extended-keys. Pisa el clear-screen
-        # que fish le da por default, pero en Ghostty eso lo hace cmd+k.
+        # Ctrl-L is a real control char (0x0c): works without the Kitty protocol
+        # or extended keys. Overrides fish's clear-screen, which stays on cmd+k.
         for mode in insert default
             bind -M $mode ctrl-l fzf-history-widget
         end

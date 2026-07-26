@@ -1,5 +1,5 @@
--- Layouts de dos apps y zoom, por atajo de teclado.
--- Regla: nunca esperar un tiempo fijo, esperar a que la condición sea cierta.
+-- Two-app layouts and zoom, driven by keyboard shortcuts.
+-- Rule: never wait a fixed amount of time, wait for the condition to be true.
 
 hs.window.animationDuration = 0
 
@@ -9,22 +9,22 @@ if hs.ipc and hs.ipc.cliInstall then hs.ipc.cliInstall() end
 local log = hs.logger.new("layouts", "info")
 
 if not hs.accessibilityState(true) then
-  hs.alert.show("⚠️  Hammerspoon necesita Accessibility.\n" ..
+  hs.alert.show("⚠️  Hammerspoon needs Accessibility.\n" ..
     "Settings → Privacy & Security → Accessibility → Hammerspoon ON", { textSize = 18 }, 8)
 end
 
--- Bundle IDs, no nombres de display: "Visual Studio Code" internamente es
--- "Code" y hs.application.find falla callado.
+-- Bundle IDs, not display names: "Visual Studio Code" is internally "Code" and
+-- hs.application.find fails silently.
 local APPS = {
   chrome    = "com.google.Chrome",
-  ghostty   = "com.mitchellh.ghostty",
-  zed       = "dev.zed.Zed",
+  alacritty = "org.alacritty",
+  vscode    = "com.microsoft.VSCode",
   tableplus = "com.tinyapp.TablePlus",
 }
 
 local GAP = 2
 
--- ─── Primitivas ───────────────────────────────────────────────────
+-- ─── Primitives ───────────────────────────────────────────────────
 
 local function waitFor(cond, onReady, timeout)
   local ok = cond()
@@ -48,13 +48,13 @@ local function frameFor(xR, yR, wR, hR, gap)
     fw * wR - gap, fh * hR - gap)
 end
 
--- 4px de tolerancia: varias apps no aplican exacto el frame pedido.
+-- 4px tolerance: several apps don't apply the requested frame exactly.
 local function frameMatches(a, b)
   return math.abs(a.w - b.w) < 4 and math.abs(a.h - b.h) < 4
      and math.abs(a.x - b.x) < 4 and math.abs(a.y - b.y) < 4
 end
 
--- mainWindow() puede dar nil o un diálogo en vez de la ventana real.
+-- mainWindow() can return nil, or a dialog instead of the real window.
 local function windowOf(app)
   if not app then return nil end
   local win = app:mainWindow()
@@ -65,24 +65,30 @@ local function windowOf(app)
   return nil
 end
 
--- Electron maneja AXSize y AXPosition por separado, así que setFrame() a veces
--- aplica solo una. Se parte en dos y se verifica. El corte es un deadline, no
--- un contador de intentos: contar intentos castigaba al caso lento (app fría).
-local function applyFrame(win, rect, deadline)
+-- Electron handles AXSize and AXPosition separately, so setFrame() sometimes
+-- applies only one: split and verify. Two cutoffs — the deadline for a cold
+-- app, and lack of progress for when the window hit its own minimum size and
+-- asking for less will never converge.
+local function applyFrame(win, rect, deadline, previous)
   deadline = deadline or (hs.timer.secondsSinceEpoch() + 2)
   win:setSize(hs.geometry.size(rect.w, rect.h))
   win:setTopLeft(hs.geometry.point(rect.x, rect.y))
 
   hs.timer.doAfter(0.1, function()
     if not win:isVisible() then return end
-    if frameMatches(win:frame(), rect) then return end
-    if hs.timer.secondsSinceEpoch() >= deadline then log.w("no se pudo posicionar") return end
-    applyFrame(win, rect, deadline)
+    local current = win:frame()
+    if frameMatches(current, rect) then return end
+    if previous and frameMatches(current, previous) then
+      log.i("window won't take that frame (own minimum size); leaving it where it landed")
+      return
+    end
+    if hs.timer.secondsSinceEpoch() >= deadline then log.w("could not position window") return end
+    applyFrame(win, rect, deadline, current)
   end)
 end
 
--- macOS ignora setSize en native-fullscreen. Salir del Space es animado, así
--- que se espera a que isFullScreen() sea falso en vez de adivinar el tiempo.
+-- macOS ignores setSize in native fullscreen, and leaving the Space is
+-- animated, so wait for isFullScreen() to be false instead of guessing.
 local function placeWindow(win, rect)
   if not win:isFullScreen() then applyFrame(win, rect) return end
   win:setFullScreen(false)
@@ -90,16 +96,14 @@ local function placeWindow(win, rect)
     function() applyFrame(win, rect) end, 3)
 end
 
--- ─── Colocación ───────────────────────────────────────────────────
+-- ─── Placement ────────────────────────────────────────────────────
 
--- Apps que un layout está colocando; el watcher las saltea para no pisarle
--- el frame.
+-- Apps a layout is currently placing; the watcher skips them so it doesn't
+-- clobber the frame.
 local claimed = {}
 
--- Un solo camino para los cuatro casos: no corre, corre escondida, corre sin
--- ventanas, corre con ventana. Tratarlos por separado producía el bug de la
--- app abierta sin ventanas: quedaba un placement esperando un evento
--- `launched` que no llegaba nunca, porque la app ya estaba corriendo.
+-- One path for all four cases: not running, running hidden, running without
+-- windows, running with a window.
 local function placeApp(bundleID, rect, onPlaced)
   claimed[bundleID] = true
 
@@ -144,22 +148,75 @@ end
 
 local currentLayout = nil
 
--- Esconde todo MENOS las dos apps del layout. Antes escondía todo y después
--- las volvía a mostrar: ese hide→unhide era la causa de tener que apretar el
--- atajo dos veces, porque el setSize llegaba con la app todavía escondida.
+-- Widths are measured, not assumed: every app has its own minimum (Chrome
+-- 500px, VS Code 600px) and won't go below it. Place the narrow one first,
+-- read the width it actually accepted, give the wide one the remainder.
+local function splitFrames(leftW, narrowActualW)
+  local f = hs.screen.mainScreen():frame()
+  local narrowOnLeft = leftW < 0.5
+  local ratio = narrowOnLeft and leftW or (1 - leftW)
+  local narrowW = narrowActualW or ((f.w - GAP) * ratio - GAP)
+  local wideW = f.w - narrowW - GAP * 2
+  local y, h = f.y + GAP / 2, f.h - GAP
+
+  local narrowX, wideX
+  if narrowOnLeft then
+    narrowX = f.x + GAP / 2
+    wideX = narrowX + narrowW + GAP
+  else
+    narrowX = f.x + f.w - GAP / 2 - narrowW
+    wideX = f.x + GAP / 2
+  end
+  return hs.geometry.rect(narrowX, y, narrowW, h),
+         hs.geometry.rect(wideX, y, wideW, h),
+         narrowOnLeft
+end
+
 local function sideBySide(left, right, leftW)
   currentLayout = { left = left, right = right, leftW = leftW }
   hideAllExcept({ left, right })
-  placeApp(right, frameFor(leftW, 0, 1 - leftW, 1, GAP))
-  placeApp(left, frameFor(0, 0, leftW, 1, GAP), function(win) win:focus() end)
+
+  local narrowRect, _, narrowOnLeft = splitFrames(leftW)
+  local narrowApp = narrowOnLeft and left or right
+  local wideApp = narrowOnLeft and right or left
+
+  placeApp(narrowApp, narrowRect, function(narrowWin)
+    local n2, w2 = splitFrames(leftW, narrowWin:frame().w)
+    placeWindow(narrowWin, n2)
+    placeApp(wideApp, w2, function(wideWin)
+      local focusWin = narrowOnLeft and narrowWin or wideWin
+      focusWin:focus()
+    end)
+  end)
 end
 
+-- Rotating mirrors the layout instead of rebuilding it. `1 - leftW` keeps each
+-- app's own width and only swaps sides; anchoring width to position could push
+-- an app below its minimum.
 local function rotateLayout()
   if not currentLayout then return end
-  sideBySide(currentLayout.right, currentLayout.left, currentLayout.leftW)
+  local left, right = currentLayout.right, currentLayout.left
+  local leftW = 1 - currentLayout.leftW
+
+  local leftWin = windowOf(hs.application.get(left))
+  local rightWin = windowOf(hs.application.get(right))
+  if not (leftWin and rightWin) then sideBySide(left, right, leftW) return end
+
+  currentLayout = { left = left, right = right, leftW = leftW }
+
+  -- No need to place-then-remeasure here: rotating preserves widths, so the
+  -- narrow one is already at whatever its minimum allowed.
+  local narrowOnLeft = leftW < 0.5
+  local narrowWin = narrowOnLeft and leftWin or rightWin
+  local wideWin = narrowOnLeft and rightWin or leftWin
+  local narrowRect, wideRect = splitFrames(leftW, narrowWin:frame().w)
+
+  placeWindow(narrowWin, narrowRect)
+  placeWindow(wideWin, wideRect)
+  leftWin:focus()
 end
 
--- ─── Auto-maximizar al abrir ──────────────────────────────────────
+-- ─── Maximize on launch ───────────────────────────────────────────
 
 hs.application.watcher.new(function(_, event, app)
   if event ~= hs.application.watcher.launched then return end
@@ -182,7 +239,7 @@ local function toggleZoom()
   local win = hs.window.focusedWindow()
   if not win then return end
 
-  -- Limpiar ids de ventanas ya cerradas; antes esta tabla crecía para siempre.
+  -- Drop ids of closed windows, otherwise this table grows forever.
   for id in pairs(savedFrames) do
     if not hs.window.get(id) then savedFrames[id] = nil end
   end
@@ -197,18 +254,16 @@ local function toggleZoom()
   end
 end
 
--- ─── Resolución ───────────────────────────────────────────────────
--- Un solo atajo que alterna entre las dos. Valores "looks like" de
--- System Settings → Displays, con scale 2 (Retina).
+-- ─── Resolution ───────────────────────────────────────────────────
+
+-- "Looks like" values from System Settings → Displays, at scale 2 (Retina).
 local RESOLUTIONS = {
-  { w = 1512, h = 982 },  -- UI más grande
-  { w = 1800, h = 1169 }, -- más espacio útil
+  { w = 1512, h = 982 },
+  { w = 1800, h = 1169 },
 }
 
--- setMode pide los cinco parámetros; freq y depth se reusan del modo actual,
--- que es el mismo panel físico. Devuelve false si el modo no existe: hay que
--- mirarlo porque `availableModes()` reporta 0 en macOS 27, así que este es el
--- único aviso de que una resolución no está disponible.
+-- setMode returns false when the mode doesn't exist. Worth checking:
+-- availableModes() reports 0 on macOS 27, so this is the only signal.
 hs.hotkey.bind({ "cmd", "alt" }, "0", function()
   local screen = hs.screen.mainScreen()
   local cur = screen:currentMode()
@@ -217,17 +272,17 @@ hs.hotkey.bind({ "cmd", "alt" }, "0", function()
   if screen:setMode(target.w, target.h, 2, cur.freq, cur.depth) then
     hs.alert.show(("%dx%d"):format(target.w, target.h))
   else
-    hs.alert.show(("No se pudo aplicar %dx%d"):format(target.w, target.h))
+    hs.alert.show(("Could not apply %dx%d"):format(target.w, target.h))
   end
 end)
 
--- ─── Atajos ───────────────────────────────────────────────────────
+-- ─── Shortcuts ────────────────────────────────────────────────────
 
-hs.hotkey.bind({ "cmd", "alt" }, "1", function() sideBySide(APPS.zed, APPS.chrome, 0.7) end)
-hs.hotkey.bind({ "cmd", "alt" }, "2", function() sideBySide(APPS.ghostty, APPS.chrome, 0.7) end)
+hs.hotkey.bind({ "cmd", "alt" }, "1", function() sideBySide(APPS.vscode, APPS.chrome, 0.7) end)
+hs.hotkey.bind({ "cmd", "alt" }, "2", function() sideBySide(APPS.alacritty, APPS.chrome, 0.7) end)
 hs.hotkey.bind({ "cmd", "alt" }, "3", function() sideBySide(APPS.tableplus, APPS.chrome, 0.7) end)
 hs.hotkey.bind({ "cmd", "alt" }, "R", rotateLayout)
 hs.hotkey.bind({ "cmd", "alt" }, "F", toggleZoom)
 hs.hotkey.bind({ "cmd", "alt", "ctrl" }, "R", hs.reload)
 
-hs.alert.show("Hammerspoon cargado")
+hs.alert.show("Hammerspoon loaded")

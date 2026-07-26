@@ -1,9 +1,6 @@
-# ~/.gitconfig — symlinkeado desde el repo por install.sh.
-#
-# OJO: al ser un symlink, cualquier `git config --global ...` que corras
-# escribe DIRECTO en este archivo del repo. Eso es a propósito — los cambios
-# quedan versionados en vez de perderse en el home — pero significa que
-# después de tocar config vas a ver el repo sucio.
+# ~/.gitconfig — symlinked from the repo by install.sh.
+# NOTE: since it's a symlink, any `git config --global ...` writes straight into
+# this repo file and leaves the working tree dirty.
 
 [user]
 	name = Nicolas Navarro
@@ -16,12 +13,11 @@
 [core]
 	editor = nvim
 	askPass =
-	# .DS_Store y demás basura de macOS, ignorada en TODOS los repos en vez de
-	# tener que repetirla en cada .gitignore.
 	excludesfile = ~/.config/git/ignore
+	# If delta isn't installed, git falls back to less without breaking.
+	pager = delta
 
 [push]
-	# "tracking" era un sinónimo deprecado de "upstream".
 	default = upstream
 	autoSetupRemote = true
 
@@ -32,17 +28,27 @@
 	autosetuprebase = always
 
 [merge]
-	# zdiff3 muestra la base común además de los dos lados: en un conflicto se
-	# ve qué cambió cada rama respecto del ancestro, no solo el resultado.
+	# zdiff3 shows the common base alongside both sides of a conflict.
 	conflictstyle = zdiff3
 
 [diff]
-	# histogram detecta mejor los bloques movidos que el algoritmo por defecto.
+	# histogram detects moved blocks better than the default.
 	algorithm = histogram
+	colorMoved = default
+
+[interactive]
+	diffFilter = delta --color-only
+
+[delta]
+	# navigate: n/N jump between files within a diff.
+	navigate = true
+	line-numbers = true
+	# ansi: use the terminal palette, same as BAT_THEME in fish.
+	syntax-theme = ansi
 
 [rerere]
-	# Recuerda cómo resolviste un conflicto y lo reaplica solo si reaparece.
-	# Con pull.rebase = true, eso pasa seguido.
+	# Replays how a conflict was resolved when it reappears. With
+	# pull.rebase = true that happens often.
 	enabled = true
 
 [color]
@@ -54,14 +60,13 @@
 [github]
 	user = nhnvrr
 
-# ─── Firma de commits con SSH ───────────────────────────
 [gpg]
 	format = ssh
 
 [gpg "ssh"]
-	# Sin esto los commits se firman igual, pero git no puede VERIFICARLOS
-	# localmente: `git log --show-signature` falla con
-	# "allowedSignersFile needs to be configured and exist".
+	# Without this, commits are still signed but can't be verified locally:
+	# `git log --show-signature` fails with "allowedSignersFile needs to be
+	# configured and exist".
 	allowedSignersFile = ~/.config/git/allowed_signers
 
 [commit]
