@@ -83,3 +83,10 @@ blue = "#7fb4ca"
 magenta = "#938aa9"
 cyan = "#7aa89f"
 white = "#c5c9c7"
+
+# tmux paints the status bar with colour208 when a pane rings the bell, and
+# kanso has no orange among the 16 ANSI colours. Defining the index here keeps
+# the alert orange while leaving the value owned by the theme file.
+[[colors.indexed_colors]]
+index = 208
+color = "#ff8700"
