@@ -92,7 +92,7 @@ test -f $docker_completion; and source $docker_completion
 # Tide keeps its config in universal variables, which aren't versionable.
 # install.sh seeds the base; these `set -g` shadow it (global beats universal)
 # so the repo stays the source of truth. Hex values go without '#'.
-set -g tide_left_prompt_items os pwd git newline character
+set -g tide_left_prompt_items pwd git newline character
 set -g tide_right_prompt_items status cmd_duration context jobs node bun go rustc python terraform aws docker time
 set -g tide_prompt_add_newline_before true
 set -g tide_prompt_transient_enabled true
@@ -106,8 +106,13 @@ set -g tide_git_truncation_length 0
 # silently becoming an empty string.
 # Catalog: nerdfonts.com/cheat-sheet · codepoint of a glyph: printf '%s' 'X' | xxd
 set -g tide_git_icon (printf '\U0000F126')
-set -g tide_os_icon (printf '\U0000F179')
-set -g tide_pwd_icon (printf '\U0000F07C')
+# No pwd icon: the path speaks for itself.
+# Set with no value (empty LIST, not empty string): in fish, concatenating an
+# empty list with a string yields nothing, so Tide's `$tide_pwd_icon' '` doesn't
+# leave a stray leading space.
+set -g tide_pwd_icon
+set -g tide_pwd_icon_home
+set -g tide_pwd_icon_unwritable
 set -g tide_cmd_duration_icon (printf '\U0000F252')
 set -g tide_jobs_icon (printf '\U0000F013')
 set -g tide_node_icon (printf '\U0000E24F')
