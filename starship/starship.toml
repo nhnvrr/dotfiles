@@ -1,7 +1,7 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
 format = '󰜁 $directory$git_branch$git_state$git_status$line_break$character'
-right_format = '$mise$status$cmd_duration$username$hostname$jobs$nodejs$bun$golang$rust$python$terraform$aws${env_var.STARSHIP_DOCKER_CTX}$time'
+right_format = '$mise$status$cmd_duration$username$hostname$jobs$nodejs$bun$golang$rust$python$ruby$terraform$aws${env_var.STARSHIP_DOCKER_CTX}$time'
 
 add_newline = true
 command_timeout = 500
@@ -122,6 +122,12 @@ format = '[$symbol($version )]($style)'
 symbol = '󰌠 '
 style = 'bright-yellow'
 format = '[$symbol($version )(\($virtualenv\) )]($style)'
+
+# vesto-api is Rails, so this is the one runtime the prompt was missing.
+[ruby]
+symbol = '󰴭 '
+style = 'red'
+format = '[$symbol($version )]($style)'
 
 # Default format is workspace-only, which is also the fast path: asking for
 # $version would shell out to `terraform version` on every prompt.
