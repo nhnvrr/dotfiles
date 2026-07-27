@@ -32,11 +32,6 @@ zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-path "$HOME/.zcompcache"
 
-if (( $+commands[aws_completer] )); then
-    autoload -Uz bashcompinit && bashcompinit
-    complete -C aws_completer aws
-fi
-
 # --- env ---------------------------------------------------------------------
 
 # Always explicit: ~/.aws/config has no [default] profile, so without this every
@@ -307,6 +302,13 @@ eval "$(mise activate zsh)"
 # extended keys. Overrides clear-screen, which stays on cmd+k.
 bindkey -M viins '^L' fzf-history-widget
 bindkey -M vicmd '^L' fzf-history-widget
+
+# AFTER mise: aws_completer is a mise-managed binary, so higher up in this file
+# the $+commands guard is false and the completion silently never registers.
+if (( $+commands[aws_completer] )); then
+    autoload -Uz bashcompinit && bashcompinit
+    complete -C aws_completer aws
+fi
 
 # --- plugins and prompt ------------------------------------------------------
 
