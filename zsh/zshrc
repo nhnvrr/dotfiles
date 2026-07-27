@@ -261,7 +261,7 @@ export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
 export FZF_DEFAULT_OPTS='
   --height 40% --layout=reverse --border=rounded
   --bind="ctrl-/:toggle-preview,ctrl-y:execute-silent(echo {} | pbcopy)+abort"
-  --color=bg+:#5C6066,fg:#a4a7a4,fg+:#c5c9c7,hl:#7aa89f,hl+:#8ea4a2,info:#5C6066,prompt:#8ba4b0,pointer:#e46876,marker:#87a987,border:#5C6066,header:#8ba4b0,spinner:#8ea4a2'
+  --color=bg+:bright-black,fg:white,fg+:bright-white,hl:bright-cyan,hl+:cyan,info:bright-black,prompt:blue,pointer:bright-red,marker:bright-green,border:bright-black,header:blue,spinner:cyan'
 
 export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always --line-range :200 {}'"
 export FZF_ALT_C_OPTS="--preview 'ls -la {} | head -100'"
@@ -315,7 +315,7 @@ bindkey -M vicmd '^L' fzf-history-widget
 # that's about to scroll away, then restore the real prompt.
 _transient_accept() {
     local prompt=$PROMPT rprompt=$RPROMPT
-    PROMPT='%F{#87a987}❯%f '
+    PROMPT='%F{10}❯%f '
     RPROMPT=''
     zle .reset-prompt
     PROMPT=$prompt RPROMPT=$rprompt
