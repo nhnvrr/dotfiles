@@ -1,6 +1,16 @@
-# JetBrains Mono, variante Mono (NFM). La Propo NO se puede: es proporcional y
-# Ghostty solo acepta monoespaciadas (la ignora y cae a un fallback sin avisar).
+# Berkeley Mono (TX-02) primero, JetBrains Mono NFM como fallback. El segundo
+# NO es opcional: el trial de Berkeley trae 95 glifos, solo ASCII imprimible.
+# Todo lo demás —❯ del prompt, ❮ de vi, ⇡⇣ de git, ✘ del status, ∅ de psql y
+# cada ícono Nerd Font— sale del fallback. Sin esa línea los elige CoreText.
+#
+# OJO: el trial vence 2026-08-03. Cuando expire hay que sacar la primera línea
+# o comprar la licencia; si se desinstala la fuente, Ghostty cae al fallback en
+# silencio y el único síntoma es que las letras cambian de forma.
+#
+# La variante Propo de JetBrains NO se puede: es proporcional y Ghostty solo
+# acepta monoespaciadas (la ignora y cae a otro fallback sin avisar).
 # JetBrains trae ligaduras; -calt/-liga/-dlig las apagan.
+font-family = Berkeley Mono Trial
 font-family = JetBrainsMono Nerd Font Mono
 font-feature = -calt, -liga, -dlig
 font-size = 21

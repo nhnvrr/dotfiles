@@ -46,7 +46,7 @@ After `install.sh` exits cleanly:
 1. **Paste the SSH pubkey on GitHub** — it's already on your clipboard. Add it at <https://github.com/settings/ssh/new> as both an authentication key AND a signing key (so your signed commits show up as Verified).
 2. **Authenticate the GitHub CLI:** `gh auth login` (script reminds you if not authenticated).
 3. **Grant Accessibility permission to Hammerspoon** on first launch (System Settings → Privacy & Security → Accessibility). Required for window management hotkeys.
-4. **Open Ghostty** (not Terminal.app) — it picks up `ghostty/config`, the kanso-zen theme, JetBrains Mono Nerd Font, and zsh as the login shell.
+4. **Open Ghostty** (not Terminal.app) — it picks up `ghostty/config`, the kanso-zen theme, the fonts, and zsh as the login shell.
 
 Note: the script prompts for your password once, for `chsh`.
 
@@ -65,7 +65,7 @@ Note: the script prompts for your password once, for `chsh`.
 | Git | versioned config, SSH-signed commits | [`git/gitconfig`](./git/gitconfig) |
 | Window mgmt | Hammerspoon (app-pair layouts) + Raycast (launcher, clipboard, simple windows) | [`hammerspoon/init.lua`](./hammerspoon/init.lua) |
 | Runtime mgr | mise — global versions plus per-project `.nvmrc` | [`mise/config.toml`](./mise/config.toml) |
-| Font | JetBrains Mono, Nerd Font patched, size 15. The `Mono` (NFM) variant — its icons occupy a single cell, so `ls -la` columns stay aligned | cask `font-jetbrains-mono-nerd-font` |
+| Font | Berkeley Mono (TX-02) at size 21, with JetBrains Mono Nerd Font Mono as **fallback**. The Berkeley trial ships 95 glyphs — printable ASCII only — so every symbol and icon comes from the fallback. **The trial licence expires 2026-08-03**; after that either buy TX-02 or drop the first `font-family` line. It is not in the Brewfile because it isn't installable by brew, so a fresh machine falls back to JetBrains silently | [`ghostty/config`](./ghostty/config), cask `font-jetbrains-mono-nerd-font` |
 | Theme | kanso-zen (dark-only): green-tinted palette on a near-black `#090E13` background. Ghostty loads it as a real theme file; nvim runs `kanso.nvim` (transparent), fzf and Starship follow in truecolor hex. tmux and `bat` inherit the terminal's ANSI palette. GUI editors keep their own user-level theme | [`ghostty/themes/kanso-zen`](./ghostty/themes/kanso-zen) |
 | Listings | eza with icons — `ls`, `ll`, `la`, `lt`. Needs the Nerd Font's **Mono** (NFM) variant, where a glyph is exactly one cell wide; the Propo variant drifts the columns | [`zsh/zshrc`](./zsh/zshrc) |
 
