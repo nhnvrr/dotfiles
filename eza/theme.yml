@@ -1,0 +1,24 @@
+# Colours by ANSI name, never hex: eza resolves them against whatever palette
+# Ghostty loads, same rule as starship.toml and BAT_THEME=ansi.
+#
+# CAREFUL: eza ignores keys it doesn't recognise without any error, so a typo
+# here looks exactly like a rule that had no effect. Check the output.
+
+filekinds:
+  directory: { foreground: Cyan, is_bold: true }
+  # Moved off Cyan, which is eza's default for symlinks and is now the folders'.
+  symlink: { foreground: LightBlue }
+
+# Metadata columns default to loud colours (the date is blue, the owner bold
+# yellow) for two fields that are the same on every row. The name is the part
+# worth reading.
+date: { foreground: DarkGray }
+users:
+  user_you: { foreground: DarkGray }
+
+# Same colours the prompt uses for git_status, so a listing and the prompt
+# agree on what modified looks like.
+git:
+  new: { foreground: LightGreen }
+  modified: { foreground: LightYellow }
+  deleted: { foreground: LightRed }

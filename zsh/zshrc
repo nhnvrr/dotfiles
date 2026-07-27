@@ -248,6 +248,10 @@ add-zsh-hook precmd _docker_ctx_precmd
 # ansi: bat uses the terminal palette, so previews match the theme.
 export BAT_THEME=ansi
 
+# Without this eza looks in ~/Library/Application Support/eza on macOS and the
+# theme is simply never read. It ignores XDG_CONFIG_HOME; this is the only knob.
+export EZA_CONFIG_DIR=$HOME/.config/eza
+
 export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
 export FZF_CTRL_T_COMMAND=$FZF_DEFAULT_COMMAND
 export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
