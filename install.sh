@@ -149,8 +149,6 @@ done
 if [[ "${SKIP_BREW}" == false ]] && command -v mise >/dev/null 2>&1; then
   echo "Installing mise-managed tools..."
   mise install
-  echo "Enabling pnpm via Corepack..."
-  mise exec -- corepack enable pnpm
 fi
 
 echo "Applying macOS defaults..."

@@ -32,6 +32,11 @@ brew "libpq"
 
 brew "mise"
 
+# Excepción a la regla de arriba: por versión iría en mise, pero mise no
+# funcionó. Ojo que mise inyecta su bin antes que /opt/homebrew en el PATH, así
+# que un shim de corepack bajo node/*/bin tapa este binario sin avisar.
+brew "pnpm"
+
 brew "yt-dlp"
 brew "htop"
 brew "fastfetch"
