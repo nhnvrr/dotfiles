@@ -1,15 +1,9 @@
-# Berkeley primero: la primera declarada es la primaria, el resto son fallback.
-# El trial trae 95 glifos (solo ASCII), así que sin la segunda línea los íconos
-# del prompt y de eza los resuelve CoreText con Symbols Nerd Font, que es
-# proporcional y descuadra las columnas.
 font-family = Berkeley Mono Trial
 font-family = JetBrainsMono Nerd Font Mono
 font-feature = -calt, -liga, -dlig
 font-size = 14
-theme = Vercel
+theme = vercel-mono
 
-# Vercel define solo 0-15. tmux pinta la barra de colour208 cuando salta la
-# campana; sin esto Ghostty lo saca de su cubo de 256 y el naranja cambia.
 palette = 208=#ff8700
 
 macos-icon = official
