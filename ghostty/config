@@ -1,39 +1,27 @@
-# Berkeley Mono (TX-02) primero, JetBrains Mono NFM como fallback. El segundo
-# NO es opcional: el trial de Berkeley trae 95 glifos, solo ASCII imprimible.
-# Todo lo demás —❯ del prompt, ❮ de vi, ⇡⇣ de git, ✘ del status, ∅ de psql y
-# cada ícono Nerd Font— sale del fallback. Sin esa línea los elige CoreText.
-#
-# OJO: el trial vence 2026-08-03. Cuando expire hay que sacar la primera línea
-# o comprar la licencia; si se desinstala la fuente, Ghostty cae al fallback en
-# silencio y el único síntoma es que las letras cambian de forma.
-#
-# La variante Propo de JetBrains NO se puede: es proporcional y Ghostty solo
-# acepta monoespaciadas (la ignora y cae a otro fallback sin avisar).
-# JetBrains trae ligaduras; -calt/-liga/-dlig las apagan.
+# Berkeley primero: la primera declarada es la primaria, el resto son fallback.
+# El trial trae 95 glifos (solo ASCII), así que sin la segunda línea los íconos
+# del prompt y de eza los resuelve CoreText con Symbols Nerd Font, que es
+# proporcional y descuadra las columnas.
 font-family = Berkeley Mono Trial
 font-family = JetBrainsMono Nerd Font Mono
 font-feature = -calt, -liga, -dlig
-font-size = 21
-theme = kanso-zen
+font-size = 14
+theme = Vercel
 
-# El icono oficial, sin retocar. `custom-style` está marcado como experimental
-# upstream y sus capas pueden cambiar de formato entre versiones; esto no.
+# Vercel define solo 0-15. tmux pinta la barra de colour208 cuando salta la
+# campana; sin esto Ghostty lo saca de su cubo de 256 y el naranja cambia.
+palette = 208=#ff8700
+
 macos-icon = official
-
-background-opacity = 0.92
+background-opacity = 0.83
 background-blur = true
 keybind = cmd+shift+o=toggle_background_opacity
 
-window-padding-x = 14
-window-padding-y = 10
-# Reparte el sobrante entre los dos lados en vez de dejarlo todo a la derecha,
-# que es lo que hace que el padding se vea disparejo al redimensionar.
+window-padding-x = 0
+window-padding-y = 0
 window-padding-balance = true
 
-# native: título en una sola línea. `tabs` integraba la tab bar de Ghostty en
-# el titlebar y agregaba un segundo renglón — inútil acá, porque las pestañas
-# las maneja tmux, no Ghostty.
-macos-titlebar-style = native
+macos-titlebar-style = transparent
 window-save-state = never
 resize-overlay = never
 adjust-cell-height = 8%
@@ -41,9 +29,6 @@ adjust-cell-height = 8%
 cursor-style = bar
 cursor-style-blink = true
 
-# Explícito, no el login shell del sistema: durante una migración de shell el
-# de `chsh` puede no ser todavía el que este repo configura. --login para que
-# corra ~/.zprofile y arme el PATH.
 command = /bin/zsh --login
 shell-integration = zsh
 shell-integration-features = cursor,sudo,title
@@ -51,8 +36,6 @@ shell-integration-features = cursor,sudo,title
 macos-option-as-alt = true
 quick-terminal-position = top
 quick-terminal-screen = main
-# `global:` para que funcione sin Ghostty en foco. La tecla es `backquote`,
-# no `grave`: ese nombre Ghostty lo rechaza con error.InvalidFormat.
 keybind = global:cmd+backquote=toggle_quick_terminal
 
 bell-features = no-audio,no-system,attention,title,no-border
