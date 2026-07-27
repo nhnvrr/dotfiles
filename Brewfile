@@ -16,6 +16,9 @@ brew "tmux"
 brew "neovim"
 
 brew "fzf"
+# Shell history in SQLite, on Ctrl-R. fzf keeps Ctrl-T, Alt-C and **<TAB>, and
+# zoxide shells out to it for `zi`, so it stays.
+brew "atuin"
 brew "fd"
 brew "ripgrep"
 brew "bat"

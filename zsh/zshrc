@@ -284,33 +284,40 @@ export FZF_DEFAULT_OPTS='
 
 export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always --line-range :200 {}'"
 export FZF_ALT_C_OPTS="--preview 'ls -la {} | head -100'"
-export FZF_CTRL_R_OPTS='--preview "echo {}" --preview-window=down:3:wrap'
 
-# These three `init zsh` calls are ~13ms of forks on EVERY shell, and every tmux
+# These four `init zsh` calls are ~13ms of forks on EVERY shell, and every tmux
 # pane opens one. Their output depends only on the binary, so cache it and
-# regenerate when any of them is newer than the cache.
+# regenerate whenever brew touches anything.
+#
+# Testing the binaries themselves does NOT work: everything in brew's bin/ is a
+# symlink into the Cellar and `-nt` follows symlinks, so it reads the bottle's
+# BUILD date — which is often older than the cache, and the upgrade is missed.
+# The bin/ directory's own mtime moves on every install, relink and upgrade.
 #
 # mise is deliberately NOT in here: `mise activate zsh` interpolates the current
 # $PATH into its output, so a cached copy would pin whatever PATH the generating
 # shell happened to have onto every shell afterwards.
 _zinit_cache=$HOME/.cache/zsh/init.zsh
 () {
-    local bin
-    if [[ -s $_zinit_cache ]]; then
-        for bin in $commands[zoxide] $commands[fzf] $commands[starship]; do
-            [[ $bin -nt $_zinit_cache ]] && break
-        done
-        [[ $bin -nt $_zinit_cache ]] || return
-    fi
+    # The :- fallback matters: HOMEBREW_PREFIX comes from zprofile, which only
+    # runs in a login shell, and an empty one would test /bin and never expire.
+    [[ -s $_zinit_cache && ! ${HOMEBREW_PREFIX:-/opt/homebrew}/bin -nt $_zinit_cache ]] && return
     mkdir -p $_zinit_cache:h
     {
         zoxide init zsh
         fzf --zsh
+        # After fzf: both bind ^R and the last one wins. --disable-up-arrow
+        # keeps ↑ on zsh's own history.
+        atuin init zsh --disable-up-arrow
         starship init zsh --print-full-init
     } >| $_zinit_cache
 }
 source $_zinit_cache
 unset _zinit_cache
+
+# atuin only takes ^R in viins; in vicmd it binds `/` and leaves ^R to fzf.
+# Has to sit after the source above, which is where both of them bind it.
+bindkey -M vicmd '^R' atuin-search-vicmd
 
 # No zsh equivalent of fish's vendor_conf.d/mise-activate.fish: without this
 # line mise is simply not active and every runtime falls back to brew's.

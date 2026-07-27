@@ -1,0 +1,17 @@
+# No account: both of these would otherwise reach the network on startup.
+auto_sync = false
+update_check = false
+
+# Enter puts the command on the line instead of running it, which is what
+# fzf's Ctrl-R did. A second Enter runs it.
+enter_accept = false
+
+search_mode = "fuzzy"
+filter_mode = "global"
+
+style = "compact"
+inline_height = 20
+show_preview = true
+
+# No [theme]: the default renders with the terminal's ANSI slots, and every
+# other tool here names slots instead of hardcoding hex.
