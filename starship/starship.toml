@@ -13,9 +13,9 @@ command_timeout = 500
 # Same reason bat runs with BAT_THEME=ansi.
 
 [directory]
-style = 'white'
+style = 'bright-white'
 repo_root_style = 'bright-white'
-before_repo_root_style = 'bright-black'
+before_repo_root_style = 'white'
 truncate_to_repo = false
 truncation_length = 0
 format = '[$path]($style) '
