@@ -3,6 +3,23 @@
 
 vim.g.mapleader = " "
 
+-- fzf-native is a C library and vim.pack has no build hook, so the make runs
+-- from PackChanged (:h vim.pack-events). This MUST stay above vim.pack.add or
+-- it won't fire on a fresh machine, which is the only run that matters.
+vim.api.nvim_create_autocmd("PackChanged", {
+  callback = function(ev)
+    if ev.data.spec.name == "telescope-fzf-native.nvim" and ev.data.kind ~= "delete" then
+      -- :wait() is not optional. vim.system is async, so without it quitting
+      -- before make finishes leaves no libfzf.so and telescope silently falls
+      -- back to the Lua sorter.
+      local done = vim.system({ "make" }, { cwd = ev.data.path }):wait()
+      if done.code ~= 0 then
+        vim.notify("fzf-native build failed: " .. (done.stderr or ""), vim.log.levels.ERROR)
+      end
+    end
+  end,
+})
+
 vim.pack.add({
   "https://github.com/datsfilipe/vesper.nvim",
   -- neo-tree's dependencies: nui draws the tree, plenary scans the filesystem,
@@ -12,6 +29,9 @@ vim.pack.add({
   "https://github.com/nvim-tree/nvim-web-devicons",
   -- v3.x is the branch upstream pins for stability; default branch moves.
   { src = "https://github.com/nvim-neo-tree/neo-tree.nvim", version = "v3.x" },
+  -- telescope reuses plenary above; fzf-native is the C sorter.
+  "https://github.com/nvim-telescope/telescope.nvim",
+  "https://github.com/nvim-telescope/telescope-fzf-native.nvim",
 })
 
 -- transparent = true: the terminal supplies the background, so nvim inherits
@@ -79,6 +99,17 @@ require("neo-tree").setup({
   window = { width = 30 },
 })
 vim.keymap.set("n", "<leader>e", "<cmd>Neotree toggle reveal left<cr>", { desc = "File explorer" })
+
+require("telescope").setup({ defaults = { layout_strategy = "flex" } })
+-- pcall: on a fresh install the make above is still running and the extension
+-- doesn't exist yet. It loads on the next start; without this nvim errors out.
+pcall(require("telescope").load_extension, "fzf")
+
+local builtin = require("telescope.builtin")
+vim.keymap.set("n", "<leader>f", builtin.find_files, { desc = "Find files" })
+vim.keymap.set("n", "<leader>g", builtin.live_grep, { desc = "Grep in project" })
+vim.keymap.set("n", "<leader>b", builtin.buffers, { desc = "Buffers" })
+vim.keymap.set("n", "<leader>h", builtin.help_tags, { desc = "Help tags" })
 
 vim.api.nvim_create_autocmd("TextYankPost", {
   callback = function()
