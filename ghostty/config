@@ -20,6 +20,9 @@ macos-titlebar-style = transparent
 window-save-state = never
 resize-overlay = never
 adjust-cell-height = 8%
+# adjust-cell-height only rescales powerline glyphs, so the nerd font icons need
+# their own bump to keep up with the taller cell.
+adjust-icon-height = 15%
 
 cursor-style = bar
 cursor-style-blink = true
