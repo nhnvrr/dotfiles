@@ -26,15 +26,34 @@ brew "eza"
 brew "git"
 brew "gh"
 brew "git-delta"
+brew "lazygit"
+brew "lazydocker"
 
 # libpq ships psql without the Postgres server.
 brew "libpq"
 
 brew "mise"
 
+# vesto-react-native needs both: cocoapods for the iOS build, watchman for
+# Metro's file watching.
+brew "cocoapods"
+brew "watchman"
+
+brew "sentry-cli"
+# The Go debugger, installed as `dlv`. Go itself comes from mise.
+brew "delve"
+
 brew "yt-dlp"
+# yt-dlp shells out to it to merge separate video and audio streams.
+brew "ffmpeg"
 brew "htop"
 brew "fastfetch"
+
+# Not declared on purpose — no evidence either way, and removing them blind is
+# worse than carrying them:
+#   bash      macOS ships 3.2; scripts here use #!/usr/bin/env bash
+#   container Apple's Linux-container CLI
+#   unixodbc  pulled in by a GUI client, kept until that's confirmed
 
 cask "ghostty"
 # Mono variant (NFM): icons take one cell, so `ls -la` columns stay aligned.
