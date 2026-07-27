@@ -11,7 +11,11 @@ style = 'bright-white'
 repo_root_style = 'bright-white'
 before_repo_root_style = 'bright-white'
 truncate_to_repo = false
-truncation_length = 0
+# The two go together: fish_style only rewrites the part that was truncated, so
+# with truncation_length = 0 (unlimited) it would do nothing at all. Parents
+# collapse to one letter, the last 4 components stay whole.
+truncation_length = 4
+fish_style_pwd_dir_length = 1
 format = '[$path]($style) '
 
 [character]
