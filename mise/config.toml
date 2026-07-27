@@ -9,4 +9,8 @@ rust = "stable"
 python = "3.14"
 
 [settings]
-idiomatic_version_file_enable_tools = ["node"]
+# ruby is deliberately not pinned in [tools]: nothing here needs a global one.
+# Listing it makes mise honour a project's .ruby-version — vesto-api is Rails
+# on 3.3.0, and without this `ruby` resolves to brew's, which is only present
+# as a cocoapods dependency and several majors ahead.
+idiomatic_version_file_enable_tools = ["node", "ruby"]
