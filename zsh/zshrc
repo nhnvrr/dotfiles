@@ -243,6 +243,26 @@ _docker_ctx_precmd() {
 }
 add-zsh-hook precmd _docker_ctx_precmd
 
+# --- pnpm --------------------------------------------------------------------
+
+# starship has no pnpm module, and a [custom] one only looks at $PWD: in a
+# monorepo the lockfile sits at the root, so it would stop drawing inside any
+# package. Walking up here doesn't fork.
+_pnpm_precmd() {
+    local ret=$? dir=$PWD
+    while [[ -n $dir ]]; do
+        if [[ -f $dir/pnpm-lock.yaml ]]; then
+            export STARSHIP_PNPM=1
+            return $ret
+        fi
+        [[ $dir == $HOME ]] && break
+        dir=${dir%/*}
+    done
+    unset STARSHIP_PNPM
+    return $ret
+}
+add-zsh-hook precmd _pnpm_precmd
+
 # --- integrations ------------------------------------------------------------
 
 # ansi: bat uses the terminal palette, so previews match the theme.
