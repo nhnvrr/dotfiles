@@ -1,21 +1,15 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
-# Only the modules named here are ever evaluated, so the ~40 others starship
-# ships (java, ruby, php, package…) cost nothing.
-format = '$directory$git_branch$git_state$git_status$line_break$character'
+format = '󰜁 $directory$git_branch$git_state$git_status$line_break$character'
 right_format = '$mise$status$cmd_duration$username$hostname$jobs$nodejs$bun$golang$rust$python$terraform$aws${env_var.STARSHIP_DOCKER_CTX}$time'
 
 add_newline = true
 command_timeout = 500
 
-# Colours by ANSI slot, never hex: the terminal resolves them, so the prompt
-# follows whatever theme Ghostty loads instead of pinning one palette here.
-# Same reason bat runs with BAT_THEME=ansi.
-
 [directory]
 style = 'bright-white'
 repo_root_style = 'bright-white'
-before_repo_root_style = 'white'
+before_repo_root_style = 'bright-white'
 truncate_to_repo = false
 truncation_length = 0
 format = '[$path]($style) '
@@ -29,36 +23,32 @@ vimcmd_replace_one_symbol = '[▶](bright-purple)'
 vimcmd_visual_symbol = '[V](bright-yellow)'
 
 [git_branch]
-symbol = '󰊢 '
-style = 'bright-green'
+symbol = ' '
+style = 'green'
 format = '[$symbol$branch]($style) '
 
 [git_state]
 style = 'red'
 format = '\([$state( $progress_current/$progress_total)]($style)\) '
 
-# Per-state colours have to be inlined: the module has one $style, and the
-# variables are format strings in their own right.
 [git_status]
 ignore_submodules = true
 format = '($all_status$ahead_behind )'
-conflicted = '[=${count}](bright-red)'
+conflicted = '[=${count}](red)'
 stashed = '[*${count}](cyan)'
-staged = '[+${count}](bright-green)'
-modified = '[!${count}](bright-yellow)'
-untracked = '[?${count}](bright-purple)'
-deleted = '[✘${count}](bright-red)'
-renamed = '[»${count}](bright-yellow)'
-ahead = '[⇡${count}](bright-cyan)'
-behind = '[⇣${count}](bright-cyan)'
-diverged = '[⇕⇡${ahead_count}⇣${behind_count}](bright-cyan)'
+staged = '[+${count}](green)'
+modified = '[!${count}](yellow)'
+untracked = '[?${count}](purple)'
+deleted = '[✘${count}](red)'
+renamed = '[»${count}](yellow)'
+ahead = '[⇡${count}](cyan)'
+behind = '[⇣${count}](cyan)'
+diverged = '[⇕⇡${ahead_count}⇣${behind_count}](cyan)'
 
-# Callado mientras mise esta sano; sale en rojo solo cuando se rompe, que es
-# el caso que de otro modo tarda en notarse.
 [mise]
 disabled = false
 style = 'bright-red'
-symbol = '󰀦 '
+symbol = ' '
 healthy_symbol = ''
 unhealthy_symbol = 'mise'
 format = '[$symbol$health]($style) '
@@ -96,12 +86,12 @@ style = 'bright-green'
 format = '[$symbol($version )]($style)'
 
 [bun]
-symbol = '󰳓 '
+symbol = ' '
 style = 'bright-white'
 format = '[$symbol($version )]($style)'
 
 [golang]
-symbol = '󰟓 '
+symbol = ' '
 style = 'bright-cyan'
 format = '[$symbol($version )]($style)'
 
@@ -123,8 +113,8 @@ style = 'bright-purple'
 format = '[$symbol$workspace]($style) '
 
 [aws]
-symbol = '󰸏 '
-style = 'bright-yellow'
+symbol = ' '
+style = 'yellow'
 format = '[$symbol$profile]($style) '
 
 # starship's own docker_context module only hides `default`, so `desktop-linux`
