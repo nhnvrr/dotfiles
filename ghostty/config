@@ -16,8 +16,8 @@ window-padding-balance = true
 macos-titlebar-style = transparent
 window-save-state = never
 resize-overlay = never
-adjust-cell-width = 12%
 adjust-cell-height = 6%
+adjust-icon-height = 15%
 
 cursor-style = bar
 cursor-style-blink = true
