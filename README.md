@@ -46,7 +46,7 @@ After `install.sh` exits cleanly:
 1. **Paste the SSH pubkey on GitHub** — it's already on your clipboard. Add it at <https://github.com/settings/ssh/new> as both an authentication key AND a signing key (so your signed commits show up as Verified).
 2. **Authenticate the GitHub CLI:** `gh auth login` (script reminds you if not authenticated).
 3. **Grant Accessibility permission to Hammerspoon** on first launch (System Settings → Privacy & Security → Accessibility). Required for window management hotkeys.
-4. **Open Ghostty** (not Terminal.app) — it picks up `ghostty/config`, the vercel-neon theme, the fonts, and zsh as the login shell.
+4. **Open Ghostty** (not Terminal.app) — it picks up `ghostty/config`, the Nord Wave theme, the fonts, and zsh as the login shell.
 
 Note: the script prompts for your password once, for `chsh`.
 
@@ -66,7 +66,7 @@ Note: the script prompts for your password once, for `chsh`.
 | Window mgmt | Hammerspoon — `cmd+alt+1/2/3` tile an app pair at 70/30 and hide everything else, `R` mirrors the split, `F` zooms. It never sleeps a fixed interval: it waits on the condition, because Electron applies `AXSize` and `AXPosition` separately and macOS ignores `setSize` in native fullscreen. Widths are measured, not assumed — the narrow app is placed first and the wide one gets whatever the other's minimum left over. Plus Raycast (launcher, clipboard, simple windows) | [`hammerspoon/init.lua`](./hammerspoon/init.lua) |
 | Runtime mgr | mise — global versions plus per-project `.nvmrc` | [`mise/config.toml`](./mise/config.toml) |
 | Font | Berkeley Mono (TX-02) at size 14, with JetBrains Mono Nerd Font Mono as **fallback**. The Berkeley trial ships 95 glyphs — printable ASCII only — so every symbol and icon comes from the fallback. **The trial licence expires 2026-08-03**; after that either buy TX-02 or drop the first `font-family` line. It is not in the Brewfile because it isn't installable by brew, so a fresh machine falls back to JetBrains silently | [`ghostty/config`](./ghostty/config), cask `font-jetbrains-mono-nerd-font` |
-| Theme | vercel-neon (dark-only): saturated neon palette on a near-black `#101010` background. Ghostty loads it as a real theme file; nvim runs `nordic.nvim` (transparent, so only its Nord syntax colours land on top). Starship, eza, `bat` and tmux all resolve colours through the terminal's ANSI slots, so changing the Ghostty theme moves everything at once. GUI editors keep their own user-level theme | [`ghostty/themes/vercel-neon`](./ghostty/themes/vercel-neon) |
+| Theme | Nord Wave (dark-only), one of Ghostty's bundled themes, with `background` forced to pure black instead of its `#212121` — that override and the `208` one have to sit **below** the `theme` line to win. nvim runs `nordic.nvim` (transparent, so only its Nord syntax colours land on top). Starship, eza, `bat` and tmux all resolve colours through the terminal's ANSI slots, so changing the Ghostty theme moves everything at once. GUI editors keep their own user-level theme | [`ghostty/config`](./ghostty/config) |
 | Listings | eza with icons — `ls`, `ll`, `la`, `lt`, themed by ANSI name (folders cyan, metadata grey, git matching the prompt). Needs the Nerd Font's **Mono** (NFM) variant, where a glyph is exactly one cell wide; the Propo variant drifts the columns. `EZA_CONFIG_DIR` is mandatory: on macOS eza reads `~/Library/Application Support/eza` and ignores `XDG_CONFIG_HOME` | [`eza/theme.yml`](./eza/theme.yml), [`zsh/zshrc`](./zsh/zshrc) |
 
 `zsh/zshrc` notes:

@@ -2,8 +2,12 @@ font-family = Berkeley Mono Trial
 font-family = JetBrainsMono Nerd Font Mono
 font-feature = -calt, -liga, -dlig
 font-size = 14
-theme = vercel-neon
+theme = Nord Wave
 
+# Both of these override the theme, so they MUST stay below it: ghostty applies
+# the theme where the line appears and lets later keys win. Nord Wave ships a
+# #212121 grey background; 208 is the orange the tmux bell uses.
+background = #000000
 palette = 208=#ff8700
 
 macos-icon = official
