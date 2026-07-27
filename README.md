@@ -46,7 +46,7 @@ After `install.sh` exits cleanly:
 1. **Paste the SSH pubkey on GitHub** — it's already on your clipboard. Add it at <https://github.com/settings/ssh/new> as both an authentication key AND a signing key (so your signed commits show up as Verified).
 2. **Authenticate the GitHub CLI:** `gh auth login` (script reminds you if not authenticated).
 3. **Grant Accessibility permission to Hammerspoon** on first launch (System Settings → Privacy & Security → Accessibility). Required for window management hotkeys.
-4. **Open Alacritty** (not Terminal.app) — it picks up `alacritty/alacritty.toml`, JetBrains Mono Nerd Font, and zsh as the login shell.
+4. **Open Ghostty** (not Terminal.app) — it picks up `ghostty/config`, the kanso-zen theme, JetBrains Mono Nerd Font, and zsh as the login shell.
 
 Note: the script prompts for your password once, for `chsh`.
 
@@ -56,7 +56,7 @@ Note: the script prompts for your password once, for `chsh`.
 |---|---|---|
 | Shell | zsh (macOS's `/bin/zsh`) | [`zsh/zshrc`](./zsh/zshrc), [`zsh/zprofile`](./zsh/zprofile) |
 | Prompt | Starship | [`starship/starship.toml`](./starship/starship.toml) |
-| Terminal | Alacritty | [`alacritty/alacritty.toml`](./alacritty/alacritty.toml) |
+| Terminal | Ghostty | [`ghostty/config`](./ghostty/config) |
 | Multiplexer | tmux | [`tmux/tmux.conf`](./tmux/tmux.conf) |
 | Editor | VS Code (`e` = `code --new-window`) — it's what handles the EC2 work: Remote-SSH, AWS Toolkit and SSM sessions. It's also what Hammerspoon's `cmd+alt+1` layout pairs with Chrome. Its config is user-level, not versioned here | — |
 | `$EDITOR` | Neovim — commits, `git rebase -i`, the shell's Ctrl-O. One file, one plugin (the theme), no LSP | [`nvim/init.lua`](./nvim/init.lua) |
@@ -66,7 +66,8 @@ Note: the script prompts for your password once, for `chsh`.
 | Window mgmt | Hammerspoon (app-pair layouts) + Raycast (launcher, clipboard, simple windows) | [`hammerspoon/init.lua`](./hammerspoon/init.lua) |
 | Runtime mgr | mise — global versions plus per-project `.nvmrc` | [`mise/config.toml`](./mise/config.toml) |
 | Font | JetBrains Mono, Nerd Font patched, size 15. The `Mono` (NFM) variant — its icons occupy a single cell, so `ls -la` columns stay aligned | cask `font-jetbrains-mono-nerd-font` |
-| Theme | kanso-zen (dark-only): green-tinted palette on a near-black `#090E13` background. Alacritty defines the palette directly; nvim runs `kanso.nvim` (transparent), fzf and Starship follow in truecolor hex. tmux and `bat` inherit the terminal's ANSI palette. GUI editors keep their own user-level theme | [`alacritty/alacritty.toml`](./alacritty/alacritty.toml) |
+| Theme | kanso-zen (dark-only): green-tinted palette on a near-black `#090E13` background. Ghostty loads it as a real theme file; nvim runs `kanso.nvim` (transparent), fzf and Starship follow in truecolor hex. tmux and `bat` inherit the terminal's ANSI palette. GUI editors keep their own user-level theme | [`ghostty/themes/kanso-zen`](./ghostty/themes/kanso-zen) |
+| Listings | eza with icons — `ls`, `ll`, `la`, `lt`. Needs the Nerd Font's **Mono** (NFM) variant, where a glyph is exactly one cell wide; the Propo variant drifts the columns | [`zsh/zshrc`](./zsh/zshrc) |
 
 `zsh/zshrc` notes:
 - Defines `dev` / `work` / `side` aliases that spawn (or switch to) a named tmux session with a fixed CWD.
@@ -74,7 +75,7 @@ Note: the script prompts for your password once, for `chsh`.
 - Provides `req` — curl with sane flags, piping the response through `jq` when it parses as JSON. There is deliberately no `~/.curlrc`: that file is read by *every* curl invocation, including the Homebrew installer's and any third-party script's.
 - Wraps `claude` so that `CLAUDE_CONFIG_DIR=~/.claude-work` is used in the `work` session, letting two Claude Code subscriptions stay logged in side-by-side.
 - Implements fish-style **abbreviations** for the git shortcuts (`gc`, `gco`, `ga`, `gb`, `gd`) in ~20 lines of ZLE: they expand in place on space or enter, so you see the real command before running it and the history stores the expanded form. They only fire in command position, so `echo gd` stays literal.
-- Uses **hybrid emacs + vi** bindings — `bindkey -v` with the emacs keys added back to `viins`, so Esc enters command mode with `KEYTIMEOUT=1`. The other direction (`bindkey -e` plus Esc bound to `vi-cmd-mode`) needs a high `KEYTIMEOUT`, which delays every Esc *and* every `Alt-<key>`, because Alacritty sends those as `ESC`+key.
+- Uses **hybrid emacs + vi** bindings — `bindkey -v` with the emacs keys added back to `viins`, so Esc enters command mode with `KEYTIMEOUT=1`. The other direction (`bindkey -e` plus Esc bound to `vi-cmd-mode`) needs a high `KEYTIMEOUT`, which delays every Esc *and* every `Alt-<key>`, because the terminal sends those as `ESC`+key (`macos-option-as-alt = true`).
 - Caches `zoxide init` / `fzf --zsh` / `starship init` into `~/.cache/zsh/init.zsh`, regenerated when any of those binaries is newer. mise is deliberately **not** cached: `mise activate zsh` interpolates the current `$PATH` into its output, so a cached copy would pin one shell's PATH onto every later shell.
 - Forces Starship's `precmd` hook to run first. mise's hook does `eval "$(mise hook-env)"` without preserving `$?`, which would otherwise leave the exit-status module permanently reading 0.
 
@@ -112,7 +113,8 @@ These are symlinked from the repo into `$HOME`:
 | `zsh/zshrc` | `~/.zshrc` |
 | `zsh/zprofile` | `~/.zprofile` |
 | `starship/starship.toml` | `~/.config/starship.toml` |
-| `alacritty/alacritty.toml` | `~/.config/alacritty/alacritty.toml` |
+| `ghostty/config` | `~/.config/ghostty/config` |
+| `ghostty/themes` | `~/.config/ghostty/themes` |
 | `tmux/tmux.conf` | `~/.tmux.conf` |
 | `mise/config.toml` | `~/.config/mise/config.toml` |
 | `nvim/init.lua` | `~/.config/nvim/init.lua` |

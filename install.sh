@@ -113,14 +113,8 @@ echo "Linking config files..."
 link_file "${CONFIG_DIR}/zsh/zprofile" "${HOME}/.zprofile"
 link_file "${CONFIG_DIR}/zsh/zshrc"    "${HOME}/.zshrc"
 link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
-link_file "${CONFIG_DIR}/alacritty/alacritty.toml" "${HOME}/.config/alacritty/alacritty.toml"
-# Symlinks from the previous terminal, removed only if they point into this repo.
-for stale in "${HOME}/.config/ghostty/config" "${HOME}/.config/ghostty/themes"; do
-  if [[ -L "${stale}" && "$(readlink "${stale}")" == "${CONFIG_DIR}"/ghostty/* ]]; then
-    rm -f "${stale}"
-    echo "  removed stale Ghostty symlink ${stale}"
-  fi
-done
+link_file "${CONFIG_DIR}/ghostty/config" "${HOME}/.config/ghostty/config"
+link_file "${CONFIG_DIR}/ghostty/themes" "${HOME}/.config/ghostty/themes"
 link_file "${CONFIG_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"
 link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.tmux.conf"
 link_file "${CONFIG_DIR}/nvim/init.lua"   "${HOME}/.config/nvim/init.lua"
@@ -133,13 +127,15 @@ if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
   link_file "${CONFIG_DIR}/gh/config.yml" "${HOME}/.config/gh/config.yml"
 fi
 
-# Orphan from the fish+tide era. Removed only if it points into this repo, so a
-# hand-written config.fish stays untouched.
-if [[ -L "${HOME}/.config/fish/config.fish" \
-   && "$(readlink "${HOME}/.config/fish/config.fish")" == "${CONFIG_DIR}"/* ]]; then
-  rm -f "${HOME}/.config/fish/config.fish"
-  echo "  removed stale symlink ${HOME}/.config/fish/config.fish"
-fi
+# Orphans from the fish+tide and Alacritty eras. Removed only if they point into
+# this repo, so a hand-written file at any of these paths stays untouched.
+for stale in "${HOME}/.config/fish/config.fish" \
+             "${HOME}/.config/alacritty/alacritty.toml"; do
+  if [[ -L "${stale}" && "$(readlink "${stale}")" == "${CONFIG_DIR}"/* ]]; then
+    rm -f "${stale}"
+    echo "  removed stale symlink ${stale}"
+  fi
+done
 
 # Dangling links into a /nix/store that no longer exists. ~/.zshenv is the one
 # that matters: zsh reads it before anything else.

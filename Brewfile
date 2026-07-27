@@ -21,6 +21,7 @@ brew "ripgrep"
 brew "bat"
 brew "jq"
 brew "zoxide"
+brew "eza"
 
 brew "git"
 brew "gh"
@@ -35,7 +36,7 @@ brew "yt-dlp"
 brew "htop"
 brew "fastfetch"
 
-cask "alacritty"
+cask "ghostty"
 # Mono variant (NFM): icons take one cell, so `ls -la` columns stay aligned.
 cask "font-jetbrains-mono-nerd-font"
 

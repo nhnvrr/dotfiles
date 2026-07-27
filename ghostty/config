@@ -1,0 +1,55 @@
+# JetBrains Mono, variante Mono (NFM). La Propo NO se puede: es proporcional y
+# Ghostty solo acepta monoespaciadas (la ignora y cae a un fallback sin avisar).
+# JetBrains trae ligaduras; -calt/-liga/-dlig las apagan.
+font-family = JetBrainsMono Nerd Font Mono
+font-feature = -calt, -liga, -dlig
+font-size = 21
+theme = kanso-zen
+
+# Icono del Dock: fantasma verde kanso sobre pantalla negra. `custom-style` es
+# nativo — genera el icono, no hace falta un .icns. Requiere declarar el frame;
+# `plastic` es el más oscuro de los cuatro (aluminum/beige/plastic/chrome).
+macos-icon = custom-style
+macos-icon-frame = plastic
+macos-icon-ghost-color = #87a987
+macos-icon-screen-color = #090E13
+
+background-opacity = 0.92
+background-blur = true
+keybind = cmd+shift+o=toggle_background_opacity
+
+window-padding-x = 14
+window-padding-y = 10
+# Reparte el sobrante entre los dos lados en vez de dejarlo todo a la derecha,
+# que es lo que hace que el padding se vea disparejo al redimensionar.
+window-padding-balance = true
+
+# native: título en una sola línea. `tabs` integraba la tab bar de Ghostty en
+# el titlebar y agregaba un segundo renglón — inútil acá, porque las pestañas
+# las maneja tmux, no Ghostty.
+macos-titlebar-style = native
+window-save-state = never
+resize-overlay = never
+adjust-cell-height = 8%
+
+cursor-style = bar
+cursor-style-blink = true
+
+# Explícito, no el login shell del sistema: durante una migración de shell el
+# de `chsh` puede no ser todavía el que este repo configura. --login para que
+# corra ~/.zprofile y arme el PATH.
+command = /bin/zsh --login
+shell-integration = zsh
+shell-integration-features = cursor,sudo,title
+
+macos-option-as-alt = true
+quick-terminal-position = top
+quick-terminal-screen = main
+# `global:` para que funcione sin Ghostty en foco. La tecla es `backquote`,
+# no `grave`: ese nombre Ghostty lo rechaza con error.InvalidFormat.
+keybind = global:cmd+backquote=toggle_quick_terminal
+
+bell-features = no-audio,no-system,attention,title,no-border
+confirm-close-surface = false
+copy-on-select = clipboard
+mouse-hide-while-typing = true

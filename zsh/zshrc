@@ -53,6 +53,15 @@ fi
 alias e='code --new-window'
 alias code='code --new-window'
 
+# eza over ls. The icons need the Nerd Font's Mono (NFM) variant, where a glyph
+# occupies exactly one cell — with the Propo variant the columns drift.
+if (( $+commands[eza] )); then
+    alias ls='eza --icons --group-directories-first'
+    alias ll='eza --icons --group-directories-first --long --git --header'
+    alias la='eza --icons --group-directories-first --long --git --header --all'
+    alias lt='eza --icons --group-directories-first --tree --level=2'
+fi
+
 # Abbreviations, not aliases: they expand on screen when you hit space or enter,
 # so you see the real command before running it and history stores the expanded
 # form. zsh has no `abbr`, so this is the fish behaviour in ~20 lines.

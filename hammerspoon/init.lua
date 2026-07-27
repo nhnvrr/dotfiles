@@ -17,7 +17,7 @@ end
 -- hs.application.find fails silently.
 local APPS = {
   chrome    = "com.google.Chrome",
-  alacritty = "org.alacritty",
+  ghostty = "com.mitchellh.ghostty",
   vscode    = "com.microsoft.VSCode",
   tableplus = "com.tinyapp.TablePlus",
 }
@@ -279,7 +279,7 @@ end)
 -- ─── Shortcuts ────────────────────────────────────────────────────
 
 hs.hotkey.bind({ "cmd", "alt" }, "1", function() sideBySide(APPS.vscode, APPS.chrome, 0.7) end)
-hs.hotkey.bind({ "cmd", "alt" }, "2", function() sideBySide(APPS.alacritty, APPS.chrome, 0.7) end)
+hs.hotkey.bind({ "cmd", "alt" }, "2", function() sideBySide(APPS.ghostty, APPS.chrome, 0.7) end)
 hs.hotkey.bind({ "cmd", "alt" }, "3", function() sideBySide(APPS.tableplus, APPS.chrome, 0.7) end)
 hs.hotkey.bind({ "cmd", "alt" }, "R", rotateLayout)
 hs.hotkey.bind({ "cmd", "alt" }, "F", toggleZoom)
