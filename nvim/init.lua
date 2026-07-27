@@ -21,7 +21,7 @@ vim.api.nvim_create_autocmd("PackChanged", {
 })
 
 vim.pack.add({
-  "https://github.com/datsfilipe/vesper.nvim",
+  "https://github.com/AlexvZyl/nordic.nvim",
   -- neo-tree's dependencies: nui draws the tree, plenary scans the filesystem,
   -- devicons needs the Nerd Font fallback Ghostty already loads.
   "https://github.com/MunifTanjim/nui.nvim",
@@ -34,11 +34,14 @@ vim.pack.add({
   "https://github.com/nvim-telescope/telescope-fzf-native.nvim",
 })
 
--- transparent = true: the terminal supplies the background, so nvim inherits
--- Ghostty's theme without hardcoding a hex here.
-require("vesper").setup({ transparent = true })
+-- transparent: the terminal supplies the background, so nvim inherits Ghostty's
+-- theme instead of hardcoding Nord's #2E3440 here. float goes with bg because
+-- telescope and neo-tree draw in floating windows.
+require("nordic").setup({
+  transparent = { bg = true, float = true },
+})
 vim.o.background = "dark"
-vim.cmd.colorscheme("vesper")
+vim.cmd.colorscheme("nordic")
 
 local opt = vim.opt
 
@@ -82,6 +85,8 @@ vim.api.nvim_create_user_command("WQ", "wq", {})
 
 vim.keymap.set("i", "jk", "<Esc>", { desc = "Leave insert mode" })
 vim.keymap.set("n", "<leader>nh", "<cmd>nohlsearch<cr>", { desc = "Clear search highlight" })
+vim.keymap.set("n", "<leader>sv", "<C-w>v", { desc = "Split window vertically" })
+vim.keymap.set("n", "<leader>sh", "<C-w>s", { desc = "Split window horizontally" })
 
 -- neo-tree instead of netrw. hijack_netrw_behavior = "open_current" keeps
 -- `nvim .` and `:e some/dir/` opening the tree in the current window, the way
