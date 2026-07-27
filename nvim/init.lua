@@ -39,13 +39,26 @@ vim.pack.add({
 -- telescope and neo-tree draw in floating windows.
 require("nordic").setup({
   transparent = { bg = true, float = true },
-  -- neo-tree renders names with DirectoryName/FileName. nordic only defines the
-  -- `*FolderName` groups, which neo-tree never reads, so these have to be set here.
+  -- The default 'flat' telescope style paints the prompt and borders with a
+  -- solid bg, which defeats transparent.float. 'classic' leaves them NONE and
+  -- draws the border as a line instead.
+  telescope = { style = "classic" },
   on_highlight = function(hl, palette)
+    -- neo-tree renders names with DirectoryName/FileName. nordic only defines
+    -- the `*FolderName` groups, which neo-tree never reads.
     hl.NeoTreeDirectoryName = { fg = palette.cyan.base }
     hl.NeoTreeDirectoryIcon = { fg = palette.cyan.base }
     hl.NeoTreeFileName = { fg = palette.white2 }
     hl.NeoTreeFileNameOpened = { fg = palette.white2, bold = true }
+    -- What 'classic' gives up and we want back: the title chip and a selected
+    -- row you can actually see.
+    local title = { fg = palette.black0, bg = palette.orange.base, bold = true }
+    hl.TelescopeTitle = title
+    hl.TelescopePromptTitle = title
+    hl.TelescopeResultsTitle = title
+    hl.TelescopePreviewTitle = { fg = palette.black0, bg = palette.blue2, bold = true }
+    hl.TelescopeSelection = { bg = palette.black2, fg = palette.yellow.bright }
+    hl.TelescopeSelectionCaret = { bg = palette.black2, fg = palette.yellow.bright, bold = true }
   end,
 })
 vim.o.background = "dark"
@@ -144,7 +157,17 @@ require("neo-tree").setup({
 })
 vim.keymap.set("n", "<leader>e", "<cmd>Neotree toggle reveal left<cr>", { desc = "File explorer" })
 
-require("telescope").setup({ defaults = { layout_strategy = "flex" } })
+-- preview.treesitter = false is not a preference, it's a workaround. nvim ships
+-- parsers without highlight queries for most filetypes, so vim.treesitter.start
+-- attaches a parser that paints nothing and returns nil — and telescope only
+-- falls back to the regex highlighter on an explicit `false`. Result: colorless
+-- previews. Off, the preview uses `syntax` like every other buffer here.
+require("telescope").setup({
+  defaults = {
+    layout_strategy = "flex",
+    preview = { treesitter = false },
+  },
+})
 -- pcall: on a fresh install the make above is still running and the extension
 -- doesn't exist yet. It loads on the next start; without this nvim errors out.
 pcall(require("telescope").load_extension, "fzf")
