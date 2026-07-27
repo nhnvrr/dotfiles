@@ -3,7 +3,7 @@
 # Only the modules named here are ever evaluated, so the ~40 others starship
 # ships (java, ruby, php, package…) cost nothing.
 format = '$directory$git_branch$git_state$git_status$line_break$character'
-right_format = '$status$cmd_duration$username$hostname$jobs$nodejs$bun$golang$rust$python$terraform$aws${env_var.STARSHIP_DOCKER_CTX}$time'
+right_format = '$mise$status$cmd_duration$username$hostname$jobs$nodejs$bun$golang$rust$python$terraform$aws${env_var.STARSHIP_DOCKER_CTX}$time'
 
 add_newline = true
 command_timeout = 500
@@ -52,6 +52,16 @@ renamed = '[»${count}](bright-yellow)'
 ahead = '[⇡${count}](bright-cyan)'
 behind = '[⇣${count}](bright-cyan)'
 diverged = '[⇕⇡${ahead_count}⇣${behind_count}](bright-cyan)'
+
+# Callado mientras mise esta sano; sale en rojo solo cuando se rompe, que es
+# el caso que de otro modo tarda en notarse.
+[mise]
+disabled = false
+style = 'bright-red'
+symbol = '󰀦 '
+healthy_symbol = ''
+unhealthy_symbol = 'mise'
+format = '[$symbol$health]($style) '
 
 [status]
 disabled = false
