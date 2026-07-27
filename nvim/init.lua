@@ -3,12 +3,22 @@
 
 vim.g.mapleader = " "
 
+vim.pack.add({
+  "https://github.com/datsfilipe/vesper.nvim",
+  -- neo-tree's dependencies: nui draws the tree, plenary scans the filesystem,
+  -- devicons needs the Nerd Font fallback Ghostty already loads.
+  "https://github.com/MunifTanjim/nui.nvim",
+  "https://github.com/nvim-lua/plenary.nvim",
+  "https://github.com/nvim-tree/nvim-web-devicons",
+  -- v3.x is the branch upstream pins for stability; default branch moves.
+  { src = "https://github.com/nvim-neo-tree/neo-tree.nvim", version = "v3.x" },
+})
+
 -- transparent = true: the terminal supplies the background, so nvim inherits
--- #090E13 without hardcoding it.
-vim.pack.add({ "https://github.com/webhooked/kanso.nvim" })
-require("kanso").setup({ transparent = true, theme = "zen" })
+-- Ghostty's theme without hardcoding a hex here.
+require("vesper").setup({ transparent = true })
 vim.o.background = "dark"
-vim.cmd.colorscheme("kanso-zen")
+vim.cmd.colorscheme("vesper")
 
 local opt = vim.opt
 
@@ -53,13 +63,22 @@ vim.api.nvim_create_user_command("WQ", "wq", {})
 vim.keymap.set("i", "jk", "<Esc>", { desc = "Leave insert mode" })
 vim.keymap.set("n", "<leader>nh", "<cmd>nohlsearch<cr>", { desc = "Clear search highlight" })
 
--- netrw, which ships with nvim: neo-tree would need four plugins.
--- `:Lexplore` toggles. Inside: <CR> opens, `-` goes up, `%` new file,
--- `d` new directory, `D` delete, `R` rename, `i` cycles views.
-vim.g.netrw_liststyle = 3
-vim.g.netrw_banner = 0
-vim.g.netrw_winsize = 25
-vim.keymap.set("n", "<leader>e", "<cmd>Lexplore<cr>", { desc = "File explorer" })
+-- neo-tree instead of netrw. hijack_netrw_behavior = "open_current" keeps
+-- `nvim .` and `:e some/dir/` opening the tree in the current window, the way
+-- netrw did, rather than splitting off a sidebar and leaving an empty buffer.
+-- Inside: <CR> opens, `a` new file (trailing `/` makes a directory), `d` delete,
+-- `r` rename, `H` toggles hidden files, `?` lists every mapping.
+require("neo-tree").setup({
+  close_if_last_window = true,
+  filesystem = {
+    hijack_netrw_behavior = "open_current",
+    -- Keep the tree pointed at the buffer being edited.
+    follow_current_file = { enabled = true },
+    filtered_items = { hide_dotfiles = false, hide_gitignored = true },
+  },
+  window = { width = 30 },
+})
+vim.keymap.set("n", "<leader>e", "<cmd>Neotree toggle reveal left<cr>", { desc = "File explorer" })
 
 vim.api.nvim_create_autocmd("TextYankPost", {
   callback = function()
