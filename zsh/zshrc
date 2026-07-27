@@ -317,7 +317,9 @@ fi
 _transient_accept() {
     local prompt=$PROMPT rprompt=$RPROMPT
     PROMPT='%F{10}❯%f '
-    RPROMPT=''
+    # Not empty: %D expands at repaint, which is when the command starts, so a
+    # long session stays readable scrolling back.
+    RPROMPT='%F{8}%D{%H:%M}%f'
     zle .reset-prompt
     PROMPT=$prompt RPROMPT=$rprompt
     zle .accept-line
