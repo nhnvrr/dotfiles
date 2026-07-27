@@ -43,7 +43,7 @@
 	# navigate: n/N jump between files within a diff.
 	navigate = true
 	line-numbers = true
-	# ansi: use the terminal palette, same as BAT_THEME in fish.
+	# ansi: use the terminal palette, same as BAT_THEME in zshrc.
 	syntax-theme = ansi
 
 [rerere]

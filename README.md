@@ -46,7 +46,7 @@ After `install.sh` exits cleanly:
 1. **Paste the SSH pubkey on GitHub** — it's already on your clipboard. Add it at <https://github.com/settings/ssh/new> as both an authentication key AND a signing key (so your signed commits show up as Verified).
 2. **Authenticate the GitHub CLI:** `gh auth login` (script reminds you if not authenticated).
 3. **Grant Accessibility permission to Hammerspoon** on first launch (System Settings → Privacy & Security → Accessibility). Required for window management hotkeys.
-4. **Open Ghostty** (not Terminal.app) — it picks up `ghostty/config`, the kanso-zen theme, the fonts, and zsh as the login shell.
+4. **Open Ghostty** (not Terminal.app) — it picks up `ghostty/config`, the vercel-neon theme, the fonts, and zsh as the login shell.
 
 Note: the script prompts for your password once, for `chsh`.
 
@@ -59,15 +59,15 @@ Note: the script prompts for your password once, for `chsh`.
 | Terminal | Ghostty | [`ghostty/config`](./ghostty/config) |
 | Multiplexer | tmux | [`tmux/tmux.conf`](./tmux/tmux.conf) |
 | Editor | VS Code (`e` = `code --new-window`) — it's what handles the EC2 work: Remote-SSH, AWS Toolkit and SSM sessions. It's also what Hammerspoon's `cmd+alt+1` layout pairs with Chrome. Its config is user-level, not versioned here | — |
-| `$EDITOR` | Neovim — commits, `git rebase -i`, the shell's Ctrl-O. One file, one plugin (the theme), no LSP | [`nvim/init.lua`](./nvim/init.lua) |
+| `$EDITOR` | Neovim — commits, `git rebase -i`, the shell's Ctrl-O, and quick edits. One file, no LSP and no completion; the plugins are the theme, neo-tree and telescope with the fzf-native C sorter (`<leader>f` files, `<leader>g` grep, `<leader>b` buffers, `<leader>e` tree) | [`nvim/init.lua`](./nvim/init.lua) |
 | Database | `psql` as the primary client; TablePlus as the visual complement | [`psql/psqlrc`](./psql/psqlrc) |
 | HTTP | `curl` via the `req` function; Bruno for exploratory work | [`zsh/zshrc`](./zsh/zshrc) |
 | Git | versioned config, SSH-signed commits | [`git/gitconfig`](./git/gitconfig) |
-| Window mgmt | Hammerspoon (app-pair layouts) + Raycast (launcher, clipboard, simple windows) | [`hammerspoon/init.lua`](./hammerspoon/init.lua) |
+| Window mgmt | Hammerspoon — `cmd+alt+1/2/3` tile an app pair at 70/30 and hide everything else, `R` mirrors the split, `F` zooms. It never sleeps a fixed interval: it waits on the condition, because Electron applies `AXSize` and `AXPosition` separately and macOS ignores `setSize` in native fullscreen. Widths are measured, not assumed — the narrow app is placed first and the wide one gets whatever the other's minimum left over. Plus Raycast (launcher, clipboard, simple windows) | [`hammerspoon/init.lua`](./hammerspoon/init.lua) |
 | Runtime mgr | mise — global versions plus per-project `.nvmrc` | [`mise/config.toml`](./mise/config.toml) |
-| Font | Berkeley Mono (TX-02) at size 21, with JetBrains Mono Nerd Font Mono as **fallback**. The Berkeley trial ships 95 glyphs — printable ASCII only — so every symbol and icon comes from the fallback. **The trial licence expires 2026-08-03**; after that either buy TX-02 or drop the first `font-family` line. It is not in the Brewfile because it isn't installable by brew, so a fresh machine falls back to JetBrains silently | [`ghostty/config`](./ghostty/config), cask `font-jetbrains-mono-nerd-font` |
-| Theme | kanso-zen (dark-only): green-tinted palette on a near-black `#090E13` background. Ghostty loads it as a real theme file; nvim runs `kanso.nvim` (transparent), fzf and Starship follow in truecolor hex. tmux and `bat` inherit the terminal's ANSI palette. GUI editors keep their own user-level theme | [`ghostty/themes/kanso-zen`](./ghostty/themes/kanso-zen) |
-| Listings | eza with icons — `ls`, `ll`, `la`, `lt`. Needs the Nerd Font's **Mono** (NFM) variant, where a glyph is exactly one cell wide; the Propo variant drifts the columns | [`zsh/zshrc`](./zsh/zshrc) |
+| Font | Berkeley Mono (TX-02) at size 14, with JetBrains Mono Nerd Font Mono as **fallback**. The Berkeley trial ships 95 glyphs — printable ASCII only — so every symbol and icon comes from the fallback. **The trial licence expires 2026-08-03**; after that either buy TX-02 or drop the first `font-family` line. It is not in the Brewfile because it isn't installable by brew, so a fresh machine falls back to JetBrains silently | [`ghostty/config`](./ghostty/config), cask `font-jetbrains-mono-nerd-font` |
+| Theme | vercel-neon (dark-only): saturated neon palette on a near-black `#101010` background. Ghostty loads it as a real theme file; nvim runs `vesper.nvim` (transparent). Starship, eza, `bat` and tmux all resolve colours through the terminal's ANSI slots, so changing the Ghostty theme moves everything at once. GUI editors keep their own user-level theme | [`ghostty/themes/vercel-neon`](./ghostty/themes/vercel-neon) |
+| Listings | eza with icons — `ls`, `ll`, `la`, `lt`, themed by ANSI name (folders cyan, metadata grey, git matching the prompt). Needs the Nerd Font's **Mono** (NFM) variant, where a glyph is exactly one cell wide; the Propo variant drifts the columns. `EZA_CONFIG_DIR` is mandatory: on macOS eza reads `~/Library/Application Support/eza` and ignores `XDG_CONFIG_HOME` | [`eza/theme.yml`](./eza/theme.yml), [`zsh/zshrc`](./zsh/zshrc) |
 
 `zsh/zshrc` notes:
 - Defines `dev` / `work` / `side` aliases that spawn (or switch to) a named tmux session with a fixed CWD.
@@ -83,7 +83,7 @@ Note: the script prompts for your password once, for `chsh`.
 
 It's macOS's own shell: no formula to install, no login-shell registration, nothing to drift. Everything fish gave natively has a direct equivalent — autosuggestions and syntax highlighting are two Homebrew plugins, prefix history search is `up-line-or-beginning-search`, and `$CMD_DURATION` becomes a `preexec`/`precmd` pair over `$EPOCHREALTIME` (a variable, not a fork). What it does **not** have is `abbr`, hybrid key bindings, or per-mode cursors, so those are hand-rolled above.
 
-Startup is ~64ms per shell, and every tmux pane opens one. Where that goes, and what was done about it:
+Startup is ~80ms per shell (60ms warm, measured end-to-end with `/usr/bin/time -p /bin/zsh -l -i -c exit`, not with a profiler that skips process spawn), and every tmux pane opens one. Where that goes, and what was done about it:
 
 | Cost | Fix |
 |---|---|
