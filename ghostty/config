@@ -16,13 +16,9 @@ font-feature = -calt, -liga, -dlig
 font-size = 21
 theme = kanso-zen
 
-# Icono del Dock: fantasma verde kanso sobre pantalla negra. `custom-style` es
-# nativo — genera el icono, no hace falta un .icns. Requiere declarar el frame;
-# `plastic` es el más oscuro de los cuatro (aluminum/beige/plastic/chrome).
-macos-icon = custom-style
-macos-icon-frame = plastic
-macos-icon-ghost-color = #87a987
-macos-icon-screen-color = #090E13
+# El icono oficial, sin retocar. `custom-style` está marcado como experimental
+# upstream y sus capas pueden cambiar de formato entre versiones; esto no.
+macos-icon = official
 
 background-opacity = 0.92
 background-blur = true
