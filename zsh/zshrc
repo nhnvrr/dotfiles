@@ -298,11 +298,6 @@ eval "$(mise activate zsh)"
 (( $+functions[prompt_starship_precmd] )) && \
     precmd_functions=(prompt_starship_precmd ${precmd_functions:#prompt_starship_precmd})
 
-# Ctrl-L is a real control char (0x0c): works without the Kitty protocol or
-# extended keys. Overrides clear-screen, which stays on cmd+k.
-bindkey -M viins '^L' fzf-history-widget
-bindkey -M vicmd '^L' fzf-history-widget
-
 # AFTER mise: aws_completer is a mise-managed binary, so higher up in this file
 # the $+commands guard is false and the completion silently never registers.
 if (( $+commands[aws_completer] )); then
