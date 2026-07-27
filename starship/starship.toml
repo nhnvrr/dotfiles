@@ -57,7 +57,21 @@ format = '[$symbol$health]($style) '
 disabled = false
 style = 'bright-red'
 symbol = '✘'
-format = '[$symbol$status]($style) '
+map_symbol = true
+recognize_signal_code = true
+# map_symbol otherwise brings starship's emoji defaults (🧱 ⚡ 🔍), which are
+# double-width and ignore the palette.
+sigint_symbol = '✘'
+signal_symbol = '✘'
+not_found_symbol = '✘'
+not_executable_symbol = '✘'
+# Without pipestatus only the last command's code is shown, so `curl … | jq .`
+# reports jq's success and a failed curl reads as fine.
+pipestatus = true
+pipestatus_separator = '[|](bright-black)'
+# map_symbol replaces $status with the readable variables: SIGINT, not 130.
+format = '[$symbol$common_meaning$signal_name$maybe_int]($style) '
+pipestatus_format = '[$pipestatus]($style)[ => $int]($style) '
 
 [cmd_duration]
 min_time = 2000
