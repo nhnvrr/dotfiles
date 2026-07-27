@@ -1,6 +1,3 @@
--- Two-app layouts and zoom, driven by keyboard shortcuts.
--- Rule: never wait a fixed amount of time, wait for the condition to be true.
-
 hs.window.animationDuration = 0
 
 require("hs.ipc")
@@ -13,8 +10,6 @@ if not hs.accessibilityState(true) then
     "Settings → Privacy & Security → Accessibility → Hammerspoon ON", { textSize = 18 }, 8)
 end
 
--- Bundle IDs, not display names: "Visual Studio Code" is internally "Code" and
--- hs.application.find fails silently.
 local APPS = {
   chrome    = "com.google.Chrome",
   ghostty = "com.mitchellh.ghostty",
@@ -23,9 +18,6 @@ local APPS = {
 }
 
 local GAP = 2
-
--- ─── Primitives ───────────────────────────────────────────────────
-
 local function waitFor(cond, onReady, timeout)
   local ok = cond()
   if ok then onReady(ok) return end
@@ -48,13 +40,11 @@ local function frameFor(xR, yR, wR, hR, gap)
     fw * wR - gap, fh * hR - gap)
 end
 
--- 4px tolerance: several apps don't apply the requested frame exactly.
 local function frameMatches(a, b)
   return math.abs(a.w - b.w) < 4 and math.abs(a.h - b.h) < 4
      and math.abs(a.x - b.x) < 4 and math.abs(a.y - b.y) < 4
 end
 
--- mainWindow() can return nil, or a dialog instead of the real window.
 local function windowOf(app)
   if not app then return nil end
   local win = app:mainWindow()
@@ -65,10 +55,6 @@ local function windowOf(app)
   return nil
 end
 
--- Electron handles AXSize and AXPosition separately, so setFrame() sometimes
--- applies only one: split and verify. Two cutoffs — the deadline for a cold
--- app, and lack of progress for when the window hit its own minimum size and
--- asking for less will never converge.
 local function applyFrame(win, rect, deadline, previous)
   deadline = deadline or (hs.timer.secondsSinceEpoch() + 2)
   win:setSize(hs.geometry.size(rect.w, rect.h))
@@ -87,8 +73,6 @@ local function applyFrame(win, rect, deadline, previous)
   end)
 end
 
--- macOS ignores setSize in native fullscreen, and leaving the Space is
--- animated, so wait for isFullScreen() to be false instead of guessing.
 local function placeWindow(win, rect)
   if not win:isFullScreen() then applyFrame(win, rect) return end
   win:setFullScreen(false)
@@ -96,14 +80,8 @@ local function placeWindow(win, rect)
     function() applyFrame(win, rect) end, 3)
 end
 
--- ─── Placement ────────────────────────────────────────────────────
-
--- Apps a layout is currently placing; the watcher skips them so it doesn't
--- clobber the frame.
 local claimed = {}
 
--- One path for all four cases: not running, running hidden, running without
--- windows, running with a window.
 local function placeApp(bundleID, rect, onPlaced)
   claimed[bundleID] = true
 
@@ -128,8 +106,6 @@ local function placeApp(bundleID, rect, onPlaced)
   hs.timer.doAfter(9, function() claimed[bundleID] = nil end)
 end
 
--- ─── Layouts ──────────────────────────────────────────────────────
-
 local NEVER_HIDE = {
   ["com.apple.finder"] = true,
   ["org.hammerspoon.Hammerspoon"] = true,
@@ -148,9 +124,6 @@ end
 
 local currentLayout = nil
 
--- Widths are measured, not assumed: every app has its own minimum (Chrome
--- 500px, VS Code 600px) and won't go below it. Place the narrow one first,
--- read the width it actually accepted, give the wide one the remainder.
 local function splitFrames(leftW, narrowActualW)
   local f = hs.screen.mainScreen():frame()
   local narrowOnLeft = leftW < 0.5
@@ -190,9 +163,6 @@ local function sideBySide(left, right, leftW)
   end)
 end
 
--- Rotating mirrors the layout instead of rebuilding it. `1 - leftW` keeps each
--- app's own width and only swaps sides; anchoring width to position could push
--- an app below its minimum.
 local function rotateLayout()
   if not currentLayout then return end
   local left, right = currentLayout.right, currentLayout.left
@@ -204,8 +174,6 @@ local function rotateLayout()
 
   currentLayout = { left = left, right = right, leftW = leftW }
 
-  -- No need to place-then-remeasure here: rotating preserves widths, so the
-  -- narrow one is already at whatever its minimum allowed.
   local narrowOnLeft = leftW < 0.5
   local narrowWin = narrowOnLeft and leftWin or rightWin
   local wideWin = narrowOnLeft and rightWin or leftWin
@@ -215,8 +183,6 @@ local function rotateLayout()
   placeWindow(wideWin, wideRect)
   leftWin:focus()
 end
-
--- ─── Maximize on launch ───────────────────────────────────────────
 
 hs.application.watcher.new(function(_, event, app)
   if event ~= hs.application.watcher.launched then return end
@@ -231,15 +197,12 @@ hs.application.watcher.new(function(_, event, app)
   end, 5)
 end):start()
 
--- ─── Zoom toggle ──────────────────────────────────────────────────
-
 local savedFrames = {}
 
 local function toggleZoom()
   local win = hs.window.focusedWindow()
   if not win then return end
 
-  -- Drop ids of closed windows, otherwise this table grows forever.
   for id in pairs(savedFrames) do
     if not hs.window.get(id) then savedFrames[id] = nil end
   end
@@ -254,16 +217,11 @@ local function toggleZoom()
   end
 end
 
--- ─── Resolution ───────────────────────────────────────────────────
-
--- "Looks like" values from System Settings → Displays, at scale 2 (Retina).
 local RESOLUTIONS = {
   { w = 1512, h = 982 },
   { w = 1800, h = 1169 },
 }
 
--- setMode returns false when the mode doesn't exist. Worth checking:
--- availableModes() reports 0 on macOS 27, so this is the only signal.
 hs.hotkey.bind({ "cmd", "alt" }, "0", function()
   local screen = hs.screen.mainScreen()
   local cur = screen:currentMode()
@@ -275,8 +233,6 @@ hs.hotkey.bind({ "cmd", "alt" }, "0", function()
     hs.alert.show(("Could not apply %dx%d"):format(target.w, target.h))
   end
 end)
-
--- ─── Shortcuts ────────────────────────────────────────────────────
 
 hs.hotkey.bind({ "cmd", "alt" }, "1", function() sideBySide(APPS.vscode, APPS.chrome, 0.7) end)
 hs.hotkey.bind({ "cmd", "alt" }, "2", function() sideBySide(APPS.ghostty, APPS.chrome, 0.7) end)

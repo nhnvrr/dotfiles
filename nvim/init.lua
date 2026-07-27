@@ -1,17 +1,8 @@
--- nvim as $EDITOR/$VISUAL and fish's Ctrl-O, not as an IDE. Day-to-day work is
--- in VS Code, so there's no LSP, completion, treesitter or DAP here.
-
 vim.g.mapleader = " "
 
--- fzf-native is a C library and vim.pack has no build hook, so the make runs
--- from PackChanged (:h vim.pack-events). This MUST stay above vim.pack.add or
--- it won't fire on a fresh machine, which is the only run that matters.
 vim.api.nvim_create_autocmd("PackChanged", {
   callback = function(ev)
     if ev.data.spec.name == "telescope-fzf-native.nvim" and ev.data.kind ~= "delete" then
-      -- :wait() is not optional. vim.system is async, so without it quitting
-      -- before make finishes leaves no libfzf.so and telescope silently falls
-      -- back to the Lua sorter.
       local done = vim.system({ "make" }, { cwd = ev.data.path }):wait()
       if done.code ~= 0 then
         vim.notify("fzf-native build failed: " .. (done.stderr or ""), vim.log.levels.ERROR)
@@ -22,36 +13,22 @@ vim.api.nvim_create_autocmd("PackChanged", {
 
 vim.pack.add({
   "https://github.com/AlexvZyl/nordic.nvim",
-  -- neo-tree's dependencies: nui draws the tree, plenary scans the filesystem,
-  -- devicons needs the Nerd Font fallback Ghostty already loads.
   "https://github.com/MunifTanjim/nui.nvim",
   "https://github.com/nvim-lua/plenary.nvim",
   "https://github.com/nvim-tree/nvim-web-devicons",
-  -- v3.x is the branch upstream pins for stability; default branch moves.
   { src = "https://github.com/nvim-neo-tree/neo-tree.nvim", version = "v3.x" },
-  -- telescope reuses plenary above; fzf-native is the C sorter.
   "https://github.com/nvim-telescope/telescope.nvim",
   "https://github.com/nvim-telescope/telescope-fzf-native.nvim",
 })
 
--- transparent: the terminal supplies the background, so nvim inherits Ghostty's
--- theme instead of hardcoding Nord's #2E3440 here. float goes with bg because
--- telescope and neo-tree draw in floating windows.
 require("nordic").setup({
   transparent = { bg = true, float = true },
-  -- The default 'flat' telescope style paints the prompt and borders with a
-  -- solid bg, which defeats transparent.float. 'classic' leaves them NONE and
-  -- draws the border as a line instead.
   telescope = { style = "classic" },
   on_highlight = function(hl, palette)
-    -- neo-tree renders names with DirectoryName/FileName. nordic only defines
-    -- the `*FolderName` groups, which neo-tree never reads.
     hl.NeoTreeDirectoryName = { fg = palette.cyan.base }
     hl.NeoTreeDirectoryIcon = { fg = palette.cyan.base }
     hl.NeoTreeFileName = { fg = palette.white2 }
     hl.NeoTreeFileNameOpened = { fg = palette.white2, bold = true }
-    -- What 'classic' gives up and we want back: the title chip and a selected
-    -- row you can actually see.
     local title = { fg = palette.black0, bg = palette.orange.base, bold = true }
     hl.TelescopeTitle = title
     hl.TelescopePromptTitle = title
@@ -76,8 +53,6 @@ opt.expandtab = true
 opt.ignorecase = true
 opt.smartcase = true
 
--- Block in normal/visual/command, blinking beam in insert: it's the mode
--- indicator.
 opt.guicursor = "n-v-c:block,i-ci-ve:ver25-blinkwait700-blinkon400-blinkoff250,r-cr-o:hor20"
 
 opt.termguicolors = true
@@ -91,14 +66,12 @@ opt.clipboard = "unnamedplus"
 opt.splitright = true
 opt.splitbelow = true
 
--- No swap, but persistent undo across sessions.
 opt.swapfile = false
 opt.undofile = true
 
 opt.list = true
 opt.listchars = { tab = "▸ ", trail = "·", nbsp = "␣" }
 
--- Typos from holding Shift too long when saving.
 vim.api.nvim_create_user_command("W", "w", {})
 vim.api.nvim_create_user_command("Q", "q", {})
 vim.api.nvim_create_user_command("Wq", "wq", {})
@@ -118,8 +91,6 @@ vim.keymap.set("n", "<Tab>", "<cmd>bnext<cr>", { desc = "Next buffer" })
 vim.keymap.set("n", "<S-Tab>", "<cmd>bprevious<cr>", { desc = "Previous buffer" })
 vim.keymap.set("n", "<leader>bn", "<cmd>enew<cr>", { desc = "New empty buffer" })
 vim.keymap.set("n", "<leader>bd", function()
-  -- A plain :bdelete closes the window with it. Move to another buffer (or an
-  -- empty one) first so the split survives.
   local cur = vim.api.nvim_get_current_buf()
   local alt = vim.fn.bufnr("#")
   if alt ~= -1 and vim.fn.buflisted(alt) == 1 then
@@ -136,20 +107,13 @@ end, { desc = "Close buffer (keep window)" })
 vim.keymap.set("n", "<leader>tv", "<cmd>vsplit | terminal<cr>", { desc = "Terminal in vertical split" })
 vim.keymap.set("n", "<leader>th", "<cmd>split | terminal<cr>", { desc = "Terminal in horizontal split" })
 
--- The trackpad's horizontal scroll only ever moves the view by accident.
 vim.keymap.set({ "n", "v", "i" }, "<ScrollWheelLeft>", "<Nop>")
 vim.keymap.set({ "n", "v", "i" }, "<ScrollWheelRight>", "<Nop>")
 
--- neo-tree instead of netrw. hijack_netrw_behavior = "open_current" keeps
--- `nvim .` and `:e some/dir/` opening the tree in the current window, the way
--- netrw did, rather than splitting off a sidebar and leaving an empty buffer.
--- Inside: <CR> opens, `a` new file (trailing `/` makes a directory), `d` delete,
--- `r` rename, `H` toggles hidden files, `?` lists every mapping.
 require("neo-tree").setup({
   close_if_last_window = true,
   filesystem = {
     hijack_netrw_behavior = "open_current",
-    -- Keep the tree pointed at the buffer being edited.
     follow_current_file = { enabled = true },
     filtered_items = { hide_dotfiles = false, hide_gitignored = true },
   },
@@ -157,19 +121,12 @@ require("neo-tree").setup({
 })
 vim.keymap.set("n", "<leader>e", "<cmd>Neotree toggle reveal left<cr>", { desc = "File explorer" })
 
--- preview.treesitter = false is not a preference, it's a workaround. nvim ships
--- parsers without highlight queries for most filetypes, so vim.treesitter.start
--- attaches a parser that paints nothing and returns nil — and telescope only
--- falls back to the regex highlighter on an explicit `false`. Result: colorless
--- previews. Off, the preview uses `syntax` like every other buffer here.
 require("telescope").setup({
   defaults = {
     layout_strategy = "flex",
     preview = { treesitter = false },
   },
 })
--- pcall: on a fresh install the make above is still running and the extension
--- doesn't exist yet. It loads on the next start; without this nvim errors out.
 pcall(require("telescope").load_extension, "fzf")
 
 local builtin = require("telescope.builtin")
@@ -188,7 +145,6 @@ vim.api.nvim_create_autocmd("TextYankPost", {
   end,
 })
 
--- Reopening a file puts the cursor back where it was.
 vim.api.nvim_create_autocmd("BufReadPost", {
   callback = function(args)
     local mark = vim.api.nvim_buf_get_mark(args.buf, '"')
@@ -198,7 +154,6 @@ vim.api.nvim_create_autocmd("BufReadPost", {
   end,
 })
 
--- `q` closes read-only buffers.
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "help", "man", "qf", "checkhealth" },
   callback = function(args)

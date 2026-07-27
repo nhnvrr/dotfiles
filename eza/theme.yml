@@ -1,16 +1,7 @@
-# Colours by ANSI name, never hex: eza resolves them against whatever palette
-# Ghostty loads, same rule as starship.toml and BAT_THEME=ansi.
-#
-# CAREFUL: eza ignores keys it doesn't recognise without any error, so a typo
-# here looks exactly like a rule that had no effect. Check the output.
-#
-# The merge is per field: a key that only sets `foreground` keeps the default
-# theme's `is_bold`, which is why every key below spells it out.
 
 filekinds:
   normal: { is_bold: false }
   directory: { foreground: Cyan, is_bold: false }
-  # Moved off Cyan, which is eza's default for symlinks and is now the folders'.
   symlink: { foreground: LightBlue, is_bold: false }
   pipe: { is_bold: false }
   block_device: { is_bold: false }
@@ -49,9 +40,6 @@ size:
   unit_giga: { is_bold: false }
   unit_huge: { is_bold: false }
 
-# Metadata columns default to loud colours (the date is blue, the owner bold
-# yellow) for two fields that are the same on every row. The name is the part
-# worth reading.
 users:
   user_you: { foreground: DarkGray, is_bold: false }
   user_root: { is_bold: false }
@@ -64,8 +52,6 @@ links:
   normal: { is_bold: false }
   multi_link_file: { is_bold: false }
 
-# Same colours the prompt uses for git_status, so a listing and the prompt
-# agree on what modified looks like.
 git:
   new: { foreground: LightGreen, is_bold: false }
   modified: { foreground: LightYellow, is_bold: false }
@@ -101,27 +87,13 @@ flags: { is_bold: false }
 control_char: { is_bold: false }
 broken_symlink: { is_bold: false }
 broken_path_overlay: { is_bold: false }
-# header keeps its underline: it's what separates the table.
-
-# eza's icons are one hardcoded table with no alternate set; these two maps patch
-# it by name and by extension. The glyph is the literal character — `\u{...}` is
-# Rust notation and would print verbatim here.
-#
-# CAREFUL: these overrides only apply while colour is on. Piping eza anywhere
-# turns colour off and silently restores the built-in icons, so verify with
-# `--color=always` or the change looks like it never landed.
 filenames:
-  # No mapping in eza, so these fell back to the generic file icon.
   .psqlrc: { icon: { glyph: "" } }
-  # The repo's copy is dotless; ~/.psqlrc is a symlink to it.
   psqlrc: { icon: { glyph: "" } }
   .nvmrc: { icon: { glyph: "" } }
-  # Matched the yaml extension, which says config rather than lockfile.
   pnpm-lock.yaml: { icon: { glyph: "" } }
 
 extensions:
-  # Catches .env.example, which resolves by extension and had no mapping.
   example: { icon: { glyph: "" } }
-  # Bruno.
-  bru: { icon: { glyph: "" } }
+  bru: { icon: { glyph: "󰩃" } }
   sql: { icon: { glyph: "" } }

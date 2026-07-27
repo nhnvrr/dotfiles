@@ -1,6 +1,3 @@
-# ~/.gitconfig — symlinked from the repo by install.sh.
-# NOTE: since it's a symlink, any `git config --global ...` writes straight into
-# this repo file and leaves the working tree dirty.
 
 [user]
 	name = Nicolas Navarro
@@ -14,7 +11,6 @@
 	editor = nvim
 	askPass =
 	excludesfile = ~/.config/git/ignore
-	# If delta isn't installed, git falls back to less without breaking.
 	pager = delta
 
 [push]
@@ -28,11 +24,9 @@
 	autosetuprebase = always
 
 [merge]
-	# zdiff3 shows the common base alongside both sides of a conflict.
 	conflictstyle = zdiff3
 
 [diff]
-	# histogram detects moved blocks better than the default.
 	algorithm = histogram
 	colorMoved = default
 
@@ -40,15 +34,11 @@
 	diffFilter = delta --color-only
 
 [delta]
-	# navigate: n/N jump between files within a diff.
 	navigate = true
 	line-numbers = true
-	# ansi: use the terminal palette, same as BAT_THEME in zshrc.
 	syntax-theme = ansi
 
 [rerere]
-	# Replays how a conflict was resolved when it reappears. With
-	# pull.rebase = true that happens often.
 	enabled = true
 
 [color]
@@ -64,9 +54,6 @@
 	format = ssh
 
 [gpg "ssh"]
-	# Without this, commits are still signed but can't be verified locally:
-	# `git log --show-signature` fails with "allowedSignersFile needs to be
-	# configured and exist".
 	allowedSignersFile = ~/.config/git/allowed_signers
 
 [commit]

@@ -1,15 +1,8 @@
-# Login shells only. Deliberately no ~/.zshenv: that one is read by EVERY zsh
-# process, scripts included, and nothing here needs to be.
-
-# Inlined instead of `eval "$(brew shellenv)"`: that costs two forks (brew, then
-# path_helper) ≈ 20ms, on every tmux pane, to print these same constants. The
-# base PATH already comes from /etc/zprofile, which runs path_helper for us.
 export HOMEBREW_PREFIX=/opt/homebrew
 export HOMEBREW_CELLAR=/opt/homebrew/Cellar
 export HOMEBREW_REPOSITORY=/opt/homebrew
 export INFOPATH=/opt/homebrew/share/info${INFOPATH:+:$INFOPATH}
 
-# LANG only: LC_ALL overrides every LC_* category and blocks per-category tweaks.
 export LANG=en_US.UTF-8
 export EDITOR=nvim
 export VISUAL=nvim
@@ -17,8 +10,6 @@ export VISUAL=nvim
 export GOPATH="$HOME/Develop/go"
 export GOPRIVATE=github.com/nhnvrr
 
-# -U keeps path[] deduped, so re-sourcing this (every tmux pane runs `zsh -l`)
-# doesn't grow $PATH.
 typeset -U path PATH
 path=(
   "$GOPATH/bin"

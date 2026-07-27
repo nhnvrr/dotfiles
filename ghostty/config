@@ -4,8 +4,6 @@ font-feature = -calt, -liga, -dlig
 font-size = 18
 theme = Nord Wave
 
-# These override the theme, so they MUST stay below it: ghostty applies the theme
-# where the line appears and lets later keys win.
 background = #000000
 palette = 208=#ff8700
 
@@ -18,9 +16,6 @@ window-padding-balance = true
 macos-titlebar-style = transparent
 window-save-state = never
 resize-overlay = never
-# Berkeley Mono's cell is 0.500em wide, so nerd font icons hit the width limit long
-# before any height limit. adjust-icon-height is inert here; this is the only knob
-# that scales them.
 adjust-cell-width = 12%
 adjust-cell-height = 6%
 

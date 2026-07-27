@@ -1,8 +1,1 @@
-# Claves SSH aceptadas para verificar firmas de commits.
-# Sin este archivo los commits se firman igual, pero `git log --show-signature`
-# no puede validarlos y tira error en cada uno.
-#
-# Formato: <email> namespaces="git" <tipo> <clave>
-# Para sumar la clave de otra persona, agregá una línea con su email y pubkey.
-
 navarropaeznicolas@gmail.com namespaces="git" ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGoR/BfG/44rZxTSztwO9sxQFjEd6Q26+Dqcy/osltMi

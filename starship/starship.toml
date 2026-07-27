@@ -1,6 +1,6 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
-format = '󰜁 $directory$git_branch$git_state$git_status$line_break$character'
+format = '󰳗 $directory$git_branch$git_state$git_status$line_break$character'
 right_format = '$mise$status$cmd_duration$username$hostname$jobs${env_var.STARSHIP_PNPM}$nodejs$bun$golang$rust$python$ruby$terraform$aws${env_var.STARSHIP_DOCKER_CTX}$time'
 
 add_newline = true
@@ -11,10 +11,7 @@ style = 'bright-white'
 repo_root_style = 'bright-white'
 before_repo_root_style = 'bright-white'
 truncate_to_repo = false
-# The two go together: fish_style only rewrites the part that was truncated, so
-# with truncation_length = 0 (unlimited) it would do nothing at all. Parents
-# collapse to one letter, the last 4 components stay whole.
-truncation_length = 4
+truncation_length = 0
 fish_style_pwd_dir_length = 1
 format = '[$path]($style) '
 
@@ -63,17 +60,12 @@ style = 'bright-red'
 symbol = '✘'
 map_symbol = true
 recognize_signal_code = true
-# map_symbol otherwise brings starship's emoji defaults (🧱 ⚡ 🔍), which are
-# double-width and ignore the palette.
 sigint_symbol = '✘'
 signal_symbol = '✘'
 not_found_symbol = '✘'
 not_executable_symbol = '✘'
-# Without pipestatus only the last command's code is shown, so `curl … | jq .`
-# reports jq's success and a failed curl reads as fine.
 pipestatus = true
 pipestatus_separator = '[|](bright-black)'
-# map_symbol replaces $status with the readable variables: SIGINT, not 130.
 format = '[$symbol$common_meaning$signal_name$maybe_int]($style) '
 pipestatus_format = '[$pipestatus]($style)[ => $int]($style) '
 
@@ -123,14 +115,11 @@ symbol = '󰌠 '
 style = 'bright-yellow'
 format = '[$symbol($version )(\($virtualenv\) )]($style)'
 
-# vesto-api is Rails, so this is the one runtime the prompt was missing.
 [ruby]
 symbol = '󰴭 '
 style = 'red'
 format = '[$symbol($version )]($style)'
 
-# Default format is workspace-only, which is also the fast path: asking for
-# $version would shell out to `terraform version` on every prompt.
 [terraform]
 symbol = '󱁢 '
 style = 'bright-purple'
@@ -141,16 +130,10 @@ symbol = ' '
 style = 'yellow'
 format = '[$symbol$profile]($style) '
 
-# zshrc sets this from the nearest pnpm-lock.yaml walking up. The variable is
-# only a switch, so the format ignores $env_value.
 [env_var.STARSHIP_PNPM]
 variable = 'STARSHIP_PNPM'
 format = '[ ](yellow)'
 
-# starship's own docker_context module only hides `default`, so `desktop-linux`
-# would draw on every prompt. zshrc computes this variable from
-# ~/.docker/config.json without forking and leaves it unset when the context is
-# one of the two normal ones.
 [env_var.STARSHIP_DOCKER_CTX]
 variable = 'STARSHIP_DOCKER_CTX'
 format = '[󰡨 $env_value](bright-cyan) '

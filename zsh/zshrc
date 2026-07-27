@@ -5,17 +5,10 @@ HISTFILE=$HOME/.zsh_history
 HISTSIZE=100000
 SAVEHIST=100000
 
-# Frees Ctrl-S/Ctrl-Q, which the terminal was swallowing.
 stty -ixon 2>/dev/null
-
-# --- completions -------------------------------------------------------------
 
 fpath=(/opt/homebrew/share/zsh/site-functions $HOME/.docker/completions $fpath)
 
-# Rebuilding the dump parses all of fpath (~150ms). Do it at most once a day and
-# take the -C fast path (no rebuild, no compaudit) the rest of the time. -d is
-# explicit because compinit otherwise picks $ZDOTDIR/.zcompdump, which would not
-# be the file the staleness check just looked at.
 autoload -Uz compinit
 () {
     local dump=$HOME/.zcompdump
@@ -32,24 +25,15 @@ zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-path "$HOME/.zcompcache"
 
-# --- env ---------------------------------------------------------------------
-
-# Always explicit: ~/.aws/config has no [default] profile, so without this every
-# aws command outside the work session fails with NoCredentials. Interactive
-# only, so scripts and subshells don't inherit it.
 if [[ -n $TMUX && $(tmux display-message -p '#S' 2>/dev/null) == work ]]; then
     export AWS_PROFILE=work
 else
     export AWS_PROFILE=personal
 fi
 
-# --- aliases and abbreviations -----------------------------------------------
-
 alias e='code --new-window'
 alias code='code --new-window'
 
-# eza over ls. The icons need the Nerd Font's Mono (NFM) variant, where a glyph
-# occupies exactly one cell — with the Propo variant the columns drift.
 if (( $+commands[eza] )); then
     alias ls='eza --icons --group-directories-first'
     alias ll='eza --icons --group-directories-first --long --git --header'
@@ -57,9 +41,6 @@ if (( $+commands[eza] )); then
     alias lt='eza --icons --group-directories-first --tree --level=2'
 fi
 
-# Abbreviations, not aliases: they expand on screen when you hit space or enter,
-# so you see the real command before running it and history stores the expanded
-# form. zsh has no `abbr`, so this is the fish behaviour in ~20 lines.
 typeset -Ag ABBRS=(
     gc  'git commit -m'
     gco 'git checkout'
@@ -72,8 +53,6 @@ _abbr_expand_word() {
     local word=${LBUFFER##*[[:space:]]}
     [[ -n ${ABBRS[$word]-} ]] || return 1
     local head=${LBUFFER%$word}
-    # Command position only, so `echo gd` stays literal. (z) splits into shell
-    # tokens, which leaves the separators as tokens of their own.
     local -a before=(${(z)head})
     [[ -z ${before[-1]-} || ${before[-1]} == (';'|'&'|'|'|'&&'|'||'|'('|'!') ]] || return 1
     LBUFFER=$head${ABBRS[$word]}
@@ -84,10 +63,6 @@ _abbr_accept() { _abbr_expand_word; zle accept-line }
 zle -N _abbr_space
 zle -N _abbr_accept
 
-# --- functions ---------------------------------------------------------------
-
-# Deliberately no ~/.curlrc: that file is read by EVERY curl invocation,
-# including Homebrew's installer and any third-party script.
 req() {
     local out
     out=$(curl --silent --show-error --location --compressed \
@@ -113,7 +88,6 @@ __tx() {
 
     tmux has-session -t="$name" 2>/dev/null || tmux new-session -d -s "$name" -c "$dir"
 
-    # Attaching nested breaks; inside tmux you have to switch instead.
     if [[ -z $TMUX ]]; then
         tmux attach-session -t "$name"
     else
@@ -125,20 +99,12 @@ alias dev='__tx dev'
 alias work='__tx work'
 alias side='__tx side'
 
-# One-time bootstrap for the work account:
-#   CLAUDE_CONFIG_DIR=~/.claude-work claude
 claude() {
     local dir=$HOME/.claude
     [[ $(tmux display-message -p '#S' 2>/dev/null) == work ]] && dir=$HOME/.claude-work
     CLAUDE_CONFIG_DIR=$dir command claude "$@"
 }
 
-# --- key bindings ------------------------------------------------------------
-
-# fish's hybrid bindings are emacs by default with vi mode on Esc. In zsh the
-# equivalent is `bindkey -v` plus the emacs keys added back to viins: the other
-# direction (`bindkey -e` + Esc bound to vi-cmd-mode) needs a high KEYTIMEOUT,
-# which delays every Esc and every Alt-key (Alacritty sends those as ESC+key).
 bindkey -v
 KEYTIMEOUT=1
 
@@ -156,8 +122,6 @@ zle -N down-line-or-beginning-search
 zle -N edit-command-line
 
 for _m in viins vicmd; do
-    # Ctrl-P/N: prefix history search. Costs Ctrl-N its accept-autosuggestion,
-    # which stays on → or Ctrl-F.
     bindkey -M $_m '^P' up-line-or-beginning-search
     bindkey -M $_m '^N' down-line-or-beginning-search
     bindkey -M $_m '^O' edit-command-line
@@ -167,11 +131,6 @@ unset _m
 bindkey -M viins ' ' _abbr_space
 bindkey -M viins '^M' _abbr_accept
 
-# --- cursor ------------------------------------------------------------------
-
-# 5 = blinking bar, 2 = block, 4 = underline. Registered as hook widgets, not
-# `zle -N zle-keymap-select`: starship installs its own widget on that hook and
-# defining it directly would silently drop starship's vi-mode character.
 autoload -Uz add-zle-hook-widget
 
 _cursor_apply() {
@@ -186,13 +145,8 @@ _cursor_apply() {
 add-zle-hook-widget zle-keymap-select _cursor_apply
 add-zle-hook-widget zle-line-init _cursor_apply
 
-# The cursor left while an external command runs. Beam, not block: apps that set
-# their own override it anyway, but Claude Code inherits this one.
 _cursor_external() { print -n '\e[5 q' }
 
-# --- long-command bell -------------------------------------------------------
-
-# tmux catches the bell: `monitor-bell on` turns the status bar orange.
 zmodload zsh/datetime
 autoload -Uz add-zsh-hook
 
@@ -204,8 +158,6 @@ _notify_preexec() {
     _notify_cmd=${${(z)1}[1]}
 }
 
-# $? is restored on every path: precmd hooks run in order and starship's reads
-# it to draw the status item.
 _notify_precmd() {
     local ret=$?
     local start=${_notify_start-}
@@ -220,12 +172,6 @@ add-zsh-hook preexec _notify_preexec
 add-zsh-hook preexec _cursor_external
 add-zsh-hook precmd _notify_precmd
 
-# --- docker context ----------------------------------------------------------
-
-# starship's docker_context module hides only `default`, so `desktop-linux`
-# would draw forever. It also shells out to the docker CLI: 126ms of Go startup
-# to read something already in config.json. $(<file) doesn't fork and takes ~70us.
-# $DOCKER_CONTEXT wins over the file, which is docker's real precedence.
 _docker_default_contexts=(default desktop-linux)
 
 _docker_ctx_precmd() {
@@ -243,11 +189,6 @@ _docker_ctx_precmd() {
 }
 add-zsh-hook precmd _docker_ctx_precmd
 
-# --- pnpm --------------------------------------------------------------------
-
-# starship has no pnpm module, and a [custom] one only looks at $PWD: in a
-# monorepo the lockfile sits at the root, so it would stop drawing inside any
-# package. Walking up here doesn't fork.
 _pnpm_precmd() {
     local ret=$? dir=$PWD
     while [[ -n $dir ]]; do
@@ -263,20 +204,14 @@ _pnpm_precmd() {
 }
 add-zsh-hook precmd _pnpm_precmd
 
-# --- integrations ------------------------------------------------------------
-
-# ansi: bat uses the terminal palette, so previews match the theme.
 export BAT_THEME=ansi
 
-# Without this eza looks in ~/Library/Application Support/eza on macOS and the
-# theme is simply never read. It ignores XDG_CONFIG_HOME; this is the only knob.
 export EZA_CONFIG_DIR=$HOME/.config/eza
 
 export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
 export FZF_CTRL_T_COMMAND=$FZF_DEFAULT_COMMAND
 export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
 
-# Ctrl-/ toggles preview, Ctrl-y copies the selection to the clipboard.
 export FZF_DEFAULT_OPTS='
   --height 40% --layout=reverse --border=rounded
   --bind="ctrl-/:toggle-preview,ctrl-y:execute-silent(echo {} | pbcopy)+abort"
@@ -285,29 +220,13 @@ export FZF_DEFAULT_OPTS='
 export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always --line-range :200 {}'"
 export FZF_ALT_C_OPTS="--preview 'ls -la {} | head -100'"
 
-# These four `init zsh` calls are ~13ms of forks on EVERY shell, and every tmux
-# pane opens one. Their output depends only on the binary, so cache it and
-# regenerate whenever brew touches anything.
-#
-# Testing the binaries themselves does NOT work: everything in brew's bin/ is a
-# symlink into the Cellar and `-nt` follows symlinks, so it reads the bottle's
-# BUILD date — which is often older than the cache, and the upgrade is missed.
-# The bin/ directory's own mtime moves on every install, relink and upgrade.
-#
-# mise is deliberately NOT in here: `mise activate zsh` interpolates the current
-# $PATH into its output, so a cached copy would pin whatever PATH the generating
-# shell happened to have onto every shell afterwards.
 _zinit_cache=$HOME/.cache/zsh/init.zsh
 () {
-    # The :- fallback matters: HOMEBREW_PREFIX comes from zprofile, which only
-    # runs in a login shell, and an empty one would test /bin and never expire.
     [[ -s $_zinit_cache && ! ${HOMEBREW_PREFIX:-/opt/homebrew}/bin -nt $_zinit_cache ]] && return
     mkdir -p $_zinit_cache:h
     {
         zoxide init zsh
         fzf --zsh
-        # After fzf: both bind ^R and the last one wins. --disable-up-arrow
-        # keeps ↑ on zsh's own history.
         atuin init zsh --disable-up-arrow
         starship init zsh --print-full-init
     } >| $_zinit_cache
@@ -315,37 +234,21 @@ _zinit_cache=$HOME/.cache/zsh/init.zsh
 source $_zinit_cache
 unset _zinit_cache
 
-# atuin only takes ^R in viins; in vicmd it binds `/` and leaves ^R to fzf.
-# Has to sit after the source above, which is where both of them bind it.
 bindkey -M vicmd '^R' atuin-search-vicmd
 
-# No zsh equivalent of fish's vendor_conf.d/mise-activate.fish: without this
-# line mise is simply not active and every runtime falls back to brew's.
 eval "$(mise activate zsh)"
 
-# mise's precmd hook runs `eval "$(mise hook-env)"` without preserving $?, which
-# would leave starship's status item permanently reading 0. starship's hook is
-# the only one that needs the real exit code, so it goes first.
 (( $+functions[prompt_starship_precmd] )) && \
     precmd_functions=(prompt_starship_precmd ${precmd_functions:#prompt_starship_precmd})
 
-# AFTER mise: aws_completer is a mise-managed binary, so higher up in this file
-# the $+commands guard is false and the completion silently never registers.
 if (( $+commands[aws_completer] )); then
     autoload -Uz bashcompinit && bashcompinit
     complete -C aws_completer aws
 fi
 
-# --- plugins and prompt ------------------------------------------------------
-
-# starship's `enable_transience` exists for bash/fish/cmd but not for zsh, so
-# the redraw is by hand: on Enter, swap in a bare character, repaint the line
-# that's about to scroll away, then restore the real prompt.
 _transient_accept() {
     local prompt=$PROMPT rprompt=$RPROMPT
     PROMPT='%F{10}❯%f '
-    # Not empty: %D expands at repaint, which is when the command starts, so a
-    # long session stays readable scrolling back.
     RPROMPT='%F{8}%D{%H:%M}%f'
     zle .reset-prompt
     PROMPT=$prompt RPROMPT=$rprompt
@@ -357,14 +260,11 @@ ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
 source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
-# Last: it wraps every widget defined above.
 ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
 source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
-# pnpm
 export PNPM_HOME="/Users/nhnvrr/Library/pnpm"
 case ":$PATH:" in
   *":$PNPM_HOME/bin:"*) ;;
   *) export PATH="$PNPM_HOME/bin:$PATH" ;;
 esac
-# pnpm end
