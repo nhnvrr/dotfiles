@@ -87,6 +87,7 @@ vim.keymap.set("i", "jk", "<Esc>", { desc = "Leave insert mode" })
 vim.keymap.set("n", "<leader>nh", "<cmd>nohlsearch<cr>", { desc = "Clear search highlight" })
 vim.keymap.set("n", "<leader>sv", "<C-w>v", { desc = "Split window vertically" })
 vim.keymap.set("n", "<leader>sh", "<C-w>s", { desc = "Split window horizontally" })
+vim.keymap.set("n", "<leader>sx", "<C-w>q", { desc = "Close split" })
 
 -- neo-tree instead of netrw. hijack_netrw_behavior = "open_current" keeps
 -- `nvim .` and `:e some/dir/` opening the tree in the current window, the way
