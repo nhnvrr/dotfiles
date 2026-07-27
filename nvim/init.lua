@@ -19,6 +19,7 @@ vim.pack.add({
   { src = "https://github.com/nvim-neo-tree/neo-tree.nvim", version = "v3.x" },
   "https://github.com/nvim-telescope/telescope.nvim",
   "https://github.com/nvim-telescope/telescope-fzf-native.nvim",
+  "https://github.com/nvim-lualine/lualine.nvim",
 })
 
 require("nordic").setup({
@@ -55,6 +56,9 @@ opt.smartcase = true
 
 opt.guicursor = "n-v-c:block,i-ci-ve:ver25-blinkwait700-blinkon400-blinkoff250,r-cr-o:hor20"
 
+opt.showmode = false
+opt.laststatus = 3
+
 opt.termguicolors = true
 opt.cursorline = true
 opt.colorcolumn = "100"
@@ -86,6 +90,16 @@ vim.keymap.set("n", "<leader>sv", "<C-w>v", { desc = "Split window vertically" }
 vim.keymap.set("n", "<leader>sh", "<C-w>s", { desc = "Split window horizontally" })
 vim.keymap.set("n", "<leader>se", "<C-w>=", { desc = "Make splits equal size" })
 vim.keymap.set("n", "<leader>sx", "<C-w>q", { desc = "Close split" })
+
+vim.keymap.set("n", "<C-h>", "<C-w>h", { desc = "Go to left split" })
+vim.keymap.set("n", "<C-j>", "<C-w>j", { desc = "Go to split below" })
+vim.keymap.set("n", "<C-k>", "<C-w>k", { desc = "Go to split above" })
+vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = "Go to right split" })
+
+vim.keymap.set("t", "<C-h>", "<C-\\><C-n><C-w>h", { desc = "Go to left split" })
+vim.keymap.set("t", "<C-j>", "<C-\\><C-n><C-w>j", { desc = "Go to split below" })
+vim.keymap.set("t", "<C-k>", "<C-\\><C-n><C-w>k", { desc = "Go to split above" })
+vim.keymap.set("t", "<C-l>", "<C-\\><C-n><C-w>l", { desc = "Go to right split" })
 
 vim.keymap.set("n", "<Tab>", "<cmd>bnext<cr>", { desc = "Next buffer" })
 vim.keymap.set("n", "<S-Tab>", "<cmd>bprevious<cr>", { desc = "Previous buffer" })
@@ -138,6 +152,31 @@ vim.keymap.set("n", "<leader>fg", builtin.git_files, { desc = "Git files" })
 vim.keymap.set("n", "<leader>fc", builtin.grep_string, { desc = "Grep word under cursor" })
 vim.keymap.set("n", "<leader>fk", builtin.keymaps, { desc = "Keymaps" })
 vim.keymap.set("n", "<leader>h", builtin.help_tags, { desc = "Help tags" })
+
+local lualine_theme = require("lualine.themes.nordic")
+for _, mode in pairs(lualine_theme) do
+  mode.a.gui = nil
+end
+
+require("lualine").setup({
+  options = {
+    theme = lualine_theme,
+    globalstatus = true,
+    component_separators = "│",
+    section_separators = "",
+  },
+  sections = {
+    lualine_a = { "mode" },
+    lualine_b = { "branch" },
+    lualine_c = {
+      { "filename", path = 1, symbols = { modified = " [+]", readonly = " ", unnamed = "[No Name]" } },
+    },
+    lualine_x = { "filetype" },
+    lualine_y = { "location" },
+    lualine_z = { "progress" },
+  },
+  extensions = { "neo-tree" },
+})
 
 vim.api.nvim_create_autocmd("TextYankPost", {
   callback = function()
