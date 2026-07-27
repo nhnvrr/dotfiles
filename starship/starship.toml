@@ -13,8 +13,8 @@ command_timeout = 500
 # Same reason bat runs with BAT_THEME=ansi.
 
 [directory]
-style = 'blue'
-repo_root_style = 'bright-cyan'
+style = 'white'
+repo_root_style = 'bright-white'
 before_repo_root_style = 'bright-black'
 truncate_to_repo = false
 truncation_length = 0
