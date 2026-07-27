@@ -7,12 +7,12 @@ theme = vercel-neon
 palette = 208=#ff8700
 
 macos-icon = official
-background-opacity = 0.83
-background-blur = true
+# background-opacity = 0.83
+# background-blur = true
 keybind = cmd+shift+o=toggle_background_opacity
 
-window-padding-x = 0
-window-padding-y = 0
+window-padding-x = 1
+window-padding-y = 1
 window-padding-balance = true
 
 macos-titlebar-style = transparent
