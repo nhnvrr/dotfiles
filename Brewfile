@@ -4,10 +4,14 @@
 # Where a tool goes: does its version need to match the project's?
 #   yes -> mise/config.toml   (node, go, rust, python, terraform, bun, aws-cli)
 #   no  -> here               (jq, fzf, ripgrep, git, bat)
-# Having them in both places makes the version depend on where you run: inside
-# fish mise wins, in a script with a clean PATH brew wins.
+# Having them in both places makes the version depend on where you run: in an
+# interactive shell mise wins, in a script with a clean PATH brew wins.
 
-brew "fish"
+# zsh itself is macOS's /bin/zsh — not a formula, so it can't drift.
+brew "starship"
+brew "zsh-autosuggestions"
+brew "zsh-syntax-highlighting"
+
 brew "tmux"
 brew "neovim"
 

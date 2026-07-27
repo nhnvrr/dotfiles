@@ -62,18 +62,6 @@ if [[ "${SKIP_BREW}" == false ]]; then
 
   echo "Applying Brewfile..."
   "${BREW_BIN}" bundle --file="${CONFIG_DIR}/Brewfile"
-
-  # Plugins are installed explicitly rather than via a symlinked fish_plugins
-  # manifest: Fisher REWRITES that file and would replace the symlink with a
-  # regular file. Both commands are idempotent.
-  if command -v fish >/dev/null 2>&1; then
-    echo "Installing fish plugins (fisher + tide)..."
-    fish -c 'functions -q fisher; or curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher'
-    fish -c 'fisher install IlanCosman/tide@v6'
-    # Seeds Tide's base config, which lives in universal variables.
-    # fish/config.fish shadows it afterwards with `set -g`.
-    fish -c 'tide configure --auto --style=Lean --prompt_colors="True color" --show_time="24-hour format" --lean_prompt_height="Two lines" --prompt_connection=Disconnected --prompt_connection_andor_frame_color=Lightest --prompt_spacing=Sparse --icons="Many icons" --transient=Yes'
-  fi
 else
   echo "Skipping Homebrew setup (--skipBrew); only linking configuration."
 fi
@@ -122,9 +110,9 @@ echo "Preparing Go workspace..."
 mkdir -p "${HOME}/Develop/go/bin"
 
 echo "Linking config files..."
-# config.fish only: Fisher and Tide WRITE into ~/.config/fish/{functions,
-# completions,conf.d}, so symlinking those would dirty the repo with plugins.
-link_file "${CONFIG_DIR}/fish/config.fish" "${HOME}/.config/fish/config.fish"
+link_file "${CONFIG_DIR}/zsh/zprofile" "${HOME}/.zprofile"
+link_file "${CONFIG_DIR}/zsh/zshrc"    "${HOME}/.zshrc"
+link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
 link_file "${CONFIG_DIR}/alacritty/alacritty.toml" "${HOME}/.config/alacritty/alacritty.toml"
 # Symlinks from the previous terminal, removed only if they point into this repo.
 for stale in "${HOME}/.config/ghostty/config" "${HOME}/.config/ghostty/themes"; do
@@ -145,12 +133,20 @@ if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
   link_file "${CONFIG_DIR}/gh/config.yml" "${HOME}/.config/gh/config.yml"
 fi
 
-# Orphans from the zsh+starship → fish+tide migration. Removed only if they
-# point into this repo, so a hand-written ~/.zshrc stays untouched.
-for stale in "${HOME}/.zshrc" "${HOME}/.config/starship.toml"; do
-  if [[ -L "${stale}" && "$(readlink "${stale}")" == "${CONFIG_DIR}"/* ]]; then
-    rm -f "${stale}"
-    echo "  removed stale symlink ${stale}"
+# Orphan from the fish+tide era. Removed only if it points into this repo, so a
+# hand-written config.fish stays untouched.
+if [[ -L "${HOME}/.config/fish/config.fish" \
+   && "$(readlink "${HOME}/.config/fish/config.fish")" == "${CONFIG_DIR}"/* ]]; then
+  rm -f "${HOME}/.config/fish/config.fish"
+  echo "  removed stale symlink ${HOME}/.config/fish/config.fish"
+fi
+
+# Dangling links into a /nix/store that no longer exists. ~/.zshenv is the one
+# that matters: zsh reads it before anything else.
+for broken in "${HOME}/.zshenv" "${HOME}/.bashrc" "${HOME}/.bash_profile" "${HOME}/.profile"; do
+  if [[ -L "${broken}" && ! -e "${broken}" ]]; then
+    rm -f "${broken}"
+    echo "  removed broken symlink ${broken}"
   fi
 done
 
@@ -176,21 +172,18 @@ defaults write com.apple.screencapture type -string "png"
 killall Finder 2>/dev/null || true
 killall SystemUIServer 2>/dev/null || true
 
-# chsh rejects shells missing from /etc/shells, so register it first (needs
-# sudo). dscl reads the real login shell, not $SHELL.
-FISH_BIN="$(command -v fish || true)"
-if [[ -n "${FISH_BIN}" ]]; then
-  if ! grep -qx "${FISH_BIN}" /etc/shells; then
-    echo "Registering ${FISH_BIN} in /etc/shells (sudo required)..."
-    echo "${FISH_BIN}" | sudo tee -a /etc/shells >/dev/null
-  fi
-  LOGIN_SHELL="$(dscl . -read "/Users/${USER}" UserShell 2>/dev/null | awk '{print $2}')"
-  if [[ "${LOGIN_SHELL}" != "${FISH_BIN}" ]]; then
-    echo "Changing login shell to ${FISH_BIN} (chsh will prompt for your password)..."
-    chsh -s "${FISH_BIN}"
-  fi
-else
-  echo "  ⚠ fish not found; login shell left as-is. Run without --skipBrew to install it."
+# chsh rejects shells missing from /etc/shells. /bin/zsh ships registered on
+# macOS, so the sudo branch is only reached on a machine that stripped it.
+# dscl reads the real login shell, not $SHELL.
+ZSH_BIN="/bin/zsh"
+if ! grep -qx "${ZSH_BIN}" /etc/shells; then
+  echo "Registering ${ZSH_BIN} in /etc/shells (sudo required)..."
+  echo "${ZSH_BIN}" | sudo tee -a /etc/shells >/dev/null
+fi
+LOGIN_SHELL="$(dscl . -read "/Users/${USER}" UserShell 2>/dev/null | awk '{print $2}')"
+if [[ "${LOGIN_SHELL}" != "${ZSH_BIN}" ]]; then
+  echo "Changing login shell to ${ZSH_BIN} (chsh will prompt for your password)..."
+  chsh -s "${ZSH_BIN}"
 fi
 
 echo "macOS standalone setup complete. Happy Coding 🧉"
