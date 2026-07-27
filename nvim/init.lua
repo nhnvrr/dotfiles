@@ -39,6 +39,14 @@ vim.pack.add({
 -- telescope and neo-tree draw in floating windows.
 require("nordic").setup({
   transparent = { bg = true, float = true },
+  -- neo-tree renders names with DirectoryName/FileName. nordic only defines the
+  -- `*FolderName` groups, which neo-tree never reads, so these have to be set here.
+  on_highlight = function(hl, palette)
+    hl.NeoTreeDirectoryName = { fg = palette.cyan.base }
+    hl.NeoTreeDirectoryIcon = { fg = palette.cyan.base }
+    hl.NeoTreeFileName = { fg = palette.white2 }
+    hl.NeoTreeFileNameOpened = { fg = palette.white2, bold = true }
+  end,
 })
 vim.o.background = "dark"
 vim.cmd.colorscheme("nordic")
