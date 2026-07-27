@@ -93,9 +93,39 @@ vim.api.nvim_create_user_command("WQ", "wq", {})
 
 vim.keymap.set("i", "jk", "<Esc>", { desc = "Leave insert mode" })
 vim.keymap.set("n", "<leader>nh", "<cmd>nohlsearch<cr>", { desc = "Clear search highlight" })
+vim.keymap.set("n", "<leader>+", "<C-a>", { desc = "Increment number" })
+vim.keymap.set("n", "<leader>-", "<C-x>", { desc = "Decrement number" })
+
 vim.keymap.set("n", "<leader>sv", "<C-w>v", { desc = "Split window vertically" })
 vim.keymap.set("n", "<leader>sh", "<C-w>s", { desc = "Split window horizontally" })
+vim.keymap.set("n", "<leader>se", "<C-w>=", { desc = "Make splits equal size" })
 vim.keymap.set("n", "<leader>sx", "<C-w>q", { desc = "Close split" })
+
+vim.keymap.set("n", "<Tab>", "<cmd>bnext<cr>", { desc = "Next buffer" })
+vim.keymap.set("n", "<S-Tab>", "<cmd>bprevious<cr>", { desc = "Previous buffer" })
+vim.keymap.set("n", "<leader>bn", "<cmd>enew<cr>", { desc = "New empty buffer" })
+vim.keymap.set("n", "<leader>bd", function()
+  -- A plain :bdelete closes the window with it. Move to another buffer (or an
+  -- empty one) first so the split survives.
+  local cur = vim.api.nvim_get_current_buf()
+  local alt = vim.fn.bufnr("#")
+  if alt ~= -1 and vim.fn.buflisted(alt) == 1 then
+    vim.cmd("buffer #")
+  else
+    vim.cmd("bprevious")
+  end
+  if vim.api.nvim_get_current_buf() == cur then
+    vim.cmd("enew")
+  end
+  vim.cmd("bdelete " .. cur)
+end, { desc = "Close buffer (keep window)" })
+
+vim.keymap.set("n", "<leader>tv", "<cmd>vsplit | terminal<cr>", { desc = "Terminal in vertical split" })
+vim.keymap.set("n", "<leader>th", "<cmd>split | terminal<cr>", { desc = "Terminal in horizontal split" })
+
+-- The trackpad's horizontal scroll only ever moves the view by accident.
+vim.keymap.set({ "n", "v", "i" }, "<ScrollWheelLeft>", "<Nop>")
+vim.keymap.set({ "n", "v", "i" }, "<ScrollWheelRight>", "<Nop>")
 
 -- neo-tree instead of netrw. hijack_netrw_behavior = "open_current" keeps
 -- `nvim .` and `:e some/dir/` opening the tree in the current window, the way
@@ -120,9 +150,13 @@ require("telescope").setup({ defaults = { layout_strategy = "flex" } })
 pcall(require("telescope").load_extension, "fzf")
 
 local builtin = require("telescope.builtin")
-vim.keymap.set("n", "<leader>f", builtin.find_files, { desc = "Find files" })
-vim.keymap.set("n", "<leader>g", builtin.live_grep, { desc = "Grep in project" })
-vim.keymap.set("n", "<leader>b", builtin.buffers, { desc = "Buffers" })
+vim.keymap.set("n", "<leader>ff", builtin.find_files, { desc = "Find files" })
+vim.keymap.set("n", "<leader>fs", builtin.live_grep, { desc = "Grep in project" })
+vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Buffers" })
+vim.keymap.set("n", "<leader>fr", builtin.oldfiles, { desc = "Recent files" })
+vim.keymap.set("n", "<leader>fg", builtin.git_files, { desc = "Git files" })
+vim.keymap.set("n", "<leader>fc", builtin.grep_string, { desc = "Grep word under cursor" })
+vim.keymap.set("n", "<leader>fk", builtin.keymaps, { desc = "Keymaps" })
 vim.keymap.set("n", "<leader>h", builtin.help_tags, { desc = "Help tags" })
 
 vim.api.nvim_create_autocmd("TextYankPost", {
