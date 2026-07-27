@@ -102,3 +102,26 @@ control_char: { is_bold: false }
 broken_symlink: { is_bold: false }
 broken_path_overlay: { is_bold: false }
 # header keeps its underline: it's what separates the table.
+
+# eza's icons are one hardcoded table with no alternate set; these two maps patch
+# it by name and by extension. The glyph is the literal character — `\u{...}` is
+# Rust notation and would print verbatim here.
+#
+# CAREFUL: these overrides only apply while colour is on. Piping eza anywhere
+# turns colour off and silently restores the built-in icons, so verify with
+# `--color=always` or the change looks like it never landed.
+filenames:
+  # No mapping in eza, so these fell back to the generic file icon.
+  .psqlrc: { icon: { glyph: "" } }
+  # The repo's copy is dotless; ~/.psqlrc is a symlink to it.
+  psqlrc: { icon: { glyph: "" } }
+  .nvmrc: { icon: { glyph: "" } }
+  # Matched the yaml extension, which says config rather than lockfile.
+  pnpm-lock.yaml: { icon: { glyph: "" } }
+
+extensions:
+  # Catches .env.example, which resolves by extension and had no mapping.
+  example: { icon: { glyph: "" } }
+  # Bruno.
+  bru: { icon: { glyph: "" } }
+  sql: { icon: { glyph: "" } }
