@@ -1,12 +1,11 @@
 font-family = Berkeley Mono Trial
 font-family = JetBrainsMono Nerd Font Mono
 font-feature = -calt, -liga, -dlig
-font-size = 14
+font-size = 18
 theme = Nord Wave
 
-# Both of these override the theme, so they MUST stay below it: ghostty applies
-# the theme where the line appears and lets later keys win. Nord Wave ships a
-# #212121 grey background; 208 is the orange the tmux bell uses.
+# These override the theme, so they MUST stay below it: ghostty applies the theme
+# where the line appears and lets later keys win.
 background = #000000
 palette = 208=#ff8700
 
@@ -19,10 +18,11 @@ window-padding-balance = true
 macos-titlebar-style = transparent
 window-save-state = never
 resize-overlay = never
-adjust-cell-height = 8%
-# adjust-cell-height only rescales powerline glyphs, so the nerd font icons need
-# their own bump to keep up with the taller cell.
-adjust-icon-height = 15%
+# Berkeley Mono's cell is 0.500em wide, so nerd font icons hit the width limit long
+# before any height limit. adjust-icon-height is inert here; this is the only knob
+# that scales them.
+adjust-cell-width = 12%
+adjust-cell-height = 6%
 
 cursor-style = bar
 cursor-style-blink = true
