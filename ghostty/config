@@ -1,4 +1,5 @@
-font-family = Berkeley Mono Trial
+# No agregar "Berkeley Mono Trial" acá: la trial intercambia # con * y / con \,
+# y solo trae ASCII, así que todo lo demás caía a esta fuente igual.
 font-family = JetBrainsMono Nerd Font Mono
 font-feature = -calt, -liga, -dlig
 font-size = 18
