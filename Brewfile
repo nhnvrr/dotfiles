@@ -21,6 +21,7 @@ brew "lazygit"
 brew "lazydocker"
 
 brew "libpq"
+brew "pgcli"
 brew "mise"
 
 brew "cocoapods"

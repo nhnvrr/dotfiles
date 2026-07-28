@@ -60,7 +60,7 @@ Note: the script prompts for your password once, for `chsh`.
 | Multiplexer | tmux | [`tmux/tmux.conf`](./tmux/tmux.conf) |
 | Editor | VS Code (`e` = `code --new-window`) — it's what handles the EC2 work: Remote-SSH, AWS Toolkit and SSM sessions. It's also what Hammerspoon's `cmd+alt+1` layout pairs with Chrome. Its config is user-level, not versioned here | — |
 | `$EDITOR` | Neovim — commits, `git rebase -i`, the shell's Ctrl-O, and quick edits. One file, no LSP and no completion; the plugins are the theme, neo-tree and telescope with the fzf-native C sorter (`<leader>f` files, `<leader>g` grep, `<leader>b` buffers, `<leader>e` tree) | [`nvim/init.lua`](./nvim/init.lua) |
-| Database | `psql` as the primary client; TablePlus as the visual complement | [`psql/psqlrc`](./psql/psqlrc) |
+| Database | `psql` is what scripts use and the fallback that's always there; `pgcli` is the interactive one — schema-aware completion of table and column names, syntax highlighting, and an editable multi-line buffer, none of which `psql` has. It does **not** read `~/.psqlrc`, so the five shortcuts are duplicated as named queries (`\n` lists them, `\n conns` runs one). TablePlus as the visual complement | [`psql/psqlrc`](./psql/psqlrc), [`pgcli/config`](./pgcli/config) |
 | HTTP | `curl` via the `req` function; Bruno for exploratory work | [`zsh/zshrc`](./zsh/zshrc) |
 | Git | versioned config, SSH-signed commits | [`git/gitconfig`](./git/gitconfig) |
 | Window mgmt | Hammerspoon — `cmd+alt+1/2/3` tile an app pair at 70/30 and hide everything else, `R` mirrors the split, `F` zooms. It never sleeps a fixed interval: it waits on the condition, because Electron applies `AXSize` and `AXPosition` separately and macOS ignores `setSize` in native fullscreen. Widths are measured, not assumed — the narrow app is placed first and the wide one gets whatever the other's minimum left over. Plus Raycast (launcher, clipboard, simple windows) | [`hammerspoon/init.lua`](./hammerspoon/init.lua) |
@@ -127,6 +127,7 @@ These are symlinked from the repo into `$HOME`:
 | `git/ignore` | `~/.config/git/ignore` |
 | `git/allowed_signers` | `~/.config/git/allowed_signers` |
 | `psql/psqlrc` | `~/.psqlrc` |
+| `pgcli/config` | `~/.config/pgcli/config` |
 | `gh/config.yml` | `~/.config/gh/config.yml` |
 
 The Neovim config is symlinked, so edits inside `~/.config/nvim` are reflected directly in the repo.
@@ -137,7 +138,7 @@ There is deliberately no `~/.zshenv`: zsh reads that file in *every* process, sc
 
 ## What is NOT managed
 
-- **Database credentials** — `~/.pgpass` holds them so `psql` doesn't prompt. It is a secrets file and is **never** versioned. Create it by hand, one connection per line, and lock it down or Postgres refuses to read it:
+- **Database credentials** — `~/.pgpass` holds them so `psql` doesn't prompt. It is a secrets file and is **never** versioned. `pgcli` runs with `keyring = False` so it reads the same file instead of caching passwords into the macOS Keychain on its own. Create it by hand, one connection per line, and lock it down or Postgres refuses to read it:
 
   ```
   hostname:port:database:username:password     # * works as a wildcard

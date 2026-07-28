@@ -125,6 +125,9 @@ link_file "${CONFIG_DIR}/hammerspoon/init.lua" "${HOME}/.hammerspoon/init.lua"
 # that directory: without it, history fails silently.
 mkdir -p "${HOME}/.local/state/psql"
 link_file "${CONFIG_DIR}/psql/psqlrc" "${HOME}/.psqlrc"
+# Same trap: pgcli won't create the directory its history and log live in.
+mkdir -p "${HOME}/.local/state/pgcli"
+link_file "${CONFIG_DIR}/pgcli/config" "${HOME}/.config/pgcli/config"
 if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
   link_file "${CONFIG_DIR}/gh/config.yml" "${HOME}/.config/gh/config.yml"
 fi
