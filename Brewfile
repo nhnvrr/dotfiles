@@ -62,6 +62,7 @@ cask "codex"
 cask "cap"
 cask "linear"
 cask "notion"
+cask "obsidian"
 
 cask "slack"
 cask "whatsapp"
