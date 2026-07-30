@@ -6,7 +6,6 @@ brew "tmux"
 brew "neovim"
 
 brew "fzf"
-brew "atuin"
 brew "fd"
 brew "ripgrep"
 brew "bat"

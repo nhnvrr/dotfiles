@@ -1,6 +1,6 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
-format = '󰳗 $directory$git_branch$git_state$git_status$line_break$character'
+format = '$directory$git_branch$git_state$git_status$line_break$character'
 right_format = '$mise$status$cmd_duration$username$hostname$jobs${env_var.STARSHIP_PNPM}$nodejs$bun$golang$rust$python$ruby$terraform$aws${env_var.STARSHIP_DOCKER_CTX}$time'
 
 add_newline = true

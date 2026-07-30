@@ -2,7 +2,7 @@
 [user]
 	name = Nicolas Navarro
 	email = navarropaeznicolas@gmail.com
-	signingkey = ~/.ssh/id_ed25519.pub
+	signingkey = /Users/nhnvrr/.ssh/id_ed25519.pub
 
 [init]
 	defaultBranch = main

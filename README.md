@@ -67,18 +67,19 @@ Note: the script prompts for your password once, for `chsh`.
 | Runtime mgr | mise — global versions plus per-project `.nvmrc` | [`mise/config.toml`](./mise/config.toml) |
 | Font | Berkeley Mono (TX-02) at size 14, with JetBrains Mono Nerd Font Mono as **fallback**. The Berkeley trial ships 95 glyphs — printable ASCII only — so every symbol and icon comes from the fallback. **The trial licence expires 2026-08-03**; after that either buy TX-02 or drop the first `font-family` line. It is not in the Brewfile because it isn't installable by brew, so a fresh machine falls back to JetBrains silently | [`ghostty/config`](./ghostty/config), cask `font-jetbrains-mono-nerd-font` |
 | Theme | Nord Wave (dark-only), one of Ghostty's bundled themes, with `background` forced to pure black instead of its `#212121` — that override and the `208` one have to sit **below** the `theme` line to win. nvim runs `nordic.nvim` (transparent, so only its Nord syntax colours land on top). Starship, eza, `bat` and tmux all resolve colours through the terminal's ANSI slots, so changing the Ghostty theme moves everything at once. GUI editors keep their own user-level theme | [`ghostty/config`](./ghostty/config) |
-| History | atuin on Ctrl-R — SQLite instead of `~/.zsh_history`, so a command carries its cwd, exit code and duration. Pressing Ctrl-R again inside the picker cycles the filter global → host → session → **directory**, which is the point: it answers "what did I run last time in *this* repo". Local only, no account (`auto_sync` and `update_check` are both off, so nothing touches the network at startup). Enter puts the command on the line rather than running it, matching what fzf's Ctrl-R did. ↑ is left alone via `--disable-up-arrow`, so it and Ctrl-P/Ctrl-N still search zsh's own history, which keeps working in parallel | [`atuin/config.toml`](./atuin/config.toml) |
-| Fuzzy find | fzf on Ctrl-T (files, `bat` preview), Alt-C (directories) and `**<TAB>` (completion) — **not** Ctrl-R, which is atuin's. zoxide also shells out to it for `zi` | [`zsh/zshrc`](./zsh/zshrc) |
+| History | zsh's native history, searched with fzf on Ctrl-R | [`zsh/zshrc`](./zsh/zshrc) |
+| Fuzzy find | fzf on Ctrl-R (history), Ctrl-T (files, `bat` preview), Alt-C (directories) and `**<TAB>` (completion). zoxide also shells out to it for `zi` | [`zsh/zshrc`](./zsh/zshrc) |
 | Listings | eza with icons — `ls`, `ll`, `la`, `lt`, themed by ANSI name (folders cyan, metadata grey, git matching the prompt). Needs the Nerd Font's **Mono** (NFM) variant, where a glyph is exactly one cell wide; the Propo variant drifts the columns. `EZA_CONFIG_DIR` is mandatory: on macOS eza reads `~/Library/Application Support/eza` and ignores `XDG_CONFIG_HOME` | [`eza/theme.yml`](./eza/theme.yml), [`zsh/zshrc`](./zsh/zshrc) |
 
 `zsh/zshrc` notes:
 - Defines `dev` / `work` / `side` aliases that spawn (or switch to) a named tmux session with a fixed CWD.
+- Defines `vault` to jump to the directory containing the Obsidian vaults in iCloud Drive.
 - Always exports an explicit `AWS_PROFILE` — `work` inside the `work` tmux session, `personal` everywhere else. `~/.aws/config` has no `[default]` profile, so leaving it unset means every `aws` command fails with `NoCredentials`; setting it always also means Starship's `aws` module always draws, which is how you see which account you're pointed at.
 - Provides `req` — curl with sane flags, piping the response through `jq` when it parses as JSON. There is deliberately no `~/.curlrc`: that file is read by *every* curl invocation, including the Homebrew installer's and any third-party script's.
 - Wraps `claude` so that `CLAUDE_CONFIG_DIR=~/.claude-work` is used in the `work` session, letting two Claude Code subscriptions stay logged in side-by-side.
 - Implements fish-style **abbreviations** for the git shortcuts (`gc`, `gco`, `ga`, `gb`, `gd`) in ~20 lines of ZLE: they expand in place on space or enter, so you see the real command before running it and the history stores the expanded form. They only fire in command position, so `echo gd` stays literal.
 - Uses **hybrid emacs + vi** bindings — `bindkey -v` with the emacs keys added back to `viins`, so Esc enters command mode with `KEYTIMEOUT=1`. The other direction (`bindkey -e` plus Esc bound to `vi-cmd-mode`) needs a high `KEYTIMEOUT`, which delays every Esc *and* every `Alt-<key>`, because the terminal sends those as `ESC`+key (`macos-option-as-alt = true`).
-- Caches `zoxide init` / `fzf --zsh` / `atuin init` / `starship init` into `~/.cache/zsh/init.zsh`, regenerated when any of those binaries is newer. `atuin init` goes **after** `fzf --zsh`: both bind `^R` and the last one wins. fzf's `fzf-history-widget` still gets defined — there's no flag to emit only the other bindings — it just becomes unreachable. mise is deliberately **not** cached: `mise activate zsh` interpolates the current `$PATH` into its output, so a cached copy would pin one shell's PATH onto every later shell.
+- Caches `zoxide init` / `fzf --zsh` / `starship init` into `~/.cache/zsh/init.zsh`, regenerated when `.zshrc` or any Homebrew binary changes. mise is deliberately **not** cached: `mise activate zsh` interpolates the current `$PATH` into its output, so a cached copy would pin one shell's PATH onto every later shell.
 - Forces Starship's `precmd` hook to run first. mise's hook does `eval "$(mise hook-env)"` without preserving `$?`, which would otherwise leave the exit-status module permanently reading 0.
 
 ### Why zsh
@@ -120,7 +121,6 @@ These are symlinked from the repo into `$HOME`:
 | `tmux/tmux.conf` | `~/.tmux.conf` |
 | `mise/config.toml` | `~/.config/mise/config.toml` |
 | `eza/theme.yml` | `~/.config/eza/theme.yml` |
-| `atuin/config.toml` | `~/.config/atuin/config.toml` |
 | `nvim/init.lua` | `~/.config/nvim/init.lua` |
 | `hammerspoon/init.lua` | `~/.hammerspoon/init.lua` |
 | `git/gitconfig` | `~/.gitconfig` |

@@ -33,6 +33,7 @@ fi
 
 alias e='code --new-window'
 alias code='code --new-window'
+alias vault='cd "$HOME/Library/Mobile Documents/iCloud~md~obsidian/Documents"'
 
 if (( $+commands[eza] )); then
     alias ls='eza --icons --group-directories-first'
@@ -222,19 +223,19 @@ export FZF_ALT_C_OPTS="--preview 'ls -la {} | head -100'"
 
 _zinit_cache=$HOME/.cache/zsh/init.zsh
 () {
-    [[ -s $_zinit_cache && ! ${HOMEBREW_PREFIX:-/opt/homebrew}/bin -nt $_zinit_cache ]] && return
+    [[ -s $_zinit_cache && ! $HOME/.zshrc -nt $_zinit_cache \
+        && ! ${HOMEBREW_PREFIX:-/opt/homebrew}/bin -nt $_zinit_cache ]] && return
     mkdir -p $_zinit_cache:h
     {
         zoxide init zsh
         fzf --zsh
-        atuin init zsh --disable-up-arrow
         starship init zsh --print-full-init
     } >| $_zinit_cache
 }
 source $_zinit_cache
 unset _zinit_cache
 
-bindkey -M vicmd '^R' atuin-search-vicmd
+bindkey -M vicmd '^R' fzf-history-widget
 
 eval "$(mise activate zsh)"
 
