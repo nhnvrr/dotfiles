@@ -35,7 +35,7 @@ brew "htop"
 brew "fastfetch"
 
 cask "ghostty"
-cask "font-jetbrains-mono-nerd-font"
+cask "font-geist-mono-nerd-font"
 
 cask "visual-studio-code"
 
