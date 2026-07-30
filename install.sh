@@ -114,7 +114,6 @@ link_file "${CONFIG_DIR}/zsh/zprofile" "${HOME}/.zprofile"
 link_file "${CONFIG_DIR}/zsh/zshrc"    "${HOME}/.zshrc"
 link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
 link_file "${CONFIG_DIR}/ghostty/config" "${HOME}/.config/ghostty/config"
-link_file "${CONFIG_DIR}/ghostty/themes" "${HOME}/.config/ghostty/themes"
 link_file "${CONFIG_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"
 link_file "${CONFIG_DIR}/eza/theme.yml" "${HOME}/.config/eza/theme.yml"
 link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.tmux.conf"
@@ -135,7 +134,8 @@ fi
 # this repo, so a hand-written file at any of these paths stays untouched.
 for stale in "${HOME}/.config/fish/config.fish" \
              "${HOME}/.config/alacritty/alacritty.toml" \
-             "${HOME}/.config/atuin/config.toml"; do
+             "${HOME}/.config/atuin/config.toml" \
+             "${HOME}/.config/ghostty/themes"; do
   if [[ -L "${stale}" && "$(readlink "${stale}")" == "${CONFIG_DIR}"/* ]]; then
     rm -f "${stale}"
     echo "  removed stale symlink ${stale}"

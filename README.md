@@ -117,7 +117,6 @@ These are symlinked from the repo into `$HOME`:
 | `zsh/zprofile` | `~/.zprofile` |
 | `starship/starship.toml` | `~/.config/starship.toml` |
 | `ghostty/config` | `~/.config/ghostty/config` |
-| `ghostty/themes` | `~/.config/ghostty/themes` |
 | `tmux/tmux.conf` | `~/.tmux.conf` |
 | `mise/config.toml` | `~/.config/mise/config.toml` |
 | `eza/theme.yml` | `~/.config/eza/theme.yml` |
