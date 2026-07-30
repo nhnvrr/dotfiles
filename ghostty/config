@@ -1,10 +1,11 @@
 font-family = GeistMono Nerd Font Mono
 font-feature = -calt, -liga, -dlig
 font-size = 18
-theme = Nord Wave
+theme = iTerm2 Solarized Dark
 
-background = #000000
-palette = 208=#ff8700
+# Solarized only defines slots 0-15, so 208 stays neon unless overridden here,
+# below the theme line. tmux paints the bell status bar with it.
+palette = 208=#cb4b16
 
 macos-icon = official
 

@@ -10,7 +10,7 @@ vi = True
 
 less_chatty = True
 
-syntax_style = nord
+syntax_style = solarized-dark
 
 # Matches \pset null '∅' in psql/psqlrc.
 null_string = '∅'
@@ -38,18 +38,16 @@ log_level = ERROR
 prompt = '\x1b[36m\u\x1b[0m@\x1b[1;33m\h\x1b[0m/\x1b[32m\d\x1b[0m\# '
 
 # By ANSI slot, so the Ghostty theme drives these like it drives starship/eza/bat.
-# The black backgrounds are the exception: Nord Wave's slot 0 is #3b4252, not black, so
-# 'ansiblack' rendered slate against Ghostty's #000000 background. 'ansidefault' would
-# be the theme-driven fix but it crashes pgcli — main.py feeds this whole dict through
-# style_factory_output into a pygments Style, and pygments has no such color.
+# Do not reach for 'ansidefault' — it crashes pgcli. main.py feeds this whole dict
+# through style_factory_output into a pygments Style, and pygments has no such color.
 [colors]
 completion-menu.completion.current      = 'bg:ansibrightblack ansiwhite'
-completion-menu.completion              = 'bg:#000000 ansiwhite'
+completion-menu.completion              = 'bg:ansiblack ansiwhite'
 completion-menu.meta.completion.current = 'bg:ansibrightblack ansibrightcyan'
-completion-menu.meta.completion         = 'bg:#000000 ansicyan'
-completion-menu.multi-column-meta       = 'bg:#000000 ansibrightblack'
+completion-menu.meta.completion         = 'bg:ansiblack ansicyan'
+completion-menu.multi-column-meta       = 'bg:ansiblack ansibrightblack'
 
-scrollbar.arrow = 'bg:#000000'
+scrollbar.arrow = 'bg:ansiblack'
 scrollbar       = 'bg:ansibrightblack'
 
 # ansiblack here is the foreground, over a bright background — leave it on the slot.
@@ -57,11 +55,11 @@ selected       = 'ansiwhite bg:ansibrightblack'
 search         = 'ansiblack bg:ansicyan'
 search.current = 'ansiblack bg:ansiyellow'
 
-bottom-toolbar                    = 'bg:#000000 ansiwhite'
-bottom-toolbar.off                = 'bg:#000000 ansibrightblack'
-bottom-toolbar.on                 = 'bg:#000000 ansiyellow'
-bottom-toolbar.transaction.valid  = 'bg:#000000 ansigreen'
-bottom-toolbar.transaction.failed = 'bg:#000000 ansired'
+bottom-toolbar                    = 'bg:ansiblack ansiwhite'
+bottom-toolbar.off                = 'bg:ansiblack ansibrightblack'
+bottom-toolbar.on                 = 'bg:ansiblack ansiyellow'
+bottom-toolbar.transaction.valid  = 'bg:ansiblack ansigreen'
+bottom-toolbar.transaction.failed = 'bg:ansiblack ansired'
 
 output.header = 'ansiyellow'
 output.null   = 'ansibrightblack'
