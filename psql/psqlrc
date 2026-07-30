@@ -1,5 +1,5 @@
 -- CAREFUL with scripts: psql reads this file even non-interactively. A script
--- parsing output (`psql -t -A -c ...`) will see the '∅' for NULL and the
+-- parsing output (`psql -t -A -c ...`) will see the 'Ø' for NULL and the
 -- unicode format below. For scripts, use `psql -X`.
 
 \set QUIET 1
@@ -13,7 +13,7 @@
 \timing on
 
 -- Without this, NULL and an empty string look identical.
-\pset null '∅'
+\pset null 'Ø'
 
 \pset linestyle unicode
 \pset border 2

@@ -76,7 +76,7 @@ opt.swapfile = false
 opt.undofile = true
 
 opt.list = true
-opt.listchars = { tab = "▸ ", trail = "·", nbsp = "␣" }
+opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
 
 vim.api.nvim_create_user_command("W", "w", {})
 vim.api.nvim_create_user_command("Q", "q", {})

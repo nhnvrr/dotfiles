@@ -12,8 +12,8 @@ less_chatty = True
 
 syntax_style = solarized-dark
 
-# Matches \pset null '∅' in psql/psqlrc.
-null_string = '∅'
+# Matches \pset null 'Ø' in psql/psqlrc.
+null_string = 'Ø'
 
 # Matches \pset linestyle unicode + \pset border 2 in psql/psqlrc. pgcli's default is
 # 'psql', which draws ASCII borders.
