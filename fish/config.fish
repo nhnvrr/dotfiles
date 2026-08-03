@@ -146,6 +146,31 @@ if status is-interactive
 
     enable_transience
 
+    # ↓ opens fzf where the history runs out: history-search-forward has
+    # nothing left to find there. fish does not leave search mode at the
+    # bottom, it restores the line you had before searching — so ↑ has to
+    # record that line for ↓ to recognise it.
+    function _up_or_search_origin --description 'up-or-search, recording the pre-search line'
+        commandline --search-mode; or set -g _history_origin "$(commandline)"
+        up-or-search
+    end
+
+    function _down_or_fzf_history --description 'down-or-search, fzf at the bottom'
+        if commandline --paging-mode
+            commandline -f down-line
+        else if commandline --search-mode
+            if test "$(commandline)" = "$_history_origin"
+                functions -q fzf-history-widget; and fzf-history-widget
+            else
+                commandline -f history-search-forward
+            end
+        else if test (commandline -L) -lt (count (commandline))
+            commandline -f down-line
+        else
+            functions -q fzf-history-widget; and fzf-history-widget
+        end
+    end
+
     # fish re-applies the preset bindings whenever $fish_key_bindings changes
     # and calls this function afterwards, so every custom bind has to live in
     # here — fzf's included, or Ctrl-R/T and Alt-C get dropped on a rebind.
@@ -154,10 +179,15 @@ if status is-interactive
 
         # Ctrl-P/N: prefix history search. Costs Ctrl-N its
         # accept-autosuggestion, which stays on → or Ctrl-F.
+        # Not visual mode: there ↓ extends the selection.
+        # Ctrl-R has to be rebound after fzf_key_bindings, which claims it.
         for mode in insert default
-            bind -M $mode ctrl-p up-or-search
+            bind -M $mode ctrl-p _up_or_search_origin
             bind -M $mode ctrl-n down-or-search
             bind -M $mode ctrl-o edit_command_buffer
+            bind -M $mode up _up_or_search_origin
+            bind -M $mode down _down_or_fzf_history
+            bind -M $mode ctrl-r history-pager
         end
     end
 
