@@ -12,7 +12,7 @@ vim.api.nvim_create_autocmd("PackChanged", {
 })
 
 vim.pack.add({
-  "https://github.com/AlexvZyl/nordic.nvim",
+  "https://github.com/morhetz/gruvbox",
   "https://github.com/MunifTanjim/nui.nvim",
   "https://github.com/nvim-lua/plenary.nvim",
   "https://github.com/nvim-tree/nvim-web-devicons",
@@ -22,26 +22,54 @@ vim.pack.add({
   "https://github.com/nvim-lualine/lualine.nvim",
 })
 
-require("nordic").setup({
-  transparent = { bg = true, float = true },
-  telescope = { style = "classic" },
-  -- Mutates the table it is handed; it does not return one like solarized did.
-  on_highlight = function(hl, palette)
-    hl.NeoTreeDirectoryName = { fg = palette.cyan.base }
-    hl.NeoTreeDirectoryIcon = { fg = palette.cyan.base }
-    hl.NeoTreeFileName = { fg = palette.white2 }
-    hl.NeoTreeFileNameOpened = { fg = palette.white2, bold = true }
-    local title = { fg = palette.black0, bg = palette.orange.base, bold = true }
-    hl.TelescopeTitle = title
-    hl.TelescopePromptTitle = title
-    hl.TelescopeResultsTitle = title
-    hl.TelescopePreviewTitle = { fg = palette.black0, bg = palette.blue2, bold = true }
-    hl.TelescopeSelection = { bg = palette.black2, fg = palette.yellow.bright }
-    hl.TelescopeSelectionCaret = { bg = palette.black2, fg = palette.yellow.bright, bold = true }
+-- Emptied, not toggled: the theme interpolates this into every group it builds,
+-- so it has to be set before the colorscheme loads.
+vim.g.gruvbox_bold = 0
+
+-- Vimscript, so there is no setup() and no palette table. The overrides read
+-- gruvbox's own Gruvbox* groups instead of hardcoding hex, and run on
+-- ColorScheme so they survive a reload. It also has no transparency option:
+-- clearing the backgrounds by hand is what keeps Ghostty showing through, float
+-- included, so telescope and neo-tree don't draw a lighter rectangle.
+vim.api.nvim_create_autocmd("ColorScheme", {
+  pattern = "gruvbox",
+  callback = function()
+    local function fg(group)
+      return vim.api.nvim_get_hl(0, { name = group, link = false }).fg
+    end
+    local bg0, bg2 = fg("GruvboxBg0"), fg("GruvboxBg2")
+    local set = vim.api.nvim_set_hl
+
+    for _, group in ipairs({ "Normal", "NormalNC", "NormalFloat", "FloatBorder", "SignColumn", "EndOfBuffer" }) do
+      set(0, group, { fg = fg(group), bg = "NONE" })
+    end
+
+    -- gruvbox_bold=0 covers everything the theme draws; these three are
+    -- Neovim's own defaults, which it never touches. @markup.strong keeps its
+    -- bold because there the bold is the meaning.
+    for _, group in ipairs({ "PmenuMatch", "PmenuMatchSel", "WinBar" }) do
+      local h = vim.api.nvim_get_hl(0, { name = group, link = false })
+      h.bold, h.cterm = nil, nil
+      set(0, group, h)
+    end
+
+    set(0, "NeoTreeDirectoryName", { fg = fg("GruvboxAqua") })
+    set(0, "NeoTreeDirectoryIcon", { fg = fg("GruvboxAqua") })
+    set(0, "NeoTreeFileName", { fg = fg("GruvboxFg1") })
+    set(0, "NeoTreeFileNameOpened", { fg = fg("GruvboxFg1") })
+
+    local title = { fg = bg0, bg = fg("GruvboxOrange") }
+    set(0, "TelescopeTitle", title)
+    set(0, "TelescopePromptTitle", title)
+    set(0, "TelescopeResultsTitle", title)
+    set(0, "TelescopePreviewTitle", { fg = bg0, bg = fg("GruvboxBlue") })
+    set(0, "TelescopeSelection", { bg = bg2, fg = fg("GruvboxYellow") })
+    set(0, "TelescopeSelectionCaret", { bg = bg2, fg = fg("GruvboxYellow") })
   end,
 })
+
 vim.o.background = "dark"
-vim.cmd.colorscheme("nordic")
+vim.cmd.colorscheme("gruvbox")
 
 local opt = vim.opt
 
@@ -154,7 +182,7 @@ vim.keymap.set("n", "<leader>fc", builtin.grep_string, { desc = "Grep word under
 vim.keymap.set("n", "<leader>fk", builtin.keymaps, { desc = "Keymaps" })
 vim.keymap.set("n", "<leader>h", builtin.help_tags, { desc = "Help tags" })
 
-local lualine_theme = require("lualine.themes.nordic")
+local lualine_theme = require("lualine.themes.gruvbox_dark")
 for _, mode in pairs(lualine_theme) do
   mode.a.gui = nil
 end
