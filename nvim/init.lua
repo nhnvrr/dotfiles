@@ -12,7 +12,7 @@ vim.api.nvim_create_autocmd("PackChanged", {
 })
 
 vim.pack.add({
-  "https://github.com/maxmx03/solarized.nvim",
+  "https://github.com/AlexvZyl/nordic.nvim",
   "https://github.com/MunifTanjim/nui.nvim",
   "https://github.com/nvim-lua/plenary.nvim",
   "https://github.com/nvim-tree/nvim-web-devicons",
@@ -22,27 +22,26 @@ vim.pack.add({
   "https://github.com/nvim-lualine/lualine.nvim",
 })
 
-require("solarized").setup({
-  transparent = { enabled = true },
-  -- Returns the highlights, it does not mutate them like nordic's on_highlight did.
-  on_highlights = function(colors)
-    local title = { fg = colors.base03, bg = colors.orange, bold = true }
-    return {
-      NeoTreeDirectoryName = { fg = colors.cyan },
-      NeoTreeDirectoryIcon = { fg = colors.cyan },
-      NeoTreeFileName = { fg = colors.base1 },
-      NeoTreeFileNameOpened = { fg = colors.base1, bold = true },
-      TelescopeTitle = title,
-      TelescopePromptTitle = title,
-      TelescopeResultsTitle = title,
-      TelescopePreviewTitle = { fg = colors.base03, bg = colors.blue, bold = true },
-      TelescopeSelection = { bg = colors.base02, fg = colors.yellow },
-      TelescopeSelectionCaret = { bg = colors.base02, fg = colors.yellow, bold = true },
-    }
+require("nordic").setup({
+  transparent = { bg = true, float = true },
+  telescope = { style = "classic" },
+  -- Mutates the table it is handed; it does not return one like solarized did.
+  on_highlight = function(hl, palette)
+    hl.NeoTreeDirectoryName = { fg = palette.cyan.base }
+    hl.NeoTreeDirectoryIcon = { fg = palette.cyan.base }
+    hl.NeoTreeFileName = { fg = palette.white2 }
+    hl.NeoTreeFileNameOpened = { fg = palette.white2, bold = true }
+    local title = { fg = palette.black0, bg = palette.orange.base, bold = true }
+    hl.TelescopeTitle = title
+    hl.TelescopePromptTitle = title
+    hl.TelescopeResultsTitle = title
+    hl.TelescopePreviewTitle = { fg = palette.black0, bg = palette.blue2, bold = true }
+    hl.TelescopeSelection = { bg = palette.black2, fg = palette.yellow.bright }
+    hl.TelescopeSelectionCaret = { bg = palette.black2, fg = palette.yellow.bright, bold = true }
   end,
 })
 vim.o.background = "dark"
-vim.cmd.colorscheme("solarized")
+vim.cmd.colorscheme("nordic")
 
 local opt = vim.opt
 
@@ -155,7 +154,7 @@ vim.keymap.set("n", "<leader>fc", builtin.grep_string, { desc = "Grep word under
 vim.keymap.set("n", "<leader>fk", builtin.keymaps, { desc = "Keymaps" })
 vim.keymap.set("n", "<leader>h", builtin.help_tags, { desc = "Help tags" })
 
-local lualine_theme = require("lualine.themes.solarized_dark")
+local lualine_theme = require("lualine.themes.nordic")
 for _, mode in pairs(lualine_theme) do
   mode.a.gui = nil
 end
