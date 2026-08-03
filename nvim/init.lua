@@ -57,6 +57,8 @@ vim.api.nvim_create_autocmd("ColorScheme", {
     set(0, "NeoTreeDirectoryIcon", { fg = fg("GruvboxAqua") })
     set(0, "NeoTreeFileName", { fg = fg("GruvboxFg1") })
     set(0, "NeoTreeFileNameOpened", { fg = fg("GruvboxFg1") })
+    set(0, "NeoTreeGitIgnored", { fg = fg("GruvboxGray"), italic = true })
+    set(0, "NeoTreeDotfile", { fg = fg("GruvboxFg4") })
 
     local title = { fg = bg0, bg = fg("GruvboxOrange") }
     set(0, "TelescopeTitle", title)
@@ -158,7 +160,14 @@ require("neo-tree").setup({
   filesystem = {
     hijack_netrw_behavior = "open_current",
     follow_current_file = { enabled = true },
-    filtered_items = { hide_dotfiles = false, hide_gitignored = true },
+    filtered_items = {
+      -- visible, not unfiltered: gitignored files still render as ignored
+      -- instead of passing for tracked ones. never_show wins over this.
+      visible = true,
+      hide_dotfiles = false,
+      hide_gitignored = true,
+      never_show = { "node_modules" },
+    },
   },
   window = { width = 30 },
 })
