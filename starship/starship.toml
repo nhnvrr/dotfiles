@@ -91,10 +91,9 @@ style = 'blue'
 format = '[$symbol$number]($style) '
 
 [nodejs]
-# Starship suprime este módulo si detecta bun/deno; sin este override no se ve node en repos con bun.lock
 detect_files = ['package.json', '.node-version', '.nvmrc']
 symbol = '󰎙 '
-style = 'bright-green'
+style = 'green'
 format = '[$symbol($version )]($style)'
 
 [bun]

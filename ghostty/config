@@ -1,11 +1,18 @@
-font-family = GeistMono Nerd Font Mono
-font-feature = -calt, -liga, -dlig
+font-family = MonaspiceAr Nerd Font Mono
+# calt is NOT ligatures in Monaspace: it's texture healing, 276 substitutions to
+# .left/.right glyph variants that nudge a glyph inside its own cell (the classic
+# "il" gap). Cell width never changes, so the terminal grid holds. The ligatures
+# live in liga and ss01-ss10, and those stay off.
+font-feature = -liga, -dlig
 font-size = 18
-theme = iTerm2 Solarized Dark
+theme = Ghostty Default Style Dark
 
-# Solarized only defines slots 0-15, so 208 stays neon unless overridden here,
-# below the theme line. tmux paints the bell status bar with it.
-palette = 208=#cb4b16
+# background-opacity-cells stays false on purpose: only the theme's background
+# goes translucent, so anything that paints its own cell background (tmux status
+# bar, selections, nvim's cursorline) stays solid and legible. The blur is what
+# keeps text readable over a busy desktop at this opacity.
+background-opacity = 0.92
+background-blur = 20
 
 macos-icon = official
 
