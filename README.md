@@ -67,8 +67,8 @@ Note: the script prompts for your password once, for `chsh`.
 | Runtime mgr | mise — global versions plus per-project `.nvmrc` | [`mise/config.toml`](./mise/config.toml) |
 | Font | MonaspiceAr Nerd Font Mono at size 18 — Monaspace Argon, one font, not a pair. The Nerd Font build carries the Monaspace glyphs *and* every icon, so there is no fallback `font-family` line to keep in sync and a fresh machine gets the real thing straight from `brew bundle`. It has to be the **Nerd Fonts** patch (cask `font-monaspice-nerd-font`, family prefix `Monaspice`), not GitHub's own `font-monaspace-nf` build: the latter ships no Mono variant, which is the one thing the icon columns need. Ligatures are off, but `calt` is left **on** — in Monaspace that tag is not ligatures, it's texture healing (substitutions to `.left`/`.right` glyph variants that nudge a glyph inside its own cell without changing cell width). The ligatures are in `liga` and `ss01`-`ss10`, hence `font-feature = -liga, -dlig` | [`ghostty/config`](./ghostty/config), cask `font-monaspice-nerd-font` |
 | Theme | Ghostty's own `Ghostty Default Style Dark` — background `#282c34`, foreground `#ffffff`. It's what Ghostty ships as its built-in default, but the `theme` line names it explicitly so the config says what it renders and doesn't drift if that built-in ever changes. One theme, not a `light:`/`dark:` pair: nvim and pgcli are pinned to dark, so following the macOS appearance left the stack half light and half dark. The background is the theme's own and there are no `palette` overrides left: everything that needs a colour asks for it by ANSI name, so the theme is the single source of truth. It runs slightly translucent (`background-opacity = 0.92`) with `background-blur = 20` — the blur is what keeps text readable over a busy desktop. `background-opacity-cells` stays at its default `false`, so only the theme background goes through: anything painting its own cell background (tmux status bar, selections, nvim's cursorline) stays solid. nvim runs `solarized.nvim` (transparent, so the terminal background shows through). Starship, eza, `bat`, delta, fzf, pgcli and tmux all resolve colours through the terminal's ANSI slots, so changing the Ghostty theme moves everything at once. GUI editors keep their own user-level theme | [`ghostty/config`](./ghostty/config) |
-| History | fish's native history (`~/.local/share/fish/fish_history`), searched with fzf on Ctrl-R | [`fish/config.fish`](./fish/config.fish) |
-| Fuzzy find | fzf on Ctrl-R (history), Ctrl-T (files, `bat` preview), Alt-C (directories) and `**<TAB>` (completion). zoxide also shells out to it for `zi` | [`fish/config.fish`](./fish/config.fish) |
+| History | fish's native history (`~/.local/share/fish/fish_history`), searched with fzf on ↓ — the arrow walks the history while there is something below and opens fzf once there is not, seeded with whatever is on the line. Ctrl-R is fish's own history pager | [`fish/config.fish`](./fish/config.fish) |
+| Fuzzy find | fzf on ↓ (history), Ctrl-T (files, `bat` preview), Alt-C (directories) and `**<TAB>` (completion). zoxide also shells out to it for `zi` | [`fish/config.fish`](./fish/config.fish) |
 | Listings | eza with icons — `ls`, `ll`, `la`, `lt`, themed by ANSI name (folders cyan, metadata grey, git matching the prompt). Needs the Nerd Font's **Mono** (NFM) variant, where a glyph is exactly one cell wide; the Propo variant drifts the columns. `EZA_CONFIG_DIR` is mandatory: on macOS eza reads `~/Library/Application Support/eza` and ignores `XDG_CONFIG_HOME` | [`eza/theme.yml`](./eza/theme.yml), [`fish/config.fish`](./fish/config.fish) |
 
 `fish/config.fish` notes:
@@ -78,7 +78,8 @@ Note: the script prompts for your password once, for `chsh`.
 - Provides `req` — curl with sane flags, piping the response through `jq` when it parses as JSON. There is deliberately no `~/.curlrc`: that file is read by *every* curl invocation, including the Homebrew installer's and any third-party script's.
 - Wraps `claude` so that `CLAUDE_CONFIG_DIR=~/.claude-work` is used in the `work` session, letting two Claude Code subscriptions stay logged in side-by-side.
 - Feeds Starship two env vars from a single `fish_prompt` event handler, both builtins-only so the prompt pays no forks: `STARSHIP_DOCKER_CTX` (read out of `~/.docker/config.json` — `docker context inspect` is 126ms of Go CLI startup to print what's already on disk) and `STARSHIP_PNPM` (walks up from `$PWD` to `$HOME` looking for `pnpm-lock.yaml`).
-- Binds everything custom inside `fish_user_key_bindings`, fzf's `Ctrl-R`/`Ctrl-T`/`Alt-C` included. fish re-applies the preset bindings whenever `$fish_key_bindings` changes and calls that function afterwards, so anything bound outside it is silently dropped.
+- Binds everything custom inside `fish_user_key_bindings`, fzf's `Ctrl-T`/`Alt-C` included. fish re-applies the preset bindings whenever `$fish_key_bindings` changes and calls that function afterwards, so anything bound outside it is silently dropped.
+- Ships its own `completions/aws.fish` instead of registering `aws_completer` from `config.fish`. `complete -c aws` *adds* a source, so the old rule merged with the `aws.fish` fish 4 compiles into its binary and kept offering services awscli dropped years ago. Only the first match in `$fish_complete_path` is autoloaded, so a file in `~/.config/fish/completions` is what actually replaces it.
 - Uses **hybrid emacs + vi** bindings (`fish_hybrid_key_bindings`) — emacs keys with vi mode on Esc. The other direction needs a long escape timeout, which delays every `Alt-<key>` too, because the terminal sends those as `ESC`+key (`macos-option-as-alt = true`).
 - Caches `zoxide init` / `fzf --fish` / `starship init` into `~/.cache/fish/init.fish`, regenerated when `config.fish` or any Homebrew binary changes. mise is deliberately **not** cached — nor activated at all: Homebrew ships `vendor_conf.d/mise-activate.fish` and fish sources it on its own. Doing it twice costs ~20ms per shell.
 - Turns on Starship's `enable_transience`, so an executed prompt collapses to a bare `❯` plus the clock.
@@ -119,6 +120,7 @@ These are symlinked from the repo into `$HOME`:
 |---|---|
 | `fish/config.fish` | `~/.config/fish/config.fish` |
 | `fish/conf.d/00-env.fish` | `~/.config/fish/conf.d/00-env.fish` |
+| `fish/completions/aws.fish` | `~/.config/fish/completions/aws.fish` |
 | `starship/starship.toml` | `~/.config/starship.toml` |
 | `ghostty/config` | `~/.config/ghostty/config` |
 | `tmux/tmux.conf` | `~/.tmux.conf` |
@@ -137,7 +139,7 @@ The Neovim config is symlinked, so edits inside `~/.config/nvim` are reflected d
 
 Because `~/.gitconfig` is a symlink, any `git config --global …` you run writes straight into `git/gitconfig` in this repo. That's deliberate — the change gets versioned instead of drifting in `$HOME` — but it does mean the repo shows as dirty after you touch git config.
 
-`~/.config/fish/functions`, `completions` and `fish_variables` are deliberately **not** versioned: fish writes into them itself, so only the two files above are symlinked and the rest stays local state.
+`~/.config/fish/functions` and `fish_variables` are deliberately **not** versioned: fish writes into them itself. `completions/` holds one symlinked file, `aws.fish`, because shadowing fish's built-in table is the only way to replace it — everything else fish drops in there stays local state.
 
 ## What is NOT managed
 
