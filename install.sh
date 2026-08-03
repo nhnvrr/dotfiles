@@ -110,8 +110,10 @@ echo "Preparing Go workspace..."
 mkdir -p "${HOME}/Develop/go/bin"
 
 echo "Linking config files..."
-link_file "${CONFIG_DIR}/zsh/zprofile" "${HOME}/.zprofile"
-link_file "${CONFIG_DIR}/zsh/zshrc"    "${HOME}/.zshrc"
+# conf.d/00-env.fish, not config.fish, holds $PATH: fish sources conf.d sorted
+# by name — mise's vendor snippet included — and config.fish only afterwards.
+link_file "${CONFIG_DIR}/fish/config.fish"       "${HOME}/.config/fish/config.fish"
+link_file "${CONFIG_DIR}/fish/conf.d/00-env.fish" "${HOME}/.config/fish/conf.d/00-env.fish"
 link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
 link_file "${CONFIG_DIR}/ghostty/config" "${HOME}/.config/ghostty/config"
 link_file "${CONFIG_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"
@@ -130,9 +132,10 @@ if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
   link_file "${CONFIG_DIR}/gh/config.yml" "${HOME}/.config/gh/config.yml"
 fi
 
-# Orphans from the fish+tide and Alacritty eras. Removed only if they point into
-# this repo, so a hand-written file at any of these paths stays untouched.
-for stale in "${HOME}/.config/fish/config.fish" \
+# Orphans from the zsh and Alacritty eras. Removed only if they point into this
+# repo, so a hand-written file at any of these paths stays untouched.
+for stale in "${HOME}/.zshrc" \
+             "${HOME}/.zprofile" \
              "${HOME}/.config/alacritty/alacritty.toml" \
              "${HOME}/.config/atuin/config.toml" \
              "${HOME}/.config/ghostty/themes"; do
@@ -141,6 +144,7 @@ for stale in "${HOME}/.config/fish/config.fish" \
     echo "  removed stale symlink ${stale}"
   fi
 done
+rm -f "${HOME}/.cache/zsh/init.zsh"
 
 # Dangling links into a /nix/store that no longer exists. ~/.zshenv is the one
 # that matters: zsh reads it before anything else.
@@ -171,18 +175,22 @@ defaults write com.apple.screencapture type -string "png"
 killall Finder 2>/dev/null || true
 killall SystemUIServer 2>/dev/null || true
 
-# chsh rejects shells missing from /etc/shells. /bin/zsh ships registered on
-# macOS, so the sudo branch is only reached on a machine that stripped it.
-# dscl reads the real login shell, not $SHELL.
-ZSH_BIN="/bin/zsh"
-if ! grep -qx "${ZSH_BIN}" /etc/shells; then
-  echo "Registering ${ZSH_BIN} in /etc/shells (sudo required)..."
-  echo "${ZSH_BIN}" | sudo tee -a /etc/shells >/dev/null
-fi
-LOGIN_SHELL="$(dscl . -read "/Users/${USER}" UserShell 2>/dev/null | awk '{print $2}')"
-if [[ "${LOGIN_SHELL}" != "${ZSH_BIN}" ]]; then
-  echo "Changing login shell to ${ZSH_BIN} (chsh will prompt for your password)..."
-  chsh -s "${ZSH_BIN}"
+# chsh rejects shells missing from /etc/shells, and a login shell that isn't
+# there locks you out of new terminals — hence the existence check before the
+# chsh. dscl reads the real login shell, not $SHELL.
+FISH_BIN="$(command -v fish || true)"
+if [[ -z "${FISH_BIN}" ]]; then
+  echo "fish not found; leaving the login shell alone. Run './install.sh' again after 'brew bundle'."
+else
+  if ! grep -qx "${FISH_BIN}" /etc/shells; then
+    echo "Registering ${FISH_BIN} in /etc/shells (sudo required)..."
+    echo "${FISH_BIN}" | sudo tee -a /etc/shells >/dev/null
+  fi
+  LOGIN_SHELL="$(dscl . -read "/Users/${USER}" UserShell 2>/dev/null | awk '{print $2}')"
+  if [[ "${LOGIN_SHELL}" != "${FISH_BIN}" ]]; then
+    echo "Changing login shell to ${FISH_BIN} (chsh will prompt for your password)..."
+    chsh -s "${FISH_BIN}"
+  fi
 fi
 
 echo "macOS standalone setup complete. Happy Coding 🧉"

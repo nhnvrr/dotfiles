@@ -29,8 +29,8 @@ adjust-icon-height = 15%
 cursor-style = bar
 cursor-style-blink = true
 
-command = /bin/zsh --login
-shell-integration = zsh
+command = /opt/homebrew/bin/fish --login
+shell-integration = fish
 shell-integration-features = cursor,sudo,title
 
 macos-option-as-alt = true

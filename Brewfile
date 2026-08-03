@@ -1,6 +1,5 @@
+brew "fish"
 brew "starship"
-brew "zsh-autosuggestions"
-brew "zsh-syntax-highlighting"
 
 brew "tmux"
 brew "neovim"
