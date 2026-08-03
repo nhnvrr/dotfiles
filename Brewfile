@@ -3,6 +3,10 @@ brew "starship"
 
 brew "tmux"
 brew "neovim"
+# vtsls backs nvim's gd on TypeScript; tree-sitter-cli is what nvim-treesitter's
+# main branch shells out to when a parser is missing.
+brew "vtsls"
+brew "tree-sitter-cli"
 
 brew "fzf"
 brew "fd"

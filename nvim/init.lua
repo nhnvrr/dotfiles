@@ -20,6 +20,8 @@ vim.pack.add({
   "https://github.com/nvim-telescope/telescope.nvim",
   "https://github.com/nvim-telescope/telescope-fzf-native.nvim",
   "https://github.com/nvim-lualine/lualine.nvim",
+  { src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
+  { src = "https://github.com/nvim-treesitter/nvim-treesitter-textobjects", version = "main" },
 })
 
 -- Emptied, not toggled: the theme interpolates this into every group it builds,
@@ -190,6 +192,106 @@ vim.keymap.set("n", "<leader>fg", builtin.git_files, { desc = "Git files" })
 vim.keymap.set("n", "<leader>fc", builtin.grep_string, { desc = "Grep word under cursor" })
 vim.keymap.set("n", "<leader>fk", builtin.keymaps, { desc = "Keymaps" })
 vim.keymap.set("n", "<leader>h", builtin.help_tags, { desc = "Help tags" })
+
+require("nvim-treesitter").setup({})
+require("nvim-treesitter-textobjects").setup({})
+
+-- gitcommit, git_rebase and diff are here because that is what nvim is opened
+-- for most of the time. install() costs a few ms even with nothing to do, and
+-- every startup pays it, so it only runs against what is actually missing.
+do
+  local have = {}
+  for _, parser in ipairs(require("nvim-treesitter").get_installed()) do
+    have[parser] = true
+  end
+  local missing = vim.tbl_filter(function(parser) return not have[parser] end, {
+    "bash", "diff", "git_rebase", "gitcommit", "go", "javascript", "json",
+    "lua", "markdown", "ruby", "tsx", "typescript", "yaml",
+  })
+  if #missing > 0 then
+    require("nvim-treesitter").install(missing)
+  end
+end
+
+vim.api.nvim_create_autocmd("FileType", {
+  callback = function(args)
+    -- Errors on a filetype whose parser is missing or still installing, which
+    -- is every filetype on a cold checkout.
+    if pcall(vim.treesitter.start, args.buf) then
+      vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+    end
+  end,
+})
+
+-- Required inside the callbacks, not up here: nothing about these two modules
+-- is needed until a motion is actually pressed.
+local function jump(dir, obj, builtin)
+  return function()
+    -- ]c and [c already mean next/previous change in diff mode, and a rebase
+    -- or a mergetool is exactly when nvim is open.
+    if builtin and vim.wo.diff then
+      return vim.cmd.normal({ builtin, bang = true })
+    end
+    local move = require("nvim-treesitter-textobjects.move")
+    move[dir == "next" and "goto_next_start" or "goto_previous_start"](obj, "textobjects")
+  end
+end
+
+for key, spec in pairs({ f = { "@function.outer" }, c = { "@class.outer", "c" } }) do
+  vim.keymap.set({ "n", "x", "o" }, "]" .. key, jump("next", spec[1], spec[2] and "]c"),
+    { desc = "Next " .. (key == "f" and "function" or "class") })
+  vim.keymap.set({ "n", "x", "o" }, "[" .. key, jump("prev", spec[1], spec[2] and "[c"),
+    { desc = "Previous " .. (key == "f" and "function" or "class") })
+end
+
+for lhs, obj in pairs({
+  af = "@function.outer", ["if"] = "@function.inner",
+  ac = "@class.outer", ic = "@class.inner",
+}) do
+  vim.keymap.set({ "x", "o" }, lhs, function()
+    require("nvim-treesitter-textobjects.select").select_textobject(obj, "textobjects")
+  end, { desc = "Select " .. obj })
+end
+
+-- Written out rather than pulling nvim-lspconfig, which for two servers is a
+-- whole repo to carry two tables nvim already knows how to consume.
+vim.lsp.config("vtsls", {
+  cmd = { "vtsls", "--stdio" },
+  filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact" },
+  -- Nested list is a priority group: the tsconfig that owns the file wins over
+  -- the repo root, which is what keeps a pnpm monorepo from resolving to one
+  -- giant project.
+  root_markers = { { "tsconfig.json", "jsconfig.json" }, "package.json", ".git" },
+})
+
+vim.lsp.config("gopls", {
+  cmd = { "gopls" },
+  filetypes = { "go", "gomod", "gowork" },
+  root_markers = { { "go.work", "go.mod" }, ".git" },
+})
+
+vim.lsp.enable({ "vtsls", "gopls" })
+
+-- grr, gri, grn, gra and grt are already Neovim's own defaults; only these two
+-- are missing.
+vim.api.nvim_create_autocmd("LspAttach", {
+  callback = function(args)
+    vim.keymap.set("n", "gd", vim.lsp.buf.definition,
+      { buffer = args.buf, desc = "Go to definition" })
+
+    -- Declaration is a C/C++ header idea. tsserver reports declarationProvider
+    -- false and gopls has nothing else to point at either, so unconditionally
+    -- mapping it would leave gD dead on both servers here.
+    vim.keymap.set("n", "gD", function()
+      for _, client in ipairs(vim.lsp.get_clients({ bufnr = 0 })) do
+        if client:supports_method("textDocument/declaration") then
+          return vim.lsp.buf.declaration()
+        end
+      end
+      vim.lsp.buf.definition()
+    end, { buffer = args.buf, desc = "Go to declaration (definition if unsupported)" })
+  end,
+})
 
 local lualine_theme = require("lualine.themes.gruvbox_dark")
 for _, mode in pairs(lualine_theme) do
