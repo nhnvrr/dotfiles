@@ -114,6 +114,7 @@ echo "Linking config files..."
 # by name — mise's vendor snippet included — and config.fish only afterwards.
 link_file "${CONFIG_DIR}/fish/config.fish"       "${HOME}/.config/fish/config.fish"
 link_file "${CONFIG_DIR}/fish/conf.d/00-env.fish" "${HOME}/.config/fish/conf.d/00-env.fish"
+link_file "${CONFIG_DIR}/fish/completions/aws.fish" "${HOME}/.config/fish/completions/aws.fish"
 link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
 link_file "${CONFIG_DIR}/ghostty/config" "${HOME}/.config/ghostty/config"
 link_file "${CONFIG_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"

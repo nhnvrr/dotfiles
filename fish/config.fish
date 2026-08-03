@@ -206,10 +206,6 @@ if status is-interactive
     # block: apps that set their own override it, but Claude Code inherits this.
     set -g fish_cursor_external line blink
 
-    if command -q aws_completer
-        complete -c aws -f -a "(env COMP_LINE=(commandline -pc) aws_completer | string trim)"
-    end
-
     # tmux catches the bell: monitor-bell on turns the status bar orange.
     set -g _notify_threshold 10000
     set -g _notify_ignore nvim less man ssh tmux claude fzf watch top tail dev work side
