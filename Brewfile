@@ -63,6 +63,7 @@ cask "notion"
 cask "obsidian"
 
 cask "slack"
+cask "gather"
 cask "whatsapp"
 cask "telegram"
 
