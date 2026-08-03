@@ -43,14 +43,23 @@ function __tx --argument-names name --description 'Attach or create a fixed tmux
 end
 
 # One-time bootstrap for the work account:
-#   CLAUDE_CONFIG_DIR=~/.claude-work claude
+#   CLAUDE_CONFIG_DIR=~/.claude-work claude   (then /login)
 function claude --description 'Claude Code, config picked by tmux session'
-    # Quoted through a variable: outside tmux the substitution is empty and
-    # `test = work` is a syntax error, not a false.
-    set -l session (tmux display-message -p '#S' 2>/dev/null)
-    set -lx CLAUDE_CONFIG_DIR $HOME/.claude
-    test "$session" = work; and set -lx CLAUDE_CONFIG_DIR $HOME/.claude-work
-    command claude $argv
+    # display-message answers outside tmux too, falling back to the last active
+    # session, so $TMUX is what decides — not the exit status.
+    set -l session
+    test -n "$TMUX"; and set session (tmux display-message -p '#S' 2>/dev/null)
+
+    # Personal leaves the variable unset on purpose: ~/.claude is the default
+    # anyway, and Claude only hashes the config dir into the Keychain item name
+    # when the variable is set, so exporting it forks the login off every
+    # `claude` that does not come from fish (VS Code, scripts).
+    # Inline prefix, not `set -lx`: that would be scoped to the if block.
+    if test "$session" = work
+        CLAUDE_CONFIG_DIR=$HOME/.claude-work command claude $argv
+    else
+        command claude $argv
+    end
 end
 
 # mise is NOT activated here: /opt/homebrew/share/fish/vendor_conf.d/
