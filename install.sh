@@ -110,8 +110,6 @@ echo "Preparing Go workspace..."
 mkdir -p "${HOME}/Develop/go/bin"
 
 echo "Linking config files..."
-# conf.d/00-env.fish, not config.fish, holds $PATH: fish sources conf.d sorted
-# by name — mise's vendor snippet included — and config.fish only afterwards.
 link_file "${CONFIG_DIR}/fish/config.fish"       "${HOME}/.config/fish/config.fish"
 link_file "${CONFIG_DIR}/fish/conf.d/00-env.fish" "${HOME}/.config/fish/conf.d/00-env.fish"
 link_file "${CONFIG_DIR}/fish/completions/aws.fish" "${HOME}/.config/fish/completions/aws.fish"
@@ -121,11 +119,10 @@ link_file "${CONFIG_DIR}/eza/theme.yml" "${HOME}/.config/eza/theme.yml"
 link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.tmux.conf"
 link_file "${CONFIG_DIR}/nvim/init.lua"   "${HOME}/.config/nvim/init.lua"
 link_file "${CONFIG_DIR}/hammerspoon/init.lua" "${HOME}/.hammerspoon/init.lua"
-# psqlrc writes history to ~/.local/state/psql/history-<db>. psql won't create
-# that directory: without it, history fails silently.
+# psql won't create this directory and history fails silently without it.
 mkdir -p "${HOME}/.local/state/psql"
 link_file "${CONFIG_DIR}/psql/psqlrc" "${HOME}/.psqlrc"
-# Same trap: pgcli won't create the directory its history and log live in.
+# Same trap.
 mkdir -p "${HOME}/.local/state/pgcli"
 link_file "${CONFIG_DIR}/pgcli/config" "${HOME}/.config/pgcli/config"
 if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
@@ -146,8 +143,6 @@ for stale in "${HOME}/.zshrc" \
 done
 rm -f "${HOME}/.cache/zsh/init.zsh"
 
-# Dangling links into a /nix/store that no longer exists. ~/.zshenv is the one
-# that matters: zsh reads it before anything else.
 for broken in "${HOME}/.zshenv" "${HOME}/.bashrc" "${HOME}/.bash_profile" "${HOME}/.profile"; do
   if [[ -L "${broken}" && ! -e "${broken}" ]]; then
     rm -f "${broken}"
@@ -167,8 +162,6 @@ defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
 defaults write com.apple.finder AppleShowAllExtensions -bool true
 defaults write com.apple.finder AppleShowAllFiles -bool true
 defaults write NSGlobalDomain AppleShowAllExtensions -bool true
-# The Dock is deliberately left alone: it's a visual preference, set it from
-# System Settings. This script only touches what affects working.
 mkdir -p "${HOME}/Screenshots"
 defaults write com.apple.screencapture location "${HOME}/Screenshots"
 defaults write com.apple.screencapture type -string "png"

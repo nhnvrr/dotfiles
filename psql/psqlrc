@@ -4,15 +4,12 @@
 
 \set QUIET 1
 
--- The host is yellow: it's the field to check before typing anything
--- destructive. Without this a production RDS looks like localhost.
 --   %n user · %m host · %/ database · %# '=' normal, '#' if superuser
 \set PROMPT1 '%[%033[36m%]%n%[%033[0m%]@%[%033[1;33m%]%m%[%033[0m%]/%[%033[32m%]%/%[%033[0m%]%[%033[1m%]%#%[%033[0m%] '
 \set PROMPT2 '%[%033[2m%]...%[%033[0m%]%# '
 
 \timing on
 
--- Without this, NULL and an empty string look identical.
 \pset null 'Ø'
 
 \pset linestyle unicode
@@ -32,7 +29,6 @@
 
 \set COMP_KEYWORD_CASE upper
 
--- A typo aborts only that statement, not the whole transaction.
 \set ON_ERROR_ROLLBACK interactive
 
 \set VERBOSITY verbose
@@ -40,19 +36,14 @@
 -- Shortcuts: invoked as :name, no backslash or semicolon. Interactive sessions
 -- or stdin only — `psql -c ':conns'` doesn't interpolate variables.
 
--- :conns — what's running right now, slowest first.
 \set conns 'SELECT pid, usename, application_name, client_addr, state, wait_event_type, now() - query_start AS duration, left(query, 60) AS query FROM pg_stat_activity WHERE pid <> pg_backend_pid() AND state <> ''idle'' ORDER BY duration DESC NULLS LAST;'
 
--- :blocking — who is blocking whom.
 \set blocking 'SELECT blocked.pid AS blocked_pid, blocked.query AS blocked_query, blocking.pid AS blocking_pid, blocking.query AS blocking_query FROM pg_stat_activity blocked JOIN pg_stat_activity blocking ON blocking.pid = ANY(pg_blocking_pids(blocked.pid)) WHERE cardinality(pg_blocking_pids(blocked.pid)) > 0;'
 
--- :locks — granted and pending locks.
 \set locks 'SELECT l.pid, l.locktype, l.mode, l.granted, c.relname, left(a.query, 50) AS query FROM pg_locks l LEFT JOIN pg_class c ON c.oid = l.relation LEFT JOIN pg_stat_activity a ON a.pid = l.pid WHERE l.pid <> pg_backend_pid() ORDER BY l.granted, l.pid;'
 
--- :sizes — tables by size, indexes included.
 \set sizes 'SELECT schemaname AS schema, relname AS table, pg_size_pretty(pg_total_relation_size(relid)) AS total, pg_size_pretty(pg_relation_size(relid)) AS data, pg_size_pretty(pg_indexes_size(relid)) AS indexes FROM pg_catalog.pg_statio_user_tables ORDER BY pg_total_relation_size(relid) DESC LIMIT 25;'
 
--- :whoami — what you're connected to.
 \set whoami 'SELECT current_user AS user, current_database() AS database, inet_server_addr() AS host, version() AS version;'
 
 \unset QUIET

@@ -1,5 +1,4 @@
-# Environment and $PATH live in conf.d/00-env.fish, which fish sources before
-# this file and — the part that matters — before mise's vendor snippet.
+# Environment and $PATH live in conf.d/00-env.fish, sourced before this file.
 
 # Deliberately no ~/.curlrc: that file is read by EVERY curl invocation,
 # including Homebrew's installer and any third-party script.
@@ -42,18 +41,15 @@ function __tx --argument-names name --description 'Attach or create a fixed tmux
     end
 end
 
-# One-time bootstrap for the work account:
-#   CLAUDE_CONFIG_DIR=~/.claude-work claude   (then /login)
 function claude --description 'Claude Code, config picked by tmux session'
     # display-message answers outside tmux too, falling back to the last active
     # session, so $TMUX is what decides — not the exit status.
     set -l session
     test -n "$TMUX"; and set session (tmux display-message -p '#S' 2>/dev/null)
 
-    # Personal leaves the variable unset on purpose: ~/.claude is the default
-    # anyway, and Claude only hashes the config dir into the Keychain item name
-    # when the variable is set, so exporting it forks the login off every
-    # `claude` that does not come from fish (VS Code, scripts).
+    # Personal leaves it unset on purpose: Claude hashes the config dir into the
+    # Keychain item name only when the variable is set, so exporting it forks
+    # the login off every `claude` that does not come from fish.
     # Inline prefix, not `set -lx`: that would be scoped to the if block.
     if test "$session" = work
         CLAUDE_CONFIG_DIR=$HOME/.claude-work command claude $argv
@@ -62,10 +58,8 @@ function claude --description 'Claude Code, config picked by tmux session'
     end
 end
 
-# mise is NOT activated here: /opt/homebrew/share/fish/vendor_conf.d/
-# mise-activate.fish already does it and conf.d runs before this file.
-# Activating twice costs ~20ms per shell. To disable the vendor one:
-# MISE_FISH_AUTO_ACTIVATE=0.
+# mise is NOT activated here: Homebrew's vendor_conf.d/mise-activate.fish
+# already does it. To disable the vendor one: MISE_FISH_AUTO_ACTIVATE=0.
 
 if status is-interactive
     set -g fish_greeting
@@ -73,18 +67,14 @@ if status is-interactive
     # Frees Ctrl-S/Ctrl-Q, which the terminal was swallowing.
     stty -ixon 2>/dev/null
 
-    # Always explicit: ~/.aws/config has no [default] profile, so without this
-    # every aws command outside the work session fails with NoCredentials.
-    # Interactive only, so scripts and subshells don't inherit it.
+    # ~/.aws/config has no [default] profile: without this every aws command
+    # outside the work session fails with NoCredentials.
     set -gx AWS_PROFILE personal
     if test -n "$TMUX"
         set -l session (tmux display-message -p '#S' 2>/dev/null)
         test "$session" = work; and set -gx AWS_PROFILE work
     end
 
-    # abbr, not alias: expands on screen when you hit space, so you see the real
-    # command before running it and history stores the expanded form. Only in
-    # command position, so `echo gd` stays literal.
     abbr -a gc 'git commit -m'
     abbr -a gco 'git checkout'
     abbr -a ga 'git add'
@@ -108,8 +98,6 @@ if status is-interactive
         alias lt 'eza --icons --group-directories-first --tree --level=2'
     end
 
-    # ansi: bat resolves colours through the terminal palette, so previews
-    # follow the terminal profile instead of pinning their own.
     set -gx BAT_THEME ansi
 
     set -gx FZF_DEFAULT_COMMAND 'fd --type f --hidden --follow --exclude .git'
@@ -117,7 +105,6 @@ if status is-interactive
     set -gx FZF_ALT_C_COMMAND 'fd --type d --hidden --follow --exclude .git'
 
     # Colours by ANSI name, not hex: the terminal profile is the single source.
-    # Ctrl-/ toggles preview, Ctrl-y copies the selection to the clipboard.
     set -gx FZF_DEFAULT_OPTS '
       --height 40% --layout=reverse --border=rounded
       --bind="ctrl-/:toggle-preview,ctrl-y:execute-silent(echo {} | pbcopy)+abort"
@@ -127,10 +114,8 @@ if status is-interactive
     set -gx FZF_ALT_C_OPTS "--preview 'ls -la {} | head -100'"
     set -gx FZF_CTRL_R_OPTS '--preview "echo {}" --preview-window=down:3:wrap'
 
-    # 3 forks per shell, and every tmux pane opens one. Rebuilt when this file
-    # or any Homebrew binary is newer. mise stays out on purpose: its output
-    # interpolates the current $PATH, so a cached copy would pin one shell's
-    # PATH onto every later shell.
+    # mise stays out on purpose: its output interpolates the current $PATH, so a
+    # cached copy would pin one shell's PATH onto every later shell.
     set -l init_cache $HOME/.cache/fish/init.fish
     if not test -s $init_cache
         or test (status filename) -nt $init_cache
@@ -154,10 +139,8 @@ if status is-interactive
 
     enable_transience
 
-    # ↓ opens fzf where the history runs out: history-search-forward has
-    # nothing left to find there. fish does not leave search mode at the
-    # bottom, it restores the line you had before searching — so ↑ has to
-    # record that line for ↓ to recognise it.
+    # fish does not leave search mode at the bottom, it restores the line you
+    # had before searching — so ↑ has to record that line for ↓ to recognise it.
     function _up_or_search_origin --description 'up-or-search, recording the pre-search line'
         commandline --search-mode; or set -g _history_origin "$(commandline)"
         up-or-search
@@ -185,9 +168,6 @@ if status is-interactive
     function fish_user_key_bindings
         functions -q fzf_key_bindings; and fzf_key_bindings
 
-        # Ctrl-P/N: prefix history search. Costs Ctrl-N its
-        # accept-autosuggestion, which stays on → or Ctrl-F.
-        # Not visual mode: there ↓ extends the selection.
         # Ctrl-R has to be rebound after fzf_key_bindings, which claims it.
         for mode in insert default
             bind -M $mode ctrl-p _up_or_search_origin
@@ -199,10 +179,8 @@ if status is-interactive
         end
     end
 
-    # Hybrid: emacs defaults plus vi mode on Esc. The other direction (emacs
-    # bindings with Esc bound to vi mode) needs a long escape timeout, which
-    # delays every Alt-<key> too — the terminal sends those as ESC+key with
-    # Terminal.app's "Use Option as Meta key".
+    # The other direction needs a long escape timeout, which delays every
+    # Alt-<key> too — the terminal sends those as ESC+key.
     set -g fish_key_bindings fish_hybrid_key_bindings
 
     set -g fish_cursor_default block
@@ -210,8 +188,6 @@ if status is-interactive
     set -g fish_cursor_replace_one underscore
     set -g fish_cursor_replace underscore
     set -g fish_cursor_visual block
-    # external is the cursor left while an external command runs. Beam, not
-    # block: apps that set their own override it, but Claude Code inherits this.
     set -g fish_cursor_external line blink
 
     # tmux catches the bell: monitor-bell flags the window in the status bar.
@@ -227,16 +203,12 @@ if status is-interactive
 
     set -g _docker_default_contexts default desktop-linux
 
-    # Feeds starship.toml's [env_var.STARSHIP_DOCKER_CTX] and
-    # [env_var.STARSHIP_PNPM]. Runs before fish_prompt, so starship sees the
-    # values in the same prompt. Builtins only — no forks, and nothing that can
-    # clobber the $status the exit-code module reads.
+    # Builtins only: no forks, and nothing that can clobber the $status the
+    # exit-code module reads — hence the last_status dance below.
     function _starship_env --on-event fish_prompt --description 'Prompt env vars starship reads'
         set -l last_status $status
 
         # $DOCKER_CONTEXT wins over the file, which is docker's own precedence.
-        # Reading the file is 69us; `docker context inspect` is 126ms of Go CLI
-        # startup to print something already on disk.
         set -l ctx $DOCKER_CONTEXT
         if test -z "$ctx"; and test -r $HOME/.docker/config.json
             set ctx (string match -rg '"currentContext"\s*:\s*"([^"]+)"' <$HOME/.docker/config.json)

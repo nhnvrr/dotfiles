@@ -3,7 +3,6 @@
 
 [main]
 
-# psql parity: Enter runs the statement only when it ends in ';'.
 multi_line = True
 
 vi = True
@@ -12,18 +11,11 @@ less_chatty = True
 
 syntax_style = solarized-dark
 
-# Matches \pset null 'Ø' in psql/psqlrc.
 null_string = 'Ø'
-
-# Matches \pset linestyle unicode + \pset border 2 in psql/psqlrc. pgcli's default is
-# 'psql', which draws ASCII borders.
 table_format = psql_unicode
-
-# drop/delete/update/truncate/alter already prompt by default; this also refuses
-# to run them outside a transaction, so a bad WHERE stays rollback-able.
 destructive_statements_require_transaction = True
 
-# Credentials come from ~/.pgpass, not from the macOS Keychain.
+# Credentials come from ~/.pgpass, not the macOS Keychain.
 keyring = False
 
 # install.sh creates ~/.local/state/pgcli/ — pgcli won't, and without it history
@@ -32,14 +24,10 @@ history_file = ~/.local/state/pgcli/history
 log_file = ~/.local/state/pgcli/log
 log_level = ERROR
 
-# Mirrors PROMPT1 in psql/psqlrc: the host is yellow, it's the field to check
-# before typing anything destructive.
 #   \u user · \h host · \d database · \# '@' if superuser, '>' otherwise
 prompt = '\x1b[36m\u\x1b[0m@\x1b[1;33m\h\x1b[0m/\x1b[32m\d\x1b[0m\# '
 
-# By ANSI slot, so the terminal profile drives these like it drives starship/eza/bat.
-# Do not reach for 'ansidefault' — it crashes pgcli. main.py feeds this whole dict
-# through style_factory_output into a pygments Style, and pygments has no such color.
+# Do not reach for 'ansidefault' — pygments has no such colour and pgcli crashes.
 [colors]
 completion-menu.completion.current      = 'bg:ansibrightblack ansiwhite'
 completion-menu.completion              = 'bg:ansiblack ansiwhite'
@@ -64,9 +52,8 @@ bottom-toolbar.transaction.failed = 'bg:ansiblack ansired'
 output.header = 'ansiyellow'
 output.null   = 'ansibrightblack'
 
-# The psql/psqlrc shortcuts, ported. Run with `\n <name>`, list them with `\n`.
-# Each value MUST stay double-quoted: configobj splits unquoted values on commas
-# and every one of these is a column list.
+# Run with `\n <name>`, list them with `\n`. Each value MUST stay double-quoted:
+# configobj splits unquoted values on commas and these are all column lists.
 [named queries]
 
 conns = "SELECT pid, usename, application_name, client_addr, state, wait_event_type, now() - query_start AS duration, left(query, 60) AS query FROM pg_stat_activity WHERE pid <> pg_backend_pid() AND state <> 'idle' ORDER BY duration DESC NULLS LAST"

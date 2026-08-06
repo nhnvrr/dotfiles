@@ -28,12 +28,8 @@ vim.pack.add({
 -- so it has to be set before the colorscheme loads.
 vim.g.gruvbox_bold = 0
 
--- Vimscript, so there is no setup() and no palette table. The overrides read
--- gruvbox's own Gruvbox* groups instead of hardcoding hex, and run on
--- ColorScheme so they survive a reload. It also has no transparency option:
--- clearing the backgrounds by hand is what keeps the terminal background
--- showing through, float included, so telescope and neo-tree don't draw a
--- lighter rectangle.
+-- On ColorScheme so a reload doesn't undo it. gruvbox has no transparency
+-- option: clearing the backgrounds by hand is what lets the terminal through.
 vim.api.nvim_create_autocmd("ColorScheme", {
   pattern = "gruvbox",
   callback = function()
@@ -47,9 +43,7 @@ vim.api.nvim_create_autocmd("ColorScheme", {
       set(0, group, { fg = fg(group), bg = "NONE" })
     end
 
-    -- gruvbox_bold=0 covers everything the theme draws; these three are
-    -- Neovim's own defaults, which it never touches. @markup.strong keeps its
-    -- bold because there the bold is the meaning.
+    -- Neovim's own defaults, which gruvbox_bold=0 never touches.
     for _, group in ipairs({ "PmenuMatch", "PmenuMatchSel", "WinBar" }) do
       local h = vim.api.nvim_get_hl(0, { name = group, link = false })
       h.bold, h.cterm = nil, nil
@@ -197,9 +191,8 @@ vim.keymap.set("n", "<leader>h", builtin.help_tags, { desc = "Help tags" })
 require("nvim-treesitter").setup({})
 require("nvim-treesitter-textobjects").setup({})
 
--- gitcommit, git_rebase and diff are here because that is what nvim is opened
--- for most of the time. install() costs a few ms even with nothing to do, and
--- every startup pays it, so it only runs against what is actually missing.
+-- install() costs a few ms even with nothing to do, and every startup pays it,
+-- so it only runs against what is actually missing.
 do
   local have = {}
   for _, parser in ipairs(require("nvim-treesitter").get_installed()) do
@@ -224,8 +217,6 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
--- Required inside the callbacks, not up here: nothing about these two modules
--- is needed until a motion is actually pressed.
 local function jump(dir, obj, builtin)
   return function()
     -- ]c and [c already mean next/previous change in diff mode, and a rebase
@@ -254,8 +245,6 @@ for lhs, obj in pairs({
   end, { desc = "Select " .. obj })
 end
 
--- Written out rather than pulling nvim-lspconfig, which for two servers is a
--- whole repo to carry two tables nvim already knows how to consume.
 vim.lsp.config("vtsls", {
   cmd = { "vtsls", "--stdio" },
   filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact" },
