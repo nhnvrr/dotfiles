@@ -11,7 +11,7 @@ if not hs.accessibilityState(true) then
 end
 
 local APPS = {
-  brave     = "com.brave.Browser",
+  chrome    = "com.google.Chrome",
   terminal  = "com.apple.Terminal",
   vscode    = "com.microsoft.VSCode",
   tableplus = "com.tinyapp.TablePlus",
@@ -234,9 +234,9 @@ hs.hotkey.bind({ "cmd", "alt" }, "0", function()
   end
 end)
 
-hs.hotkey.bind({ "cmd", "alt" }, "1", function() sideBySide(APPS.vscode, APPS.brave, 0.7) end)
-hs.hotkey.bind({ "cmd", "alt" }, "2", function() sideBySide(APPS.terminal, APPS.brave, 0.7) end)
-hs.hotkey.bind({ "cmd", "alt" }, "3", function() sideBySide(APPS.tableplus, APPS.brave, 0.7) end)
+hs.hotkey.bind({ "cmd", "alt" }, "1", function() sideBySide(APPS.vscode, APPS.chrome, 0.7) end)
+hs.hotkey.bind({ "cmd", "alt" }, "2", function() sideBySide(APPS.terminal, APPS.chrome, 0.7) end)
+hs.hotkey.bind({ "cmd", "alt" }, "3", function() sideBySide(APPS.tableplus, APPS.chrome, 0.7) end)
 -- Global on purpose, so it costs cmd+` its cycle-windows in every other app.
 hs.hotkey.bind({ "cmd" }, "`", function()
   local app = hs.application.get(APPS.terminal)

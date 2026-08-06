@@ -93,7 +93,6 @@ if status is-interactive
 
     alias code 'code --new-window'
     alias e code
-    alias vault 'cd "$HOME/Library/Mobile Documents/iCloud~md~obsidian/Documents"'
     alias dev '__tx dev'
     alias work '__tx work'
     alias side '__tx side'

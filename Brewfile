@@ -41,10 +41,9 @@ cask "font-monaspice-nerd-font"
 
 cask "visual-studio-code"
 
-cask "raycast"
 cask "hammerspoon"
 
-cask "brave-browser"
+cask "google-chrome"
 
 cask "docker-desktop"
 cask "tableplus"
@@ -63,7 +62,6 @@ cask "codex"
 cask "cap"
 cask "linear"
 cask "notion"
-cask "obsidian"
 
 cask "slack"
 cask "gather"
