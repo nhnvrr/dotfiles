@@ -214,7 +214,7 @@ if status is-interactive
     # block: apps that set their own override it, but Claude Code inherits this.
     set -g fish_cursor_external line blink
 
-    # tmux catches the bell: monitor-bell on turns the status bar orange.
+    # tmux catches the bell: monitor-bell flags the window in the status bar.
     set -g _notify_threshold 10000
     set -g _notify_ignore nvim less man ssh tmux claude fzf watch top tail dev work side
 
