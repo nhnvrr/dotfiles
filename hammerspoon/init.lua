@@ -74,7 +74,14 @@ local function applyFrame(win, rect, deadline, previous)
 end
 
 local function placeWindow(win, rect)
-  if not win:isFullScreen() then applyFrame(win, rect) return end
+  if not win:isFullScreen() then
+    -- Ya está ahí: ni escribir. El panel derecho es el mismo en los tres
+    -- layouts, así que cambiar de layout no debería tocarlo. Además deja el
+    -- frame limpio para quien lo mida después: no queda escritura en vuelo.
+    if frameMatches(win:frame(), rect) then return end
+    applyFrame(win, rect)
+    return
+  end
   win:setFullScreen(false)
   waitFor(function() return not win:isFullScreen() end,
     function() applyFrame(win, rect) end, 3)
@@ -116,7 +123,8 @@ local function hideAllExcept(keep)
   for _, bid in ipairs(keep) do keepSet[bid] = true end
   for _, app in ipairs(hs.application.runningApplications()) do
     local bid = app:bundleID()
-    if bid and not keepSet[bid] and not NEVER_HIDE[bid] and app:kind() == 1 then
+    if bid and not keepSet[bid] and not NEVER_HIDE[bid] and app:kind() == 1
+       and not app:isHidden() then
       app:hide()
     end
   end
