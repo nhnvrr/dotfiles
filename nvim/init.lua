@@ -31,8 +31,9 @@ vim.g.gruvbox_bold = 0
 -- Vimscript, so there is no setup() and no palette table. The overrides read
 -- gruvbox's own Gruvbox* groups instead of hardcoding hex, and run on
 -- ColorScheme so they survive a reload. It also has no transparency option:
--- clearing the backgrounds by hand is what keeps Ghostty showing through, float
--- included, so telescope and neo-tree don't draw a lighter rectangle.
+-- clearing the backgrounds by hand is what keeps the terminal background
+-- showing through, float included, so telescope and neo-tree don't draw a
+-- lighter rectangle.
 vim.api.nvim_create_autocmd("ColorScheme", {
   pattern = "gruvbox",
   callback = function()

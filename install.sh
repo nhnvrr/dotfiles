@@ -116,7 +116,6 @@ link_file "${CONFIG_DIR}/fish/config.fish"       "${HOME}/.config/fish/config.fi
 link_file "${CONFIG_DIR}/fish/conf.d/00-env.fish" "${HOME}/.config/fish/conf.d/00-env.fish"
 link_file "${CONFIG_DIR}/fish/completions/aws.fish" "${HOME}/.config/fish/completions/aws.fish"
 link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
-link_file "${CONFIG_DIR}/ghostty/config" "${HOME}/.config/ghostty/config"
 link_file "${CONFIG_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"
 link_file "${CONFIG_DIR}/eza/theme.yml" "${HOME}/.config/eza/theme.yml"
 link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.tmux.conf"
@@ -133,13 +132,13 @@ if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
   link_file "${CONFIG_DIR}/gh/config.yml" "${HOME}/.config/gh/config.yml"
 fi
 
-# Orphans from the zsh and Alacritty eras. Removed only if they point into this
-# repo, so a hand-written file at any of these paths stays untouched.
+# Orphans from previous setups. Removed only if they point into this repo, so a
+# hand-written file at any of these paths stays untouched.
 for stale in "${HOME}/.zshrc" \
              "${HOME}/.zprofile" \
              "${HOME}/.config/alacritty/alacritty.toml" \
              "${HOME}/.config/atuin/config.toml" \
-             "${HOME}/.config/ghostty/themes"; do
+             "${HOME}/.config/ghostty/config"; do
   if [[ -L "${stale}" && "$(readlink "${stale}")" == "${CONFIG_DIR}"/* ]]; then
     rm -f "${stale}"
     echo "  removed stale symlink ${stale}"

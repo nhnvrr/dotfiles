@@ -12,7 +12,7 @@ end
 
 local APPS = {
   brave     = "com.brave.Browser",
-  ghostty = "com.mitchellh.ghostty",
+  terminal  = "com.apple.Terminal",
   vscode    = "com.microsoft.VSCode",
   tableplus = "com.tinyapp.TablePlus",
 }
@@ -235,8 +235,18 @@ hs.hotkey.bind({ "cmd", "alt" }, "0", function()
 end)
 
 hs.hotkey.bind({ "cmd", "alt" }, "1", function() sideBySide(APPS.vscode, APPS.brave, 0.7) end)
-hs.hotkey.bind({ "cmd", "alt" }, "2", function() sideBySide(APPS.ghostty, APPS.brave, 0.7) end)
+hs.hotkey.bind({ "cmd", "alt" }, "2", function() sideBySide(APPS.terminal, APPS.brave, 0.7) end)
 hs.hotkey.bind({ "cmd", "alt" }, "3", function() sideBySide(APPS.tableplus, APPS.brave, 0.7) end)
+-- Global on purpose, so it costs cmd+` its cycle-windows in every other app.
+hs.hotkey.bind({ "cmd" }, "`", function()
+  local app = hs.application.get(APPS.terminal)
+  if app and app:isFrontmost() then
+    app:hide()
+  else
+    hs.application.launchOrFocusByBundleID(APPS.terminal)
+  end
+end)
+
 hs.hotkey.bind({ "cmd", "alt" }, "R", rotateLayout)
 hs.hotkey.bind({ "cmd", "alt" }, "F", toggleZoom)
 hs.hotkey.bind({ "cmd", "alt", "ctrl" }, "R", hs.reload)

@@ -110,14 +110,14 @@ if status is-interactive
     end
 
     # ansi: bat resolves colours through the terminal palette, so previews
-    # follow the Ghostty theme instead of pinning their own.
+    # follow the terminal profile instead of pinning their own.
     set -gx BAT_THEME ansi
 
     set -gx FZF_DEFAULT_COMMAND 'fd --type f --hidden --follow --exclude .git'
     set -gx FZF_CTRL_T_COMMAND $FZF_DEFAULT_COMMAND
     set -gx FZF_ALT_C_COMMAND 'fd --type d --hidden --follow --exclude .git'
 
-    # Colours by ANSI name, not hex: the Ghostty theme is the single source.
+    # Colours by ANSI name, not hex: the terminal profile is the single source.
     # Ctrl-/ toggles preview, Ctrl-y copies the selection to the clipboard.
     set -gx FZF_DEFAULT_OPTS '
       --height 40% --layout=reverse --border=rounded
@@ -203,7 +203,7 @@ if status is-interactive
     # Hybrid: emacs defaults plus vi mode on Esc. The other direction (emacs
     # bindings with Esc bound to vi mode) needs a long escape timeout, which
     # delays every Alt-<key> too — the terminal sends those as ESC+key with
-    # macos-option-as-alt.
+    # Terminal.app's "Use Option as Meta key".
     set -g fish_key_bindings fish_hybrid_key_bindings
 
     set -g fish_cursor_default block

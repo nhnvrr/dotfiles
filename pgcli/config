@@ -37,7 +37,7 @@ log_level = ERROR
 #   \u user · \h host · \d database · \# '@' if superuser, '>' otherwise
 prompt = '\x1b[36m\u\x1b[0m@\x1b[1;33m\h\x1b[0m/\x1b[32m\d\x1b[0m\# '
 
-# By ANSI slot, so the Ghostty theme drives these like it drives starship/eza/bat.
+# By ANSI slot, so the terminal profile drives these like it drives starship/eza/bat.
 # Do not reach for 'ansidefault' — it crashes pgcli. main.py feeds this whole dict
 # through style_factory_output into a pygments Style, and pygments has no such color.
 [colors]
