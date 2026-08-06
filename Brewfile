@@ -45,7 +45,7 @@ cask "visual-studio-code"
 cask "raycast"
 cask "hammerspoon"
 
-cask "google-chrome"
+cask "brave-browser"
 
 cask "docker-desktop"
 cask "tableplus"

@@ -11,7 +11,7 @@ if not hs.accessibilityState(true) then
 end
 
 local APPS = {
-  chrome    = "com.google.Chrome",
+  brave     = "com.brave.Browser",
   ghostty = "com.mitchellh.ghostty",
   vscode    = "com.microsoft.VSCode",
   tableplus = "com.tinyapp.TablePlus",
@@ -234,9 +234,9 @@ hs.hotkey.bind({ "cmd", "alt" }, "0", function()
   end
 end)
 
-hs.hotkey.bind({ "cmd", "alt" }, "1", function() sideBySide(APPS.vscode, APPS.chrome, 0.7) end)
-hs.hotkey.bind({ "cmd", "alt" }, "2", function() sideBySide(APPS.ghostty, APPS.chrome, 0.7) end)
-hs.hotkey.bind({ "cmd", "alt" }, "3", function() sideBySide(APPS.tableplus, APPS.chrome, 0.7) end)
+hs.hotkey.bind({ "cmd", "alt" }, "1", function() sideBySide(APPS.vscode, APPS.brave, 0.7) end)
+hs.hotkey.bind({ "cmd", "alt" }, "2", function() sideBySide(APPS.ghostty, APPS.brave, 0.7) end)
+hs.hotkey.bind({ "cmd", "alt" }, "3", function() sideBySide(APPS.tableplus, APPS.brave, 0.7) end)
 hs.hotkey.bind({ "cmd", "alt" }, "R", rotateLayout)
 hs.hotkey.bind({ "cmd", "alt" }, "F", toggleZoom)
 hs.hotkey.bind({ "cmd", "alt", "ctrl" }, "R", hs.reload)
