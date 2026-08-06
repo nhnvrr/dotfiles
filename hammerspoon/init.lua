@@ -75,9 +75,8 @@ end
 
 local function placeWindow(win, rect)
   if not win:isFullScreen() then
-    -- Ya está ahí: ni escribir. El panel derecho es el mismo en los tres
-    -- layouts, así que cambiar de layout no debería tocarlo. Además deja el
-    -- frame limpio para quien lo mida después: no queda escritura en vuelo.
+    -- Skipping the write also keeps the frame readable: sideBySide measures
+    -- this window right after, and a write in flight reads back stale.
     if frameMatches(win:frame(), rect) then return end
     applyFrame(win, rect)
     return
@@ -155,7 +154,6 @@ end
 
 local function sideBySide(left, right, leftW)
   currentLayout = { left = left, right = right, leftW = leftW }
-  hideAllExcept({ left, right })
 
   local narrowRect, _, narrowOnLeft = splitFrames(leftW)
   local narrowApp = narrowOnLeft and left or right
@@ -167,6 +165,10 @@ local function sideBySide(left, right, leftW)
     placeApp(wideApp, w2, function(wideWin)
       local focusWin = narrowOnLeft and narrowWin or wideWin
       focusWin:focus()
+      -- Last, not first. Hiding up front empties the screen and the desktop
+      -- flashes through until the two windows land. It also means a placement
+      -- that times out leaves the old windows up instead of a bare desktop.
+      hideAllExcept({ left, right })
     end)
   end)
 end
