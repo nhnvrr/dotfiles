@@ -104,7 +104,7 @@ if status is-interactive
     set -gx FZF_CTRL_T_COMMAND $FZF_DEFAULT_COMMAND
     set -gx FZF_ALT_C_COMMAND 'fd --type d --hidden --follow --exclude .git'
 
-    # Colours by ANSI name, not hex: the terminal profile is the single source.
+    # Colours by ANSI name, not hex: ghostty/config's palette is the single source.
     set -gx FZF_DEFAULT_OPTS '
       --height 40% --layout=reverse --border=rounded
       --bind="ctrl-/:toggle-preview,ctrl-y:execute-silent(echo {} | pbcopy)+abort"

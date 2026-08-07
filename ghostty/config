@@ -1,0 +1,61 @@
+font-family = MonaspiceAr Nerd Font Mono
+font-size = 18
+# Monaspace ships coding ligatures on; -calt also turns off its texture healing,
+# which reflows glyph widths mid-line and drifts eza's icon columns.
+font-feature = -liga, -dlig, -calt
+adjust-cell-height = 6%
+
+# These sixteen slots are the stack's only source of colour: starship, eza, bat,
+# delta, fzf and pgcli all ask by ANSI name and hardcode no hex anywhere.
+# Slot 8 is read both as text (fzf info/border, starship, bat comments) and as a
+# background (fzf bg+, pgcli selected), so it cannot be tuned for either alone.
+background = #1A1A1A
+foreground = #E0E0E0
+selection-background = #273D4C
+cursor-color = #388732
+
+palette = 0=#0D0D0D
+palette = 1=#B45648
+palette = 2=#6CAA71
+palette = 3=#C4AC62
+palette = 4=#6D96B4
+palette = 5=#BD7BCD
+palette = 6=#7CCBCD
+palette = 7=#DEE5EB
+palette = 8=#6B6B6B
+palette = 9=#DF6C5A
+palette = 10=#79BE7E
+palette = 11=#E5C872
+palette = 12=#67B5ED
+palette = 13=#D389E5
+palette = 14=#84DDE0
+palette = 15=#E5EFF5
+
+cursor-style = bar
+cursor-style-blink = true
+
+# Alt has to reach the shell as ESC+key: fish's hybrid bindings read Alt-<key>,
+# and macOS would otherwise eat it composing ¨ ø ∆.
+macos-option-as-alt = true
+macos-titlebar-style = transparent
+macos-icon = official
+
+window-padding-x = 1
+window-padding-y = 1
+window-padding-balance = true
+# Hammerspoon resizes this window on every cmd+alt+N; the overlay would flash the
+# cell count over the pane each time.
+resize-overlay = never
+# Restored windows land before Hammerspoon's launch watcher sees the app, and it
+# tiles the wrong one.
+window-save-state = never
+
+shell-integration = fish
+shell-integration-features = cursor,sudo,title
+
+confirm-close-surface = false
+copy-on-select = clipboard
+mouse-hide-while-typing = true
+# fish's _notify_long_command hook emits a BEL; this turns it into the dock badge
+# instead of a beep.
+bell-features = no-audio,no-system,attention,title,no-border

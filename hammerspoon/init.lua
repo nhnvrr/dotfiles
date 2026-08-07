@@ -12,7 +12,7 @@ end
 
 local APPS = {
   helium    = "net.imput.helium",
-  terminal  = "com.apple.Terminal",
+  terminal  = "com.mitchellh.ghostty",
   vscode    = "com.microsoft.VSCode",
   tableplus = "com.tinyapp.TablePlus",
 }

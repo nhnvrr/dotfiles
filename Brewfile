@@ -38,6 +38,7 @@ brew "htop"
 brew "fastfetch"
 
 cask "font-monaspice-nerd-font"
+cask "ghostty"
 
 cask "visual-studio-code"
 

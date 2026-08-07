@@ -116,6 +116,7 @@ link_file "${CONFIG_DIR}/fish/completions/aws.fish" "${HOME}/.config/fish/comple
 link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
 link_file "${CONFIG_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"
 link_file "${CONFIG_DIR}/eza/theme.yml" "${HOME}/.config/eza/theme.yml"
+link_file "${CONFIG_DIR}/ghostty/config" "${HOME}/.config/ghostty/config"
 link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.tmux.conf"
 link_file "${CONFIG_DIR}/nvim/init.lua"   "${HOME}/.config/nvim/init.lua"
 link_file "${CONFIG_DIR}/hammerspoon/init.lua" "${HOME}/.hammerspoon/init.lua"
@@ -129,13 +130,21 @@ if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
   link_file "${CONFIG_DIR}/gh/config.yml" "${HOME}/.config/gh/config.yml"
 fi
 
+# Ghostty keeps xterm-ghostty inside its own bundle and points TERMINFO at it,
+# but sudo and ssh drop that variable and leave TERM naming a terminal ncurses
+# cannot find. ~/.terminfo is read without any variable at all.
+GHOSTTY_TERMINFO="/Applications/Ghostty.app/Contents/Resources/terminfo"
+if [[ -d "${GHOSTTY_TERMINFO}" ]]; then
+  mkdir -p "${HOME}/.terminfo"
+  cp -R "${GHOSTTY_TERMINFO}/" "${HOME}/.terminfo/"
+fi
+
 # Orphans from previous setups. Removed only if they point into this repo, so a
 # hand-written file at any of these paths stays untouched.
 for stale in "${HOME}/.zshrc" \
              "${HOME}/.zprofile" \
              "${HOME}/.config/alacritty/alacritty.toml" \
-             "${HOME}/.config/atuin/config.toml" \
-             "${HOME}/.config/ghostty/config"; do
+             "${HOME}/.config/atuin/config.toml"; do
   if [[ -L "${stale}" && "$(readlink "${stale}")" == "${CONFIG_DIR}"/* ]]; then
     rm -f "${stale}"
     echo "  removed stale symlink ${stale}"
