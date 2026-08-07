@@ -11,7 +11,7 @@ if not hs.accessibilityState(true) then
 end
 
 local APPS = {
-  chrome    = "com.google.Chrome",
+  helium    = "net.imput.helium",
   terminal  = "com.apple.Terminal",
   vscode    = "com.microsoft.VSCode",
   tableplus = "com.tinyapp.TablePlus",
@@ -75,8 +75,7 @@ end
 
 local function placeWindow(win, rect)
   if not win:isFullScreen() then
-    -- Skipping the write also keeps the frame readable: sideBySide measures
-    -- this window right after, and a write in flight reads back stale.
+    -- Load-bearing: swapping the left pane must not rewrite the right one.
     if frameMatches(win:frame(), rect) then return end
     applyFrame(win, rect)
     return
@@ -112,86 +111,58 @@ local function placeApp(bundleID, rect, onPlaced)
   hs.timer.doAfter(9, function() claimed[bundleID] = nil end)
 end
 
-local NEVER_HIDE = {
-  ["com.apple.finder"] = true,
-  ["org.hammerspoon.Hammerspoon"] = true,
-}
+local RIGHT_PANE = APPS.helium
+local RIGHT_RATIO = 0.3
 
-local function hideAllExcept(keep)
-  local keepSet = {}
-  for _, bid in ipairs(keep) do keepSet[bid] = true end
-  for _, app in ipairs(hs.application.runningApplications()) do
-    local bid = app:bundleID()
-    if bid and not keepSet[bid] and not NEVER_HIDE[bid] and app:kind() == 1
-       and not app:isHidden() then
-      app:hide()
-    end
-  end
-end
-
-local currentLayout = nil
-
-local function splitFrames(leftW, narrowActualW)
+-- The width test is not decoration: a full-screen window is also flush right
+-- and full height, and taking it for the pane leaves the left one a negative
+-- width. Not an equality test either — Chrome lands on its own minimum, wider
+-- than the nominal ratio.
+local function rightPaneIsPlaced(win)
   local f = hs.screen.mainScreen():frame()
-  local narrowOnLeft = leftW < 0.5
-  local ratio = narrowOnLeft and leftW or (1 - leftW)
-  local narrowW = narrowActualW or ((f.w - GAP) * ratio - GAP)
-  local wideW = f.w - narrowW - GAP * 2
-  local y, h = f.y + GAP / 2, f.h - GAP
+  local r = win:frame()
+  return math.abs((r.x + r.w) - (f.x + f.w - GAP / 2)) < 4
+     and math.abs(r.h - (f.h - GAP)) < 4
+     and r.w < f.w / 2
+end
 
-  local narrowX, wideX
-  if narrowOnLeft then
-    narrowX = f.x + GAP / 2
-    wideX = narrowX + narrowW + GAP
-  else
-    narrowX = f.x + f.w - GAP / 2 - narrowW
-    wideX = f.x + GAP / 2
+-- Flush right, full height, at whatever width it actually took: Chrome has a
+-- minimum width and refuses the nominal ratio. Tested on the right edge rather
+-- than the whole rect, so that refusal doesn't read as "not placed" forever.
+local function withRightPane(cb)
+  local app = hs.application.get(RIGHT_PANE)
+  local win = app and not app:isHidden() and windowOf(app) or nil
+  if win and rightPaneIsPlaced(win) then
+    win:raise()
+    cb(win:frame())
+    return
   end
-  return hs.geometry.rect(narrowX, y, narrowW, h),
-         hs.geometry.rect(wideX, y, wideW, h),
-         narrowOnLeft
-end
 
-local function sideBySide(left, right, leftW)
-  currentLayout = { left = left, right = right, leftW = leftW }
-
-  local narrowRect, _, narrowOnLeft = splitFrames(leftW)
-  local narrowApp = narrowOnLeft and left or right
-  local wideApp = narrowOnLeft and right or left
-
-  placeApp(narrowApp, narrowRect, function(narrowWin)
-    local n2, w2 = splitFrames(leftW, narrowWin:frame().w)
-    placeWindow(narrowWin, n2)
-    placeApp(wideApp, w2, function(wideWin)
-      local focusWin = narrowOnLeft and narrowWin or wideWin
-      focusWin:focus()
-      -- Last, not first. Hiding up front empties the screen and the desktop
-      -- flashes through until the two windows land. It also means a placement
-      -- that times out leaves the old windows up instead of a bare desktop.
-      hideAllExcept({ left, right })
+  local f = hs.screen.mainScreen():frame()
+  local w = (f.w - GAP) * RIGHT_RATIO - GAP
+  placeApp(RIGHT_PANE, hs.geometry.rect(f.x + f.w - GAP / 2 - w, f.y + GAP / 2, w, f.h - GAP),
+    function(placed)
+      -- The resize does not always land before this read. A width that big is
+      -- the pre-resize frame coming back, so fall back to the nominal.
+      local got = placed:frame().w
+      if got >= f.w / 2 then got = w end
+      local rect = hs.geometry.rect(f.x + f.w - GAP / 2 - got, f.y + GAP / 2, got, f.h - GAP)
+      placeWindow(placed, rect)
+      placed:raise()
+      cb(rect)
     end)
-  end)
 end
 
-local function rotateLayout()
-  if not currentLayout then return end
-  local left, right = currentLayout.right, currentLayout.left
-  local leftW = 1 - currentLayout.leftW
-
-  local leftWin = windowOf(hs.application.get(left))
-  local rightWin = windowOf(hs.application.get(right))
-  if not (leftWin and rightWin) then sideBySide(left, right, leftW) return end
-
-  currentLayout = { left = left, right = right, leftW = leftW }
-
-  local narrowOnLeft = leftW < 0.5
-  local narrowWin = narrowOnLeft and leftWin or rightWin
-  local wideWin = narrowOnLeft and rightWin or leftWin
-  local narrowRect, wideRect = splitFrames(leftW, narrowWin:frame().w)
-
-  placeWindow(narrowWin, narrowRect)
-  placeWindow(wideWin, wideRect)
-  leftWin:focus()
+local function setLeftPane(bundleID)
+  withRightPane(function(right)
+    local f = hs.screen.mainScreen():frame()
+    placeApp(bundleID,
+      hs.geometry.rect(f.x + GAP / 2, f.y + GAP / 2, right.x - f.x - GAP * 1.5, f.h - GAP),
+      function(win)
+        win:raise()
+        win:focus()
+      end)
+  end)
 end
 
 hs.application.watcher.new(function(_, event, app)
@@ -244,9 +215,9 @@ hs.hotkey.bind({ "cmd", "alt" }, "0", function()
   end
 end)
 
-hs.hotkey.bind({ "cmd", "alt" }, "1", function() sideBySide(APPS.vscode, APPS.chrome, 0.7) end)
-hs.hotkey.bind({ "cmd", "alt" }, "2", function() sideBySide(APPS.terminal, APPS.chrome, 0.7) end)
-hs.hotkey.bind({ "cmd", "alt" }, "3", function() sideBySide(APPS.tableplus, APPS.chrome, 0.7) end)
+hs.hotkey.bind({ "cmd", "alt" }, "1", function() setLeftPane(APPS.vscode) end)
+hs.hotkey.bind({ "cmd", "alt" }, "2", function() setLeftPane(APPS.terminal) end)
+hs.hotkey.bind({ "cmd", "alt" }, "3", function() setLeftPane(APPS.tableplus) end)
 -- Global on purpose, so it costs cmd+` its cycle-windows in every other app.
 hs.hotkey.bind({ "cmd" }, "`", function()
   local app = hs.application.get(APPS.terminal)
@@ -257,7 +228,6 @@ hs.hotkey.bind({ "cmd" }, "`", function()
   end
 end)
 
-hs.hotkey.bind({ "cmd", "alt" }, "R", rotateLayout)
 hs.hotkey.bind({ "cmd", "alt" }, "F", toggleZoom)
 hs.hotkey.bind({ "cmd", "alt", "ctrl" }, "R", hs.reload)
 

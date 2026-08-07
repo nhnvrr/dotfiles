@@ -43,6 +43,7 @@ cask "visual-studio-code"
 
 cask "hammerspoon"
 
+cask "helium-browser"
 cask "google-chrome"
 
 cask "docker-desktop"
