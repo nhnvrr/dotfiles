@@ -4,6 +4,7 @@ font-size = 18
 # which reflows glyph widths mid-line and drifts eza's icon columns.
 font-feature = -liga, -dlig, -calt
 adjust-cell-height = 6%
+adjust-box-thickness = 1
 
 # These sixteen slots are the stack's only source of colour: starship, eza, bat,
 # delta, fzf and pgcli all ask by ANSI name and hardcode no hex anywhere.

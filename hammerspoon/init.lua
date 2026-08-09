@@ -11,7 +11,7 @@ if not hs.accessibilityState(true) then
 end
 
 local APPS = {
-  helium    = "net.imput.helium",
+  chrome    = "com.google.Chrome",
   terminal  = "com.mitchellh.ghostty",
   vscode    = "com.microsoft.VSCode",
   tableplus = "com.tinyapp.TablePlus",
@@ -111,7 +111,7 @@ local function placeApp(bundleID, rect, onPlaced)
   hs.timer.doAfter(9, function() claimed[bundleID] = nil end)
 end
 
-local RIGHT_PANE = APPS.helium
+local RIGHT_PANE = APPS.chrome
 local RIGHT_RATIO = 0.3
 
 -- The width test is not decoration: a full-screen window is also flush right

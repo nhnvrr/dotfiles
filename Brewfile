@@ -24,6 +24,9 @@ brew "lazydocker"
 
 brew "libpq"
 brew "pgcli"
+# Nothing in Homebrew depends on this, so it reads as an orphan leaf, but the odbc
+# npm package links its native binding against libodbc; ~/side's ETL needs it.
+brew "unixodbc"
 brew "mise"
 
 brew "cocoapods"
@@ -44,7 +47,6 @@ cask "visual-studio-code"
 
 cask "hammerspoon"
 
-cask "helium-browser"
 cask "google-chrome"
 
 cask "docker-desktop"
