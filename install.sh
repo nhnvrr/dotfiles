@@ -116,7 +116,6 @@ link_file "${CONFIG_DIR}/fish/completions/aws.fish" "${HOME}/.config/fish/comple
 link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
 link_file "${CONFIG_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"
 link_file "${CONFIG_DIR}/eza/theme.yml" "${HOME}/.config/eza/theme.yml"
-link_file "${CONFIG_DIR}/ghostty/config" "${HOME}/.config/ghostty/config"
 link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.tmux.conf"
 link_file "${CONFIG_DIR}/nvim/init.lua"   "${HOME}/.config/nvim/init.lua"
 link_file "${CONFIG_DIR}/hammerspoon/init.lua" "${HOME}/.hammerspoon/init.lua"
@@ -130,19 +129,46 @@ if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
   link_file "${CONFIG_DIR}/gh/config.yml" "${HOME}/.config/gh/config.yml"
 fi
 
-# Ghostty keeps xterm-ghostty inside its own bundle and points TERMINFO at it,
-# but sudo and ssh drop that variable and leave TERM naming a terminal ncurses
-# cannot find. ~/.terminfo is read without any variable at all.
-GHOSTTY_TERMINFO="/Applications/Ghostty.app/Contents/Resources/terminfo"
-if [[ -d "${GHOSTTY_TERMINFO}" ]]; then
-  mkdir -p "${HOME}/.terminfo"
-  cp -R "${GHOSTTY_TERMINFO}/" "${HOME}/.terminfo/"
+TERMINAL_PROFILE="Dotfiles"
+TERMINAL_PROFILE_FILE="${CONFIG_DIR}/terminal/${TERMINAL_PROFILE}.terminal"
+if [[ -f "${TERMINAL_PROFILE_FILE}" ]]; then
+  echo "Importing the ${TERMINAL_PROFILE} Terminal profile..."
+  # Not `defaults write`: Terminal.app holds its settings in memory and rewrites
+  # the whole plist on quit, so a direct write is lost the moment the window
+  # running this script closes. AppleScript goes through the app itself.
+  # A profile cannot be deleted while it is the default one, hence the swap.
+  osascript <<APPLESCRIPT >/dev/null
+tell application "Terminal"
+  if name of settings sets contains "${TERMINAL_PROFILE}" then
+    set default settings to settings set "Basic"
+    set startup settings to settings set "Basic"
+    delete settings set "${TERMINAL_PROFILE}"
+  end if
+end tell
+APPLESCRIPT
+  # `open` is what imports it — Terminal has no AppleScript verb for that. It
+  # also opens a window on the freshly imported profile.
+  open "${TERMINAL_PROFILE_FILE}"
+  osascript <<APPLESCRIPT >/dev/null
+tell application "Terminal"
+  repeat 50 times
+    if name of settings sets contains "${TERMINAL_PROFILE}" then exit repeat
+    delay 0.1
+  end repeat
+  set default settings to settings set "${TERMINAL_PROFILE}"
+  set startup settings to settings set "${TERMINAL_PROFILE}"
+end tell
+APPLESCRIPT
+else
+  echo "  no ${TERMINAL_PROFILE}.terminal in the repo; leaving Terminal.app alone."
+  echo "  → Export one from Terminal → Settings → Profiles → ⚙ → Export…"
 fi
 
 # Orphans from previous setups. Removed only if they point into this repo, so a
 # hand-written file at any of these paths stays untouched.
 for stale in "${HOME}/.zshrc" \
              "${HOME}/.zprofile" \
+             "${HOME}/.config/ghostty/config" \
              "${HOME}/.config/alacritty/alacritty.toml" \
              "${HOME}/.config/atuin/config.toml"; do
   if [[ -L "${stale}" && "$(readlink "${stale}")" == "${CONFIG_DIR}"/* ]]; then
@@ -151,6 +177,12 @@ for stale in "${HOME}/.zshrc" \
   fi
 done
 rm -f "${HOME}/.cache/zsh/init.zsh"
+rmdir "${HOME}/.config/ghostty" 2>/dev/null || true
+
+# Copied out of Ghostty's bundle by a previous run of this script, not a
+# symlink. Terminal.app reports xterm-256color, which the system terminfo has.
+rm -f "${HOME}/.terminfo/78/xterm-ghostty" "${HOME}/.terminfo/67/ghostty"
+rmdir "${HOME}"/.terminfo/* "${HOME}/.terminfo" 2>/dev/null || true
 
 for broken in "${HOME}/.zshenv" "${HOME}/.bashrc" "${HOME}/.bash_profile" "${HOME}/.profile"; do
   if [[ -L "${broken}" && ! -e "${broken}" ]]; then
@@ -171,6 +203,9 @@ defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
 defaults write com.apple.finder AppleShowAllExtensions -bool true
 defaults write com.apple.finder AppleShowAllFiles -bool true
 defaults write NSGlobalDomain AppleShowAllExtensions -bool true
+# Restored windows land before Hammerspoon's launch watcher sees the app, and it
+# tiles the wrong one.
+defaults write com.apple.Terminal NSQuitAlwaysKeepsWindows -bool false
 mkdir -p "${HOME}/Screenshots"
 defaults write com.apple.screencapture location "${HOME}/Screenshots"
 defaults write com.apple.screencapture type -string "png"
