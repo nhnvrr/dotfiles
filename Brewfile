@@ -68,6 +68,13 @@ cask "visual-studio-code"
 
 cask "hammerspoon"
 
+# Clipboard history. Hammerspoon could do this with hs.pasteboard and hs.chooser
+# and no new cask, but that trades one line here for a couple hundred of Lua to
+# own, text only and no image support. Maccy is MIT, native, and the cask pulls
+# from the project's own GitHub releases — there are typosquat "maccy" sites.
+# Needs Accessibility permission on first launch or paste-on-select does nothing.
+cask "maccy"
+
 cask "helium-browser"
 
 cask "docker-desktop"

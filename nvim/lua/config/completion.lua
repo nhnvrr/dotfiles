@@ -1,7 +1,18 @@
 require("blink.cmp").setup({
   -- default keeps <C-y> to accept and leaves <Tab> to snippet jumps only.
   -- super-tab would shadow the indent that <Tab> does everywhere else.
-  keymap = { preset = "default" },
+  keymap = {
+    preset = "default",
+    -- Enter takes the highlighted item while the menu is up, and is a plain
+    -- newline when it is not. `fallback` is the half that does the second job:
+    -- without it Enter would be swallowed whenever blink has nothing to accept.
+    --
+    -- This only reads as "accept the suggestion" because list.selection.preselect
+    -- defaults to true, so the first item is already highlighted the moment the
+    -- menu opens. The flip side is that Enter cannot break a line while the menu
+    -- is showing — <C-e> dismisses it first.
+    ["<CR>"] = { "accept", "fallback" },
+  },
 
   appearance = {
     -- The Nerd Font here is the Mono variant, where a glyph is exactly one

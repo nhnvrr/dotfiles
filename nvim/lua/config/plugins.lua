@@ -12,12 +12,7 @@ vim.api.nvim_create_autocmd("PackChanged", {
 })
 
 vim.pack.add({
-  -- One per theme family, because no single colorscheme plugin carries all three.
-  -- Each ships both halves and switches on vim.o.background; config/theme.lua maps
-  -- the family, which it reads from the deployed alacritty theme.
-  "https://github.com/maxmx03/solarized.nvim",
-  "https://github.com/ellisonleao/gruvbox.nvim",
-  "https://github.com/olimorris/onedarkpro.nvim",
+  "https://github.com/AlexvZyl/nordic.nvim",
 
   "https://github.com/MunifTanjim/nui.nvim",
   "https://github.com/nvim-lua/plenary.nvim",
@@ -26,6 +21,18 @@ vim.pack.add({
   "https://github.com/nvim-telescope/telescope.nvim",
   "https://github.com/nvim-telescope/telescope-fzf-native.nvim",
   "https://github.com/nvim-lualine/lualine.nvim",
+
+  -- lazygit owns committing, history and branches. What it cannot do is mark
+  -- which lines of the buffer being edited changed, or stage one hunk without
+  -- leaving it.
+  "https://github.com/lewis6991/gitsigns.nvim",
+
+  -- No built-in changes or adds a delimiter: ci" only edits what is inside.
+  "https://github.com/kylechui/nvim-surround",
+
+  -- undofile is already on; without this the undo *branches* it persists are
+  -- reachable only through :undolist plus :undo N.
+  "https://github.com/mbbill/undotree",
 
   { src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
   { src = "https://github.com/nvim-treesitter/nvim-treesitter-textobjects", version = "main" },
@@ -38,6 +45,11 @@ vim.pack.add({
 
   "https://github.com/stevearc/conform.nvim",
   "https://github.com/b0o/SchemaStore.nvim",
+
+  -- Renders markdown in the buffer itself. No node, no deno, no browser and no
+  -- second window — and the markdown/markdown_inline parsers it needs are already
+  -- in the treesitter list.
+  "https://github.com/MeanderingProgrammer/render-markdown.nvim",
 
   -- Owns rust-analyzer end to end — LSP, inlay hints, runnables and the DAP
   -- wiring. Configured through vim.g.rustaceanvim, never vim.lsp.enable: doing

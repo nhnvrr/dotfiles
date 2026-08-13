@@ -1,0 +1,103 @@
+# Nord, derived from the sixteen ANSI slots in alacritty/alacritty.toml so btop
+# stays matched to the rest of the stack. btop keeps its own hex and reads no
+# terminal palette, which is why this file exists at all.
+#
+# Named nord-slots and not nord on purpose: btop ships its own nord.theme in
+# /opt/homebrew/share/btop/themes, and which one wins a name collision is not
+# defined. The distinct name sidesteps it.
+#
+# btop's bundled themes are unused here for one reason: all eight of their meters
+# share a single ramp, so temperature, load, memory and network paint identically.
+# The per-meter ramps at the bottom of this file are the whole point.
+
+# Empty, not the background hex: that is how the format asks for the terminal's
+# own background, the same policy as transparency in nvim.
+theme[main_bg]=""
+
+theme[main_fg]="#d8dee9"
+
+# Box titles, and the shortcut letters that have to be findable at a glance.
+theme[title]="#8fbcbb"
+theme[hi_fg]="#ebcb8b"
+
+# Slot 0 — nord1, a step off the background rather than a step into it.
+theme[selected_bg]="#3b4252"
+theme[selected_fg]="#eceff4"
+theme[meter_bg]="#3b4252"
+
+# Slot 8, the one value calibrated by hand because it is dim text and a surface
+# at once. Both of btop's uses here are the text one, at 4.00:1.
+theme[inactive_fg]="#6f788a"
+theme[graph_text]="#6f788a"
+
+theme[proc_misc]="#b48ead"
+
+# Process box banner and follow mode. Only four of btop's own themes define these
+# at all, so the rest fall back to stock colours. The background goes on the
+# accent block and the terminal background on top, which is the readable of the
+# two on a palette this dark.
+theme[proc_pause_bg]="#bf616a"
+theme[proc_follow_bg]="#81a1c1"
+theme[proc_banner_bg]="#b48ead"
+theme[proc_banner_fg]="#15181e"
+theme[followed_bg]="#81a1c1"
+theme[followed_fg]="#15181e"
+
+# Outlines on slot 8, the more visible of the two; the divider a step quieter on
+# slot 0. Losing that ordering makes the boxes vanish and the dividers shout.
+theme[cpu_box]="#6f788a"
+theme[mem_box]="#6f788a"
+theme[net_box]="#6f788a"
+theme[proc_box]="#6f788a"
+theme[div_line]="#3b4252"
+
+# The gradients below are deliberately NOT all the same. Each meter has to be
+# identifiable without reading its label, which is the whole failure of the
+# bundled themes. Anything that means "more is worse" ends on red; the meters
+# that are merely informational are flat, which the format expresses by leaving
+# mid and end empty.
+
+# Temperature: cold green through to hot red.
+theme[temp_start]="#a3be8c"
+theme[temp_mid]="#ebcb8b"
+theme[temp_end]="#bf616a"
+
+# Load: starts cold blue instead of green so a glance separates it from temp,
+# ends on the same red because a pegged cpu means the same thing.
+theme[cpu_start]="#81a1c1"
+theme[cpu_mid]="#ebcb8b"
+theme[cpu_end]="#bf616a"
+
+# Free memory: flat green, never a gradient — it is not a warning.
+theme[free_start]="#a3be8c"
+theme[free_mid]=""
+theme[free_end]=""
+
+theme[cached_start]="#81a1c1"
+theme[cached_mid]=""
+theme[cached_end]=""
+
+theme[available_start]="#8fbcbb"
+theme[available_mid]=""
+theme[available_end]=""
+
+# Used memory: two colours starting at yellow, so it never reads green at the
+# same time as the free bar sitting next to it.
+theme[used_start]="#ebcb8b"
+theme[used_mid]=""
+theme[used_end]="#bf616a"
+
+# Network: down cool, up warm. Confusing the two directions is the one mistake
+# worth designing out here.
+theme[download_start]="#a3be8c"
+theme[download_mid]="#8fbcbb"
+theme[download_end]="#88c0d0"
+
+theme[upload_start]="#ebcb8b"
+theme[upload_mid]="#b48ead"
+theme[upload_end]="#bf616a"
+
+# Per-process usage, matching the cpu ramp it sits beside.
+theme[process_start]="#81a1c1"
+theme[process_mid]="#ebcb8b"
+theme[process_end]="#bf616a"

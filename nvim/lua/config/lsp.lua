@@ -8,7 +8,7 @@ vim.lsp.config("*", {
 vim.diagnostic.config({
   virtual_text = { spacing = 2, prefix = "●" },
   severity_sort = true,
-  float = { border = "rounded", source = true },
+  float = { source = true },
   signs = {
     text = {
       [vim.diagnostic.severity.ERROR] = "E",
@@ -123,9 +123,15 @@ vim.lsp.config("jsonls", {
   cmd = { "vscode-json-language-server", "--stdio" },
   filetypes = { "json", "jsonc" },
   root_markers = { ".git" },
+  -- Mutated in place, never reassigned: vim.lsp.Client captures
+  -- `settings = config.settings` when it is created, which is before this runs.
+  -- The `config.settings = vim.tbl_deep_extend(...)` shown in
+  -- :h vim.lsp.ClientConfig binds a new table the client never reads.
+  before_init = function(_, config)
+    config.settings.json.schemas = require("schemastore").json.schemas()
+  end,
   settings = {
     json = {
-      schemas = require("schemastore").json.schemas(),
       validate = { enable = true },
       format = { enable = false },
     },
@@ -136,13 +142,16 @@ vim.lsp.config("yamlls", {
   cmd = { "yaml-language-server", "--stdio" },
   filetypes = { "yaml", "yaml.docker-compose", "yaml.gitlab" },
   root_markers = { ".git" },
+  -- Same in-place mutation as jsonls above, for the same reason.
+  before_init = function(_, config)
+    config.settings.yaml.schemas = require("schemastore").yaml.schemas()
+  end,
   settings = {
     yaml = {
       -- The built-in store is disabled so SchemaStore.nvim is the only source;
       -- with both on, the two fight over the same file and the wrong one wins
       -- roughly half the time.
       schemaStore = { enable = false, url = "" },
-      schemas = require("schemastore").yaml.schemas(),
       validate = true,
       -- On by default, and it flags every key that is not alphabetically
       -- sorted — which is every serverless.yml ever written.

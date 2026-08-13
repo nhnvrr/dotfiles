@@ -1,107 +1,85 @@
--- Three theme families, two halves each, one plugin per family: no single
--- colorscheme plugin carries all three. nightfox, which these replace, had none.
+-- Nord, dark only, matching the sixteen ANSI slots in alacritty/alacritty.toml.
 --
--- The mode needs no telling. Neovim's TUI asks the terminal for its background on
--- startup and sets 'background' itself (:h 'background'), so the terminal stays
--- the single source of truth. The family cannot be detected that way, so it is
--- read from the `# theme:` marker in the deployed alacritty theme — the same file
--- the `theme` switch writes, so there is still only one place holding the truth.
+-- 'background' is set here rather than left to the terminal handshake. Neovim's
+-- TUI does ask the terminal for its background and would land on dark by itself,
+-- but that detection only ever earned its keep while there was a light half to
+-- pick; with one palette there is nothing to detect and a lot of machinery that
+-- existed only to catch the reply.
 
-local M = {}
+vim.o.background = "dark"
 
--- Two of the three use one colorscheme name for both halves and switch on
--- 'background'; onedarkpro ships a name per half instead.
-local SCHEMES = {
-  solarized = { dark = "solarized", light = "solarized" },
-  gruvbox = { dark = "gruvbox", light = "gruvbox" },
-  one = { dark = "onedark", light = "onelight" },
-}
+-- Only what differs from nordic's own defaults. In particular reduced_blue is
+-- left alone: nordic ships its own white rather than nord4, so neither setting
+-- would match the terminal's slot 15 anyway, and the default is the brighter of
+-- the two against this background — 10.58:1 against 10.05:1.
+require("nordic").setup({
+  -- On so the terminal's own background shows through and nvim never paints one.
+  transparent = { bg = true, float = true },
+  -- Both default to true. Off here for the same reason as the is_bold sweep in
+  -- eza/theme.yml and the mode block in lualine: no bold anywhere in the stack.
+  cursorline = { bold_number = false },
+  visual = { bold_number = false },
 
-M.LUALINE = {
-  solarized = { dark = "solarized_dark", light = "solarized_light" },
-  gruvbox = { dark = "gruvbox_dark", light = "gruvbox_light" },
-  one = { dark = "onedark", light = "onelight" },
-}
-
--- Matches install.sh's seed, so a machine with nothing deployed still gets a pair
--- rather than an error.
-local DEFAULT_FAMILY = "gruvbox"
-
-local function read_family()
-  local fh = io.open(vim.fn.expand("~/.config/alacritty/theme.toml"), "r")
-  if not fh then return DEFAULT_FAMILY end
-  local found
-  for line in fh:lines() do
-    -- The markers live in the header block; stop at the first real setting rather
-    -- than reading the whole file on every startup.
-    if not line:match("^#") and line ~= "" then break end
-    found = line:match("^#%s*theme:%s*(%S+)")
-    if found then break end
-  end
-  fh:close()
-  return SCHEMES[found] and found or DEFAULT_FAMILY
-end
-
-M.family = read_family()
-
-function M.mode()
-  return vim.o.background == "light" and "light" or "dark"
-end
-
--- Transparency is on in all three so the terminal's own background shows through
--- and nvim never paints one of its own. Each plugin names it differently, which is
--- the only reason these three blocks cannot be collapsed.
-require("solarized").setup({
-  transparent = { enabled = true },
-  -- Off: it would tint the palette away from the sixteen ANSI slots, which is the
-  -- one thing that has to stay matched.
-  variant = "winter",
-})
-require("gruvbox").setup({
-  transparent_mode = true,
-  bold = false,
-  italic = { comments = true, strings = false, folds = false, operators = false },
-})
-require("onedarkpro").setup({
-  options = { transparency = true, bold = false, italic = true },
+  -- nordic computes its surfaces and its dim text against its own background,
+  -- which is far lighter than the #15181e this terminal paints. Transparency
+  -- means nvim never paints that lighter background, so three groups land on a
+  -- surface they were not measured for. Re-seated on the palette the sixteen
+  -- slots already define; every ratio below is against #15181e.
+  --
+  -- Fields are mutated rather than replaced so nothing else on the group is lost.
+  on_highlight = function(hl)
+    -- Shipped at #191d24, which is 1.05:1 against the background — the same
+    -- colour, so selecting text looked like nothing happened.
+    --
+    -- nord3 stepped 10% toward nord4, the same ramp slot 8 is derived from. It
+    -- lands on 2.98:1, which is the 3:1 WCAG asks of a non-text UI element, and
+    -- a selection is exactly that. Deliberately lighter than the terminal's own
+    -- selection (nord2, 2.06:1), so the two no longer match: on a background
+    -- this dark nord2 was not carrying far enough inside the editor.
+    --
+    -- This is the ceiling, not a preference. Going lighter costs the text *in*
+    -- the selection: body text is 3.55:1 here and 2.64:1 at slot 8, where a
+    -- comment would land on exactly the selection colour and vanish.
+    hl.Visual.bg = "#5a6477" -- 2.98:1
+    hl.VisualNOS.bg = "#5a6477"
+    -- Same 1.05:1 defect. This is the first step of the elevation ramp the rest
+    -- of the stack uses — the same value as herdr's panel_bg — and not a nord
+    -- grey on purpose: nord1 reads better on its own (1.77:1) but leaves a
+    -- selection sitting on the cursor line at 1.17:1, so the end of a partial
+    -- selection becomes impossible to place. This keeps that at 1.80:1.
+    hl.CursorLine.bg = "#20242d" -- 1.14:1, a wide band rather than a bright one
+    -- nord3, at 2.41:1, under the 3:1 floor this stack holds dim text to — and
+    -- the same value slot 8 already exists to replace. Kept on slot 8 rather than
+    -- raised further so a comment is the same colour in nvim, bat and fish; the
+    -- cost is that inside a selection it sits at 1.34:1. Raising this is the one
+    -- knob if that ever matters more than the match.
+    hl.Comment.fg = "#6f788a" -- 4.00:1 alone, 1.34:1 inside a selection
+  end,
 })
 
-local applying = false
-local applied
-
-local function apply()
-  local key = M.family .. ":" .. M.mode()
-  -- Keyed on family and mode, not on colors_name: solarized and gruvbox use one
-  -- name for both halves, so comparing names alone would skip the reload that
-  -- actually repaints when only the mode changed.
-  if applying or applied == key then return end
-  applying = true
-  applied = key
-  vim.cmd.colorscheme(SCHEMES[M.family][M.mode()])
-  applying = false
-end
-
--- Two hooks and not one because they cover different windows: OptionSet does not
--- fire during startup at all (:h OptionSet), which is precisely when the terminal's
--- reply usually lands, and VimEnter runs once startup is over and the option has
--- settled. apply() is idempotent, so the second costs nothing when it is already
--- right.
-vim.api.nvim_create_autocmd("OptionSet", { pattern = "background", callback = apply })
-vim.api.nvim_create_autocmd("VimEnter", { callback = apply })
-
+-- Registered before the colorscheme call below, not after: the autocmd is what
+-- applies these on the very first paint too.
+--
 -- On ColorScheme so a reload doesn't undo it. Groups are read by their generic
 -- names (Directory, Normal, Comment) rather than any theme's own, which is what
--- has let this block survive every colorscheme change untouched.
+-- has let this block survive every colorscheme change here untouched.
 vim.api.nvim_create_autocmd("ColorScheme", {
-  pattern = { "solarized", "gruvbox", "onedark", "onelight" },
+  pattern = "nordic",
   callback = function()
     local function fg(group)
       return vim.api.nvim_get_hl(0, { name = group, link = false }).fg
     end
     local set = vim.api.nvim_set_hl
 
-    -- Neovim's own defaults, which no theme option reaches.
-    for _, group in ipairs({ "PmenuMatch", "PmenuMatchSel", "WinBar" }) do
+    -- Bold that no option reaches: the first three are Neovim's own defaults, the
+    -- headings are nordic's — bold_keywords does not cover them, and they are what
+    -- render-markdown paints markdown titles with.
+    for _, group in ipairs({
+      "PmenuMatch", "PmenuMatchSel", "WinBar",
+      "@markup.heading.1.markdown", "@markup.heading.2.markdown",
+      "@markup.heading.3.markdown", "@markup.heading.4.markdown",
+      "@markup.heading.5.markdown", "@markup.heading.6.markdown",
+    }) do
       local h = vim.api.nvim_get_hl(0, { name = group, link = false })
       h.bold, h.cterm = nil, nil
       set(0, group, h)
@@ -116,6 +94,4 @@ vim.api.nvim_create_autocmd("ColorScheme", {
   end,
 })
 
-apply()
-
-return M
+vim.cmd.colorscheme("nordic")

@@ -114,9 +114,6 @@ link_file "${CONFIG_DIR}/fish/config.fish"       "${HOME}/.config/fish/config.fi
 link_file "${CONFIG_DIR}/fish/conf.d/00-env.fish" "${HOME}/.config/fish/conf.d/00-env.fish"
 link_file "${CONFIG_DIR}/fish/conf.d/10-colors.fish" "${HOME}/.config/fish/conf.d/10-colors.fish"
 link_file "${CONFIG_DIR}/fish/completions/aws.fish" "${HOME}/.config/fish/completions/aws.fish"
-# The day/night switch. It resolves the repo from this symlink, three levels up,
-# so it has to be linked and not copied.
-link_file "${CONFIG_DIR}/fish/functions/theme.fish" "${HOME}/.config/fish/functions/theme.fish"
 link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
 link_file "${CONFIG_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"
 link_file "${CONFIG_DIR}/eza/theme.yml" "${HOME}/.config/eza/theme.yml"
@@ -127,33 +124,21 @@ link_file "${CONFIG_DIR}/eza/theme.yml" "${HOME}/.config/eza/theme.yml"
 link_file "${CONFIG_DIR}/nvim" "${HOME}/.config/nvim"
 link_file "${CONFIG_DIR}/hammerspoon/init.lua" "${HOME}/.hammerspoon/init.lua"
 link_file "${CONFIG_DIR}/alacritty/alacritty.toml" "${HOME}/.config/alacritty/alacritty.toml"
-# The six theme files. Linked as a directory: `theme` copies one of them over
-# ~/.config/alacritty/theme.toml, which is mutable state and deliberately NOT a
-# symlink — a link into the repo would have every switch write in the working tree.
-link_file "${CONFIG_DIR}/alacritty/themes" "${HOME}/.config/alacritty/themes"
-# herdr is not linked, unlike every other config here: `theme` rewrites its
-# dark_name/light_name per family, so the deployed file is a derived copy. Only
-# config.toml would have been linked anyway — herdr keeps its sockets, logs,
-# session.json and installed plugins in the same directory, and none of that is
-# config.
-# The theme goes in by name, not by path — btop.conf asks for "current" and btop
-# looks it up under ~/.config/btop/themes. That name is not linked here and is not
-# a file in this repo either: `theme` generates it from the sixteen slots of
-# whichever palette is live, so there is one template instead of six near-copies.
-# The template itself is read straight out of the repo and deliberately not linked
-# in here — btop lists every *.theme in this directory, and one full of unresolved
-# placeholders would show up as a selectable theme.
-# Linking the config is only safe because it sets save_config_on_exit = false;
-# otherwise btop would write back through the symlink every time it is closed.
+# Only config.toml and not the directory: herdr keeps its sockets, logs,
+# session.json and installed plugins alongside it, and none of that is config.
+link_file "${CONFIG_DIR}/herdr/config.toml" "${HOME}/.config/herdr/config.toml"
+# The theme goes in by name and not by path — btop.conf asks for "nord-slots" and
+# btop resolves it against this directory. Linking the config is only safe because
+# it sets save_config_on_exit = false; otherwise btop would write back through the
+# symlink every time it is closed.
 link_file "${CONFIG_DIR}/btop/btop.conf" "${HOME}/.config/btop/btop.conf"
+link_file "${CONFIG_DIR}/btop/themes/nord-slots.theme" "${HOME}/.config/btop/themes/nord-slots.theme"
 # psql won't create this directory and history fails silently without it.
 mkdir -p "${HOME}/.local/state/psql"
 link_file "${CONFIG_DIR}/psql/psqlrc" "${HOME}/.psqlrc"
-# Same trap. Not linked, unlike every other config here: syntax_style is the one
-# setting in the stack that is neither an ANSI slot nor a path — a pygments style
-# name resolved inside Python — so `theme` deploys a copy with that single line
-# rewritten. The cost is that editing pgcli/config needs a `theme` run to land.
+# Same trap.
 mkdir -p "${HOME}/.local/state/pgcli"
+link_file "${CONFIG_DIR}/pgcli/config" "${HOME}/.config/pgcli/config"
 # Same trap, for both redis clients.
 mkdir -p "${HOME}/.local/state/iredis" "${HOME}/.local/state/redis"
 link_file "${CONFIG_DIR}/redis/iredisrc" "${HOME}/.iredisrc"
@@ -172,15 +157,26 @@ for stale in "${HOME}/.zshrc" \
              "${HOME}/.tmux.conf" \
              "${HOME}/.config/ghostty/config" \
              "${HOME}/.config/atuin/config.toml" \
-             "${HOME}/.config/btop/themes/nord-slots.theme" \
-             "${HOME}/.config/btop/themes/nord-slots-light.theme" \
-             "${HOME}/.config/herdr/config.toml"; do
+             "${HOME}/.config/fish/functions/theme.fish" \
+             "${HOME}/.config/alacritty/themes"; do
   if [[ -L "${stale}" && "$(readlink "${stale}")" == "${CONFIG_DIR}"/* ]]; then
     rm -f "${stale}"
     echo "  removed stale symlink ${stale}"
   fi
 done
 rm -f "${HOME}/.cache/zsh/init.zsh"
+
+# What the old theme switch generated. Regular files rather than symlinks, so the
+# loop above cannot reach them: its guard only ever removes links into this repo,
+# which is exactly what keeps a hand-written file safe. theme.toml goes only if it
+# still carries the `# theme:` marker the switch wrote into its header, so a config
+# someone put there by hand survives.
+if [[ -f "${HOME}/.config/alacritty/theme.toml" ]] &&
+   grep -q '^# theme:' "${HOME}/.config/alacritty/theme.toml"; then
+  rm -f "${HOME}/.config/alacritty/theme.toml"
+  echo "  removed generated ~/.config/alacritty/theme.toml"
+fi
+rm -f "${HOME}/.config/btop/themes/current.theme"
 
 for broken in "${HOME}/.zshenv" "${HOME}/.bashrc" "${HOME}/.bash_profile" "${HOME}/.profile"; do
   if [[ -L "${broken}" && ! -e "${broken}" ]]; then
@@ -223,17 +219,6 @@ else
     echo "Changing login shell to ${FISH_BIN} (chsh will prompt for your password)..."
     chsh -s "${FISH_BIN}"
   fi
-fi
-
-# Seeds alacritty's theme.toml, btop's generated current.theme, pgcli's config and
-# herdr's, all through the same code path the switch uses, so there is only ever
-# one. Keeps whatever is already live; on a machine with nothing, gruvbox dark —
-# the half with the strongest body text of the six, 10.75:1.
-if [[ -n "${FISH_BIN}" ]]; then
-  echo "Deploying the terminal theme..."
-  THEME_LIVE="$("${FISH_BIN}" -c theme 2>/dev/null || true)"
-  [[ -n "${THEME_LIVE}" ]] || THEME_LIVE="gruvbox dark"
-  "${FISH_BIN}" -c "theme ${THEME_LIVE}"
 fi
 
 echo "macOS standalone setup complete. Happy Coding 🧉"

@@ -25,6 +25,15 @@ next_agent = "prefix+a"
 previous_agent = "prefix+shift+a"
 focus_agent = "prefix+alt+1..9"
 
+# Swapped against herdr's own defaults, which put settings on s and goto on g.
+# s is the jump key in tmux — prefix+s is its session picker — and that is the
+# muscle memory this machine still has. Settings is the rarer of the two, so it
+# takes the key that loses its mnemonic. Both names are real config keys, not
+# just template comments: `herdr config check` reports an invalid *binding* for
+# them rather than an unknown *key*, which is how the two cases are told apart.
+goto = "prefix+s"
+settings = "prefix+g"
+
 [ui]
 # ctrl+b c opens the tab straight away; the name prompt is what made it slow.
 prompt_new_tab_name = false
@@ -45,22 +54,19 @@ delivery = "herdr"
 enabled = true
 
 [theme]
-# herdr ships native themes for all three families and both halves of each, which
-# are more faithful to them than deriving the chrome from the sixteen slots would
-# be. `name` below is rewritten by the `theme` fish function on every switch; this
-# file is deployed as a copy rather than a symlink because of it, the same as
-# pgcli's.
+# herdr ships a native nord, which is more faithful to the palette than deriving
+# its chrome from the sixteen slots would be.
 #
-# One resolved name, and auto_switch deliberately OFF, which is the opposite of
-# how this started. auto_switch has herdr pick the half by asking the terminal for
-# its background — and it did not follow, so the half had to be changed by hand
-# inside herdr. That is the part that bites: changing it in the UI makes herdr
-# write its choice back here as `name` and set auto_switch = false itself, and from
-# then on the two *_name keys it had been choosing between are ignored and herdr is
-# pinned for good. Writing the resolved name outright has nothing to detect and
-# nothing to lose a race with, and it overwrites whatever the UI persisted.
+# auto_switch deliberately OFF, which is the opposite of how this started, and the
+# part worth keeping written down. auto_switch has herdr pick the half by asking
+# the terminal for its background — and it did not follow, so the half had to be
+# changed by hand inside herdr. That is what bites: changing it in the UI makes
+# herdr write its choice back here as `name` and set auto_switch = false itself,
+# and from then on herdr is pinned for good. Naming one theme outright has nothing
+# to detect and nothing to lose a race with. There is no second half to pick
+# anyway — nord is dark only.
 auto_switch = false
-name = "gruvbox"
+name = "nord"
 
 [experimental]
 # herdr inside tmux is not herdr inside herdr, but if it ever refuses to start

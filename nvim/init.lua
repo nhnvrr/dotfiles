@@ -1,3 +1,7 @@
+-- Before every require below, including config.plugins: the loader only caches
+-- modules it sees loaded after this call.
+vim.loader.enable()
+
 vim.g.mapleader = " "
 
 -- Everything is namespaced under lua/config/. Bare names would collide: Lua
@@ -22,6 +26,7 @@ opt.expandtab = true
 
 opt.ignorecase = true
 opt.smartcase = true
+opt.inccommand = "split"
 
 opt.guicursor = "n-v-c:block,i-ci-ve:ver25-blinkwait700-blinkon400-blinkoff250,r-cr-o:hor20"
 
@@ -29,6 +34,10 @@ opt.showmode = false
 opt.laststatus = 3
 
 opt.termguicolors = true
+-- Every float that does not ask for a border explicitly reads this: LSP hover,
+-- diagnostics, blink's menu and docs. It is why vim.diagnostic.config no longer
+-- sets one of its own.
+opt.winborder = "rounded"
 opt.cursorline = true
 opt.colorcolumn = "100"
 opt.scrolloff = 8
@@ -41,6 +50,11 @@ opt.splitbelow = true
 
 opt.swapfile = false
 opt.undofile = true
+opt.confirm = true
+
+-- append, not set: the default "clean" is what drops jumplist entries for
+-- buffers that no longer exist.
+opt.jumpoptions:append("view")
 
 opt.list = true
 opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
@@ -54,8 +68,10 @@ require("config.theme")
 require("config.keymaps")
 require("config.treesitter")
 require("config.ui")
+require("config.git")
 require("config.completion")
 require("config.lsp")
 require("config.format")
 require("config.dap")
+require("config.markdown")
 require("config.autocmds")

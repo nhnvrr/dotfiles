@@ -35,15 +35,12 @@ vim.keymap.set("n", "<leader>fk", builtin.keymaps, { desc = "Keymaps" })
 vim.keymap.set("n", "<leader>fd", builtin.diagnostics, { desc = "Diagnostics (project)" })
 vim.keymap.set("n", "<leader>h", builtin.help_tags, { desc = "Help tags" })
 
--- Built per family and mode rather than left on lualine's "auto", which would
--- follow the colorscheme by itself: the loop needs a real table to strip the bold
--- out of the mode block, matching the is_bold sweep in eza/theme.yml. The map
--- lives in config.theme, which owns which family is live.
-local theme_cfg = require("config.theme")
-
+-- Named rather than left on lualine's "auto", which would follow the colorscheme
+-- by itself: the loop needs a real table to strip the bold out of the mode block,
+-- matching the is_bold sweep in eza/theme.yml. lualine ships this one, so the
+-- statusline does not depend on the colorscheme plugin being loaded first.
 local function lualine_theme()
-  local name = theme_cfg.LUALINE[theme_cfg.family][theme_cfg.mode()]
-  local theme = require("lualine.themes." .. name)
+  local theme = require("lualine.themes.nord")
   for _, mode in pairs(theme) do
     mode.a.gui = nil
   end
@@ -63,6 +60,16 @@ local lualine_config = {
     lualine_c = {
       { "filename", path = 1, symbols = { modified = " [+]", readonly = " ", unnamed = "[No Name]" } },
       { "diagnostics", sources = { "nvim_lsp" } },
+      -- gitsigns has already computed this per buffer. lualine's own source
+      -- shells out to `git diff` instead, once per redraw.
+      { "diff",
+        source = function()
+          local d = vim.b.gitsigns_status_dict
+          if d then
+            return { added = d.added, modified = d.changed, removed = d.removed }
+          end
+        end,
+        symbols = { added = "+", modified = "~", removed = "-" } },
     },
     lualine_x = {
       -- Only renders while a session is live, so it costs nothing the rest of
@@ -78,15 +85,3 @@ local lualine_config = {
 }
 
 require("lualine").setup(lualine_config)
-
--- nvim learns the background from the terminal asynchronously, so the theme built
--- above can be the wrong half of the pair. Re-passing the whole table and not just
--- options is load-bearing: setup() merges with lualine's defaults, so options on
--- their own would wipe the sections.
-vim.api.nvim_create_autocmd("ColorScheme", {
-  pattern = { "solarized", "gruvbox", "onedark", "onelight" },
-  callback = function()
-    lualine_config.options.theme = lualine_theme()
-    require("lualine").setup(lualine_config)
-  end,
-})
