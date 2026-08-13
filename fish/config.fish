@@ -16,7 +16,7 @@ function req --description 'curl with sane flags; pretty-prints JSON responses'
     end
 end
 
-function __tx --argument-names name --description 'Attach or create a fixed tmux session'
+function __ws --argument-names name --description 'Focus or create a fixed herdr workspace'
     set -l dir
     switch $name
         case dev
@@ -26,26 +26,35 @@ function __tx --argument-names name --description 'Attach or create a fixed tmux
         case side
             set dir $HOME/side
         case '*'
-            echo "__tx: unknown session '$name'" >&2
+            echo "__ws: unknown workspace '$name'" >&2
             return 1
     end
 
-    tmux has-session -t=$name 2>/dev/null
-    or tmux new-session -d -s $name -c $dir
+    if test "$HERDR_ENV" != 1
+        echo "__ws: not inside herdr" >&2
+        return 1
+    end
 
-    # Attaching nested breaks; inside tmux you have to switch instead.
-    if test -z "$TMUX"
-        tmux attach-session -t $name
+    # The label is the routing key __ctx reads, so focus by label rather than
+    # by number — workspace numbers shift as workspaces are closed.
+    set -l id (herdr workspace list 2>/dev/null \
+        | jq -r --arg l $name '.result.workspaces[] | select(.label == $l) | .workspace_id')
+
+    if test -n "$id"
+        herdr workspace focus $id >/dev/null
     else
-        tmux switch-client -t $name
+        herdr workspace create --label $name --cwd $dir --focus >/dev/null
     end
 end
 
-function claude --description 'Claude Code, config picked by tmux session'
-    # display-message answers outside tmux too, falling back to the last active
-    # session, so $TMUX is what decides — not the exit status.
-    set -l session
-    test -n "$TMUX"; and set session (tmux display-message -p '#S' 2>/dev/null)
+function __ctx --description 'Enclosing herdr workspace label'
+    test "$HERDR_ENV" = 1; or return
+    herdr workspace get $HERDR_WORKSPACE_ID 2>/dev/null \
+        | jq -r '.result.workspace.label // empty'
+end
+
+function claude --description 'Claude Code, config picked by the enclosing session'
+    set -l session (__ctx)
 
     # Personal leaves it unset on purpose: Claude hashes the config dir into the
     # Keychain item name only when the variable is set, so exporting it forks
@@ -70,10 +79,7 @@ if status is-interactive
     # ~/.aws/config has no [default] profile: without this every aws command
     # outside the work session fails with NoCredentials.
     set -gx AWS_PROFILE personal
-    if test -n "$TMUX"
-        set -l session (tmux display-message -p '#S' 2>/dev/null)
-        test "$session" = work; and set -gx AWS_PROFILE work
-    end
+    test "$(__ctx)" = work; and set -gx AWS_PROFILE work
 
     abbr -a gc 'git commit -m'
     abbr -a gco 'git checkout'
@@ -83,9 +89,9 @@ if status is-interactive
 
     alias code 'code --new-window'
     alias e code
-    alias dev '__tx dev'
-    alias work '__tx work'
-    alias side '__tx side'
+    alias dev '__ws dev'
+    alias work '__ws work'
+    alias side '__ws side'
 
     # Mandatory: on macOS eza reads ~/Library/Application Support/eza and
     # ignores XDG_CONFIG_HOME.
@@ -104,7 +110,7 @@ if status is-interactive
     set -gx FZF_CTRL_T_COMMAND $FZF_DEFAULT_COMMAND
     set -gx FZF_ALT_C_COMMAND 'fd --type d --hidden --follow --exclude .git'
 
-    # Colours by ANSI name, not hex: the Terminal profile is the single source.
+    # Colours by ANSI name, not hex: alacritty.toml's palette is the single source.
     set -gx FZF_DEFAULT_OPTS '
       --height 40% --layout=reverse --border=rounded
       --bind="ctrl-/:toggle-preview,ctrl-y:execute-silent(echo {} | pbcopy)+abort"
@@ -180,7 +186,7 @@ if status is-interactive
     end
 
     # The other direction needs a long escape timeout, which delays every
-    # Alt-<key> too — with "Use Option as Meta Key" the terminal sends those as
+    # Alt-<key> too — with macos-option-as-alt the terminal sends those as
     # ESC+key.
     set -g fish_key_bindings fish_hybrid_key_bindings
 
@@ -191,9 +197,10 @@ if status is-interactive
     set -g fish_cursor_visual block
     set -g fish_cursor_external line blink
 
-    # tmux catches the bell: monitor-bell flags the window in the status bar.
+    # herdr catches the bell: [ui.toast] and [ui.sound] raise it against the
+    # workspace it came from, so a background one still reaches you.
     set -g _notify_threshold 10000
-    set -g _notify_ignore nvim less man ssh tmux claude fzf watch top tail dev work side
+    set -g _notify_ignore nvim less man ssh claude fzf watch top tail dev work side
 
     function _notify_long_command --on-event fish_postexec --description 'Bell after a long command'
         test -n "$argv[1]"; or return

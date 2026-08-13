@@ -1,0 +1,39 @@
+[main]
+# iredis has no colour section: its highlighting comes from pygments defaults
+# and is not themeable from here. It is the one client in the repo that does
+# not resolve through the sixteen ANSI slots.
+
+# Same pager flags as psqlrc: -S no wrapping, -R keep colours, -X don't clear
+# on exit, -F skip the pager when the result fits on one screen.
+enable_pager = True
+pager = less -SRXF
+
+# Confirm before FLUSHALL, KEYS and the rest of the footguns.
+warning = True
+
+# Off by default it would run any unrecognised input as a shell command, so a
+# typo'd Redis command silently executes in the shell instead of erroring.
+shell = False
+
+# Values come back as text rather than byte reprs. The trap is genuinely
+# binary values (packed structs, compressed blobs) — those print as mojibake.
+# Drop this line to inspect them.
+decode = utf-8
+
+completion_casing = upper
+completer_max = 300
+newbie_mode = False
+rainbow = False
+bottom_bar = True
+greetings = False
+
+retry_times = 2
+socket_keepalive = True
+
+# install.sh creates this directory, same as it does for psql and pgcli.
+history_location = ~/.local/state/iredis/history
+
+[alias_dsn]
+# Only passwordless local connections belong in a versioned file. Anything with
+# credentials goes in ~/.iredisrc.local or an env var — same rule as ~/.pgpass.
+local = redis://localhost:6379/0

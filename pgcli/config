@@ -9,7 +9,7 @@ vi = True
 
 less_chatty = True
 
-syntax_style = solarized-dark
+syntax_style = nord
 
 null_string = 'Ø'
 table_format = psql_unicode

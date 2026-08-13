@@ -1,0 +1,86 @@
+# theme: solarized
+# mode: light
+#
+# Deployed as ~/.config/alacritty/theme.toml by the `theme` fish function, which
+# reads the two markers above to know what is live. Never edit the deployed copy:
+# the next switch overwrites it.
+#
+# Solarized (Ethan Schoonover), the light half. The sixteen slots are the single
+# source of truth for the whole stack: starship, eza, bat, delta, fzf and pgcli all
+# ask by ANSI name, so editing a line here moves every one of them at once.
+#
+# The weakest of the six halves: body text is 4.13:1, under AA, and green,
+# yellow and cyan all sit near 2.95:1. It is real Solarized — the eight accents
+# are the same hexes as the dark half, which is the palette's selling point and
+# also why they cannot clear 4.5:1 against both ends. Reach for gruvbox or one
+# in hard daylight.
+#
+# Two things below are NOT upstream, because they are structural rather than
+# cosmetic: slot 8 and the four chrome tables. Both are explained where they sit.
+# Every ratio in this file is measured against this file's own background.
+
+[window]
+decorations_theme_variant = "Light"
+
+[colors.primary]
+background = "#fdf6e3"   # base3
+foreground = "#657b83"   # base00 — 4.13:1
+
+[colors.cursor]
+text = "#fdf6e3"
+cursor = "#2aa198"
+
+# CellForeground, not a hex: it keeps whatever colour the cell already had, so
+# selecting text does not flatten syntax highlighting.
+[colors.selection]
+text = "CellForeground"
+background = "#eee8d5"   # base2, foreground over it 3.64:1
+
+[colors.normal]
+# Slot 0 is a surface here and never text: nothing in this stack paints it as a
+# foreground, pgcli asks for it only as `bg:ansiblack`.
+black = "#eee8d5"   # base2 — 1.14:1 off the background
+red = "#dc322f"   # 4.29:1
+green = "#859900"   # 2.97:1
+yellow = "#b58900"   # 2.98:1
+blue = "#268bd2"   # 3.41:1
+magenta = "#d33682"   # 4.21:1
+cyan = "#2aa198"   # 2.93:1
+white = "#073642"   # base02 — 12.05:1
+
+[colors.bright]
+# Slot 8 is the one slot with two jobs: dim text (comments in fish and bat,
+# autosuggestion, starship, fzf's info and border) and a background (fzf's bg+,
+# fish's selection, pgcli's selected row). No palette publishes a value chosen for
+# both, so this is the one slot that cannot just be transcribed.
+# base0 seeded this, then lightness moved to the crossover of the two roles,
+# holding hue and saturation: 3.73:1 as text and 3.73:1 with slot 15 over it.
+black = "#708285"
+red = "#dc322f"   # 4.29:1
+green = "#859900"   # 2.97:1
+yellow = "#b58900"   # 2.98:1
+blue = "#268bd2"   # 3.41:1
+magenta = "#d33682"   # 4.21:1
+cyan = "#2aa198"   # 2.93:1
+white = "#002b36"   # base03 — 13.92:1
+
+# Alacritty's own UI does not read the sixteen slots; without these four tables
+# the search bar, hint labels and footer paint in its stock base16. The block
+# stays the family's own accent and the readable one of the pair goes on top,
+# which lands on a dark tone for the light halves and a light one for the dark.
+[colors.search]
+matches = { foreground = "#002b36", background = "#b58900" }        # 4.68:1
+focused_match = { foreground = "#002b36", background = "#2aa198" }   # 4.75:1
+
+[colors.hints]
+start = { foreground = "#002b36", background = "#b58900" }   # 4.68:1
+end = { foreground = "#002b36", background = "#268bd2" }     # 4.08:1  <- the accent is mid-tone; this is its best pair
+
+[colors.footer_bar]
+foreground = "#002b36"
+background = "#2aa198"   # 4.75:1
+
+# Only the colour lives here; animation and duration stay in alacritty.toml,
+# which merges per field.
+[bell]
+color = "#2aa198"

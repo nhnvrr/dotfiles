@@ -1,0 +1,60 @@
+[general]
+live_config_reload = true
+# Every colour lives in the imported file, never here. Imports load first and
+# the importing file loads last, and the last one wins — so a colour table left
+# in this file would silently override whatever `theme` deployed, and the toggle
+# would look like it does nothing. The path is deployed by `theme`, not linked
+# to the repo: it is mutable state, and a symlink would have the toggle writing
+# back into the working tree.
+import = ["~/.config/alacritty/theme.toml"]
+
+[terminal]
+shell = { program = "/opt/homebrew/bin/fish", args = ["--login"] }
+
+[window]
+# SimpleFullscreen and not Fullscreen: the native one opens a Space of its own,
+# and there Hammerspoon's cmd+` stops hiding the window reliably.
+startup_mode = "SimpleFullscreen"
+decorations = "Buttonless"
+padding = { x = 1, y = 1 }
+dynamic_padding = true
+opacity = 1.0
+# fish sends its Alt-<key> bindings as ESC+key; without this they arrive as
+# composed characters instead.
+option_as_alt = "Both"
+
+[font]
+normal = { family = "MonaspiceAr Nerd Font Mono", style = "Regular" }
+size = 12
+# There is no font-feature setting and none is needed: Alacritty does no
+# shaping, so Monaspace's calt texture healing — which drifts eza's icon
+# columns elsewhere — can never fire.
+offset = { x = 0, y = 1 }
+
+[cursor]
+style = { shape = "Beam", blinking = "On" }
+# 0 = never stop blinking. The default gives up after five seconds.
+blink_timeout = 0
+
+[selection]
+save_to_clipboard = true
+
+[mouse]
+hide_when_typing = true
+
+# All that is left of the bell: there is no Dock attention and no title marker
+# here, so the \a from fish's _notify_long_command shows as a flash.
+[bell]
+animation = "EaseOutExpo"
+duration = 90
+
+[keyboard]
+bindings = [
+  # cmd+w is Quit in the macOS defaults, not "close tab": herdr is not a
+  # daemon, so one slip takes every agent with it.
+  { key = "W", mods = "Command", action = "None" },
+  # herdr already multiplexes; a tab bar on top of it only confuses.
+  { key = "T", mods = "Command", action = "None" },
+  # Default here is ToggleFullscreen, the native one, which opens a Space.
+  { key = "F", mods = "Command|Control", action = "ToggleSimpleFullscreen" },
+]

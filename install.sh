@@ -112,77 +112,75 @@ mkdir -p "${HOME}/Develop/go/bin"
 echo "Linking config files..."
 link_file "${CONFIG_DIR}/fish/config.fish"       "${HOME}/.config/fish/config.fish"
 link_file "${CONFIG_DIR}/fish/conf.d/00-env.fish" "${HOME}/.config/fish/conf.d/00-env.fish"
+link_file "${CONFIG_DIR}/fish/conf.d/10-colors.fish" "${HOME}/.config/fish/conf.d/10-colors.fish"
 link_file "${CONFIG_DIR}/fish/completions/aws.fish" "${HOME}/.config/fish/completions/aws.fish"
+# The day/night switch. It resolves the repo from this symlink, three levels up,
+# so it has to be linked and not copied.
+link_file "${CONFIG_DIR}/fish/functions/theme.fish" "${HOME}/.config/fish/functions/theme.fish"
 link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
 link_file "${CONFIG_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"
 link_file "${CONFIG_DIR}/eza/theme.yml" "${HOME}/.config/eza/theme.yml"
-link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.tmux.conf"
-link_file "${CONFIG_DIR}/nvim/init.lua"   "${HOME}/.config/nvim/init.lua"
+# The whole directory, not init.lua alone: the config is modules under
+# nvim/lua/config/ now and a per-file list would need a line for each new one.
+# vim.pack also writes nvim-pack-lock.json here, so plugin revisions end up
+# versioned — the same deliberate side effect as ~/.gitconfig being a symlink.
+link_file "${CONFIG_DIR}/nvim" "${HOME}/.config/nvim"
 link_file "${CONFIG_DIR}/hammerspoon/init.lua" "${HOME}/.hammerspoon/init.lua"
+link_file "${CONFIG_DIR}/alacritty/alacritty.toml" "${HOME}/.config/alacritty/alacritty.toml"
+# The six theme files. Linked as a directory: `theme` copies one of them over
+# ~/.config/alacritty/theme.toml, which is mutable state and deliberately NOT a
+# symlink — a link into the repo would have every switch write in the working tree.
+link_file "${CONFIG_DIR}/alacritty/themes" "${HOME}/.config/alacritty/themes"
+# herdr is not linked, unlike every other config here: `theme` rewrites its
+# dark_name/light_name per family, so the deployed file is a derived copy. Only
+# config.toml would have been linked anyway — herdr keeps its sockets, logs,
+# session.json and installed plugins in the same directory, and none of that is
+# config.
+# The theme goes in by name, not by path — btop.conf asks for "current" and btop
+# looks it up under ~/.config/btop/themes. That name is not linked here and is not
+# a file in this repo either: `theme` generates it from the sixteen slots of
+# whichever palette is live, so there is one template instead of six near-copies.
+# The template itself is read straight out of the repo and deliberately not linked
+# in here — btop lists every *.theme in this directory, and one full of unresolved
+# placeholders would show up as a selectable theme.
+# Linking the config is only safe because it sets save_config_on_exit = false;
+# otherwise btop would write back through the symlink every time it is closed.
+link_file "${CONFIG_DIR}/btop/btop.conf" "${HOME}/.config/btop/btop.conf"
 # psql won't create this directory and history fails silently without it.
 mkdir -p "${HOME}/.local/state/psql"
 link_file "${CONFIG_DIR}/psql/psqlrc" "${HOME}/.psqlrc"
-# Same trap.
+# Same trap. Not linked, unlike every other config here: syntax_style is the one
+# setting in the stack that is neither an ANSI slot nor a path — a pygments style
+# name resolved inside Python — so `theme` deploys a copy with that single line
+# rewritten. The cost is that editing pgcli/config needs a `theme` run to land.
 mkdir -p "${HOME}/.local/state/pgcli"
-link_file "${CONFIG_DIR}/pgcli/config" "${HOME}/.config/pgcli/config"
+# Same trap, for both redis clients.
+mkdir -p "${HOME}/.local/state/iredis" "${HOME}/.local/state/redis"
+link_file "${CONFIG_DIR}/redis/iredisrc" "${HOME}/.iredisrc"
 if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
   link_file "${CONFIG_DIR}/gh/config.yml" "${HOME}/.config/gh/config.yml"
 fi
 
-TERMINAL_PROFILE="Dotfiles"
-TERMINAL_PROFILE_FILE="${CONFIG_DIR}/terminal/${TERMINAL_PROFILE}.terminal"
-if [[ -f "${TERMINAL_PROFILE_FILE}" ]]; then
-  echo "Importing the ${TERMINAL_PROFILE} Terminal profile..."
-  # Not `defaults write`: Terminal.app holds its settings in memory and rewrites
-  # the whole plist on quit, so a direct write is lost the moment the window
-  # running this script closes. AppleScript goes through the app itself.
-  # A profile cannot be deleted while it is the default one, hence the swap.
-  osascript <<APPLESCRIPT >/dev/null
-tell application "Terminal"
-  if name of settings sets contains "${TERMINAL_PROFILE}" then
-    set default settings to settings set "Basic"
-    set startup settings to settings set "Basic"
-    delete settings set "${TERMINAL_PROFILE}"
-  end if
-end tell
-APPLESCRIPT
-  # `open` is what imports it — Terminal has no AppleScript verb for that. It
-  # also opens a window on the freshly imported profile.
-  open "${TERMINAL_PROFILE_FILE}"
-  osascript <<APPLESCRIPT >/dev/null
-tell application "Terminal"
-  repeat 50 times
-    if name of settings sets contains "${TERMINAL_PROFILE}" then exit repeat
-    delay 0.1
-  end repeat
-  set default settings to settings set "${TERMINAL_PROFILE}"
-  set startup settings to settings set "${TERMINAL_PROFILE}"
-end tell
-APPLESCRIPT
-else
-  echo "  no ${TERMINAL_PROFILE}.terminal in the repo; leaving Terminal.app alone."
-  echo "  → Export one from Terminal → Settings → Profiles → ⚙ → Export…"
-fi
+# No terminfo step here on purpose: TERM=alacritty is missing from the system
+# database too, but the cask declares ~/.terminfo/61/alacritty as one of its
+# own artifacts, so `brew bundle` symlinks it out of the bundle already.
 
 # Orphans from previous setups. Removed only if they point into this repo, so a
 # hand-written file at any of these paths stays untouched.
 for stale in "${HOME}/.zshrc" \
              "${HOME}/.zprofile" \
+             "${HOME}/.tmux.conf" \
              "${HOME}/.config/ghostty/config" \
-             "${HOME}/.config/alacritty/alacritty.toml" \
-             "${HOME}/.config/atuin/config.toml"; do
+             "${HOME}/.config/atuin/config.toml" \
+             "${HOME}/.config/btop/themes/nord-slots.theme" \
+             "${HOME}/.config/btop/themes/nord-slots-light.theme" \
+             "${HOME}/.config/herdr/config.toml"; do
   if [[ -L "${stale}" && "$(readlink "${stale}")" == "${CONFIG_DIR}"/* ]]; then
     rm -f "${stale}"
     echo "  removed stale symlink ${stale}"
   fi
 done
 rm -f "${HOME}/.cache/zsh/init.zsh"
-rmdir "${HOME}/.config/ghostty" 2>/dev/null || true
-
-# Copied out of Ghostty's bundle by a previous run of this script, not a
-# symlink. Terminal.app reports xterm-256color, which the system terminfo has.
-rm -f "${HOME}/.terminfo/78/xterm-ghostty" "${HOME}/.terminfo/67/ghostty"
-rmdir "${HOME}"/.terminfo/* "${HOME}/.terminfo" 2>/dev/null || true
 
 for broken in "${HOME}/.zshenv" "${HOME}/.bashrc" "${HOME}/.bash_profile" "${HOME}/.profile"; do
   if [[ -L "${broken}" && ! -e "${broken}" ]]; then
@@ -203,9 +201,6 @@ defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
 defaults write com.apple.finder AppleShowAllExtensions -bool true
 defaults write com.apple.finder AppleShowAllFiles -bool true
 defaults write NSGlobalDomain AppleShowAllExtensions -bool true
-# Restored windows land before Hammerspoon's launch watcher sees the app, and it
-# tiles the wrong one.
-defaults write com.apple.Terminal NSQuitAlwaysKeepsWindows -bool false
 mkdir -p "${HOME}/Screenshots"
 defaults write com.apple.screencapture location "${HOME}/Screenshots"
 defaults write com.apple.screencapture type -string "png"
@@ -228,6 +223,17 @@ else
     echo "Changing login shell to ${FISH_BIN} (chsh will prompt for your password)..."
     chsh -s "${FISH_BIN}"
   fi
+fi
+
+# Seeds alacritty's theme.toml, btop's generated current.theme, pgcli's config and
+# herdr's, all through the same code path the switch uses, so there is only ever
+# one. Keeps whatever is already live; on a machine with nothing, gruvbox dark —
+# the half with the strongest body text of the six, 10.75:1.
+if [[ -n "${FISH_BIN}" ]]; then
+  echo "Deploying the terminal theme..."
+  THEME_LIVE="$("${FISH_BIN}" -c theme 2>/dev/null || true)"
+  [[ -n "${THEME_LIVE}" ]] || THEME_LIVE="gruvbox dark"
+  "${FISH_BIN}" -c "theme ${THEME_LIVE}"
 fi
 
 echo "macOS standalone setup complete. Happy Coding 🧉"

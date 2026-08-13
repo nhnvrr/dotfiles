@@ -22,6 +22,18 @@ set -gx GOPATH $HOME/Develop/go
 set -gx GOPRIVATE github.com/nhnvrr
 set -gx PNPM_HOME $HOME/Library/pnpm
 
+# aws-cli v2 pipes every result through less by default, which turns a one-line
+# answer into a pager. These live here rather than in a [default] profile in
+# ~/.aws/config on purpose: creating that profile would remove the NoCredentials
+# error that forces AWS_PROFILE to be explicit. See aws/config.example.
+set -gx AWS_PAGER ""
+set -gx AWS_RETRY_MODE standard
+set -gx AWS_MAX_ATTEMPTS 3
+
+# redis-cli writes ~/.rediscli_history otherwise. install.sh creates the
+# directory; without it the history is dropped silently, same as psql.
+set -gx REDISCLI_HISTFILE $HOME/.local/state/redis/history
+
 # -g, not -U: $fish_user_paths is state outside the repo and drifts.
 fish_add_path -g $GOPATH/bin /opt/homebrew/bin /opt/homebrew/sbin \
     /opt/homebrew/opt/libpq/bin $HOME/.bun/bin $HOME/.local/bin \

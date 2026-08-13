@@ -11,8 +11,8 @@ if not hs.accessibilityState(true) then
 end
 
 local APPS = {
-  chrome    = "com.google.Chrome",
-  terminal  = "com.apple.Terminal",
+  helium    = "net.imput.helium",
+  alacritty = "org.alacritty",
   vscode    = "com.microsoft.VSCode",
   tableplus = "com.tinyapp.TablePlus",
 }
@@ -111,13 +111,13 @@ local function placeApp(bundleID, rect, onPlaced)
   hs.timer.doAfter(9, function() claimed[bundleID] = nil end)
 end
 
-local RIGHT_PANE = APPS.chrome
+local RIGHT_PANE = APPS.helium
 local RIGHT_RATIO = 0.3
 
 -- The width test is not decoration: a full-screen window is also flush right
 -- and full height, and taking it for the pane leaves the left one a negative
--- width. Not an equality test either — Chrome lands on its own minimum, wider
--- than the nominal ratio.
+-- width. Not an equality test either — Helium lands on its own minimum, wider
+-- than the nominal ratio, like every Chromium.
 local function rightPaneIsPlaced(win)
   local f = hs.screen.mainScreen():frame()
   local r = win:frame()
@@ -126,7 +126,7 @@ local function rightPaneIsPlaced(win)
      and r.w < f.w / 2
 end
 
--- Flush right, full height, at whatever width it actually took: Chrome has a
+-- Flush right, full height, at whatever width it actually took: Helium has a
 -- minimum width and refuses the nominal ratio. Tested on the right edge rather
 -- than the whole rect, so that refusal doesn't read as "not placed" forever.
 local function withRightPane(cb)
@@ -169,6 +169,9 @@ hs.application.watcher.new(function(_, event, app)
   if event ~= hs.application.watcher.launched then return end
   local bid = app:bundleID()
   if not bid or claimed[bid] or bid == "org.hammerspoon.Hammerspoon" then return end
+  -- Alacritty starts in SimpleFullscreen, which is wider and taller than the
+  -- frame below. Placing it here would shrink it a moment after it opens.
+  if bid == APPS.alacritty then return end
   if app:kind() ~= 1 then return end
 
   local rect = frameFor(0, 0, 1, 1)
@@ -216,15 +219,17 @@ hs.hotkey.bind({ "cmd", "alt" }, "0", function()
 end)
 
 hs.hotkey.bind({ "cmd", "alt" }, "1", function() setLeftPane(APPS.vscode) end)
-hs.hotkey.bind({ "cmd", "alt" }, "2", function() setLeftPane(APPS.terminal) end)
+-- Tiling Alacritty takes it out of SimpleFullscreen. That is the point of
+-- asking; cmd+ctrl+f inside it puts it back.
+hs.hotkey.bind({ "cmd", "alt" }, "2", function() setLeftPane(APPS.alacritty) end)
 hs.hotkey.bind({ "cmd", "alt" }, "3", function() setLeftPane(APPS.tableplus) end)
 -- Global on purpose, so it costs cmd+` its cycle-windows in every other app.
 hs.hotkey.bind({ "cmd" }, "`", function()
-  local app = hs.application.get(APPS.terminal)
+  local app = hs.application.get(APPS.alacritty)
   if app and app:isFrontmost() then
     app:hide()
   else
-    hs.application.launchOrFocusByBundleID(APPS.terminal)
+    hs.application.launchOrFocusByBundleID(APPS.alacritty)
   end
 end)
 
