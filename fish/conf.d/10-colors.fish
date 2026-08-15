@@ -1,5 +1,5 @@
-# Colours by ANSI name, never hex: alacritty.toml's sixteen slots are the single
-# source of truth, same rule the fzf block in config.fish follows.
+# Colours by ANSI name, never hex: the sixteen slots in ghostty/config are the
+# single source of truth, same rule the fzf block in config.fish follows.
 
 # The 10- prefix is load-bearing: conf.d is sourced sorted by name and this has
 # to land after 00-env.fish.
@@ -8,7 +8,8 @@
 # global here wins over anything fish_config left behind in fish_variables, and
 # the repo stays the source of truth instead of that file.
 
-# No --bold anywhere, matching the is_bold sweep in eza/theme.yml.
+# No --bold anywhere: weight is not one of the sixteen slots, so it is the one
+# attribute the profile cannot keep consistent across the stack.
 
 set -g fish_color_normal          normal
 set -g fish_color_command         blue

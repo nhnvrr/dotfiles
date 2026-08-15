@@ -1,49 +1,22 @@
--- CAREFUL with scripts: psql reads this file even non-interactively. A script
--- parsing output (`psql -t -A -c ...`) will see the 'Ø' for NULL and the
--- unicode format below. For scripts, use `psql -X`.
 
 \set QUIET 1
-
---   %n user · %m host · %/ database · %# '=' normal, '#' if superuser
 \set PROMPT1 '%[%033[36m%]%n%[%033[0m%]@%[%033[1;33m%]%m%[%033[0m%]/%[%033[32m%]%/%[%033[0m%]%[%033[1m%]%#%[%033[0m%] '
 \set PROMPT2 '%[%033[2m%]...%[%033[0m%]%# '
-
 \timing on
-
 \pset null 'Ø'
-
 \pset linestyle unicode
 \pset border 2
-
---   -S  no wrapping → wide tables scroll sideways
---   -R  keep colors
---   -X  don't clear the screen on exit
---   -F  skip the pager when the result fits on one screen
 \setenv PAGER 'less -SRXF'
 \pset pager on
-
--- install.sh creates ~/.local/state/psql/ — without it this fails silently.
 \set HISTFILE ~/.local/state/psql/history-:DBNAME
 \set HISTSIZE 5000
 \set HISTCONTROL ignoredups
-
 \set COMP_KEYWORD_CASE upper
-
 \set ON_ERROR_ROLLBACK interactive
-
 \set VERBOSITY verbose
-
--- Shortcuts: invoked as :name, no backslash or semicolon. Interactive sessions
--- or stdin only — `psql -c ':conns'` doesn't interpolate variables.
-
 \set conns 'SELECT pid, usename, application_name, client_addr, state, wait_event_type, now() - query_start AS duration, left(query, 60) AS query FROM pg_stat_activity WHERE pid <> pg_backend_pid() AND state <> ''idle'' ORDER BY duration DESC NULLS LAST;'
-
 \set blocking 'SELECT blocked.pid AS blocked_pid, blocked.query AS blocked_query, blocking.pid AS blocking_pid, blocking.query AS blocking_query FROM pg_stat_activity blocked JOIN pg_stat_activity blocking ON blocking.pid = ANY(pg_blocking_pids(blocked.pid)) WHERE cardinality(pg_blocking_pids(blocked.pid)) > 0;'
-
 \set locks 'SELECT l.pid, l.locktype, l.mode, l.granted, c.relname, left(a.query, 50) AS query FROM pg_locks l LEFT JOIN pg_class c ON c.oid = l.relation LEFT JOIN pg_stat_activity a ON a.pid = l.pid WHERE l.pid <> pg_backend_pid() ORDER BY l.granted, l.pid;'
-
 \set sizes 'SELECT schemaname AS schema, relname AS table, pg_size_pretty(pg_total_relation_size(relid)) AS total, pg_size_pretty(pg_relation_size(relid)) AS data, pg_size_pretty(pg_indexes_size(relid)) AS indexes FROM pg_catalog.pg_statio_user_tables ORDER BY pg_total_relation_size(relid) DESC LIMIT 25;'
-
 \set whoami 'SELECT current_user AS user, current_database() AS database, inet_server_addr() AS host, version() AS version;'
-
 \unset QUIET

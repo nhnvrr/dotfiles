@@ -6,18 +6,9 @@ shell_mode = "login"
 new_cwd = "follow"
 
 [keys]
-# The stock default, free now that tmux is not the outer layer. Two things it
-# takes inside herdr panes: nvim's CTRL-B, which is page up, and fish's
-# backward-char. Run herdr nested in tmux and it needs pressing twice.
 prefix = "ctrl+b"
-# Raw key, no prefix accepted, and only ever live under `herdr --remote` — where
-# the agent runs on the far side and cannot read this machine's clipboard. It
-# costs fish nothing locally, which is why it is left at the stock ctrl+v.
-remote_image_paste = "ctrl+v"
+remote_image_paste = "cmd+v"
 
-# Herdr ships these six unbound, and they are the sidebar's whole point: moving
-# between workspaces and between agents without stopping at the picker.
-# Workspaces and agents are both vertical lists, hence shift+j/k over h/l.
 next_workspace = "prefix+shift+j"
 previous_workspace = "prefix+shift+k"
 switch_workspace = "prefix+shift+1..9"
@@ -25,28 +16,37 @@ next_agent = "prefix+a"
 previous_agent = "prefix+shift+a"
 focus_agent = "prefix+alt+1..9"
 
-# Swapped against herdr's own defaults, which put settings on s and goto on g.
-# s is the jump key in tmux — prefix+s is its session picker — and that is the
-# muscle memory this machine still has. Settings is the rarer of the two, so it
-# takes the key that loses its mnemonic. Both names are real config keys, not
-# just template comments: `herdr config check` reports an invalid *binding* for
-# them rather than an unknown *key*, which is how the two cases are told apart.
 goto = "prefix+s"
 settings = "prefix+g"
 
 [ui]
-# ctrl+b c opens the tab straight away; the name prompt is what made it slow.
 prompt_new_tab_name = false
 copy_on_select = true
 tab_bar_position = "top"
-# By ANSI name and not the hex it used to be, so it resolves through the same
-# sixteen slots as everything else and follows the day/night switch. herdr's own
-# default for this key is a name too.
-accent = "cyan"
-# The agents are the reason this is installed, so sort them by attention.
-agent_panel_sort = "priority"
+agent_panel_sort = "spaces"
 
 show_agent_labels_on_pane_borders = true
+accent = "green"
+
+[ui.sidebar.agents]
+rows = [
+  [
+    { token = "state_icon" },
+    { token = "workspace", bold = false },
+    { token = "tab", bold = false },
+  ],
+  [{ token = "agent", bold = false }],
+]
+
+[ui.sidebar.spaces]
+rows = [
+  [{ token = "state_icon" }, { token = "workspace", bold = false }],
+  [
+    { token = "branch", bold = false },
+    { token = "git_status", bold = false },
+  ],
+]
+
 [ui.toast]
 delivery = "herdr"
 
@@ -54,21 +54,8 @@ delivery = "herdr"
 enabled = true
 
 [theme]
-# herdr ships a native nord, which is more faithful to the palette than deriving
-# its chrome from the sixteen slots would be.
-#
-# auto_switch deliberately OFF, which is the opposite of how this started, and the
-# part worth keeping written down. auto_switch has herdr pick the half by asking
-# the terminal for its background — and it did not follow, so the half had to be
-# changed by hand inside herdr. That is what bites: changing it in the UI makes
-# herdr write its choice back here as `name` and set auto_switch = false itself,
-# and from then on herdr is pinned for good. Naming one theme outright has nothing
-# to detect and nothing to lose a race with. There is no second half to pick
-# anyway — nord is dark only.
 auto_switch = false
-name = "nord"
+name = "terminal"
 
 [experimental]
-# herdr inside tmux is not herdr inside herdr, but if it ever refuses to start
-# in a tmux pane this is the switch that lets it.
 allow_nested = false

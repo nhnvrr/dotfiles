@@ -1,59 +1,15 @@
 # Environment and $PATH live in conf.d/00-env.fish, sourced before this file.
 
-# Deliberately no ~/.curlrc: that file is read by EVERY curl invocation,
-# including Homebrew's installer and any third-party script.
-function req --description 'curl with sane flags; pretty-prints JSON responses'
-    set -l out (curl --silent --show-error --location --compressed \
-        --connect-timeout 10 --max-time 60 --globoff $argv | string collect)
-    # pipestatus[1] is curl's exit code, not jq's.
-    set -l code $pipestatus[1]
-    test $code -ne 0; and return $code
-
-    if command -q jq; and printf '%s' $out | jq -e . >/dev/null 2>&1
-        printf '%s' $out | jq .
-    else
-        printf '%s\n' $out
+# The directory is the only thing that says which account a shell belongs to,
+# so it is what routes AWS_PROFILE and CLAUDE_CONFIG_DIR.
+function __ctx --description 'work under ~/work, empty everywhere else'
+    if string match -q -- "$HOME/work" "$PWD"
+        or string match -q -- "$HOME/work/*" "$PWD"
+        echo work
     end
 end
 
-function __ws --argument-names name --description 'Focus or create a fixed herdr workspace'
-    set -l dir
-    switch $name
-        case dev
-            set dir $HOME/develop
-        case work
-            set dir $HOME/work
-        case side
-            set dir $HOME/side
-        case '*'
-            echo "__ws: unknown workspace '$name'" >&2
-            return 1
-    end
-
-    if test "$HERDR_ENV" != 1
-        echo "__ws: not inside herdr" >&2
-        return 1
-    end
-
-    # The label is the routing key __ctx reads, so focus by label rather than
-    # by number — workspace numbers shift as workspaces are closed.
-    set -l id (herdr workspace list 2>/dev/null \
-        | jq -r --arg l $name '.result.workspaces[] | select(.label == $l) | .workspace_id')
-
-    if test -n "$id"
-        herdr workspace focus $id >/dev/null
-    else
-        herdr workspace create --label $name --cwd $dir --focus >/dev/null
-    end
-end
-
-function __ctx --description 'Enclosing herdr workspace label'
-    test "$HERDR_ENV" = 1; or return
-    herdr workspace get $HERDR_WORKSPACE_ID 2>/dev/null \
-        | jq -r '.result.workspace.label // empty'
-end
-
-function claude --description 'Claude Code, config picked by the enclosing session'
+function claude --description 'Claude Code, config picked by the working directory'
     set -l session (__ctx)
 
     # Personal leaves it unset on purpose: Claude hashes the config dir into the
@@ -67,6 +23,41 @@ function claude --description 'Claude Code, config picked by the enclosing sessi
     end
 end
 
+function ask --description 'One-off question to Claude, no session'
+    if test (count $argv) -eq 0
+        echo 'ask: <question>   — try the ? abbreviation' >&2
+        return 2
+    end
+
+    # Bare `claude`, not `command claude`: the function above picks the config
+    # dir, or a question asked under ~/work logs in as personal.
+    #
+    # --disallowedTools is what makes this read-only. --allowedTools only
+    # auto-approves, it does not restrict, so on its own `ask 'save a file
+    # called notes.txt'` writes the file. There is no "only these".
+    #
+    # --verbose is required, not noise: without it stream-json prints nothing.
+    # jq -j concatenates the deltas, --unbuffered flushes them as they arrive —
+    # drop it and the buffering it exists to remove comes straight back.
+    claude -p --safe-mode --no-session-persistence --strict-mcp-config \
+        --disable-slash-commands --model sonnet --effort low \
+        --output-format stream-json --include-partial-messages --verbose \
+        --allowedTools WebSearch WebFetch \
+        --disallowedTools Bash Write Edit NotebookEdit Read Glob Grep Task \
+        --system-prompt 'Answer directly and concisely: a few sentences, no preamble, no follow-up offers. Search the web when the answer depends on current or recent information, and cite the sources when you do. Reply in the language of the question.' \
+        -- "$argv" \
+        | jq --unbuffered -j 'select(.type == "stream_event" and .event.delta.type == "text_delta") | .event.delta.text'
+
+    # $pipestatus, not $status: $status here is jq's, and jq happily exits 0
+    # after printing nothing at all when claude dies.
+    set -l rc $pipestatus[1]
+    echo
+    if test $rc -ne 0
+        echo "ask: claude exited $rc" >&2
+    end
+    return $rc
+end
+
 # mise is NOT activated here: Homebrew's vendor_conf.d/mise-activate.fish
 # already does it. To disable the vendor one: MISE_FISH_AUTO_ACTIVATE=0.
 
@@ -77,9 +68,23 @@ if status is-interactive
     stty -ixon 2>/dev/null
 
     # ~/.aws/config has no [default] profile: without this every aws command
-    # outside the work session fails with NoCredentials.
-    set -gx AWS_PROFILE personal
-    test "$(__ctx)" = work; and set -gx AWS_PROFILE work
+    # outside ~/work fails with NoCredentials. On PWD rather than once at
+    # startup, because a directory can change under a shell and a workspace
+    # could not — Starship's aws module is what makes the switch visible.
+    function _aws_profile --on-variable PWD --description 'AWS profile follows the directory'
+        if test "$(__ctx)" = work
+            set -gx AWS_PROFILE work
+        else
+            set -gx AWS_PROFILE personal
+        end
+    end
+    _aws_profile
+
+    # `? ` expands to `ask ""` with the cursor already between the quotes. An
+    # abbreviation and not a `?` function on purpose: typed bare, `? why is 5 > 3`
+    # is a redirection and fish silently writes a file named 3 instead of asking
+    # anything. Inside the quotes, > | & ; # and apostrophes are all just text.
+    abbr -a --position command --set-cursor -- '?' 'ask "%"'
 
     abbr -a gc 'git commit -m'
     abbr -a gco 'git checkout'
@@ -88,20 +93,21 @@ if status is-interactive
     abbr -a gd 'git diff'
 
     alias code 'code --new-window'
-    alias e code
-    alias dev '__ws dev'
-    alias work '__ws work'
-    alias side '__ws side'
 
-    # Mandatory: on macOS eza reads ~/Library/Application Support/eza and
-    # ignores XDG_CONFIG_HOME.
+    # Mandatory, not a preference: on macOS eza resolves its config through the
+    # native strategy and reads ~/Library/Application Support/eza, ignoring
+    # XDG_CONFIG_HOME. Without this the theme is silently never loaded.
     set -gx EZA_CONFIG_DIR $HOME/.config/eza
 
     if command -q eza
-        alias ls 'eza --icons --group-directories-first'
-        alias ll 'eza --icons --group-directories-first --long --git --header'
-        alias la 'eza --icons --group-directories-first --long --git --header --all'
-        alias lt 'eza --icons --group-directories-first --tree --level=2'
+        # --icons=auto and never a bare --icons: the value is optional, so the
+        # flag eats whatever token follows it and `ls somedir` dies with
+        # "invalid value for --icons". auto also drops the glyphs when the
+        # output is a pipe, which is what keeps `ls | grep` matching.
+        alias ls 'eza --icons=auto --group-directories-first'
+        alias ll 'eza --icons=auto --group-directories-first --long --git --header'
+        alias la 'eza --icons=auto --group-directories-first --long --git --header --all'
+        alias lt 'eza --icons=auto --group-directories-first --tree --level=2'
     end
 
     set -gx BAT_THEME ansi
@@ -110,7 +116,8 @@ if status is-interactive
     set -gx FZF_CTRL_T_COMMAND $FZF_DEFAULT_COMMAND
     set -gx FZF_ALT_C_COMMAND 'fd --type d --hidden --follow --exclude .git'
 
-    # Colours by ANSI name, not hex: alacritty.toml's palette is the single source.
+    # Colours by ANSI name, not hex: the sixteen slots in ghostty/config are
+    # the single source.
     set -gx FZF_DEFAULT_OPTS '
       --height 40% --layout=reverse --border=rounded
       --bind="ctrl-/:toggle-preview,ctrl-y:execute-silent(echo {} | pbcopy)+abort"
@@ -118,7 +125,15 @@ if status is-interactive
 
     set -gx FZF_CTRL_T_OPTS "--preview 'bat --style=numbers --color=always --line-range :200 {}'"
     set -gx FZF_ALT_C_OPTS "--preview 'ls -la {} | head -100'"
-    set -gx FZF_CTRL_R_OPTS '--preview "echo {}" --preview-window=down:3:wrap'
+    # Taller than the default 40%: history is the one list where the match is
+    # rarely in the first rows. The preview is what makes a long or wrapped
+    # command readable, and bat reads BAT_THEME=ansi, so it lands on the same
+    # sixteen slots as everything above.
+    set -gx FZF_CTRL_R_OPTS '
+      --height=60%
+      --preview="echo {} | bat --color=always --style=plain --language=fish"
+      --preview-window=down:5:wrap
+      --header="ctrl-y copy · ctrl-/ preview"'
 
     # mise stays out on purpose: its output interpolates the current $PATH, so a
     # cached copy would pin one shell's PATH onto every later shell.
@@ -128,7 +143,6 @@ if status is-interactive
         or test /opt/homebrew/bin -nt $init_cache
         mkdir -p (path dirname $init_cache)
         begin
-            zoxide init fish
             fzf --fish
             starship init fish --print-full-init
         end >$init_cache
@@ -145,27 +159,29 @@ if status is-interactive
 
     enable_transience
 
-    # fish does not leave search mode at the bottom, it restores the line you
-    # had before searching — so ↑ has to record that line for ↓ to recognise it.
-    function _up_or_search_origin --description 'up-or-search, recording the pre-search line'
-        commandline --search-mode; or set -g _history_origin "$(commandline)"
-        up-or-search
-    end
+    # A copy of fish's own down-or-search with the last branch swapped: where
+    # fish starts a forward history search, this opens fzf's widget instead.
+    # The three branches above it are not optional — down also drives the
+    # completion pager and multi-line cursor movement.
+    function fzf-history-down --description 'fzf history, or move down a line'
+        if commandline --search-mode
+            commandline -f history-search-forward
+            return
+        end
 
-    function _down_or_fzf_history --description 'down-or-search, fzf at the bottom'
         if commandline --paging-mode
             commandline -f down-line
-        else if commandline --search-mode
-            if test "$(commandline)" = "$_history_origin"
-                functions -q fzf-history-widget; and fzf-history-widget
-            else
-                commandline -f history-search-forward
-            end
-        else if test (commandline -L) -lt (count (commandline))
-            commandline -f down-line
-        else
-            functions -q fzf-history-widget; and fzf-history-widget
+            return
         end
+
+        # -lt, not fish's `switch` on equality: on an empty buffer the line
+        # count is 0 while the cursor line is 1, and fzf should still open.
+        if test (commandline -L) -lt (count (commandline))
+            commandline -f down-line
+            return
+        end
+
+        fzf-history-widget
     end
 
     # fish re-applies the preset bindings whenever $fish_key_bindings changes
@@ -174,14 +190,16 @@ if status is-interactive
     function fish_user_key_bindings
         functions -q fzf_key_bindings; and fzf_key_bindings
 
-        # Ctrl-R has to be rebound after fzf_key_bindings, which claims it.
+        # Ctrl-R is left to fzf_key_bindings above. It used to be rebound to
+        # fish's history-pager, which forks nothing but only matches prefixes.
         for mode in insert default
-            bind -M $mode ctrl-p _up_or_search_origin
+            bind -M $mode ctrl-p up-or-search
             bind -M $mode ctrl-n down-or-search
             bind -M $mode ctrl-o edit_command_buffer
-            bind -M $mode up _up_or_search_origin
-            bind -M $mode down _down_or_fzf_history
-            bind -M $mode ctrl-r history-pager
+            # Guarded: fzf-history-widget is defined by fzf_key_bindings above,
+            # so without fzf it does not exist and down would break outright.
+            # Unbound, the preset down-or-search stands.
+            functions -q fzf-history-widget; and bind -M $mode down fzf-history-down
         end
     end
 
@@ -197,10 +215,10 @@ if status is-interactive
     set -g fish_cursor_visual block
     set -g fish_cursor_external line blink
 
-    # herdr catches the bell: [ui.toast] and [ui.sound] raise it against the
-    # workspace it came from, so a background one still reaches you.
+    # Ghostty turns the bell into a Dock bounce and a title marker, so a
+    # background window still reaches you without anything catching it first.
     set -g _notify_threshold 10000
-    set -g _notify_ignore nvim less man ssh claude fzf watch top tail dev work side
+    set -g _notify_ignore less man ssh claude fzf watch top tail
 
     function _notify_long_command --on-event fish_postexec --description 'Bell after a long command'
         test -n "$argv[1]"; or return
@@ -209,23 +227,15 @@ if status is-interactive
         test $CMD_DURATION -ge $_notify_threshold; and printf '\a'
     end
 
-    set -g _docker_default_contexts default desktop-linux
-
+    # Only STARSHIP_PNPM: starship has no pnpm module and its detect_files does
+    # not walk ancestors. The docker half used to live here and was dropped —
+    # starship's own docker_context reads the same config.json and hides the
+    # same two contexts, default and desktop-linux.
+    #
     # Builtins only: no forks, and nothing that can clobber the $status the
     # exit-code module reads — hence the last_status dance below.
     function _starship_env --on-event fish_prompt --description 'Prompt env vars starship reads'
         set -l last_status $status
-
-        # $DOCKER_CONTEXT wins over the file, which is docker's own precedence.
-        set -l ctx $DOCKER_CONTEXT
-        if test -z "$ctx"; and test -r $HOME/.docker/config.json
-            set ctx (string match -rg '"currentContext"\s*:\s*"([^"]+)"' <$HOME/.docker/config.json)
-        end
-        if test -n "$ctx"; and not contains -- $ctx $_docker_default_contexts
-            set -gx STARSHIP_DOCKER_CTX $ctx
-        else
-            set -e STARSHIP_DOCKER_CTX
-        end
 
         set -e STARSHIP_PNPM
         set -l dir $PWD

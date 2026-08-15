@@ -115,75 +115,28 @@ link_file "${CONFIG_DIR}/fish/conf.d/00-env.fish" "${HOME}/.config/fish/conf.d/0
 link_file "${CONFIG_DIR}/fish/conf.d/10-colors.fish" "${HOME}/.config/fish/conf.d/10-colors.fish"
 link_file "${CONFIG_DIR}/fish/completions/aws.fish" "${HOME}/.config/fish/completions/aws.fish"
 link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
+link_file "${CONFIG_DIR}/ghostty/config" "${HOME}/.config/ghostty/config"
 link_file "${CONFIG_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"
+# Only read because config.fish exports EZA_CONFIG_DIR to this path; eza's own
+# default on macOS is ~/Library/Application Support/eza.
 link_file "${CONFIG_DIR}/eza/theme.yml" "${HOME}/.config/eza/theme.yml"
-# The whole directory, not init.lua alone: the config is modules under
-# nvim/lua/config/ now and a per-file list would need a line for each new one.
-# vim.pack also writes nvim-pack-lock.json here, so plugin revisions end up
-# versioned — the same deliberate side effect as ~/.gitconfig being a symlink.
-link_file "${CONFIG_DIR}/nvim" "${HOME}/.config/nvim"
-link_file "${CONFIG_DIR}/hammerspoon/init.lua" "${HOME}/.hammerspoon/init.lua"
-link_file "${CONFIG_DIR}/alacritty/alacritty.toml" "${HOME}/.config/alacritty/alacritty.toml"
-# Only config.toml and not the directory: herdr keeps its sockets, logs,
-# session.json and installed plugins alongside it, and none of that is config.
+# Older revisions linked this entire directory. Remove only that known symlink
+# before switching to the single-file layout; local directories stay untouched.
+if [[ -L "${HOME}/.config/nvim" && "$(readlink "${HOME}/.config/nvim")" == "${CONFIG_DIR}/nvim" ]]; then
+  unlink "${HOME}/.config/nvim"
+fi
+link_file "${CONFIG_DIR}/nvim/init.lua" "${HOME}/.config/nvim/init.lua"
+# Only config.toml and not the directory: herdr keeps its sockets, logs and
+# workspace state in the same folder and writes to them at runtime.
 link_file "${CONFIG_DIR}/herdr/config.toml" "${HOME}/.config/herdr/config.toml"
-# The theme goes in by name and not by path — btop.conf asks for "nord-slots" and
-# btop resolves it against this directory. Linking the config is only safe because
-# it sets save_config_on_exit = false; otherwise btop would write back through the
-# symlink every time it is closed.
-link_file "${CONFIG_DIR}/btop/btop.conf" "${HOME}/.config/btop/btop.conf"
-link_file "${CONFIG_DIR}/btop/themes/nord-slots.theme" "${HOME}/.config/btop/themes/nord-slots.theme"
 # psql won't create this directory and history fails silently without it.
 mkdir -p "${HOME}/.local/state/psql"
 link_file "${CONFIG_DIR}/psql/psqlrc" "${HOME}/.psqlrc"
-# Same trap.
-mkdir -p "${HOME}/.local/state/pgcli"
-link_file "${CONFIG_DIR}/pgcli/config" "${HOME}/.config/pgcli/config"
-# Same trap, for both redis clients.
-mkdir -p "${HOME}/.local/state/iredis" "${HOME}/.local/state/redis"
-link_file "${CONFIG_DIR}/redis/iredisrc" "${HOME}/.iredisrc"
+# Same trap: REDISCLI_HISTFILE points inside it, and redis-cli won't mkdir.
+mkdir -p "${HOME}/.local/state/redis"
 if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
   link_file "${CONFIG_DIR}/gh/config.yml" "${HOME}/.config/gh/config.yml"
 fi
-
-# No terminfo step here on purpose: TERM=alacritty is missing from the system
-# database too, but the cask declares ~/.terminfo/61/alacritty as one of its
-# own artifacts, so `brew bundle` symlinks it out of the bundle already.
-
-# Orphans from previous setups. Removed only if they point into this repo, so a
-# hand-written file at any of these paths stays untouched.
-for stale in "${HOME}/.zshrc" \
-             "${HOME}/.zprofile" \
-             "${HOME}/.tmux.conf" \
-             "${HOME}/.config/ghostty/config" \
-             "${HOME}/.config/atuin/config.toml" \
-             "${HOME}/.config/fish/functions/theme.fish" \
-             "${HOME}/.config/alacritty/themes"; do
-  if [[ -L "${stale}" && "$(readlink "${stale}")" == "${CONFIG_DIR}"/* ]]; then
-    rm -f "${stale}"
-    echo "  removed stale symlink ${stale}"
-  fi
-done
-rm -f "${HOME}/.cache/zsh/init.zsh"
-
-# What the old theme switch generated. Regular files rather than symlinks, so the
-# loop above cannot reach them: its guard only ever removes links into this repo,
-# which is exactly what keeps a hand-written file safe. theme.toml goes only if it
-# still carries the `# theme:` marker the switch wrote into its header, so a config
-# someone put there by hand survives.
-if [[ -f "${HOME}/.config/alacritty/theme.toml" ]] &&
-   grep -q '^# theme:' "${HOME}/.config/alacritty/theme.toml"; then
-  rm -f "${HOME}/.config/alacritty/theme.toml"
-  echo "  removed generated ~/.config/alacritty/theme.toml"
-fi
-rm -f "${HOME}/.config/btop/themes/current.theme"
-
-for broken in "${HOME}/.zshenv" "${HOME}/.bashrc" "${HOME}/.bash_profile" "${HOME}/.profile"; do
-  if [[ -L "${broken}" && ! -e "${broken}" ]]; then
-    rm -f "${broken}"
-    echo "  removed broken symlink ${broken}"
-  fi
-done
 
 if [[ "${SKIP_BREW}" == false ]] && command -v mise >/dev/null 2>&1; then
   echo "Installing mise-managed tools..."

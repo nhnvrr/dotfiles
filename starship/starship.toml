@@ -1,11 +1,8 @@
 "$schema" = 'https://starship.rs/config-schema.json'
-
 format = '$directory$git_branch$git_state$git_status$line_break$character'
-right_format = '$mise$status$cmd_duration$username$hostname$jobs${env_var.STARSHIP_PNPM}$nodejs$bun$golang$rust$python$ruby$terraform$aws${env_var.STARSHIP_DOCKER_CTX}$time'
-
+right_format = '$mise$status$cmd_duration$username$hostname$jobs${env_var.STARSHIP_PNPM}$nodejs$bun$golang$rust$python$ruby$terraform$aws$docker_context$time'
 add_newline = true
 command_timeout = 500
-
 [directory]
 style = 'bright-white'
 repo_root_style = 'bright-white'
@@ -14,7 +11,6 @@ truncate_to_repo = false
 truncation_length = 0
 fish_style_pwd_dir_length = 1
 format = '[$path]($style) '
-
 [character]
 success_symbol = '[❯](bright-green)'
 error_symbol = '[❯](bright-red)'
@@ -22,16 +18,13 @@ vimcmd_symbol = '[❮](bright-green)'
 vimcmd_replace_symbol = '[▶](bright-purple)'
 vimcmd_replace_one_symbol = '[▶](bright-purple)'
 vimcmd_visual_symbol = '[V](bright-yellow)'
-
 [git_branch]
 symbol = ' '
 style = 'green'
 format = '[$symbol$branch]($style) '
-
 [git_state]
 style = 'red'
 format = '\([$state( $progress_current/$progress_total)]($style)\) '
-
 [git_status]
 ignore_submodules = true
 format = '($all_status$ahead_behind )'
@@ -135,9 +128,11 @@ format = '[$symbol$profile]($style) '
 variable = 'STARSHIP_PNPM'
 format = '[ ](yellow)'
 
-[env_var.STARSHIP_DOCKER_CTX]
-variable = 'STARSHIP_DOCKER_CTX'
-format = '[󰡨 $env_value](bright-cyan) '
+[docker_context]
+only_with_files = false
+symbol = '󰡨 '
+style = 'bright-cyan'
+format = '[$symbol$context]($style) '
 
 [time]
 disabled = false
