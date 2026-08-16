@@ -1,7 +1,7 @@
 onboarding = false
 
 [terminal]
-default_shell = "/opt/homebrew/bin/fish"
+default_shell = "/bin/zsh"
 shell_mode = "login"
 new_cwd = "follow"
 
@@ -20,13 +20,12 @@ goto = "prefix+s"
 settings = "prefix+g"
 
 [ui]
-prompt_new_tab_name = false
+prompt_new_tab_name = true
 copy_on_select = true
 tab_bar_position = "top"
 agent_panel_sort = "spaces"
 
 show_agent_labels_on_pane_borders = true
-accent = "green"
 
 [ui.sidebar.agents]
 rows = [
@@ -40,7 +39,11 @@ rows = [
 
 [ui.sidebar.spaces]
 rows = [
-  [{ token = "state_icon" }, { token = "workspace", bold = false }],
+  [
+    { token = "state_icon" },
+    { token = "$icon" },
+    { token = "workspace", bold = false },
+  ],
   [
     { token = "branch", bold = false },
     { token = "git_status", bold = false },
@@ -56,6 +59,26 @@ enabled = true
 [theme]
 auto_switch = false
 name = "terminal"
+
+# GitHub Dark (Primer). Base stays "terminal" so pane contents keep the
+# host palette; these tokens only repaint herdr's own chrome.
+[theme.custom]
+panel_bg = "#0d1117"
+surface0 = "#161b22"
+surface1 = "#21262d"
+surface_dim = "#010409"
+overlay0 = "#30363d"
+overlay1 = "#484f58"
+text = "#e6edf3"
+subtext0 = "#848d97"
+accent = "#2f81f7"
+blue = "#2f81f7"
+mauve = "#a371f7"
+green = "#3fb950"
+yellow = "#d29922"
+red = "#f85149"
+teal = "#39c5cf"
+peach = "#db6d28"
 
 [experimental]
 allow_nested = false

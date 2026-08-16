@@ -110,14 +110,15 @@ echo "Preparing Go workspace..."
 mkdir -p "${HOME}/Develop/go/bin"
 
 echo "Linking config files..."
-link_file "${CONFIG_DIR}/fish/config.fish"       "${HOME}/.config/fish/config.fish"
-link_file "${CONFIG_DIR}/fish/conf.d/00-env.fish" "${HOME}/.config/fish/conf.d/00-env.fish"
-link_file "${CONFIG_DIR}/fish/conf.d/10-colors.fish" "${HOME}/.config/fish/conf.d/10-colors.fish"
-link_file "${CONFIG_DIR}/fish/completions/aws.fish" "${HOME}/.config/fish/completions/aws.fish"
+link_file "${CONFIG_DIR}/zsh/zshenv"             "${HOME}/.zshenv"
+link_file "${CONFIG_DIR}/zsh/zshrc"              "${HOME}/.zshrc"
+link_file "${CONFIG_DIR}/zsh/completions/_aws"   "${HOME}/.config/zsh/completions/_aws"
+# zsh won't create it and history is dropped silently without it, same as psql.
+mkdir -p "${HOME}/.local/state/zsh" "${HOME}/.cache/zsh"
 link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
 link_file "${CONFIG_DIR}/ghostty/config" "${HOME}/.config/ghostty/config"
 link_file "${CONFIG_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"
-# Only read because config.fish exports EZA_CONFIG_DIR to this path; eza's own
+# Only read because zsh/zshenv exports EZA_CONFIG_DIR to this path; eza's own
 # default on macOS is ~/Library/Application Support/eza.
 link_file "${CONFIG_DIR}/eza/theme.yml" "${HOME}/.config/eza/theme.yml"
 # Older revisions linked this entire directory. Remove only that known symlink
@@ -129,6 +130,8 @@ link_file "${CONFIG_DIR}/nvim/init.lua" "${HOME}/.config/nvim/init.lua"
 # Only config.toml and not the directory: herdr keeps its sockets, logs and
 # workspace state in the same folder and writes to them at runtime.
 link_file "${CONFIG_DIR}/herdr/config.toml" "${HOME}/.config/herdr/config.toml"
+# Only init.lua: ~/.hammerspoon/Spoons is downloaded state, not config.
+link_file "${CONFIG_DIR}/hammerspoon/init.lua" "${HOME}/.hammerspoon/init.lua"
 # psql won't create this directory and history fails silently without it.
 mkdir -p "${HOME}/.local/state/psql"
 link_file "${CONFIG_DIR}/psql/psqlrc" "${HOME}/.psqlrc"
@@ -156,22 +159,14 @@ defaults write com.apple.screencapture type -string "png"
 killall Finder 2>/dev/null || true
 killall SystemUIServer 2>/dev/null || true
 
-# chsh rejects shells missing from /etc/shells, and a login shell that isn't
-# there locks you out of new terminals — hence the existence check before the
-# chsh. dscl reads the real login shell, not $SHELL.
-FISH_BIN="$(command -v fish || true)"
-if [[ -z "${FISH_BIN}" ]]; then
-  echo "fish not found; leaving the login shell alone. Run './install.sh' again after 'brew bundle'."
-else
-  if ! grep -qx "${FISH_BIN}" /etc/shells; then
-    echo "Registering ${FISH_BIN} in /etc/shells (sudo required)..."
-    echo "${FISH_BIN}" | sudo tee -a /etc/shells >/dev/null
-  fi
-  LOGIN_SHELL="$(dscl . -read "/Users/${USER}" UserShell 2>/dev/null | awk '{print $2}')"
-  if [[ "${LOGIN_SHELL}" != "${FISH_BIN}" ]]; then
-    echo "Changing login shell to ${FISH_BIN} (chsh will prompt for your password)..."
-    chsh -s "${FISH_BIN}"
-  fi
+# /bin/zsh is macOS's default and is already in /etc/shells, so there is nothing
+# to register and no sudo — this only matters on a machine left on bash or fish.
+# dscl reads the real login shell, not $SHELL.
+ZSH_BIN=/bin/zsh
+LOGIN_SHELL="$(dscl . -read "/Users/${USER}" UserShell 2>/dev/null | awk '{print $2}')"
+if [[ "${LOGIN_SHELL}" != "${ZSH_BIN}" ]]; then
+  echo "Changing login shell to ${ZSH_BIN} (chsh will prompt for your password)..."
+  chsh -s "${ZSH_BIN}"
 fi
 
 echo "macOS standalone setup complete. Happy Coding 🧉"

@@ -1,4 +1,11 @@
-brew "fish"
+tap "getsentry/tools"
+
+# The shell is macOS's own /bin/zsh, so nothing to declare for it. These two are
+# the only reason a framework is not: zsh has no inline history suggestion and
+# no command-line colouring of its own. Everything else oh-my-zsh would bundle
+# already exists here — starship draws the prompt, fzf owns history search.
+brew "zsh-autosuggestions"
+brew "zsh-syntax-highlighting"
 brew "starship"
 
 # Not a shell multiplexer: Ghostty tabs already do that. It reads agent
@@ -49,7 +56,10 @@ brew "mise"
 brew "cocoapods"
 brew "watchman"
 
-brew "sentry-cli"
+# Superset of the old sentry-cli, which core deprecated when it relicensed
+# to FSL. Tap-only, so a fresh machine needs `brew trust` before bundling:
+# brew trust --formula getsentry/tools/sentry
+brew "getsentry/tools/sentry"
 brew "delve"
 
 brew "yt-dlp"
@@ -57,22 +67,27 @@ brew "ffmpeg"
 brew "btop"
 
 cask "ghostty"
-cask "font-monaspice-nerd-font"
+cask "font-jetbrains-mono-nerd-font"
 
 cask "visual-studio-code"
-cask "zed"
 
 # Clipboard history. Maccy is MIT, native, and the cask pulls from the
 # project's own GitHub releases — there are typosquat "maccy" sites.
 # Needs Accessibility permission on first launch or paste-on-select does nothing.
 cask "maccy"
 
+# Window tiling: right pane Chrome, left pane switched by cmd+alt+1/2/3.
+# Needs Accessibility permission on first launch or every placement silently
+# no-ops — init.lua puts an alert up when it is missing.
+cask "hammerspoon"
+
 # The default handler.
 cask "google-chrome"
-cask "zen"
 
 cask "docker-desktop"
 cask "datagrip"
+# Bound to cmd+alt+3 as the left pane in hammerspoon/init.lua.
+cask "tableplus"
 cask "bruno"
 
 cask "aws-vpn-client"

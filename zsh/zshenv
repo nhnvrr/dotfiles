@@ -1,0 +1,58 @@
+# Sourced by EVERY zsh — scripts, `zsh -c`, ssh commands, not just interactive
+# ones. Environment and $PATH only; anything touching the line editor, the
+# prompt or completion belongs in zshrc.
+
+export HOMEBREW_PREFIX=/opt/homebrew
+export HOMEBREW_CELLAR=/opt/homebrew/Cellar
+export HOMEBREW_REPOSITORY=/opt/homebrew
+
+# LANG only: LC_ALL overrides every LC_* category and blocks per-category tweaks.
+export LANG=en_US.UTF-8
+export EDITOR=nvim
+export VISUAL=nvim
+
+export GOPATH=$HOME/Develop/go
+export GOPRIVATE=github.com/nhnvrr
+export PNPM_HOME=$HOME/Library/pnpm
+
+# aws-cli v2 pipes every result through less by default, which turns a one-line
+# answer into a pager. These live here rather than in a [default] profile in
+# ~/.aws/config on purpose: creating that profile would remove the NoCredentials
+# error that forces AWS_PROFILE to be explicit.
+export AWS_PAGER=""
+export AWS_RETRY_MODE=standard
+export AWS_MAX_ATTEMPTS=3
+
+# redis-cli writes ~/.rediscli_history otherwise. install.sh creates the
+# directory; without it the history is dropped silently, same as psql.
+export REDISCLI_HISTFILE=$HOME/.local/state/redis/history
+
+# Mandatory, not a preference: on macOS eza resolves its config through the
+# native strategy and reads ~/Library/Application Support/eza, ignoring
+# XDG_CONFIG_HOME. Without this the theme is silently never loaded.
+export EZA_CONFIG_DIR=$HOME/.config/eza
+
+# -U dedups keeping the LEFTMOST copy, which is what makes __path_setup safe to
+# run twice. -T ties INFOPATH to the infopath array the same way PATH is tied.
+typeset -U path fpath
+typeset -TUx INFOPATH infopath
+
+# macOS runs path_helper from /etc/zprofile AFTER this file and pushes /usr/bin
+# in front of everything set here, so a mise-pinned runtime gets shadowed by
+# whatever ships with the system. zshrc calls this again for that reason —
+# do not "clean up" the second call.
+__path_setup() {
+  path=(
+    $GOPATH/bin
+    /opt/homebrew/bin
+    /opt/homebrew/sbin
+    /opt/homebrew/opt/libpq/bin
+    $HOME/.bun/bin
+    $HOME/.local/bin
+    $PNPM_HOME/bin
+    /usr/local/bin
+    $path
+  )
+  infopath=(/opt/homebrew/share/info $infopath)
+}
+__path_setup

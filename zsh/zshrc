@@ -1,0 +1,417 @@
+# Interactive shells only. Environment and $PATH live in ~/.zshenv, sourced
+# before this file.
+
+# Not redundant: /etc/zprofile ran path_helper between zshenv and here and
+# reordered $path. See the comment on __path_setup.
+__path_setup
+
+# Frees Ctrl-S/Ctrl-Q, which the terminal was swallowing.
+stty -ixon 2>/dev/null
+
+zmodload zsh/datetime
+
+# ─── history ────────────────────────────────────────────────────────────────
+
+HISTFILE=$HOME/.local/state/zsh/history
+HISTSIZE=100000
+SAVEHIST=100000
+
+setopt SHARE_HISTORY          # every shell sees what the others just ran
+setopt EXTENDED_HISTORY       # timestamps, which is what fzf's preview sorts by
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_SAVE_NO_DUPS
+setopt HIST_REDUCE_BLANKS
+setopt HIST_IGNORE_SPACE      # a leading space keeps a command out of history
+setopt INTERACTIVE_COMMENTS
+# Load-bearing, not a taste thing: the `(#q...)` glob qualifiers used below for
+# the compinit cache are parse errors without it.
+setopt EXTENDED_GLOB
+
+# The bell is a deliberate signal here (see _notify_long_command), so only zle's
+# own beeping is silenced.
+unsetopt BEEP LIST_BEEP
+
+# ─── completion ─────────────────────────────────────────────────────────────
+
+fpath=($HOME/.config/zsh/completions /opt/homebrew/share/zsh/site-functions $fpath)
+
+autoload -Uz compinit
+_zcompdump=$HOME/.cache/zsh/zcompdump
+mkdir -p ${_zcompdump:h}
+# Rescanning fpath costs ~150ms and only matters when a formula adds a
+# completion, so it runs once a day; delete the dump to force it.
+if [[ -n $_zcompdump(#qN.mh-24) ]]; then
+  compinit -C -d $_zcompdump
+else
+  compinit -d $_zcompdump
+fi
+# Reading the dump is most of what compinit -C costs; the wordcode form skips
+# the parse. Regenerated whenever compinit rewrites the dump.
+[[ -s $_zcompdump && ! -s $_zcompdump.zwc ]] || [[ $_zcompdump -nt $_zcompdump.zwc ]] &&
+  zcompile -R $_zcompdump 2>/dev/null
+
+setopt COMPLETE_IN_WORD ALWAYS_TO_END
+unsetopt FLOW_CONTROL
+
+zstyle ':completion:*' menu select
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path $HOME/.cache/zsh/compcache
+# Case-insensitive, then partial-word (fb → foo-bar). Ordered: zsh stops at the
+# first matcher that produces anything, so the loose one must come last.
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}' 'r:|[._-]=* r:|=*'
+zstyle ':completion:*:descriptions' format '%F{8}%d%f'
+zstyle ':completion:*:warnings'     format '%F{1}no matches%f'
+zstyle ':completion:*:*:kill:*:processes' command 'ps -u $USER -o pid,user,comm -w'
+
+# ─── keys ───────────────────────────────────────────────────────────────────
+
+# Hybrid on purpose, the same trade fish makes: vi keymaps for the modes and the
+# cursor shape, but the emacs bindings kept on top of insert mode. Pure `bindkey -v`
+# drops Ctrl-A/E/K/W, and raising KEYTIMEOUT to make Esc comfortable would delay
+# every Alt-<key> too, since macos-option-as-alt sends those as ESC+key.
+bindkey -v
+KEYTIMEOUT=1
+
+bindkey -M viins '^A' beginning-of-line
+bindkey -M viins '^E' end-of-line
+bindkey -M viins '^K' kill-line
+bindkey -M viins '^U' backward-kill-line
+bindkey -M viins '^W' backward-kill-word
+bindkey -M viins '^Y' yank
+bindkey -M viins '^_' undo
+bindkey -M viins '^?' backward-delete-char   # else backspace stops at the insert point
+bindkey -M viins '^H' backward-delete-char
+
+# Prefix search, fish's up-or-search: with a partial command typed, these walk
+# only the history entries that start with it.
+autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+for m in viins vicmd; do
+  bindkey -M $m '^P' up-line-or-beginning-search
+  bindkey -M $m '^N' down-line-or-beginning-search
+  bindkey -M $m '^[[A' up-line-or-beginning-search
+  bindkey -M $m '^[OA' up-line-or-beginning-search
+done
+
+autoload -Uz edit-command-line
+zle -N edit-command-line
+bindkey -M viins '^O' edit-command-line
+bindkey -M vicmd '^O' edit-command-line
+
+# Cursor shape follows the mode. Ghostty resets it per prompt, hence line-init.
+function _cursor_shape {
+  case ${KEYMAP:-viins} in
+    vicmd) print -n '\e[2 q' ;;     # block
+    *)     print -n '\e[5 q' ;;     # blinking bar
+  esac
+}
+zle -N zle-keymap-select _cursor_shape
+zle -N zle-line-init     _cursor_shape
+# Otherwise the block from vicmd leaks into the command's own output.
+function _cursor_reset { print -n '\e[5 q' }
+
+autoload -Uz add-zsh-hook
+add-zsh-hook preexec _cursor_reset
+
+# ─── abbreviations ──────────────────────────────────────────────────────────
+
+# zsh has no abbr, and an alias is not the same thing: an alias never lands in
+# the buffer, so history stores `gc` and a later `!!` or Ctrl-R shows a token
+# instead of the command. This expands in place on space, like fish's abbr.
+# `%` marks where the cursor should end up.
+typeset -Ag ZABBR=(
+  '?'   'ask "%"'
+  'gc'  'git commit -m'
+  'gco' 'git checkout'
+  'ga'  'git add'
+  'gb'  'git branch'
+  'gd'  'git diff'
+)
+
+function _abbr_expand_space {
+  emulate -L zsh -o extendedglob
+  local -a w
+  w=(${(z)LBUFFER})
+  local last=${w[-1]:-} repl=${ZABBR[${w[-1]:-}]:-}
+
+  if [[ -n $repl && $LBUFFER == *$last ]]; then
+    local head=${LBUFFER%$last}
+    # Command position only, exactly like `abbr --position command`: with
+    # nothing but blanks in front, or a separator. Without this `git diff gd `
+    # would expand the argument.
+    case ${head%%[[:space:]]#} in
+      ''|*';'|*'|'|*'&')
+        LBUFFER=$head
+        if [[ $repl == *%* ]]; then
+          # Cursor lands inside the quotes and the triggering space is
+          # swallowed: typed bare, `? why is 5 > 3` is a redirection and zsh
+          # writes a file named 3 instead of asking anything. Inside the quotes
+          # > | & ; # and apostrophes are all just text.
+          LBUFFER+=${repl%\%*}
+          RBUFFER=${repl#*%}$RBUFFER
+          return
+        fi
+        LBUFFER+=$repl
+        ;;
+    esac
+  fi
+  zle self-insert
+}
+zle -N _abbr_expand_space
+bindkey -M viins ' ' _abbr_expand_space
+bindkey -M viins '^ ' magic-space          # escape hatch: a literal space
+
+# ─── tools ──────────────────────────────────────────────────────────────────
+
+export BAT_THEME=ansi
+
+export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+export FZF_CTRL_T_COMMAND=$FZF_DEFAULT_COMMAND
+export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
+
+# Colours by ANSI name, not hex: the sixteen slots in ghostty/config are the
+# single source.
+export FZF_DEFAULT_OPTS='
+  --height 40% --layout=reverse --border=rounded
+  --bind="ctrl-/:toggle-preview,ctrl-y:execute-silent(echo {} | pbcopy)+abort"
+  --color=bg+:bright-black,fg:white,fg+:bright-white,hl:bright-cyan,hl+:cyan,info:bright-black,prompt:blue,pointer:bright-red,marker:bright-green,border:bright-black,header:blue,spinner:cyan'
+
+export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always --line-range :200 {}'"
+export FZF_ALT_C_OPTS="--preview 'ls -la {} | head -100'"
+# Taller than the default 40%: history is the one list where the match is rarely
+# in the first rows. bat reads BAT_THEME=ansi, so the preview lands on the same
+# sixteen slots as everything above.
+export FZF_CTRL_R_OPTS='
+  --height=60%
+  --preview="echo {} | bat --color=always --style=plain --language=zsh"
+  --preview-window=down:5:wrap
+  --header="ctrl-y copy · ctrl-/ preview"'
+
+if (( $+commands[eza] )); then
+  # --icons=auto and never a bare --icons: the value is optional, so the flag
+  # eats whatever token follows it and `ls somedir` dies with "invalid value for
+  # --icons". auto also drops the glyphs when the output is a pipe, which is
+  # what keeps `ls | grep` matching.
+  alias ls='eza --icons=auto --group-directories-first'
+  alias ll='eza --icons=auto --group-directories-first --long --git --header'
+  alias la='eza --icons=auto --group-directories-first --long --git --header --all'
+  alias lt='eza --icons=auto --group-directories-first --tree --level=2'
+fi
+
+alias code='code --new-window'
+
+# ─── context: AWS profile and Claude config follow the directory ────────────
+
+# The directory is the only thing that says which account a shell belongs to.
+function __ctx {
+  case $PWD in
+    $HOME/work|$HOME/work/*) print work ;;
+  esac
+}
+
+function claude {
+  # Personal leaves it unset on purpose: Claude hashes the config dir into the
+  # Keychain item name only when the variable is set, so exporting it forks the
+  # login off every `claude` that does not come from this shell.
+  if [[ $(__ctx) == work ]]; then
+    CLAUDE_CONFIG_DIR=$HOME/.claude-work command claude "$@"
+  else
+    command claude "$@"
+  fi
+}
+
+# ~/.aws/config has no [default] profile: without this every aws command outside
+# ~/work fails with NoCredentials. On chpwd rather than once at startup, because
+# a directory can change under a shell — starship's aws module makes it visible.
+function _aws_profile {
+  if [[ $(__ctx) == work ]]; then
+    export AWS_PROFILE=work
+  else
+    export AWS_PROFILE=personal
+  fi
+}
+add-zsh-hook chpwd _aws_profile
+_aws_profile
+
+function ask {
+  if (( $# == 0 )); then
+    print -u2 'ask: <question>   — try the ? abbreviation'
+    return 2
+  fi
+
+  # Bare `claude`, not `command claude`: the function above picks the config
+  # dir, or a question asked under ~/work logs in as personal.
+  #
+  # --disallowedTools is what makes this read-only. --allowedTools only
+  # auto-approves, it does not restrict, so on its own `ask 'save a file called
+  # notes.txt'` writes the file. There is no "only these".
+  #
+  # --verbose is required, not noise: without it stream-json prints nothing.
+  # jq -j concatenates the deltas, --unbuffered flushes them as they arrive —
+  # drop it and the buffering it exists to remove comes straight back.
+  claude -p --safe-mode --no-session-persistence --strict-mcp-config \
+    --disable-slash-commands --model sonnet --effort low \
+    --output-format stream-json --include-partial-messages --verbose \
+    --allowedTools WebSearch WebFetch \
+    --disallowedTools Bash Write Edit NotebookEdit Read Glob Grep Task \
+    --system-prompt 'Answer directly and concisely: a few sentences, no preamble, no follow-up offers. Search the web when the answer depends on current or recent information, and cite the sources when you do. Reply in the language of the question.' \
+    -- "$*" \
+    | jq --unbuffered -j 'select(.type == "stream_event" and .event.delta.type == "text_delta") | .event.delta.text'
+
+  # $pipestatus[1], not $?: $? here is jq's, and jq happily exits 0 after
+  # printing nothing at all when claude dies.
+  local rc=$pipestatus[1]
+  print
+  (( rc == 0 )) || print -u2 "ask: claude exited $rc"
+  return $rc
+}
+
+# ─── prompt hooks ───────────────────────────────────────────────────────────
+
+# Ghostty turns the bell into a Dock bounce and a title marker, so a background
+# window still reaches you without anything catching it first.
+_notify_threshold=10
+_notify_ignore=(less man ssh claude fzf watch top tail nvim btop lazygit)
+
+function _notify_start { _notify_cmd=$1; _notify_at=$EPOCHSECONDS }
+function _notify_end {
+  [[ -n ${_notify_at:-} ]] || return
+  local elapsed=$(( EPOCHSECONDS - _notify_at ))
+  local cmd=${${(z)_notify_cmd}[1]}
+  unset _notify_at
+  (( ${_notify_ignore[(I)$cmd]} )) && return
+  (( elapsed >= _notify_threshold )) && print -n '\a'
+}
+add-zsh-hook preexec _notify_start
+add-zsh-hook precmd  _notify_end
+
+# Only STARSHIP_PNPM: starship has no pnpm module and its detect_files does not
+# walk ancestors. The docker half used to live here and was dropped — starship's
+# own docker_context reads the same config.json and hides the same two contexts.
+#
+# Builtins only: no forks, and nothing that can clobber the $? the exit-code
+# module reads — hence the _st dance.
+function _starship_env {
+  local _st=$?
+  unset STARSHIP_PNPM
+  local dir=$PWD
+  while [[ -n $dir ]]; do
+    if [[ -f $dir/pnpm-lock.yaml ]]; then
+      export STARSHIP_PNPM=1
+      break
+    fi
+    [[ $dir == $HOME ]] && break
+    dir=${dir%/*}
+  done
+  return $_st
+}
+add-zsh-hook precmd _starship_env
+
+# ─── plugins ────────────────────────────────────────────────────────────────
+
+# Two, and only because zsh has no equivalent built in: the inline suggestion
+# from history and the syntax colouring on the command line. Everything else a
+# framework would bundle is already here — starship draws the prompt, fzf owns
+# history search, the git shortcuts are six abbreviations.
+_zsh_plugins=/opt/homebrew/share
+
+if [[ -r $_zsh_plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
+  ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+  ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
+  # The widget list it wraps is rebuilt at source time, so this has to come
+  # after every custom `zle -N` above.
+  source $_zsh_plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+fi
+
+# ─── colours ────────────────────────────────────────────────────────────────
+
+# By ANSI slot number, never hex: the sixteen slots in ghostty/config are the
+# single source of truth. Numbers and not names because zsh has no spelling for
+# the bright half — 8-15 are brblack…brwhite.
+#
+# No `bold` anywhere: weight is not one of the sixteen slots, so it is the one
+# attribute the profile cannot keep consistent across the stack.
+typeset -gA ZSH_HIGHLIGHT_STYLES
+ZSH_HIGHLIGHT_STYLES[command]='fg=4'
+ZSH_HIGHLIGHT_STYLES[builtin]='fg=4'
+ZSH_HIGHLIGHT_STYLES[function]='fg=4'
+ZSH_HIGHLIGHT_STYLES[alias]='fg=4'
+ZSH_HIGHLIGHT_STYLES[precommand]='fg=4'
+ZSH_HIGHLIGHT_STYLES[reserved-word]='fg=12'
+ZSH_HIGHLIGHT_STYLES[single-quoted-argument]='fg=3'
+ZSH_HIGHLIGHT_STYLES[double-quoted-argument]='fg=3'
+ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument]='fg=3'
+ZSH_HIGHLIGHT_STYLES[redirection]='fg=6'
+ZSH_HIGHLIGHT_STYLES[commandseparator]='fg=14'
+ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=1'
+ZSH_HIGHLIGHT_STYLES[default]='fg=7'
+ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg=15'
+ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='fg=15'
+ZSH_HIGHLIGHT_STYLES[comment]='fg=8'
+ZSH_HIGHLIGHT_STYLES[globbing]='fg=14'
+ZSH_HIGHLIGHT_STYLES[back-quoted-argument]='fg=14'
+ZSH_HIGHLIGHT_STYLES[dollar-double-quoted-argument]='fg=5'
+ZSH_HIGHLIGHT_STYLES[backslash-escape]='fg=5'
+ZSH_HIGHLIGHT_STYLES[path]='fg=7,underline'
+ZSH_HIGHLIGHT_STYLES[path_prefix]='fg=7'
+
+# The source line is deliberately not here — see the foot of the file.
+
+# ─── init ───────────────────────────────────────────────────────────────────
+
+# mise stays out of the cache on purpose: its output interpolates the current
+# $PATH, so a cached copy would pin one shell's PATH onto every later shell.
+# Unlike fish, Homebrew ships no vendor auto-activation for zsh — drop this line
+# and every runtime falls back to whatever is on $PATH.
+(( $+commands[mise] )) && eval "$(mise activate zsh)"
+
+_init_cache=$HOME/.cache/zsh/init.zsh
+if [[ ! -s $_init_cache || ${(%):-%N} -nt $_init_cache || /opt/homebrew/bin -nt $_init_cache ]]; then
+  mkdir -p ${_init_cache:h}
+  {
+    # fzf's snippet flips zle options unconditionally, which errors on every
+    # line under `zsh -i -c` — no tty, so zle is off. Guarding it here keeps
+    # that output clean for anything scripting an interactive shell.
+    print -r -- 'if [[ -o zle ]]; then'
+    fzf --zsh
+    print -r -- 'fi'
+    starship init zsh --print-full-init
+  } >$_init_cache
+fi
+source $_init_cache
+
+# fzf's Ctrl-R lands on the whole history; this is the same widget on `down`,
+# which is where the hand already is. The guard is the point: on a multi-line
+# buffer `down` still has to move the cursor between lines, and binding the
+# widget straight to `down` breaks that outright.
+function fzf-history-down {
+  if [[ ${BUFFER[$((CURSOR + 1)),-1]} == *$'\n'* ]]; then
+    zle down-line-or-history
+    return
+  fi
+  zle fzf-history-widget
+}
+zle -N fzf-history-down
+# After the cache is sourced, and guarded: fzf-history-widget does not exist
+# before it, and binding `down` to a widget that is missing leaves the key dead
+# rather than falling back to the default.
+if (( $+widgets[fzf-history-widget] )); then
+  for m in viins vicmd; do
+    bindkey -M $m '^[[B' fzf-history-down
+    bindkey -M $m '^[OB' fzf-history-down
+  done
+  unset m
+fi
+
+# starship has no transient prompt for zsh — `enable_transience` is fish, cmd
+# and powershell only as of 1.26, so there is nothing to call here.
+
+# Genuinely last, and it has to be: it wraps every widget that exists when it is
+# sourced. fzf's own widgets and fzf-history-down are defined just above, so
+# moving this line up leaves them uncoloured.
+[[ -r /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] &&
+  source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+unset _zsh_plugins _init_cache _zcompdump

@@ -12,6 +12,8 @@ opt.number = true
 opt.signcolumn = "yes"
 opt.wrap = false
 opt.scrolloff = 4
+-- lualine already draws the mode; the builtin message would print it twice.
+opt.showmode = false
 
 opt.tabstop = 2
 opt.shiftwidth = 2
@@ -34,8 +36,8 @@ vim.o.background = "dark"
 vim.cmd("filetype plugin indent on")
 vim.cmd("syntax enable")
 
--- kanso-ink, the same variant ghostty/config transcribes, so the editor and the
--- terminal come from one upstream. A real colorscheme rather than inheriting the
+-- github_dark_dimmed, the same variant selected in ghostty/config, keeps the
+-- editor and terminal aligned. A real colorscheme rather than inheriting the
 -- sixteen ANSI slots: a colorscheme addresses far more groups than sixteen.
 --
 -- termguicolors is set instead of left to autodetect, which reads COLORTERM —
@@ -44,9 +46,76 @@ vim.cmd("syntax enable")
 --
 -- vim.pack is Neovim's own (0.12), so this adds a plugin without a plugin
 -- manager. It clones on first start; nvim runs bare until it finishes.
+--
+-- Major pinned, same reason as neo-tree below: this plugin went through a
+-- breaking 0.0.x to v1 rewrite that renamed every colorscheme.
 vim.o.termguicolors = true
-vim.pack.add({ "https://github.com/webhooked/kanso.nvim" })
-vim.cmd.colorscheme("kanso-ink")
+vim.pack.add({
+  { src = "https://github.com/projekt0n/github-nvim-theme", version = vim.version.range("1") },
+})
+-- setup() has to run before the colorscheme command: it only stores options,
+-- and the highlights are built when the scheme loads.
+--
+-- transparent drops the Normal background so the terminal shows through. The
+-- theme's own background is then gone, so what you actually see is whatever
+-- ghostty/config or Terminal.app paints.
+require("github-theme").setup({
+  options = {
+    transparent = true,
+    styles = {
+      comments = "NONE",
+      conditionals = "NONE",
+      constants = "NONE",
+      functions = "NONE",
+      keywords = "NONE",
+      numbers = "NONE",
+      operators = "NONE",
+      strings = "NONE",
+      types = "NONE",
+      variables = "NONE",
+    },
+  },
+})
+vim.cmd.colorscheme("github_dark")
+
+-- styles above only reach the syntax groups the theme exposes; bold survives in
+-- Title, diagnostics, the popup menu and every plugin group. This sweeps all of
+-- them, and re-runs on ColorScheme because loading a scheme rebuilds the table.
+--
+-- Linked groups come back as { link = "Other" } with no bold key, so the guard
+-- skips them and the link is left intact rather than flattened into a copy.
+local function strip_bold()
+  for name, attrs in pairs(vim.api.nvim_get_hl(0, {})) do
+    if attrs.bold or (attrs.cterm and attrs.cterm.bold) then
+      attrs.bold = nil
+      if attrs.cterm then
+        attrs.cterm.bold = nil
+      end
+      -- nvim_get_hl reports default = true for groups declared with hi default,
+      -- and nvim_set_hl reads that flag as "skip if the group already exists".
+      -- Handing the table straight back would silently do nothing.
+      attrs.default = nil
+      vim.api.nvim_set_hl(0, name, attrs)
+    end
+  end
+end
+
+vim.api.nvim_create_autocmd("ColorScheme", {
+  callback = function()
+    -- Deferred so plugins that rebuild their own groups on ColorScheme run first.
+    vim.schedule(strip_bold)
+  end,
+})
+
+-- VimEnter and not a bare call here: the plugins set up further down this file
+-- define their groups after this point, and fzf-lua defines some of its own on
+-- first open. This pass runs once the whole config has been read.
+vim.api.nvim_create_autocmd("VimEnter", {
+  callback = function()
+    vim.schedule(strip_bold)
+  end,
+})
+strip_bold()
 
 vim.diagnostic.config({
   severity_sort = true,
@@ -82,6 +151,46 @@ require("neo-tree").setup({
 
 vim.keymap.set("n", "<leader>e", "<Cmd>Neotree toggle reveal<CR>", { desc = "Toggle file tree" })
 
+-- The builtin statusline cannot show diagnostic counts or the git branch
+-- without hand-writing a vim.o.statusline expression and its refresh; that is
+-- the limit being bought out here, not the looks. Unpinned like plenary and
+-- nui: lualine publishes no tags, so a range would have nothing to match.
+--
+-- devicons is already loaded above for neo-tree.
+vim.pack.add({ "https://github.com/nvim-lualine/lualine.nvim" })
+
+-- The auto theme is derived from the loaded colorscheme, so it arrives with
+-- github_dark's own backgrounds and a bold mode section. Both are stripped
+-- here rather than after setup(): lualine copies the table it is given and
+-- rebuilds these groups on ColorScheme, which would undo a later override.
+local lualine_theme = require("lualine.themes.auto")
+for _, mode in pairs(lualine_theme) do
+  for _, section in pairs(mode) do
+    section.bg = "NONE"
+    section.gui = nil
+  end
+end
+
+require("lualine").setup({
+  options = {
+    theme = lualine_theme,
+    -- Plain separators: the powerline arrows need a glyph that changes width
+    -- between Nerd Font builds, and ghostty/config loads the Mono one.
+    section_separators = "",
+    component_separators = "|",
+    globalstatus = true,
+  },
+  sections = {
+    lualine_a = { "mode" },
+    lualine_b = { "branch" },
+    lualine_c = { { "filename", path = 1 } },
+    lualine_x = { "diagnostics", "filetype" },
+    lualine_y = { "progress" },
+    lualine_z = { "location" },
+  },
+  extensions = { "neo-tree", "fzf" },
+})
+
 -- fzf-lua and not telescope: it shells out to the same fzf binary the shell
 -- already uses, so file search matches the same way in both places and there is
 -- no second fuzzy engine to build. devicons is already here for neo-tree.
@@ -98,7 +207,7 @@ require("fzf-lua").setup({
     preview = { layout = "vertical", vertical = "down:45%" },
   },
   files = {
-    -- Same switches as FZF_CTRL_T_COMMAND in fish/config.fish.
+    -- Same switches as FZF_CTRL_T_COMMAND in zsh/zshrc.
     fd_opts = "--type f --hidden --follow --exclude .git",
   },
 })
