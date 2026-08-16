@@ -18,9 +18,10 @@ focus_agent = "prefix+alt+1..9"
 
 goto = "prefix+s"
 settings = "prefix+g"
+toggle_sidebar = "prefix+b"
 
 [ui]
-prompt_new_tab_name = true
+prompt_new_tab_name = false
 copy_on_select = true
 tab_bar_position = "top"
 agent_panel_sort = "spaces"
@@ -71,7 +72,7 @@ overlay0 = "#30363d"
 overlay1 = "#484f58"
 text = "#e6edf3"
 subtext0 = "#848d97"
-accent = "#2f81f7"
+accent = "#3fb950"
 blue = "#2f81f7"
 mauve = "#a371f7"
 green = "#3fb950"

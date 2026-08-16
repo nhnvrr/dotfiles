@@ -408,6 +408,13 @@ fi
 # starship has no transient prompt for zsh — `enable_transience` is fish, cmd
 # and powershell only as of 1.26, so there is nothing to call here.
 
+# herdr space icons are server-side metadata and die with the server, so there
+# is no config file that can hold them. Every pane shell re-asserts them; the
+# script no-ops (~20ms) once each space already has one.
+if [[ -n $HERDR_PANE_ID ]]; then
+  (~/Develop/dotfiles/herdr/space-icons.sh &) >/dev/null 2>&1
+fi
+
 # Genuinely last, and it has to be: it wraps every widget that exists when it is
 # sourced. fzf's own widgets and fzf-history-down are defined just above, so
 # moving this line up leaves them uncoloured.
