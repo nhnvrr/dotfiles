@@ -36,8 +36,8 @@ vim.o.background = "dark"
 vim.cmd("filetype plugin indent on")
 vim.cmd("syntax enable")
 
--- github_dark_dimmed, the same variant selected in ghostty/config, keeps the
--- editor and terminal aligned. A real colorscheme rather than inheriting the
+-- github_dark_dimmed, the same variant the Terminal.app profile paints, keeps
+-- the editor and terminal aligned. A real colorscheme rather than inheriting the
 -- sixteen ANSI slots: a colorscheme addresses far more groups than sixteen.
 --
 -- termguicolors is set instead of left to autodetect, which reads COLORTERM —
@@ -58,7 +58,7 @@ vim.pack.add({
 --
 -- transparent drops the Normal background so the terminal shows through. The
 -- theme's own background is then gone, so what you actually see is whatever
--- ghostty/config or Terminal.app paints.
+-- the Terminal.app profile paints.
 require("github-theme").setup({
   options = {
     transparent = true,
@@ -136,11 +136,37 @@ vim.pack.add({
   "https://github.com/nvim-tree/nvim-web-devicons",
 })
 
--- Icons are left at their defaults: they are already Nerd Font glyphs, and
--- ghostty/config loads the Mono build where each one is exactly one cell.
+-- Filetype icons are left at their defaults: they are already Nerd Font glyphs,
+-- and the Terminal.app profile loads the Mono build where each one is one cell.
+--
+-- The git markers are not. Two of the defaults — `✚` and `✖` — are East-Asian
+-- Ambiguous, so their width depends on a terminal setting rather than on the
+-- font, and next to the one-cell Nerd Font glyphs the column shifts by a cell
+-- as files change state. These are git's own porcelain letters, every one of
+-- them ASCII and one cell wide, so the column never moves.
+--
+-- unstaged is empty on purpose: unstaged is the normal case, and printing it
+-- next to the change type gives every modified file two markers instead of one.
+-- Only the exception is drawn — `=` for what is already staged. ignored is
+-- empty too, since filtered_items hides those anyway.
 require("neo-tree").setup({
   close_if_last_window = true,
   window = { width = 32 },
+  default_component_configs = {
+    git_status = {
+      symbols = {
+        added     = "+",
+        modified  = "~",
+        deleted   = "-",
+        renamed   = ">",
+        untracked = "?",
+        conflict  = "!",
+        staged    = "=",
+        unstaged  = "",
+        ignored   = "",
+      },
+    },
+  },
   filesystem = {
     -- This is a dotfiles repo: hiding dotfiles would hide the whole tree.
     filtered_items = { hide_dotfiles = false, hide_gitignored = true },
@@ -175,7 +201,7 @@ require("lualine").setup({
   options = {
     theme = lualine_theme,
     -- Plain separators: the powerline arrows need a glyph that changes width
-    -- between Nerd Font builds, and ghostty/config loads the Mono one.
+    -- between Nerd Font builds, and the profile loads the Mono one.
     section_separators = "",
     component_separators = "|",
     globalstatus = true,

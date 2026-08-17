@@ -59,7 +59,7 @@ enabled = true
 
 [theme]
 auto_switch = false
-name = "terminal"
+name = "nord"
 
 [theme.custom]
 panel_bg = "#0d1117"

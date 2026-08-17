@@ -12,7 +12,7 @@ end
 
 local APPS = {
   chrome    = "com.google.Chrome",
-  ghostty   = "com.mitchellh.ghostty",
+  terminal  = "com.apple.Terminal",
   vscode    = "com.microsoft.VSCode",
   tableplus = "com.tinyapp.TablePlus",
 }
@@ -114,10 +114,6 @@ end
 local RIGHT_PANE = APPS.chrome
 local RIGHT_RATIO = 0.3
 
--- The width test is not decoration: a full-screen window is also flush right
--- and full height, and taking it for the pane leaves the left one a negative
--- width. Not an equality test either — Chrome lands on its own minimum, wider
--- than the nominal ratio, like every Chromium.
 local function rightPaneIsPlaced(win)
   local f = hs.screen.mainScreen():frame()
   local r = win:frame()
@@ -126,9 +122,6 @@ local function rightPaneIsPlaced(win)
      and r.w < f.w / 2
 end
 
--- Flush right, full height, at whatever width it actually took: Chrome has a
--- minimum width and refuses the nominal ratio. Tested on the right edge rather
--- than the whole rect, so that refusal doesn't read as "not placed" forever.
 local function withRightPane(cb)
   local app = hs.application.get(RIGHT_PANE)
   local win = app and not app:isHidden() and windowOf(app) or nil
@@ -142,8 +135,6 @@ local function withRightPane(cb)
   local w = (f.w - GAP) * RIGHT_RATIO - GAP
   placeApp(RIGHT_PANE, hs.geometry.rect(f.x + f.w - GAP / 2 - w, f.y + GAP / 2, w, f.h - GAP),
     function(placed)
-      -- The resize does not always land before this read. A width that big is
-      -- the pre-resize frame coming back, so fall back to the nominal.
       local got = placed:frame().w
       if got >= f.w / 2 then got = w end
       local rect = hs.geometry.rect(f.x + f.w - GAP / 2 - got, f.y + GAP / 2, got, f.h - GAP)
@@ -169,10 +160,6 @@ hs.application.watcher.new(function(_, event, app)
   if event ~= hs.application.watcher.launched then return end
   local bid = app:bundleID()
   if not bid or claimed[bid] or bid == "org.hammerspoon.Hammerspoon" then return end
-  -- Ghostty starts full-screen — ghostty/config sets fullscreen = true with
-  -- macos-non-native-fullscreen, which is wider and taller than the frame
-  -- below. Placing it here would shrink it a moment after it opens.
-  if bid == APPS.ghostty then return end
   if app:kind() ~= 1 then return end
 
   local rect = frameFor(0, 0, 1, 1)
@@ -220,17 +207,14 @@ hs.hotkey.bind({ "cmd", "alt" }, "0", function()
 end)
 
 hs.hotkey.bind({ "cmd", "alt" }, "1", function() setLeftPane(APPS.vscode) end)
--- Tiling Ghostty takes it out of its non-native fullscreen. That is the point
--- of asking; cmd+ctrl+f inside it puts it back.
-hs.hotkey.bind({ "cmd", "alt" }, "2", function() setLeftPane(APPS.ghostty) end)
+hs.hotkey.bind({ "cmd", "alt" }, "2", function() setLeftPane(APPS.terminal) end)
 hs.hotkey.bind({ "cmd", "alt" }, "3", function() setLeftPane(APPS.tableplus) end)
--- Global on purpose, so it costs cmd+` its cycle-windows in every other app.
 hs.hotkey.bind({ "cmd" }, "`", function()
-  local app = hs.application.get(APPS.ghostty)
+  local app = hs.application.get(APPS.terminal)
   if app and app:isFrontmost() then
     app:hide()
   else
-    hs.application.launchOrFocusByBundleID(APPS.ghostty)
+    hs.application.launchOrFocusByBundleID(APPS.terminal)
   end
 end)
 

@@ -100,7 +100,7 @@ zle -N edit-command-line
 bindkey -M viins '^O' edit-command-line
 bindkey -M vicmd '^O' edit-command-line
 
-# Cursor shape follows the mode. Ghostty resets it per prompt, hence line-init.
+# Cursor shape follows the mode. Terminal resets it per prompt, hence line-init.
 function _cursor_shape {
   case ${KEYMAP:-viins} in
     vicmd) print -n '\e[2 q' ;;     # block
@@ -171,8 +171,8 @@ export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
 export FZF_CTRL_T_COMMAND=$FZF_DEFAULT_COMMAND
 export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
 
-# Colours by ANSI name, not hex: the sixteen slots in ghostty/config are the
-# single source.
+# Colours by ANSI name, not hex: the sixteen slots of the Terminal.app profile
+# are the single source.
 export FZF_DEFAULT_OPTS='
   --height 40% --layout=reverse --border=rounded
   --bind="ctrl-/:toggle-preview,ctrl-y:execute-silent(echo {} | pbcopy)+abort"
@@ -270,7 +270,7 @@ function ask {
 
 # ─── prompt hooks ───────────────────────────────────────────────────────────
 
-# Ghostty turns the bell into a Dock bounce and a title marker, so a background
+# Terminal.app turns the bell into a Dock bounce and a badge, so a background
 # window still reaches you without anything catching it first.
 _notify_threshold=10
 _notify_ignore=(less man ssh claude fzf watch top tail nvim btop lazygit)
@@ -327,8 +327,8 @@ fi
 
 # ─── colours ────────────────────────────────────────────────────────────────
 
-# By ANSI slot number, never hex: the sixteen slots in ghostty/config are the
-# single source of truth. Numbers and not names because zsh has no spelling for
+# By ANSI slot number, never hex: the sixteen slots of the Terminal.app profile
+# are the single source of truth. Numbers and not names because zsh has no spelling for
 # the bright half — 8-15 are brblack…brwhite.
 #
 # No `bold` anywhere: weight is not one of the sixteen slots, so it is the one
