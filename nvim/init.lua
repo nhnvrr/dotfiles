@@ -36,7 +36,7 @@ vim.o.background = "dark"
 vim.cmd("filetype plugin indent on")
 vim.cmd("syntax enable")
 
--- github_dark_dimmed, the same variant the Terminal.app profile paints, keeps
+-- github_dark_dimmed, the same variant alacritty.toml paints, keeps
 -- the editor and terminal aligned. A real colorscheme rather than inheriting the
 -- sixteen ANSI slots: a colorscheme addresses far more groups than sixteen.
 --
@@ -58,7 +58,7 @@ vim.pack.add({
 --
 -- transparent drops the Normal background so the terminal shows through. The
 -- theme's own background is then gone, so what you actually see is whatever
--- the Terminal.app profile paints.
+-- alacritty.toml paints.
 require("github-theme").setup({
   options = {
     transparent = true,
@@ -137,7 +137,7 @@ vim.pack.add({
 })
 
 -- Filetype icons are left at their defaults: they are already Nerd Font glyphs,
--- and the Terminal.app profile loads the Mono build where each one is one cell.
+-- and alacritty.toml loads the Mono build where each one is one cell.
 --
 -- The git markers are not. Two of the defaults — `✚` and `✖` — are East-Asian
 -- Ambiguous, so their width depends on a terminal setting rather than on the

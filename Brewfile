@@ -45,6 +45,12 @@ brew "yt-dlp"
 brew "ffmpeg"
 brew "btop"
 
+# No args here: Homebrew removed `--no-quarantine` from `brew install --cask`,
+# so the Gatekeeper attribute is stripped in install.sh instead. The cask is
+# deprecated for failing that same check and is disabled on 2026-09-01 — after
+# that, install from the GitHub release.
+cask "alacritty"
+
 cask "font-jetbrains-mono-nerd-font"
 
 cask "visual-studio-code"

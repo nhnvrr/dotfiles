@@ -122,6 +122,13 @@ if [[ -L "${HOME}/.config/ghostty/config" &&
       "$(readlink "${HOME}/.config/ghostty/config")" == "${CONFIG_DIR}/ghostty/config" ]]; then
   unlink "${HOME}/.config/ghostty/config"
 fi
+link_file "${CONFIG_DIR}/alacritty/alacritty.toml" "${HOME}/.config/alacritty/alacritty.toml"
+# Alacritty fails the Gatekeeper check, so every launch would be a
+# right-click → Open. `brew install --cask --no-quarantine` used to do this;
+# Homebrew removed the flag, so the attribute is stripped here instead.
+if [[ -d "/Applications/Alacritty.app" ]]; then
+  xattr -dr com.apple.quarantine "/Applications/Alacritty.app" 2>/dev/null || true
+fi
 link_file "${CONFIG_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"
 # Only read because zsh/zshenv exports EZA_CONFIG_DIR to this path; eza's own
 # default on macOS is ~/Library/Application Support/eza.

@@ -38,6 +38,17 @@ rows = [
   [{ token = "agent", bold = false }],
 ]
 
+[ui.sidebar.agents.rows_by_agent]
+claude = [
+  [
+    { token = "state_text" },
+    { token = "$icon" },
+    { token = "workspace", bold = false },
+    { token = "tab", bold = false },
+  ],
+  [{ token = "terminal_title_stripped", bold = false, dim = true }],
+]
+
 [ui.sidebar.spaces]
 rows = [
   [
@@ -59,25 +70,25 @@ enabled = true
 
 [theme]
 auto_switch = false
-name = "nord"
+name = "one-dark"
 
-[theme.custom]
-panel_bg = "#0d1117"
-surface0 = "#161b22"
-surface1 = "#21262d"
-surface_dim = "#010409"
-overlay0 = "#30363d"
-overlay1 = "#484f58"
-text = "#e6edf3"
-subtext0 = "#848d97"
-accent = "#2f81f7"
-blue = "#2f81f7"
-mauve = "#a371f7"
-green = "#3fb950"
-yellow = "#d29922"
-red = "#f85149"
-teal = "#39c5cf"
-peach = "#db6d28"
+# [theme.custom]
+# panel_bg = "#0d1117"
+# surface0 = "#161b22"
+# surface1 = "#21262d"
+# surface_dim = "#010409"
+# overlay0 = "#30363d"
+# overlay1 = "#484f58"
+# text = "#e6edf3"
+# subtext0 = "#848d97"
+# accent = "#2f81f7"
+# blue = "#2f81f7"
+# mauve = "#a371f7"
+# green = "#3fb950"
+# yellow = "#d29922"
+# red = "#f85149"
+# teal = "#39c5cf"
+# peach = "#db6d28"
 
 [experimental]
 allow_nested = false

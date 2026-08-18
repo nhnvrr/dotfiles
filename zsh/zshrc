@@ -171,8 +171,8 @@ export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
 export FZF_CTRL_T_COMMAND=$FZF_DEFAULT_COMMAND
 export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
 
-# Colours by ANSI name, not hex: the sixteen slots of the Terminal.app profile
-# are the single source.
+# Colours by ANSI name, not hex: the sixteen slots of alacritty.toml are the
+# single source.
 export FZF_DEFAULT_OPTS='
   --height 40% --layout=reverse --border=rounded
   --bind="ctrl-/:toggle-preview,ctrl-y:execute-silent(echo {} | pbcopy)+abort"
@@ -270,8 +270,9 @@ function ask {
 
 # ─── prompt hooks ───────────────────────────────────────────────────────────
 
-# Terminal.app turns the bell into a Dock bounce and a badge, so a background
-# window still reaches you without anything catching it first.
+# The bell is the signal: alacritty.toml turns it into a flash and a macOS
+# notification, so a background window still reaches you.
+# Terminal.app bounced the Dock for free; Alacritty needs the [bell] block.
 _notify_threshold=10
 _notify_ignore=(less man ssh claude fzf watch top tail nvim btop lazygit)
 
@@ -309,6 +310,21 @@ function _starship_env {
 }
 add-zsh-hook precmd _starship_env
 
+# herdr draws agent state as a coloured dot whose glyph no config key reaches.
+# The `state_text` token does take per-pane labels, but only over the socket API
+# — there is no config equivalent — so every pane has to report them itself, and
+# a shell is the one thing that runs in all of them. Backgrounded and detached:
+# it is a socket round-trip, and nothing here waits on the answer.
+#
+# herdr has no error state, so `unknown` carries it: an agent it cannot classify
+# is not proof of work, and the one thing worth knowing is that it stopped
+# reading as normal.
+if [[ ${HERDR_ENV:-} == 1 && -n ${HERDR_PANE_ID:-} ]]; then
+  (herdr pane report-metadata "$HERDR_PANE_ID" --source dotfiles \
+    --state-label 'idle='    --state-label 'working=󱦟' \
+    --state-label 'blocked=󰔟' --state-label 'unknown=' >/dev/null 2>&1 &)
+fi
+
 # ─── plugins ────────────────────────────────────────────────────────────────
 
 # Two, and only because zsh has no equivalent built in: the inline suggestion
@@ -327,12 +343,12 @@ fi
 
 # ─── colours ────────────────────────────────────────────────────────────────
 
-# By ANSI slot number, never hex: the sixteen slots of the Terminal.app profile
-# are the single source of truth. Numbers and not names because zsh has no spelling for
+# By ANSI slot number, never hex: the sixteen slots of alacritty.toml are the
+# single source of truth. Numbers and not names because zsh has no spelling for
 # the bright half — 8-15 are brblack…brwhite.
 #
 # No `bold` anywhere: weight is not one of the sixteen slots, so it is the one
-# attribute the profile cannot keep consistent across the stack.
+# attribute the palette cannot keep consistent across the stack.
 typeset -gA ZSH_HIGHLIGHT_STYLES
 ZSH_HIGHLIGHT_STYLES[command]='fg=4'
 ZSH_HIGHLIGHT_STYLES[builtin]='fg=4'

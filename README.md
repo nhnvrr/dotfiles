@@ -1,6 +1,6 @@
 # dotfiles
 
-macOS. zsh + Starship in Terminal.app, Hammerspoon for window tiling, herdr for agents, Neovim, VS Code, GitHub Dark Dimmed.
+macOS. zsh + Starship in Alacritty, Hammerspoon for window tiling, herdr for agents, Neovim, VS Code, GitHub Dark Dimmed.
 
 ## Install
 
@@ -21,7 +21,7 @@ Then, by hand:
 1. **Paste the SSH pubkey on GitHub** — already on your clipboard. Add it at <https://github.com/settings/ssh/new> as **both** an authentication and a signing key, or signed commits won't show as Verified.
 2. `gh auth login`
 3. **Set Chrome as the default browser** — System Settings → Desktop & Dock.
-4. **Set up Terminal.app** — Settings → Profiles: font `JetBrainsMono NFM` at 14, the GitHub Dark Dimmed palette, and Use Option as Meta Key. By hand, once: Terminal keeps its profiles in `com.apple.Terminal.plist` and rewrites it on quit, so it cannot be a symlink.
+4. **Launch Alacritty once** — font, palette and Option-as-Meta all come from `alacritty/alacritty.toml`, so there is nothing to click. The first long command asks for notification permission (the bell); allow it.
 
 ## The stack
 
@@ -29,7 +29,7 @@ Then, by hand:
 |---|---|---|
 | Shell | zsh — macOS's own `/bin/zsh`, no framework | [`zsh/zshrc`](./zsh/zshrc), [`zsh/zshenv`](./zsh/zshenv) |
 | Prompt | Starship | [`starship/starship.toml`](./starship/starship.toml) |
-| Terminal | Terminal.app — macOS's own | — user-level |
+| Terminal | Alacritty | [`alacritty/alacritty.toml`](./alacritty/alacritty.toml) |
 | Agents | herdr — agent state over its socket API, not a shell multiplexer | [`herdr/config.toml`](./herdr/config.toml) |
 | Quick questions | `?` → `ask` — one-off question to Claude, read-only, web search when needed | [`zsh/zshrc`](./zsh/zshrc) |
 | Editor | Neovim for fast local code reading; VS Code alongside | [`nvim/init.lua`](./nvim/init.lua) |
@@ -47,7 +47,7 @@ Then, by hand:
 
 Neovim has no plugin manager: the handful of plugins it does use — the [`github-nvim-theme`](https://github.com/projekt0n/github-nvim-theme) colorscheme, neo-tree and fzf-lua with their dependencies — are added through Neovim 0.12's own `vim.pack`. Its native LSP client provides automatic completion and diagnostics for TypeScript, Go, Rust, Bash, YAML and JSON; `Tab`/`Shift-Tab` select, `Enter` accepts, and `Ctrl-Space` triggers completion manually. Every write runs exactly one formatter: Prettier for TypeScript/YAML/JSON, gofumpt for Go, rustfmt for Rust, and shfmt for Bash. `Space-f` formats without writing and `gd` jumps to a definition.
 
-Keys split by modifier: Terminal.app takes `cmd`, zsh takes bare `ctrl`, and inside a herdr pane `ctrl+b` is the prefix before any of it.
+Keys split by modifier: Alacritty takes `cmd`, zsh takes bare `ctrl`, and inside a herdr pane `ctrl+b` is the prefix before any of it.
 
 Typing `?` and a space expands to `ask ""` with the cursor between the quotes — a one-off question, streamed. The first word lands at ~1.7s no matter how long the answer runs; buffered, nothing appears until it is finished, which is 2.4s for one line and 9.2s for a long one. So the gain scales with the answer and is nil on a two-word reply. Answers needing live data cost ~12s and cite their sources.
 
@@ -55,11 +55,11 @@ It is read-only by construction: `--disallowedTools` blocks the file and shell t
 
 ## Theme
 
-**GitHub Dark Dimmed, dark only.** The Terminal.app profile carries the palette, so the terminal owns the sixteen slots and everything downstream follows them for free — nothing here hardcodes a hex.
+**GitHub Dark Dimmed, dark only.** `alacritty/alacritty.toml` carries the palette, so the terminal owns the sixteen slots and everything downstream follows them for free — nothing here hardcodes a hex. Under Terminal.app the same sixteen lived in `com.apple.Terminal.plist`, which the app rewrites on quit and which therefore could never be a symlink; moving to Alacritty is what brought them into the repo.
 
 Neovim is the only thing downstream that carries a palette of its own, and it carries the same one. Everything else resolves through the slots: `bat` and delta run `syntax-theme = ansi`, starship styles by ANSI name and zsh-syntax-highlighting by ANSI slot number, `psql` writes the raw SGR slots, and herdr uses its built-in `terminal` theme, which draws its chrome from the same sixteen. A bundled-theme update moves all of those together.
 
-The Terminal.app profile paints the GitHub Dark Dimmed variant, while Neovim runs the same variant through [`github-nvim-theme`](https://github.com/projekt0n/github-nvim-theme)'s `github_dark_dimmed`. Neovim does not inherit the terminal slots because a colorscheme addresses far more groups than sixteen; the two applications still agree on `#22272e`, and body text (`#adbac7`) lands at 7.60:1.
+`alacritty.toml` paints the GitHub Dark Dimmed variant, while Neovim runs the same variant through [`github-nvim-theme`](https://github.com/projekt0n/github-nvim-theme)'s `github_dark_dimmed`. Neovim does not inherit the terminal slots because a colorscheme addresses far more groups than sixteen; the two applications still agree on `#22272e`, and body text (`#adbac7`) lands at 7.60:1.
 
 Two of the sixteen ANSI slots do not clear the 3:1 floor against `#22272e`, and unlike the previous theme one of them is painted:
 
@@ -80,6 +80,7 @@ Any window opacity in the profile pulls every ratio above down slightly, by what
 | `zsh/zshrc` | `~/.zshrc` |
 | `zsh/completions/_aws` | `~/.config/zsh/completions/_aws` |
 | `starship/starship.toml` | `~/.config/starship.toml` |
+| `alacritty/alacritty.toml` | `~/.config/alacritty/alacritty.toml` |
 | `mise/config.toml` | `~/.config/mise/config.toml` |
 | `eza/theme.yml` | `~/.config/eza/theme.yml` |
 | `nvim/init.lua` | `~/.config/nvim/init.lua` |
@@ -93,7 +94,7 @@ Any window opacity in the profile pulls every ratio above down slightly, by what
 
 Single files only, no directory symlinks. `link_file` moves any pre-existing regular file to `<dst>.bak.<timestamp>` before replacing it.
 
-**Not managed, and why not:** Terminal.app and Chrome both keep their settings in a file the app rewrites on quit, so neither can be a symlink. VS Code and `~/.claude/` are user-level state. `~/.aws/config` and `~/.pgpass` hold reconnaissance material and secrets, and this repo is public — write them by hand (`chmod 600 ~/.pgpass`).
+**Not managed, and why not:** Chrome keeps its settings in a file the app rewrites on quit, so it cannot be a symlink. VS Code and `~/.claude/` are user-level state. `~/.aws/config` and `~/.pgpass` hold reconnaissance material and secrets, and this repo is public — write them by hand (`chmod 600 ~/.pgpass`).
 
 ## Traps
 
@@ -112,8 +113,12 @@ The things that will bite you, and nothing else:
 - **Neovim formatting is strict and runs before every write.** A missing formatter or invalid source aborts the write; `:noautocmd write` is the deliberate escape hatch.
 - **There is deliberately no `~/.curlrc`.** That file is read by *every* curl invocation, Homebrew's installer included.
 - **`fd` and `bat` are not optional next to fzf** — `FZF_DEFAULT_COMMAND` and the `Ctrl-T` preview shell out to them.
-- **`font-jetbrains-mono-nerd-font`, not `font-jetbrains-mono`.** The plain cask carries no Nerd Font glyphs, which is what the eza icon column and starship need. The cask installs three families whose names differ by one word — `Mono`, `Propo` and `NL` — and only `JetBrainsMono Nerd Font Mono` keeps the icon column aligned. Terminal's font picker lists the one you want as `JetBrainsMono NFM`, and a family it cannot find falls back silently — `ll` showing boxes instead of icons is what tells you the pick was wrong.
-- **Neovim forces `termguicolors` instead of autodetecting.** Terminal.app exports `COLORTERM=truecolor` and honours 24-bit colour, but that variable does not survive every ssh — forcing it keeps the colourscheme instead of dropping to sixteen slots silently.
+- **`font-jetbrains-mono-nerd-font`, not `font-jetbrains-mono`.** The plain cask carries no Nerd Font glyphs, which is what the eza icon column and starship need. The cask installs three families whose names differ by one word — `Mono`, `Propo` and `NL` — and only `JetBrainsMono Nerd Font Mono` keeps the icon column aligned. `alacritty.toml` names it in full as `JetBrainsMono Nerd Font Mono`, and a family it cannot find falls back silently — `ll` showing boxes instead of icons is what tells you the name was wrong.
+- **Alacritty sets `TERM=xterm-256color`, not its own `alacritty`.** The cask does install the `alacritty` terminfo, into `~/.terminfo` symlinked inside the app bundle, so it resolves locally — but `TERM` travels over ssh and almost no remote host has the entry, which breaks `clear`, `less` and nvim there. The price is that `xterm-256color` does not advertise `Smulx`, so undercurl renders as a plain underline. Drop the `[env]` block to get it back.
+- **The `alacritty` cask is deprecated in Homebrew and disabled on 2026-09-01** — it fails the macOS Gatekeeper check. After that date `brew bundle` will skip it and the app has to come from the [GitHub release](https://github.com/alacritty/alacritty/releases) or `cargo install alacritty`.
+- **`install.sh` strips the quarantine attribute off `Alacritty.app`.** Homebrew removed `--no-quarantine` from `brew install --cask`, and a Brewfile `args: { no_quarantine: true }` now fails outright with `invalid option`. Without the `xattr -dr` every launch is a right-click → Open.
+- **The bell is a notification now, not a Dock bounce.** Terminal.app bounced the Dock for free; Alacritty needs the `[bell]` block, which shells out to `osascript`. macOS asks for notification permission the first time — deny it and long commands finish silently in the background.
+- **Neovim forces `termguicolors` instead of autodetecting.** Alacritty exports `COLORTERM=truecolor` and honours 24-bit colour, but that variable does not survive every ssh — forcing it keeps the colourscheme instead of dropping to sixteen slots silently.
 
 ## Homebrew
 
