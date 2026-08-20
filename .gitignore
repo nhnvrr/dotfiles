@@ -3,3 +3,11 @@
 # gh keeps the GitHub token in hosts.yml. Only config.yml (preferences) is
 # versioned; this rule is the net in case the other one ever gets copied in.
 gh/hosts.yml
+
+# This repo is public. Nothing carrying a credential or a per-machine value gets
+# in by accident: *.local is the convention every rc file here points at for the
+# credentialed half of a config, and .claude/ holds worktree and session state.
+.env
+.env.*
+*.local
+.claude/

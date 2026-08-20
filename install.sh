@@ -87,12 +87,17 @@ if [[ ! -f "${SSH_KEY}" ]]; then
 fi
 
 # Deliberately OUTSIDE the block above: on a machine where the key already
-# exists this still has to run. The grep avoids duplicating the entry.
+# exists this still has to run. The marker avoids duplicating the entry.
 mkdir -p "${HOME}/.ssh" && chmod 700 "${HOME}/.ssh"
-if ! grep -q "UseKeychain yes" "${HOME}/.ssh/config" 2>/dev/null; then
+# Matched against a sentinel this block owns, not against `UseKeychain yes`:
+# that string is legal inside any per-host block, so grepping the whole file
+# reports success while the `Host *` defaults were never written.
+SSH_MARKER="# managed by dotfiles"
+if ! grep -qF "${SSH_MARKER}" "${HOME}/.ssh/config" 2>/dev/null; then
   echo "Configuring ~/.ssh/config (agent + Keychain)..."
   cat >> "${HOME}/.ssh/config" <<'EOF'
 
+# managed by dotfiles
 Host *
   AddKeysToAgent yes
   UseKeychain yes
@@ -116,19 +121,7 @@ link_file "${CONFIG_DIR}/zsh/completions/_aws"   "${HOME}/.config/zsh/completion
 # zsh won't create it and history is dropped silently without it, same as psql.
 mkdir -p "${HOME}/.local/state/zsh" "${HOME}/.cache/zsh"
 link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
-# Older revisions linked Ghostty's config from here. Remove only that known
-# symlink; a real local config stays untouched.
-if [[ -L "${HOME}/.config/ghostty/config" &&
-      "$(readlink "${HOME}/.config/ghostty/config")" == "${CONFIG_DIR}/ghostty/config" ]]; then
-  unlink "${HOME}/.config/ghostty/config"
-fi
-link_file "${CONFIG_DIR}/alacritty/alacritty.toml" "${HOME}/.config/alacritty/alacritty.toml"
-# Alacritty fails the Gatekeeper check, so every launch would be a
-# right-click → Open. `brew install --cask --no-quarantine` used to do this;
-# Homebrew removed the flag, so the attribute is stripped here instead.
-if [[ -d "/Applications/Alacritty.app" ]]; then
-  xattr -dr com.apple.quarantine "/Applications/Alacritty.app" 2>/dev/null || true
-fi
+link_file "${CONFIG_DIR}/ghostty/config" "${HOME}/.config/ghostty/config"
 link_file "${CONFIG_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"
 # Only read because zsh/zshenv exports EZA_CONFIG_DIR to this path; eza's own
 # default on macOS is ~/Library/Application Support/eza.

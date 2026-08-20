@@ -14,7 +14,7 @@
 	pager = delta
 
 [push]
-	default = upstream
+	default = simple
 	autoSetupRemote = true
 
 [pull]

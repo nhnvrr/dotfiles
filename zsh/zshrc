@@ -100,7 +100,7 @@ zle -N edit-command-line
 bindkey -M viins '^O' edit-command-line
 bindkey -M vicmd '^O' edit-command-line
 
-# Cursor shape follows the mode. Terminal resets it per prompt, hence line-init.
+# Cursor shape follows the mode. The terminal resets it per prompt, hence line-init.
 function _cursor_shape {
   case ${KEYMAP:-viins} in
     vicmd) print -n '\e[2 q' ;;     # block
@@ -171,7 +171,7 @@ export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
 export FZF_CTRL_T_COMMAND=$FZF_DEFAULT_COMMAND
 export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
 
-# Colours by ANSI name, not hex: the sixteen slots of alacritty.toml are the
+# Colours by ANSI name, not hex: the sixteen slots of ghostty/config are the
 # single source.
 export FZF_DEFAULT_OPTS='
   --height 40% --layout=reverse --border=rounded
@@ -202,24 +202,15 @@ fi
 
 alias code='code --new-window'
 
-# ─── context: AWS profile and Claude config follow the directory ────────────
+# ─── context: the AWS profile follows the directory ─────────────────────────
 
 # The directory is the only thing that says which account a shell belongs to.
+# Claude is deliberately not part of this: the terminal always runs the personal
+# account, and the work one is only ever used from the web.
 function __ctx {
   case $PWD in
     $HOME/work|$HOME/work/*) print work ;;
   esac
-}
-
-function claude {
-  # Personal leaves it unset on purpose: Claude hashes the config dir into the
-  # Keychain item name only when the variable is set, so exporting it forks the
-  # login off every `claude` that does not come from this shell.
-  if [[ $(__ctx) == work ]]; then
-    CLAUDE_CONFIG_DIR=$HOME/.claude-work command claude "$@"
-  else
-    command claude "$@"
-  fi
 }
 
 # ~/.aws/config has no [default] profile: without this every aws command outside
@@ -241,9 +232,6 @@ function ask {
     return 2
   fi
 
-  # Bare `claude`, not `command claude`: the function above picks the config
-  # dir, or a question asked under ~/work logs in as personal.
-  #
   # --disallowedTools is what makes this read-only. --allowedTools only
   # auto-approves, it does not restrict, so on its own `ask 'save a file called
   # notes.txt'` writes the file. There is no "only these".
@@ -270,9 +258,9 @@ function ask {
 
 # ─── prompt hooks ───────────────────────────────────────────────────────────
 
-# The bell is the signal: alacritty.toml turns it into a flash and a macOS
-# notification, so a background window still reaches you.
-# Terminal.app bounced the Dock for free; Alacritty needs the [bell] block.
+# The bell is the signal: ghostty/config sets bell-features, which turns it into
+# a macOS notification and a Dock bounce, so a background window still reaches
+# you without anything catching it first.
 _notify_threshold=10
 _notify_ignore=(less man ssh claude fzf watch top tail nvim btop lazygit)
 
@@ -343,7 +331,7 @@ fi
 
 # ─── colours ────────────────────────────────────────────────────────────────
 
-# By ANSI slot number, never hex: the sixteen slots of alacritty.toml are the
+# By ANSI slot number, never hex: the sixteen slots of ghostty/config are the
 # single source of truth. Numbers and not names because zsh has no spelling for
 # the bright half — 8-15 are brblack…brwhite.
 #
@@ -427,8 +415,13 @@ fi
 # herdr space icons are server-side metadata and die with the server, so there
 # is no config file that can hold them. Every pane shell re-asserts them; the
 # script no-ops (~20ms) once each space already has one.
-if [[ -n $HERDR_PANE_ID ]]; then
-  (~/Develop/dotfiles/herdr/space-icons.sh &) >/dev/null 2>&1
+#
+# The path is derived, never written out: ~/.zshrc is a symlink into the repo,
+# so `:A` resolves it and `:h:h` climbs from zsh/ to the repo root. Hardcoding
+# ~/Develop/dotfiles here breaks a clone made anywhere else, and the redirection
+# below swallows the "no such file" that would say so.
+if [[ -n ${HERDR_PANE_ID:-} ]]; then
+  (${${(%):-%N}:A:h:h}/herdr/space-icons.sh &) >/dev/null 2>&1
 fi
 
 # Genuinely last, and it has to be: it wraps every widget that exists when it is
@@ -438,3 +431,6 @@ fi
   source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 unset _zsh_plugins _init_cache _zcompdump
+
+# bun completions
+[ -s "/Users/nhnvrr/.bun/_bun" ] && source "/Users/nhnvrr/.bun/_bun"

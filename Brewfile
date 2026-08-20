@@ -45,11 +45,9 @@ brew "yt-dlp"
 brew "ffmpeg"
 brew "btop"
 
-# No args here: Homebrew removed `--no-quarantine` from `brew install --cask`,
-# so the Gatekeeper attribute is stripped in install.sh instead. The cask is
-# deprecated for failing that same check and is disabled on 2026-09-01 — after
-# that, install from the GitHub release.
-cask "alacritty"
+# Ghostty is the terminal, settled. Its config is a plain file at
+# ~/.config/ghostty/config, which is what install.sh symlinks.
+cask "ghostty"
 
 cask "font-jetbrains-mono-nerd-font"
 

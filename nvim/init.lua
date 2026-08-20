@@ -36,9 +36,10 @@ vim.o.background = "dark"
 vim.cmd("filetype plugin indent on")
 vim.cmd("syntax enable")
 
--- github_dark_dimmed, the same variant alacritty.toml paints, keeps
--- the editor and terminal aligned. A real colorscheme rather than inheriting the
--- sixteen ANSI slots: a colorscheme addresses far more groups than sixteen.
+-- Jellybeans, the same palette ghostty/config paints slot by slot, so editor and
+-- terminal agree on #242424 and body text (#e8e8d3) lands at 12.50:1. A real
+-- colorscheme rather than inheriting the sixteen ANSI slots: a colorscheme
+-- addresses far more groups than sixteen.
 --
 -- termguicolors is set instead of left to autodetect, which reads COLORTERM —
 -- that does not survive every ssh, and without it the theme drops to sixteen
@@ -47,40 +48,68 @@ vim.cmd("syntax enable")
 -- vim.pack is Neovim's own (0.12), so this adds a plugin without a plugin
 -- manager. It clones on first start; nvim runs bare until it finishes.
 --
--- Major pinned, same reason as neo-tree below: this plugin went through a
--- breaking 0.0.x to v1 rewrite that renamed every colorscheme.
+-- Unpinned, same as lualine below: this plugin publishes no tags, so a version
+-- range would have nothing to match.
 vim.o.termguicolors = true
-vim.pack.add({
-  { src = "https://github.com/projekt0n/github-nvim-theme", version = vim.version.range("1") },
-})
+vim.pack.add({ "https://github.com/wtfox/jellybeans.nvim" })
+
 -- setup() has to run before the colorscheme command: it only stores options,
 -- and the highlights are built when the scheme loads.
 --
--- transparent drops the Normal background so the terminal shows through. The
--- theme's own background is then gone, so what you actually see is whatever
--- alacritty.toml paints.
-require("github-theme").setup({
-  options = {
-    transparent = true,
-    styles = {
-      comments = "NONE",
-      conditionals = "NONE",
-      constants = "NONE",
-      functions = "NONE",
-      keywords = "NONE",
-      numbers = "NONE",
-      operators = "NONE",
-      strings = "NONE",
-      types = "NONE",
-      variables = "NONE",
-    },
-  },
+-- plugins.all and not the default plugins.auto: auto-detection is a check for
+-- `package.loaded.lazy`, and there is no plugin manager here, so it would
+-- silently skip the neo-tree, lualine and telescope groups.
+--
+-- transparent drops the Normal background so the terminal shows through, which
+-- is what keeps Ghostty's blur visible behind the buffer. It is also what makes
+-- the background a single knob: jellybeans' own is #151515, ghostty/config
+-- paints #242424, and because nvim never draws one it follows the terminal
+-- rather than disagreeing with it.
+--
+-- on_colors relights five palette entries.
+--
+-- `old_brick` is jellybeans' dark red and lands at 2.10:1 on this background —
+-- it is what paints neo-tree's deleted and conflict markers, and it is
+-- unreadable there. The replacement is the same hex ghostty/config uses for
+-- ANSI slot 9, which is the same colour for the same reason, so the two stay
+-- in lockstep.
+--
+-- The other three are the greys jellybeans defines *relative to* its own
+-- #151515 background, which ghostty/config no longer paints. Left alone they do
+-- not merely shift, they invert: every one of them is darker than #242424, so
+-- a Telescope prompt or a selected row reads as a dark hole instead of a raised
+-- panel. Each is relit to the value that reproduces its original ratio, because
+-- what these encode is a distance from the background, not a colour:
+--
+--   grey_one     #1c1c1c  1.07:1   ->  #292929   selected row
+--   mine_shaft   #1f1f1f  1.11:1   ->  #2c2c2c   Telescope's prompt fill
+--   grey_three   #333333  1.45:1   ->  #3e3e3e   borders, Pmenu, indent markers
+--
+-- `background` itself is relit for the same reason. transparent = true above
+-- leaves the main windows at NONE, so the buffer is unaffected — but the flat_ui
+-- Telescope groups paint it *solid*, and the picker covers most of the screen.
+-- Without this it would open as a #151515 slab on a #242424 terminal, which is
+-- both visibly wrong and the near-black this palette moved away from.
+require("jellybeans").setup({
+  transparent = true,
+  italics = false,
+  bold = false,
+  flat_ui = true,
+  plugins = { all = true },
+  on_colors = function(colors)
+    colors.old_brick = "#e06060"
+    colors.background = "#242424"
+    colors.grey_one = "#292929"
+    colors.mine_shaft = "#2c2c2c"
+    colors.grey_three = "#3e3e3e"
+  end,
 })
-vim.cmd.colorscheme("github_dark")
+vim.cmd.colorscheme("jellybeans")
 
--- styles above only reach the syntax groups the theme exposes; bold survives in
--- Title, diagnostics, the popup menu and every plugin group. This sweeps all of
--- them, and re-runs on ColorScheme because loading a scheme rebuilds the table.
+-- `bold = false` above only reaches the groups jellybeans itself declares; bold
+-- survives in the builtins it leaves alone and in every plugin group. This
+-- sweeps all of them, and re-runs on ColorScheme because loading a scheme
+-- rebuilds the table.
 --
 -- Linked groups come back as { link = "Other" } with no bold key, so the guard
 -- skips them and the link is left intact rather than flattened into a copy.
@@ -108,8 +137,8 @@ vim.api.nvim_create_autocmd("ColorScheme", {
 })
 
 -- VimEnter and not a bare call here: the plugins set up further down this file
--- define their groups after this point, and fzf-lua defines some of its own on
--- first open. This pass runs once the whole config has been read.
+-- define their groups after this point, and Telescope defines some of its own
+-- on first open. This pass runs once the whole config has been read.
 vim.api.nvim_create_autocmd("VimEnter", {
   callback = function()
     vim.schedule(strip_bold)
@@ -137,7 +166,7 @@ vim.pack.add({
 })
 
 -- Filetype icons are left at their defaults: they are already Nerd Font glyphs,
--- and alacritty.toml loads the Mono build where each one is one cell.
+-- and ghostty/config loads the Mono build where each one is one cell.
 --
 -- The git markers are not. Two of the defaults — `✚` and `✖` — are East-Asian
 -- Ambiguous, so their width depends on a terminal setting rather than on the
@@ -185,13 +214,34 @@ vim.keymap.set("n", "<leader>e", "<Cmd>Neotree toggle reveal<CR>", { desc = "Tog
 -- devicons is already loaded above for neo-tree.
 vim.pack.add({ "https://github.com/nvim-lualine/lualine.nvim" })
 
--- The auto theme is derived from the loaded colorscheme, so it arrives with
--- github_dark's own backgrounds and a bold mode section. Both are stripped
--- here rather than after setup(): lualine copies the table it is given and
--- rebuilds these groups on ColorScheme, which would undo a later override.
-local lualine_theme = require("lualine.themes.auto")
+-- jellybeans.nvim ships its own lualine theme, so this is the palette itself
+-- and not the auto theme's guess at it. It arrives with solid backgrounds and a
+-- bold mode section; both are stripped here rather than after setup(), because
+-- lualine copies the table it is given and rebuilds these groups on
+-- ColorScheme, which would undo a later override.
+local function luminance(hex)
+  local function channel(value)
+    value = tonumber(value, 16) / 255
+    return value <= 0.04045 and value / 12.92 or ((value + 0.055) / 1.055) ^ 2.4
+  end
+  local r, g, b = hex:match("^#(%x%x)(%x%x)(%x%x)$")
+  if not r then
+    return nil
+  end
+  return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b)
+end
+
+local lualine_theme = require("lualine.themes.jellybeans-nvim")
 for _, mode in pairs(lualine_theme) do
   for _, section in pairs(mode) do
+    -- The mode section is a coloured chip with near-black text on it. Dropping
+    -- the chip without touching the text leaves #000000 on #242424, which is
+    -- invisible — so where the text is the darker of the two, the chip's own
+    -- colour becomes the text colour. That is what carried the mode anyway.
+    local fg, bg = luminance(section.fg or ""), luminance(section.bg or "")
+    if fg and bg and fg < bg then
+      section.fg = section.bg
+    end
     section.bg = "NONE"
     section.gui = nil
   end
@@ -214,37 +264,93 @@ require("lualine").setup({
     lualine_y = { "progress" },
     lualine_z = { "location" },
   },
-  extensions = { "neo-tree", "fzf" },
+  extensions = { "neo-tree" },
 })
 
--- fzf-lua and not telescope: it shells out to the same fzf binary the shell
--- already uses, so file search matches the same way in both places and there is
--- no second fuzzy engine to build. devicons is already here for neo-tree.
+-- Telescope. plenary is already loaded above for neo-tree, and so is devicons,
+-- which is what draws the filetype glyph in the results list.
 --
--- live_grep needs ripgrep, which is why Brewfile declares it: every rg on this
--- machine otherwise belongs to some editor extension, not to the profile.
-vim.pack.add({ "https://github.com/ibhagwan/fzf-lua" })
+-- telescope-fzf-native is a C extension that has to be compiled, and the hook
+-- below is what compiles it. It is not decoration: without it the sorter is
+-- Telescope's own Lua fuzzy matcher, which scores differently from the fzf
+-- binary the shell uses on Ctrl-T. With it, the same query ranks the same way
+-- in both places.
+--
+-- Unpinned: telescope's last tag is 0.1.8, and master is where the fixes for
+-- Neovim 0.12 landed. fzf-native publishes no tags at all.
+--
+-- live_grep shells out to ripgrep, which is why Brewfile declares it: every rg
+-- on this machine otherwise belongs to some editor extension, not the profile.
 
-require("fzf-lua").setup({
-  winopts = {
-    height = 0.85,
-    width = 0.85,
-    border = "rounded",
-    preview = { layout = "vertical", vertical = "down:45%" },
+-- Registered before the add, because PackChanged fires during it — on first
+-- clone there is no second chance to run the build.
+vim.api.nvim_create_autocmd("PackChanged", {
+  callback = function(args)
+    local data = args.data
+    if data.spec.name ~= "telescope-fzf-native.nvim" or data.kind == "delete" then
+      return
+    end
+    local result = vim.system({ "make" }, { cwd = data.path, text = true }):wait()
+    if result.code ~= 0 then
+      vim.notify("telescope-fzf-native: make failed\n" .. (result.stderr or ""), vim.log.levels.ERROR)
+    end
+  end,
+})
+
+vim.pack.add({
+  "https://github.com/nvim-telescope/telescope.nvim",
+  "https://github.com/nvim-telescope/telescope-fzf-native.nvim",
+})
+
+local telescope = require("telescope")
+
+telescope.setup({
+  defaults = {
+    -- Same shape as the neo-tree markers: one-cell ASCII rather than glyphs
+    -- whose width depends on a terminal setting.
+    prompt_prefix = "> ",
+    selection_caret = "> ",
+    -- flex is horizontal (matches left, preview right) and only stacks the
+    -- preview below when the window is narrower than flip_columns.
+    layout_strategy = "flex",
+    layout_config = {
+      width = 0.9,
+      height = 0.9,
+      prompt_position = "top",
+      flip_columns = 120,
+      horizontal = { preview_width = 0.55 },
+      vertical = { preview_height = 0.45 },
+    },
+    sorting_strategy = "ascending",
+    path_display = { "truncate" },
+    -- The default ignores nothing, so .git objects flood a --hidden search.
+    file_ignore_patterns = { "^%.git/" },
   },
-  files = {
-    -- Same switches as FZF_CTRL_T_COMMAND in zsh/zshrc.
-    fd_opts = "--type f --hidden --follow --exclude .git",
+  pickers = {
+    find_files = {
+      -- Same switches as FZF_CTRL_T_COMMAND in zsh/zshrc.
+      find_command = { "fd", "--type", "f", "--hidden", "--follow", "--exclude", ".git" },
+    },
+  },
+  extensions = {
+    fzf = { fuzzy = true, override_generic_sorter = true, override_file_sorter = true },
   },
 })
 
-local fzf = require("fzf-lua")
+-- After setup(), and guarded: the extension is a compiled .so, and if the build
+-- above failed this would error out of the whole config instead of falling back
+-- to the Lua sorter.
+pcall(telescope.load_extension, "fzf")
 
-vim.keymap.set("n", "<leader>ff", fzf.files, { desc = "Find file" })
-vim.keymap.set("n", "<leader>fg", fzf.live_grep, { desc = "Grep in project" })
-vim.keymap.set("n", "<leader>fb", fzf.buffers, { desc = "Find buffer" })
-vim.keymap.set("n", "<leader>fh", fzf.helptags, { desc = "Find help tag" })
-vim.keymap.set("n", "<leader>/", fzf.blines, { desc = "Grep in current file" })
+local builtin = require("telescope.builtin")
+
+vim.keymap.set("n", "<leader>ff", builtin.find_files, { desc = "Find file" })
+vim.keymap.set("n", "<leader>fg", builtin.live_grep, { desc = "Grep in project" })
+vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Find buffer" })
+vim.keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "Find help tag" })
+vim.keymap.set("n", "<leader>fr", builtin.oldfiles, { desc = "Find recent file" })
+vim.keymap.set("n", "<leader>fd", builtin.diagnostics, { desc = "Find diagnostic" })
+vim.keymap.set("n", "<leader>/", builtin.current_buffer_fuzzy_find, { desc = "Grep in current file" })
 
 local function root(markers)
   return function(bufnr, on_dir)

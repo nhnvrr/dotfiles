@@ -11,6 +11,13 @@ export LANG=en_US.UTF-8
 export EDITOR=nvim
 export VISUAL=nvim
 
+# /etc/zshrc sources /etc/zshrc_$TERM_PROGRAM, and Apple_Terminal's copy prints
+# "Restored session: <date>" from ~/.zsh_sessions/$TERM_SESSION_ID.session. Both
+# vars get inherited by anything launched from a Terminal.app shell, so the
+# banner follows the process tree into Ghostty. Must be set here, not in zshrc:
+# /etc/zshrc runs first.
+export SHELL_SESSIONS_DISABLE=1
+
 export GOPATH=$HOME/Develop/go
 export GOPRIVATE=github.com/nhnvrr
 export PNPM_HOME=$HOME/Library/pnpm

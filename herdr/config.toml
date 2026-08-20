@@ -24,29 +24,25 @@ toggle_sidebar = "prefix+b"
 prompt_new_tab_name = false
 copy_on_select = true
 tab_bar_position = "top"
-agent_panel_sort = "spaces"
+agent_panel_sort = "priority"
 
 show_agent_labels_on_pane_borders = true
 
+# One row shape for every agent, and no rows_by_agent: the per-agent block only
+# existed to give claude the $icon column, which left every other agent's second
+# column holding the workspace name instead — the two panels stopped lining up.
+#
+# state_icon and not state_text: the text spells the state out, and `done` is
+# five cells of a fixed-width column that push the workspace name off the end.
 [ui.sidebar.agents]
 rows = [
   [
     { token = "state_icon" },
-    { token = "workspace", bold = false },
-    { token = "tab", bold = false },
-  ],
-  [{ token = "agent", bold = false }],
-]
-
-[ui.sidebar.agents.rows_by_agent]
-claude = [
-  [
-    { token = "state_text" },
     { token = "$icon" },
     { token = "workspace", bold = false },
     { token = "tab", bold = false },
   ],
-  [{ token = "terminal_title_stripped", bold = false, dim = true }],
+  [{ token = "agent", bold = false }],
 ]
 
 [ui.sidebar.spaces]
@@ -70,7 +66,7 @@ enabled = true
 
 [theme]
 auto_switch = false
-name = "one-dark"
+name = "gruvbox"
 
 # [theme.custom]
 # panel_bg = "#0d1117"
