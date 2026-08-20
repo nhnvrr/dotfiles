@@ -135,6 +135,12 @@ link_file "${CONFIG_DIR}/nvim/init.lua" "${HOME}/.config/nvim/init.lua"
 # Only config.toml and not the directory: herdr keeps its sockets, logs and
 # workspace state in the same folder and writes to them at runtime.
 link_file "${CONFIG_DIR}/herdr/config.toml" "${HOME}/.config/herdr/config.toml"
+# The notification sounds, next to the config that names them by relative path.
+# See the comment on [ui.sound]: config.toml is a symlink, so the relative path
+# resolves either here or in the repo depending on whether herdr calls realpath
+# first, and linking these makes both readings land on the same file.
+link_file "${CONFIG_DIR}/herdr/sounds/done.mp3"    "${HOME}/.config/herdr/sounds/done.mp3"
+link_file "${CONFIG_DIR}/herdr/sounds/request.mp3" "${HOME}/.config/herdr/sounds/request.mp3"
 # Only init.lua: ~/.hammerspoon/Spoons is downloaded state, not config.
 link_file "${CONFIG_DIR}/hammerspoon/init.lua" "${HOME}/.hammerspoon/init.lua"
 # psql won't create this directory and history fails silently without it.
