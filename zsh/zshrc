@@ -298,20 +298,12 @@ function _starship_env {
 }
 add-zsh-hook precmd _starship_env
 
-# herdr draws agent state as a coloured dot whose glyph no config key reaches.
-# The `state_text` token does take per-pane labels, but only over the socket API
-# — there is no config equivalent — so every pane has to report them itself, and
-# a shell is the one thing that runs in all of them. Backgrounded and detached:
-# it is a socket round-trip, and nothing here waits on the answer.
-#
-# herdr has no error state, so `unknown` carries it: an agent it cannot classify
-# is not proof of work, and the one thing worth knowing is that it stopped
-# reading as normal.
-if [[ ${HERDR_ENV:-} == 1 && -n ${HERDR_PANE_ID:-} ]]; then
-  (herdr pane report-metadata "$HERDR_PANE_ID" --source dotfiles \
-    --state-label 'idle='    --state-label 'working=󱦟' \
-    --state-label 'blocked=󰔟' --state-label 'unknown=' >/dev/null 2>&1 &)
-fi
+# The per-pane --state-label block that used to live here is gone. It fed the
+# `state_text` token, which no sidebar row draws any more, and `herdr pane
+# report-metadata` is display-only — so it was a socket round-trip per pane
+# producing nothing. `ui.status_indicators = "symbols"` in herdr/config.toml
+# does the same job server-side: a distinct shape per state rather than four
+# colours of the same dot, and it covers panes that never sourced this file.
 
 # ─── plugins ────────────────────────────────────────────────────────────────
 

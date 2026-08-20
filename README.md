@@ -97,6 +97,8 @@ That value is not jellybeans' own. Neovim runs `transparent = true`, so the term
 | `eza/theme.yml` | `~/.config/eza/theme.yml` |
 | `nvim/init.lua` | `~/.config/nvim/init.lua` |
 | `herdr/config.toml` | `~/.config/herdr/config.toml` |
+| `herdr/sounds/done.mp3` | `~/.config/herdr/sounds/done.mp3` |
+| `herdr/sounds/request.mp3` | `~/.config/herdr/sounds/request.mp3` |
 | `hammerspoon/init.lua` | `~/.hammerspoon/init.lua` |
 | `git/gitconfig` | `~/.gitconfig` |
 | `git/ignore` | `~/.config/git/ignore` |
