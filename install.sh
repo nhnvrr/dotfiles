@@ -121,7 +121,6 @@ link_file "${CONFIG_DIR}/zsh/completions/_aws"   "${HOME}/.config/zsh/completion
 # zsh won't create it and history is dropped silently without it, same as psql.
 mkdir -p "${HOME}/.local/state/zsh" "${HOME}/.cache/zsh"
 link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
-link_file "${CONFIG_DIR}/ghostty/config" "${HOME}/.config/ghostty/config"
 link_file "${CONFIG_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"
 # Only read because zsh/zshenv exports EZA_CONFIG_DIR to this path; eza's own
 # default on macOS is ~/Library/Application Support/eza.
@@ -141,6 +140,13 @@ link_file "${CONFIG_DIR}/herdr/config.toml" "${HOME}/.config/herdr/config.toml"
 # first, and linking these makes both readings land on the same file.
 link_file "${CONFIG_DIR}/herdr/sounds/done.mp3"    "${HOME}/.config/herdr/sounds/done.mp3"
 link_file "${CONFIG_DIR}/herdr/sounds/request.mp3" "${HOME}/.config/herdr/sounds/request.mp3"
+# btop rewrites this file on exit, comments and all, so the reason it is here
+# cannot live inside it: color_theme = "TTY" makes btop draw from the terminal's
+# sixteen ANSI slots instead of a theme file of its own, which is what keeps it
+# following alacritty/alacritty.toml for free. Expect btop to churn the file whenever a
+# setting is changed from its UI.
+link_file "${CONFIG_DIR}/alacritty/alacritty.toml" "${HOME}/.config/alacritty/alacritty.toml"
+link_file "${CONFIG_DIR}/btop/btop.conf" "${HOME}/.config/btop/btop.conf"
 # Only init.lua: ~/.hammerspoon/Spoons is downloaded state, not config.
 link_file "${CONFIG_DIR}/hammerspoon/init.lua" "${HOME}/.hammerspoon/init.lua"
 # psql won't create this directory and history fails silently without it.

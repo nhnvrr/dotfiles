@@ -41,9 +41,9 @@ agent_panel_sort = "priority"
 # sourced that file.
 status_indicators = "symbols"
 
-# Jellybeans' bright blue, ANSI slot 12 in ghostty/config. The default is a
-# generic cyan that belongs to no palette in use here.
-accent = "#8fbfdc"
+# Kanso Ink's bright blue, the same accent the agent rows use below. Left alone
+# herdr picks a generic cyan that matches nothing else on screen.
+accent = "#7fb4ca"
 
 # 36 truncates a worktree branch at `chore/sc-109…` — and the ticket number is
 # the only thing telling two worktrees of the same repo apart. The width still
@@ -54,23 +54,19 @@ sidebar_max_width = 44
 # copy_on_select above makes that a copy of the wrong thing.
 pane_scrollbars = false
 
-# Empty, and it has to be: herdr's default is "{hostname}: {workspace}", which
-# it recomputes and writes to the outer terminal on every workspace switch —
-# and ghostty/config pins `title = 🧉`, which makes Ghostty ignore the title
-# escape sequence outright rather than override it once. The default is work
-# whose result is discarded before it is drawn.
+# Empty on purpose: herdr's default is "{hostname}: {workspace}", which it
+# recomputes and writes to the outer terminal on every workspace switch. The
+# window already says which project it is; this is work for nothing.
 window_title = ""
 
 show_agent_labels_on_pane_borders = true
 
 # The fallback shape, used by any agent without an entry in rows_by_agent below.
 #
-# rows_by_agent is back, and the distinction matters: it used to give claude an
-# extra $icon column, which left every other agent's second column holding the
-# workspace name and broke alignment against the spaces panel. Row 1 is now
-# byte-identical across all three blocks — only the agent name's colour differs,
-# which no other key can express, since herdr takes complete row overrides and
-# offers no per-agent colour of its own.
+# Row 1 is byte-identical across all three blocks — only the agent name's colour
+# on row 2 differs, which no other key can express, since herdr takes complete
+# row overrides and offers no per-agent colour of its own. Any drift in row 1
+# and the agents panel stops lining up with the spaces panel.
 #
 # state_icon and not state_text: the text spells the state out, and `done` is
 # five cells of a fixed-width column that push the workspace name off the end.
@@ -78,7 +74,6 @@ show_agent_labels_on_pane_borders = true
 rows = [
   [
     { token = "state_icon" },
-    { token = "$icon" },
     { token = "workspace", bold = false },
     { token = "tab", bold = false },
   ],
@@ -90,12 +85,12 @@ rows = [
   #
   # `agent` carries an explicit fg and no dim. Left to the theme it inherits
   # subtext0, and herdr already renders the second row at reduced intensity — the
-  # two stack and the agent name washes out to near-invisible against #242424.
+  # two stack and the agent name washes out to near-invisible against #32302f.
   # The hex is ANSI slot 12, the same accent the sidebar uses elsewhere.
   #
   # No dim on state_text either, for the same reason: herdr colours it by state,
   # and dimming a signal that exists to be noticed defeats it.
-  [{ token = "agent", fg = "#8fbfdc", bold = false }, { token = "state_text" }],
+  [{ token = "agent", fg = "#a4c6bf", bold = false }, { token = "state_text" }],
 ]
 
 # Per-agent colour, and nothing else. Row 1 is copied verbatim from the block
@@ -105,39 +100,34 @@ rows = [
 # The colour answers "whose pane is this" at a glance, which is the question a
 # sidebar with several agents actually gets asked.
 #
-# #fe8019 is the one hex here that is NOT one of ghostty/config's sixteen slots.
-# It is a deliberate exception: jellybeans' warmest slot is #e6a75a, an amber
-# that reads as a sibling of the yellow used for state, and the point of this
-# colour is to be unmistakable. Swapping it for #e6a75a is a one-line change if
-# the palette purity is worth more than the contrast between the two agents.
+# #b6927b is the theme's own indexed colour 16, which alacritty.toml also
+# defines — the one warm hue far enough from both the blue above and the yellow
+# state_text uses to tell the two agents apart at a glance.
 [ui.sidebar.agents.rows_by_agent]
 claude = [
   [
     { token = "state_icon" },
-    { token = "$icon" },
     { token = "workspace", bold = false },
     { token = "tab", bold = false },
   ],
-  [{ token = "agent", fg = "#fe8019", bold = false }, { token = "state_text" }],
+  [{ token = "agent", fg = "#b6927b", bold = false }, { token = "state_text" }],
 ]
 
 codex = [
   [
     { token = "state_icon" },
-    { token = "$icon" },
     { token = "workspace", bold = false },
     { token = "tab", bold = false },
   ],
-  # Slot 15, the brightest white in the palette — the maximum separation from
-  # the orange above without reaching for a hue that means something else.
-  [{ token = "agent", fg = "#f0f0f0", bold = false }, { token = "state_text" }],
+  # Plain text, the maximum separation from the peach above without reaching
+  # for a hue that means something else.
+  [{ token = "agent", fg = "#C5C9C7", bold = false }, { token = "state_text" }],
 ]
 
 [ui.sidebar.spaces]
 rows = [
   [
     { token = "state_icon" },
-    { token = "$icon" },
     { token = "workspace", bold = false },
   ],
   [
@@ -173,50 +163,46 @@ enabled = true
 done_path = "sounds/done.mp3"
 request_path = "sounds/request.mp3"
 
+# Kanso Ink, matching alacritty/alacritty.toml slot for slot. herdr's theme
+# tokens accept no ANSI reference, so this is the one place besides
+# nvim/init.lua that has to restate the palette as hex.
 [theme]
 auto_switch = false
 # The base only fills tokens [theme.custom] leaves alone; every token herdr
 # exposes is overridden below, so the name is a floor, not the look.
-name = "catppuccin"
+name = "terminal"
 
-# Jellybeans, so herdr stops being the one surface that disagrees with the rest
-# of the stack. Nothing here is invented: the colours are ghostty/config's
-# sixteen ANSI slots, and the greys are the ones nvim/init.lua already relit for
-# this exact problem — jellybeans defines them relative to its own #151515
-# background, and against #242424 they invert into dark holes instead of raised
-# panels. Reusing those values keeps the sidebar and the editor in lockstep by
-# construction rather than by hand.
 [theme.custom]
-# Surfaces. panel_bg matches the terminal background so herdr does not paint its
-# own ground behind Ghostty's blur.
-panel_bg    = "#242424"
-sidebar_bg  = "#242424"
-surface_dim = "#151515"   # ANSI slot 0, the one value that stays near-black
-surface0    = "#292929"   # nvim's grey_one   — the selected row
-surface1    = "#2c2c2c"   # nvim's mine_shaft — raised fills
-overlay0    = "#3e3e3e"   # nvim's grey_three — borders, menus, indent markers
-overlay1    = "#4a4a4a"   # ghostty's selection-background
+# Surfaces, straight off the theme's own bg0-bg4 ramp. panel_bg matches the
+# terminal background so herdr does not paint its own ground behind the blur.
+panel_bg    = "#14171d"   # bg0, the terminal background
+sidebar_bg  = "#14171d"
+# bg0 again, and it has to be: bg0 is the darkest value the palette defines, so
+# there is nothing to sit below the ground.
+surface_dim = "#14171d"
+surface0    = "#1f1f26"   # bg1 — the selected row
+surface1    = "#22262D"   # bg2 — raised fills
+overlay0    = "#393B44"   # bg3 — borders, menus, and the terminal's selection
+overlay1    = "#4b4e57"   # bg4
 
-# The row backgrounds herdr singles out, pointed at the grey whose job in nvim
-# is already "selected row".
-active_row_bg = "#292929"
-selection_bg  = "#2c2c2c"
+active_row_bg = "#1f1f26"
+selection_bg  = "#22262D"
 
-# Text. subtext0 is slot 8, which holds 4.38:1 on this background — the value
-# README picked precisely because it paints comments and dim text everywhere.
-text     = "#e8e8d3"
-subtext0 = "#888888"
+# subtext0 is ANSI slot 8, which holds 7.39:1 on this background — the value
+# alacritty.toml carries precisely because it paints dim text everywhere.
+text     = "#C5C9C7"
+subtext0 = "#A4A7A4"
 
 # Hues, by ANSI slot. The bright half where herdr uses a colour to carry meaning
 # on a dark panel, the normal half where it is decoration.
-accent = "#8fbfdc"   # slot 12, matching ui.accent above
-blue   = "#8197bf"   # slot 4
-mauve  = "#c6b6ee"   # slot 5
-green  = "#99ad6a"   # slot 2
-yellow = "#fad07a"   # slot 3
-red    = "#d74545"   # slot 1
-teal   = "#668799"   # slot 6
-peach  = "#e6a75a"   # slot 11, jellybeans' relit bright yellow
+accent = "#7fb4ca"   # slot 12
+blue   = "#8ba4b0"   # slot 4
+mauve  = "#938aa9"   # slot 13
+green  = "#87a987"   # slot 10
+yellow = "#e6c384"   # slot 11
+red    = "#e46876"   # slot 9
+teal   = "#7aa89f"   # slot 14
+peach  = "#c4b28a"   # slot 3
 
 [experimental]
 allow_nested = false

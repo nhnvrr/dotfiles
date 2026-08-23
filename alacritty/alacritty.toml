@@ -1,0 +1,121 @@
+
+[general]
+live_config_reload = true
+
+[env]
+TERM = "xterm-256color"
+
+[window]
+padding = { x = 1, y = 1 }
+dynamic_padding = true
+# "none" and not "buttonless": buttonless only removes the three traffic
+# lights, it keeps the titlebar strip and the window title centred in it —
+# which is what was still showing. "none" removes the bar outright.
+#
+# The cost is the drag area. It is affordable here because the window opens
+# Maximized and hammerspoon/init.lua is what moves and sizes it; go back to
+# "buttonless" if a draggable strip turns out to be worth the title.
+decorations = "none"
+option_as_alt = "Both"
+# SimpleFullscreen, and the three modes are genuinely different on macOS:
+#
+#   Maximized       fills the screen BELOW the menu bar
+#   Fullscreen      covers everything, but moves the window to a Space of its
+#                   own, where hammerspoon/init.lua can no longer tile it —
+#                   `cmd+alt+2` (setLeftPane) would have nothing to place it
+#                   beside
+#   SimpleFullscreen  covers everything, menu bar included, and stays in the
+#                   current Space
+#
+# The third is the only one that satisfies both: the whole screen, still an
+# ordinary window as far as Hammerspoon is concerned.
+startup_mode = "SimpleFullscreen"
+opacity = 0.97
+blur = true
+
+# Belt and braces: with no titlebar there is nothing to draw the title on, but
+# this also stops Alacritty recomputing it on every foreground process change.
+dynamic_title = false
+title = ""
+
+[scrolling]
+history = 10000
+
+[font]
+size = 14.0
+normal      = { family = "JetBrainsMono NFM", style = "Regular" }
+bold        = { family = "JetBrainsMono NFM", style = "Bold" }
+italic      = { family = "JetBrainsMono NFM", style = "Italic" }
+bold_italic = { family = "JetBrainsMono NFM", style = "Bold Italic" }
+offset = { x = 0, y = 1 }
+builtin_box_drawing = true
+
+[cursor]
+style = { shape = "Beam", blinking = "On" }
+unfocused_hollow = true
+
+[mouse]
+hide_when_typing = true
+
+[selection]
+save_to_clipboard = true
+
+[terminal]
+osc52 = "CopyPaste"
+
+[bell]
+# A flash and nothing else. zsh/zshrc rings this when a command takes longer
+# than ten seconds; a `command = { program = "osascript", ... }` here would turn
+# each one into a macOS notification, which reaches you behind other windows at
+# the cost of a popup — and a popup carrying Script Editor's icon, since
+# osascript is what posts it. The flash covers the foreground case, which is the
+# one that actually happens.
+animation = "EaseOutExpo"
+duration = 100
+color = '#7fb4ca'
+
+[colors.primary]
+background = '#14171d'
+foreground = '#C5C9C7'
+
+[colors.cursor]
+text   = '#14171d'
+cursor = '#C5C9C7'
+
+[colors.selection]
+background = '#393B44'
+foreground = '#C5C9C7'
+
+[colors.normal]
+black   = '#14171d'
+red     = '#c4746e'
+green   = '#8a9a7b'
+yellow  = '#c4b28a'
+blue    = '#8ba4b0'
+magenta = '#a292a3'
+cyan    = '#8ea4a2'
+white   = '#c8c093'
+
+[colors.bright]
+black   = '#A4A7A4'
+red     = '#e46876'
+green   = '#87a987'
+yellow  = '#e6c384'
+blue    = '#7fb4ca'
+magenta = '#938aa9'
+cyan    = '#7aa89f'
+white   = '#C5C9C7'
+
+[[colors.indexed_colors]]
+index = 16
+color = '#b6927b'
+
+[[colors.indexed_colors]]
+index = 17
+color = '#b98d7b'
+
+[keyboard]
+bindings = [
+  { key = "K", mods = "Command", chars = "\u000C" },
+  { key = "Back", mods = "Command", chars = "\u0015" },
+]

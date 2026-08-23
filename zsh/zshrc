@@ -91,9 +91,15 @@ zle -N down-line-or-beginning-search
 for m in viins vicmd; do
   bindkey -M $m '^P' up-line-or-beginning-search
   bindkey -M $m '^N' down-line-or-beginning-search
+  # Both forms of each arrow: ^[[A is the normal mode and ^[OA the application
+  # cursor mode, and which one the terminal sends depends on the mode the last
+  # program left it in.
   bindkey -M $m '^[[A' up-line-or-beginning-search
   bindkey -M $m '^[OA' up-line-or-beginning-search
+  bindkey -M $m '^[[B' down-line-or-beginning-search
+  bindkey -M $m '^[OB' down-line-or-beginning-search
 done
+unset m
 
 autoload -Uz edit-command-line
 zle -N edit-command-line
@@ -171,8 +177,8 @@ export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
 export FZF_CTRL_T_COMMAND=$FZF_DEFAULT_COMMAND
 export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
 
-# Colours by ANSI name, not hex: the sixteen slots of ghostty/config are the
-# single source.
+# Colours by ANSI name, not hex: the sixteen slots of alacritty/alacritty.toml
+# are the single source.
 export FZF_DEFAULT_OPTS='
   --height 40% --layout=reverse --border=rounded
   --bind="ctrl-/:toggle-preview,ctrl-y:execute-silent(echo {} | pbcopy)+abort"
@@ -258,9 +264,11 @@ function ask {
 
 # ─── prompt hooks ───────────────────────────────────────────────────────────
 
-# The bell is the signal: ghostty/config sets bell-features, which turns it into
-# a macOS notification and a Dock bounce, so a background window still reaches
-# you without anything catching it first.
+# The bell is the signal. alacritty/alacritty.toml turns it into a flash of the
+# window and nothing more — deliberately no notification, so a long command
+# never raises a popup. That means it only reaches you when the window is
+# visible; raise _notify_threshold if even the flash is noise.
+
 _notify_threshold=10
 _notify_ignore=(less man ssh claude fzf watch top tail nvim btop lazygit)
 
@@ -323,9 +331,9 @@ fi
 
 # ─── colours ────────────────────────────────────────────────────────────────
 
-# By ANSI slot number, never hex: the sixteen slots of ghostty/config are the
-# single source of truth. Numbers and not names because zsh has no spelling for
-# the bright half — 8-15 are brblack…brwhite.
+# By ANSI slot number, never hex: the sixteen slots of alacritty/alacritty.toml
+# are the single source of truth. Numbers and not names because zsh has no
+# spelling for the bright half — 8-15 are brblack…brwhite.
 #
 # No `bold` anywhere: weight is not one of the sixteen slots, so it is the one
 # attribute the palette cannot keep consistent across the stack.
@@ -378,46 +386,14 @@ if [[ ! -s $_init_cache || ${(%):-%N} -nt $_init_cache || /opt/homebrew/bin -nt 
 fi
 source $_init_cache
 
-# fzf's Ctrl-R lands on the whole history; this is the same widget on `down`,
-# which is where the hand already is. The guard is the point: on a multi-line
-# buffer `down` still has to move the cursor between lines, and binding the
-# widget straight to `down` breaks that outright.
-function fzf-history-down {
-  if [[ ${BUFFER[$((CURSOR + 1)),-1]} == *$'\n'* ]]; then
-    zle down-line-or-history
-    return
-  fi
-  zle fzf-history-widget
-}
-zle -N fzf-history-down
-# After the cache is sourced, and guarded: fzf-history-widget does not exist
-# before it, and binding `down` to a widget that is missing leaves the key dead
-# rather than falling back to the default.
-if (( $+widgets[fzf-history-widget] )); then
-  for m in viins vicmd; do
-    bindkey -M $m '^[[B' fzf-history-down
-    bindkey -M $m '^[OB' fzf-history-down
-  done
-  unset m
-fi
+# fzf's history popup is Ctrl-R and nothing else: the snippet sourced above
+# binds it. The arrows stay on the prefix search bound near the top of the file.
 
 # starship has no transient prompt for zsh — `enable_transience` is fish, cmd
 # and powershell only as of 1.26, so there is nothing to call here.
 
-# herdr space icons are server-side metadata and die with the server, so there
-# is no config file that can hold them. Every pane shell re-asserts them; the
-# script no-ops (~20ms) once each space already has one.
-#
-# The path is derived, never written out: ~/.zshrc is a symlink into the repo,
-# so `:A` resolves it and `:h:h` climbs from zsh/ to the repo root. Hardcoding
-# ~/Develop/dotfiles here breaks a clone made anywhere else, and the redirection
-# below swallows the "no such file" that would say so.
-if [[ -n ${HERDR_PANE_ID:-} ]]; then
-  (${${(%):-%N}:A:h:h}/herdr/space-icons.sh &) >/dev/null 2>&1
-fi
-
 # Genuinely last, and it has to be: it wraps every widget that exists when it is
-# sourced. fzf's own widgets and fzf-history-down are defined just above, so
+# sourced. fzf's own widgets come from the init cache sourced just above, so
 # moving this line up leaves them uncoloured.
 [[ -r /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] &&
   source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh

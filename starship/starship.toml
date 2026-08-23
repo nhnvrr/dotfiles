@@ -19,7 +19,7 @@ vimcmd_replace_symbol = '[▶](bright-purple)'
 vimcmd_replace_one_symbol = '[▶](bright-purple)'
 vimcmd_visual_symbol = '[V](bright-yellow)'
 [git_branch]
-symbol = ' '
+symbol = ' '
 style = 'green'
 format = '[$symbol$branch]($style) '
 [git_state]

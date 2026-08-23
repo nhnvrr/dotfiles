@@ -12,9 +12,9 @@ end
 
 local APPS = {
   chrome    = "com.google.Chrome",
-  terminal  = "com.mitchellh.ghostty",
+  terminal  = "org.alacritty",
   vscode    = "com.microsoft.VSCode",
-  tableplus = "com.tinyapp.TablePlus",
+  datagrip  = "com.jetbrains.datagrip",
 }
 
 local GAP = 2
@@ -208,7 +208,7 @@ end)
 
 hs.hotkey.bind({ "cmd", "alt" }, "1", function() setLeftPane(APPS.vscode) end)
 hs.hotkey.bind({ "cmd", "alt" }, "2", function() setLeftPane(APPS.terminal) end)
-hs.hotkey.bind({ "cmd", "alt" }, "3", function() setLeftPane(APPS.tableplus) end)
+hs.hotkey.bind({ "cmd", "alt" }, "3", function() setLeftPane(APPS.datagrip) end)
 hs.hotkey.bind({ "cmd" }, "`", function()
   local app = hs.application.get(APPS.terminal)
   if app and app:isFrontmost() then

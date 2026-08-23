@@ -6,6 +6,20 @@ vim.g.loaded_perl_provider = 0
 vim.g.loaded_python3_provider = 0
 vim.g.loaded_ruby_provider = 0
 
+-- Builtin plugins this profile never reaches. They are sourced from $VIMRUNTIME
+-- during startup unless the flag is set BEFORE it, which is why this sits at the
+-- top of the file rather than with the other options. netrw is the one that
+-- matters: neo-tree replaces it outright, and left enabled it still registers
+-- its autocmds and hijacks a `:e directory/`.
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+vim.g.loaded_gzip = 1
+vim.g.loaded_tarPlugin = 1
+vim.g.loaded_zipPlugin = 1
+vim.g.loaded_tutor_mode_plugin = 1
+vim.g.loaded_spellfile_plugin = 1
+vim.g.loaded_rplugin = 1
+
 local opt = vim.opt
 
 opt.number = true
@@ -27,6 +41,23 @@ opt.splitright = true
 opt.completeopt = { "fuzzy", "menuone", "noselect", "popup" }
 opt.updatetime = 250
 
+-- Live preview of :s while it is being typed, in a split showing every line it
+-- would touch. The single largest "why did I not have this" option in vim.
+opt.inccommand = "split"
+
+-- Relative for the jumps (5k, d3j), absolute on the cursor line so the ruler
+-- still says where you are. `number` above is what keeps that one line absolute.
+opt.relativenumber = true
+
+-- 300ms and not the 1000ms default: leader is Space, so every chord below waits
+-- this long before giving up. Short enough not to feel stuck, long enough that
+-- `<leader>ca` typed at speed still lands.
+opt.timeoutlen = 300
+
+-- Trailing whitespace and hard tabs are invisible until they break a diff.
+opt.list = true
+opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
+
 opt.clipboard = "unnamedplus"
 opt.confirm = true
 opt.swapfile = false
@@ -36,9 +67,9 @@ vim.o.background = "dark"
 vim.cmd("filetype plugin indent on")
 vim.cmd("syntax enable")
 
--- Jellybeans, the same palette ghostty/config paints slot by slot, so editor and
--- terminal agree on #242424 and body text (#e8e8d3) lands at 12.50:1. A real
--- colorscheme rather than inheriting the sixteen ANSI slots: a colorscheme
+-- Kanso Ink — the same palette alacritty/alacritty.toml paints slot by slot, so
+-- editor and terminal agree on #14171d and body text (#C5C9C7) lands at
+-- 10.73:1. A real colorscheme rather than the sixteen ANSI slots: a colorscheme
 -- addresses far more groups than sixteen.
 --
 -- termguicolors is set instead of left to autodetect, which reads COLORTERM —
@@ -47,69 +78,33 @@ vim.cmd("syntax enable")
 --
 -- vim.pack is Neovim's own (0.12), so this adds a plugin without a plugin
 -- manager. It clones on first start; nvim runs bare until it finishes.
---
--- Unpinned, same as lualine below: this plugin publishes no tags, so a version
--- range would have nothing to match.
 vim.o.termguicolors = true
-vim.pack.add({ "https://github.com/wtfox/jellybeans.nvim" })
+vim.pack.add({ "https://github.com/webhooked/kanso.nvim" })
 
 -- setup() has to run before the colorscheme command: it only stores options,
 -- and the highlights are built when the scheme loads.
 --
--- plugins.all and not the default plugins.auto: auto-detection is a check for
--- `package.loaded.lazy`, and there is no plugin manager here, so it would
--- silently skip the neo-tree, lualine and telescope groups.
---
 -- transparent drops the Normal background so the terminal shows through, which
--- is what keeps Ghostty's blur visible behind the buffer. It is also what makes
--- the background a single knob: jellybeans' own is #151515, ghostty/config
--- paints #242424, and because nvim never draws one it follows the terminal
--- rather than disagreeing with it.
+-- is what keeps Alacritty's blur visible behind the buffer. It is also what
+-- makes the background a single knob — it is painted in one place,
+-- alacritty.toml, and nvim follows rather than disagreeing.
 --
--- on_colors relights five palette entries.
---
--- `old_brick` is jellybeans' dark red and lands at 2.10:1 on this background —
--- it is what paints neo-tree's deleted and conflict markers, and it is
--- unreadable there. The replacement is the same hex ghostty/config uses for
--- ANSI slot 9, which is the same colour for the same reason, so the two stay
--- in lockstep.
---
--- The other three are the greys jellybeans defines *relative to* its own
--- #151515 background, which ghostty/config no longer paints. Left alone they do
--- not merely shift, they invert: every one of them is darker than #242424, so
--- a Telescope prompt or a selected row reads as a dark hole instead of a raised
--- panel. Each is relit to the value that reproduces its original ratio, because
--- what these encode is a distance from the background, not a colour:
---
---   grey_one     #1c1c1c  1.07:1   ->  #292929   selected row
---   mine_shaft   #1f1f1f  1.11:1   ->  #2c2c2c   Telescope's prompt fill
---   grey_three   #333333  1.45:1   ->  #3e3e3e   borders, Pmenu, indent markers
---
--- `background` itself is relit for the same reason. transparent = true above
--- leaves the main windows at NONE, so the buffer is unaffected — but the flat_ui
--- Telescope groups paint it *solid*, and the picker covers most of the screen.
--- Without this it would open as a #151515 slab on a #242424 terminal, which is
--- both visibly wrong and the near-black this palette moved away from.
-require("jellybeans").setup({
+-- No palette override is needed anywhere: the theme's own bg0 is #14171d, which
+-- is exactly what the terminal paints, so the surfaces it defines as a distance
+-- above the background land where they were designed to.
+require("kanso").setup({
+  theme = "ink",
+  background = { dark = "ink" },
   transparent = true,
   italics = false,
   bold = false,
-  flat_ui = true,
-  plugins = { all = true },
-  on_colors = function(colors)
-    colors.old_brick = "#e06060"
-    colors.background = "#242424"
-    colors.grey_one = "#292929"
-    colors.mine_shaft = "#2c2c2c"
-    colors.grey_three = "#3e3e3e"
-  end,
 })
-vim.cmd.colorscheme("jellybeans")
+vim.cmd.colorscheme("kanso-ink")
 
--- `bold = false` above only reaches the groups jellybeans itself declares; bold
--- survives in the builtins it leaves alone and in every plugin group. This
--- sweeps all of them, and re-runs on ColorScheme because loading a scheme
--- rebuilds the table.
+-- `gruvbox_material_enable_bold = 0` above only reaches the groups the scheme
+-- itself declares; bold survives in the builtins it leaves alone and in every
+-- plugin group. This sweeps all of them, and re-runs on ColorScheme because
+-- loading a scheme rebuilds the table.
 --
 -- Linked groups come back as { link = "Other" } with no bold key, so the guard
 -- skips them and the link is left intact rather than flattened into a copy.
@@ -166,7 +161,7 @@ vim.pack.add({
 })
 
 -- Filetype icons are left at their defaults: they are already Nerd Font glyphs,
--- and ghostty/config loads the Mono build where each one is one cell.
+-- and the terminal profile loads the Mono build where each one is one cell.
 --
 -- The git markers are not. Two of the defaults — `✚` and `✖` — are East-Asian
 -- Ambiguous, so their width depends on a terminal setting rather than on the
@@ -214,7 +209,7 @@ vim.keymap.set("n", "<leader>e", "<Cmd>Neotree toggle reveal<CR>", { desc = "Tog
 -- devicons is already loaded above for neo-tree.
 vim.pack.add({ "https://github.com/nvim-lualine/lualine.nvim" })
 
--- jellybeans.nvim ships its own lualine theme, so this is the palette itself
+-- kanso.nvim ships its own lualine theme, so this is the palette itself
 -- and not the auto theme's guess at it. It arrives with solid backgrounds and a
 -- bold mode section; both are stripped here rather than after setup(), because
 -- lualine copies the table it is given and rebuilds these groups on
@@ -231,11 +226,11 @@ local function luminance(hex)
   return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b)
 end
 
-local lualine_theme = require("lualine.themes.jellybeans-nvim")
+local lualine_theme = require("lualine.themes.kanso")
 for _, mode in pairs(lualine_theme) do
   for _, section in pairs(mode) do
     -- The mode section is a coloured chip with near-black text on it. Dropping
-    -- the chip without touching the text leaves #000000 on #242424, which is
+    -- the chip without touching the text leaves near-black on black, which is
     -- invisible — so where the text is the darker of the two, the chip's own
     -- colour becomes the text colour. That is what carried the mode anyway.
     local fg, bg = luminance(section.fg or ""), luminance(section.bg or "")
@@ -599,3 +594,190 @@ vim.api.nvim_create_user_command("Format", function()
 end, { desc = "Format the current buffer" })
 
 vim.keymap.set("n", "<leader>f", "<Cmd>Format<CR>", { desc = "Format buffer" })
+
+
+-- ─── splits ──────────────────────────────────────────────────────────────────
+--
+-- sv/sh and not the builtin <C-w>v / <C-w>s: those are two chords deep and this
+-- is the one window operation used constantly. The letters follow the shape of
+-- the resulting divider, not the direction of the new pane — sv puts a vertical
+-- line down the middle, sh a horizontal one across.
+vim.keymap.set("n", "<leader>sv", "<Cmd>vsplit<CR>", { desc = "Split vertically" })
+vim.keymap.set("n", "<leader>sh", "<Cmd>split<CR>", { desc = "Split horizontally" })
+vim.keymap.set("n", "<leader>sc", "<Cmd>close<CR>", { desc = "Close split" })
+vim.keymap.set("n", "<leader>so", "<Cmd>only<CR>", { desc = "Close other splits" })
+vim.keymap.set("n", "<leader>s=", "<C-w>=", { desc = "Equalise splits" })
+
+-- Moving between them, since a split is worth little without this.
+for key, dir in pairs({ h = "h", j = "j", k = "k", l = "l" }) do
+  vim.keymap.set("n", "<C-" .. key .. ">", "<C-w>" .. dir, { desc = "Focus split " .. dir })
+end
+
+-- ─── writing code: the language keymaps ──────────────────────────────────────
+--
+-- Buffer-local and attached on LspAttach, not global: bound globally these would
+-- fire in a buffer with no server and error, and `gd` above already follows this
+-- pattern. Everything here is a builtin vim.lsp.buf call — no plugin involved.
+vim.api.nvim_create_autocmd("LspAttach", {
+  callback = function(args)
+    local function map(lhs, rhs, desc)
+      vim.keymap.set("n", lhs, rhs, { buffer = args.buf, desc = desc })
+    end
+    map("K", vim.lsp.buf.hover, "Hover docs")
+    map("gr", vim.lsp.buf.references, "References")
+    map("gi", vim.lsp.buf.implementation, "Implementation")
+    map("gy", vim.lsp.buf.type_definition, "Type definition")
+    map("<leader>rn", vim.lsp.buf.rename, "Rename symbol")
+    map("<leader>ca", vim.lsp.buf.code_action, "Code action")
+    map("<leader>ds", vim.diagnostic.open_float, "Diagnostic under cursor")
+    -- Errors only. Walking every hint on a TypeScript buffer is unusable.
+    map("]d", function()
+      vim.diagnostic.jump({ count = 1, severity = vim.diagnostic.severity.ERROR })
+    end, "Next error")
+    map("[d", function()
+      vim.diagnostic.jump({ count = -1, severity = vim.diagnostic.severity.ERROR })
+    end, "Previous error")
+  end,
+})
+
+-- Per-language, and only what the generic LSP maps above cannot do.
+--
+-- vtsls exposes the TypeScript-specific refactors as workspace commands rather
+-- than code actions, so they have to be sent through executeCommand with the
+-- buffer URI — there is no vim.lsp.buf wrapper for them.
+local function vtsls(command)
+  return function()
+    vim.lsp.buf_request(0, "workspace/executeCommand", {
+      command = command,
+      arguments = { vim.uri_from_bufnr(0) },
+    })
+  end
+end
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "typescript", "typescriptreact", "javascript", "javascriptreact" },
+  callback = function(args)
+    local function map(lhs, rhs, desc)
+      vim.keymap.set("n", lhs, rhs, { buffer = args.buf, desc = desc })
+    end
+    map("<leader>co", vtsls("typescript.organizeImports"), "Organize imports")
+    map("<leader>cm", vtsls("typescript.addMissingImports"), "Add missing imports")
+    map("<leader>cu", vtsls("typescript.removeUnusedImports"), "Remove unused imports")
+  end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "rust",
+  callback = function(args)
+    local function map(lhs, rhs, desc)
+      vim.keymap.set("n", lhs, rhs, { buffer = args.buf, desc = desc })
+    end
+    -- Clippy is the one that catches what rustc accepts but nobody wants; check
+    -- is only "does it compile". Both run in a terminal split rather than
+    -- through :make, so the output scrolls and cargo's colours survive.
+    map("<leader>cc", "<Cmd>split | terminal cargo clippy --all-targets<CR>", "cargo clippy")
+    map("<leader>ck", "<Cmd>split | terminal cargo check<CR>", "cargo check")
+    map("<leader>ct", "<Cmd>split | terminal cargo test<CR>", "cargo test")
+    map("<leader>cr", "<Cmd>split | terminal cargo run<CR>", "cargo run")
+    -- rust-analyzer's own expansion, which no other server has an analogue for.
+    map("<leader>ce", function()
+      vim.lsp.buf_request(0, "rust-analyzer/expandMacro", vim.lsp.util.make_position_params(0, "utf-8"))
+    end, "Expand macro")
+  end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "json", "jsonc" },
+  callback = function(args)
+    local function map(lhs, rhs, desc)
+      vim.keymap.set("n", lhs, rhs, { buffer = args.buf, desc = desc })
+    end
+    -- jq and not the LSP: jsonls validates and completes against a schema but
+    -- has no opinion on shape. `%!` filters the whole buffer through the
+    -- command, so a failed parse leaves an error in the buffer and `u` undoes it.
+    map("<leader>cp", "<Cmd>%!jq .<CR>", "Pretty-print with jq")
+    map("<leader>cm", "<Cmd>%!jq -c .<CR>", "Minify with jq")
+    map("<leader>cs", "<Cmd>%!jq -S .<CR>", "Sort keys with jq")
+  end,
+})
+
+
+-- ─── ergonomics ──────────────────────────────────────────────────────────────
+--
+-- Everything here is a builtin. No plugin loads for any of it, which is the
+-- point: the cost of the config is what it does at startup, and this costs
+-- nothing measurable.
+
+-- Esc clears the search highlight as well as leaving the mode. Without this the
+-- highlight from the last search stays lit until :noh, which nobody types.
+vim.keymap.set("n", "<Esc>", "<Cmd>nohlsearch<CR>", { desc = "Clear search highlight" })
+
+-- Keep the cursor in the middle when jumping. Half-page scrolling and search
+-- both dump you at the edge of the screen otherwise, and reading around the
+-- landing point is most of what happens next.
+for _, key in ipairs({ "<C-d>", "<C-u>", "n", "N" }) do
+  vim.keymap.set("n", key, key .. "zz", { desc = "Jump and centre" })
+end
+
+-- Move the selection, reindenting as it goes. The one refactor motion that is
+-- pure ceremony without a mapping: dd, navigate, p, re-indent.
+vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move selection down" })
+vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move selection up" })
+
+-- Stay in visual mode after indenting, so > > > is one keypress repeated.
+vim.keymap.set("v", "<", "<gv", { desc = "Indent left, keep selection" })
+vim.keymap.set("v", ">", ">gv", { desc = "Indent right, keep selection" })
+
+-- Paste over a selection without losing the register. The default swaps the
+-- yanked text for whatever was replaced, which makes a second paste useless.
+vim.keymap.set("v", "p", '"_dP', { desc = "Paste without clobbering register" })
+
+-- Delete without touching the unnamed register, for the same reason.
+vim.keymap.set({ "n", "v" }, "<leader>d", '"_d', { desc = "Delete to black hole" })
+
+-- Resize the splits from <leader>s..., matching the split maps above.
+vim.keymap.set("n", "<C-Up>", "<Cmd>resize +2<CR>", { desc = "Grow split" })
+vim.keymap.set("n", "<C-Down>", "<Cmd>resize -2<CR>", { desc = "Shrink split" })
+vim.keymap.set("n", "<C-Left>", "<Cmd>vertical resize -4<CR>", { desc = "Narrow split" })
+vim.keymap.set("n", "<C-Right>", "<Cmd>vertical resize +4<CR>", { desc = "Widen split" })
+
+-- Buffers, since this profile has no tabline.
+vim.keymap.set("n", "<S-l>", "<Cmd>bnext<CR>", { desc = "Next buffer" })
+vim.keymap.set("n", "<S-h>", "<Cmd>bprevious<CR>", { desc = "Previous buffer" })
+vim.keymap.set("n", "<leader>bd", "<Cmd>bdelete<CR>", { desc = "Close buffer" })
+
+-- A visible flash on whatever was just yanked, so a large yank is confirmed
+-- without checking the register.
+vim.api.nvim_create_autocmd("TextYankPost", {
+  callback = function()
+    vim.hl.on_yank({ timeout = 150 })
+  end,
+})
+
+-- Reopen a file where it was left. The mark survives in the shada file; the
+-- guard skips it when the line no longer exists, which happens after a rebase.
+vim.api.nvim_create_autocmd("BufReadPost", {
+  callback = function(args)
+    local mark = vim.api.nvim_buf_get_mark(args.buf, '"')
+    if mark[1] > 0 and mark[1] <= vim.api.nvim_buf_line_count(args.buf) then
+      pcall(vim.api.nvim_win_set_cursor, 0, mark)
+    end
+  end,
+})
+
+-- Diagnostics: the text on the line that has one, the rest in the float. Left
+-- at the default every error prints its full message inline and wraps the
+-- window on a TypeScript buffer.
+vim.diagnostic.config({
+  virtual_text = { prefix = "●", spacing = 2, source = "if_many" },
+  severity_sort = true,
+  float = { border = "rounded", source = "if_many" },
+  signs = {
+    text = {
+      [vim.diagnostic.severity.ERROR] = "E",
+      [vim.diagnostic.severity.WARN] = "W",
+      [vim.diagnostic.severity.INFO] = "I",
+      [vim.diagnostic.severity.HINT] = "H",
+    },
+  },
+})
