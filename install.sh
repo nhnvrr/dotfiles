@@ -164,7 +164,6 @@ link_file "${CONFIG_DIR}/zsh/zshrc" "${HOME}/.zshrc"
 link_file "${CONFIG_DIR}/zsh/completions/_aws" "${HOME}/.config/zsh/completions/_aws"
 # zsh won't create it and history is dropped silently without it, same as psql.
 mkdir -p "${HOME}/.local/state/zsh" "${HOME}/.cache/zsh"
-link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
 link_file "${CONFIG_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"
 # Only read because zsh/zshenv exports EZA_CONFIG_DIR to this path; eza's own
 # default on macOS is ~/Library/Application Support/eza.

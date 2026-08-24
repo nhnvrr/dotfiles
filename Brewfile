@@ -2,7 +2,6 @@ tap "getsentry/tools"
 
 brew "zsh-autosuggestions"
 brew "zsh-syntax-highlighting"
-brew "starship"
 
 brew "herdr"
 
@@ -16,7 +15,7 @@ brew "vscode-langservers-extracted"
 # The config is ~1200 lines of Lua that edits itself; without a server a typo in
 # an API name is found by restarting nvim and reading a traceback.
 brew "lua-language-server"
-# Four TOML files here drive alacritty, mise, starship and herdr. A misspelled
+# Three TOML files here drive alacritty, mise and herdr. A misspelled
 # key in any of them is otherwise discovered by the program behaving oddly.
 brew "taplo"
 
@@ -90,18 +89,16 @@ cask "font-jetbrains-mono-nerd-font"
 cask "visual-studio-code"
 cask "maccy"
 cask "hammerspoon"
-# The browser. The cask name matters: plain `helium` is a
-# different application entirely (koush's), and it is deprecated for failing the
-# Gatekeeper check — the same trap alacritty is in above.
-#
-# Still 0.x and it auto-updates outside Homebrew, so the version pinned here is
-# only what a fresh machine starts from.
-cask "helium-browser"
-# No longer the default browser — Helium is. Kept because the Claude in Chrome
-# extension ships only through the Chrome Web Store and has no equivalent
-# elsewhere, and because a second engine is worth having even when both are
-# Chromium. Undeclared it would be removed by `brew bundle cleanup`.
+# The browser and the default handler. The Claude in Chrome extension ships only
+# through the Chrome Web Store and has no equivalent elsewhere, which is what
+# settles it between two Chromium builds.
 cask "google-chrome"
+# No longer the default — Chrome is. Kept as a second browser for the profile
+# separation, and because the cask name matters: plain `helium` is a different
+# application entirely (koush's), deprecated for failing the Gatekeeper check —
+# the same trap alacritty is in above. Still 0.x and it auto-updates outside
+# Homebrew. Undeclared it would be removed by `brew bundle cleanup`.
+cask "helium-browser"
 cask "docker-desktop"
 # The only database GUI left standing, now that TablePlus is uninstalled. It is
 # also the one with the JetBrains keymap the rest of the toolchain already uses.

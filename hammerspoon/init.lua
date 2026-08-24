@@ -25,7 +25,7 @@ local APPS = {
 --
 -- Resolved once at load: pathForBundleID hits Launch Services, and this runs on
 -- every cmd+alt+1/2/3 otherwise. Reload Hammerspoon after installing a browser.
-local BROWSER_PREFERENCE = { APPS.helium, APPS.chrome }
+local BROWSER_PREFERENCE = { APPS.chrome, APPS.helium }
 
 local function firstInstalled(bundleIDs)
   for _, id in ipairs(bundleIDs) do
