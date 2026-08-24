@@ -1,6 +1,6 @@
 # dotfiles
 
-macOS. zsh + Starship in Alacritty, Hammerspoon for window tiling, herdr for agents, Neovim, VS Code, Kanso Ink.
+macOS. zsh in Alacritty, Hammerspoon for window tiling, herdr for agents, Neovim, VS Code, Kanso Ink.
 
 ## Install
 
@@ -20,7 +20,7 @@ Then, by hand:
 
 1. **Paste the SSH pubkey on GitHub** — already on your clipboard. Add it at <https://github.com/settings/ssh/new> as **both** an authentication and a signing key, or signed commits won't show as Verified.
 2. `gh auth login`
-3. **Set Helium as the default browser** — System Settings → Desktop & Dock.
+3. **Set Chrome as the default browser** — System Settings → Desktop & Dock.
 4. **Launch Alacritty once** — font, palette, window mode and `option_as_alt` all come from [`alacritty/alacritty.toml`](./alacritty/alacritty.toml), so there is nothing to click. It opens covering the whole screen, menu bar included, with no titlebar.
 
 ## The stack
@@ -28,13 +28,14 @@ Then, by hand:
 | Layer | Tool | Config |
 |---|---|---|
 | Shell | zsh — macOS's own `/bin/zsh`, no framework | [`zsh/zshrc`](./zsh/zshrc), [`zsh/zshenv`](./zsh/zshenv) |
-| Prompt | Starship | [`starship/starship.toml`](./starship/starship.toml) |
+| Prompt | zsh, one line — path, branch, dirty counts; `envinfo` prints the rest on demand | [`zsh/zshrc`](./zsh/zshrc) |
 | Terminal | Alacritty | [`alacritty/alacritty.toml`](./alacritty/alacritty.toml) |
 | Agents | herdr — agent state over its socket API, not a shell multiplexer | [`herdr/config.toml`](./herdr/config.toml) |
 | Quick questions | `?` → `ask` — one-off question to Claude, read-only, web search when needed | [`zsh/zshrc`](./zsh/zshrc) |
+| Environment | `envinfo` — shell, path, git, the mise toolchain, AWS profile, docker context, on demand | [`zsh/zshrc`](./zsh/zshrc) |
 | Editor | Neovim for fast local code reading; VS Code alongside | [`nvim/init.lua`](./nvim/init.lua) |
 | `$EDITOR` | Neovim | [`zsh/zshenv`](./zsh/zshenv) |
-| Browser | Helium — the default handler. Chrome stays installed for the Claude in Chrome extension, which only ships through the Chrome Web Store | — user-level |
+| Browser | Chrome — the default handler, and where the Claude in Chrome extension lives. Helium stays installed as a second browser | — user-level |
 | Database | `psql` for scripts, a GUI client for interactive | [`psql/psqlrc`](./psql/psqlrc) |
 | Redis | `redis-cli` | — history path in [`zsh/zshenv`](./zsh/zshenv) |
 | HTTP | `curl` via `req`; Postman and Bruno for exploratory work | [`zsh/zshrc`](./zsh/zshrc) |
@@ -58,7 +59,7 @@ It is read-only by construction: `--disallowedTools` blocks the file and shell t
 
 ## Theme
 
-**[Kanso Ink](https://github.com/webhooked/kanso.nvim).** [`alacritty/alacritty.toml`](./alacritty/alacritty.toml) carries the palette slot by slot, so the terminal owns the sixteen slots and everything downstream follows them for free: `bat` and delta run `syntax-theme = ansi`, starship styles by ANSI name, zsh-syntax-highlighting by ANSI slot number, `psql` writes the raw SGR slots, `eza` styles by ANSI name, and `btop` runs `color_theme = "TTY"`. None of them carries a colour of its own.
+**[Kanso Ink](https://github.com/webhooked/kanso.nvim).** [`alacritty/alacritty.toml`](./alacritty/alacritty.toml) carries the palette slot by slot, so the terminal owns the sixteen slots and everything downstream follows them for free: `bat` and delta run `syntax-theme = ansi`, the prompt styles by ANSI slot number and so does zsh-syntax-highlighting, `psql` writes the raw SGR slots, `eza` styles by ANSI name, and `btop` runs `color_theme = "TTY"`. None of them carries a colour of its own.
 
 Two things restate the palette as hex, and both have to. Neovim runs [`kanso.nvim`](https://github.com/webhooked/kanso.nvim) because a colorscheme addresses far more groups than sixteen; herdr's theme tokens accept no ANSI reference, so [`herdr/config.toml`](./herdr/config.toml) writes them out under `[theme.custom]`, using the theme's own `bg0`–`bg4` ramp for its surfaces.
 
@@ -85,7 +86,6 @@ The one thing to know: `black` is the background itself, so a program that expli
 | `zsh/zshenv` | `~/.zshenv` |
 | `zsh/zshrc` | `~/.zshrc` |
 | `zsh/completions/_aws` | `~/.config/zsh/completions/_aws` |
-| `starship/starship.toml` | `~/.config/starship.toml` |
 | `alacritty/alacritty.toml` | `~/.config/alacritty/alacritty.toml` |
 | `btop/btop.conf` | `~/.config/btop/btop.conf` |
 | `mise/config.toml` | `~/.config/mise/config.toml` |
@@ -103,16 +103,19 @@ The one thing to know: `black` is the background itself, so a program that expli
 
 Single files, with one exception: `~/.config/nvim` is a directory symlink, because the config is `init.lua` plus `lua/config/*.lua` and `require` only resolves those through the runtimepath. `link_file` moves any pre-existing regular file to `<dst>.bak.<timestamp>` before replacing it.
 
-**Not managed, and why not:** Helium and Chrome both keep their settings in a file the app rewrites on quit, so neither can be a symlink. VS Code and `~/.claude/` are user-level state. `~/.aws/config` and `~/.pgpass` hold reconnaissance material and secrets, and this repo is public — write them by hand (`chmod 600 ~/.pgpass`).
+**Not managed, and why not:** Chrome and Helium both keep their settings in a file the app rewrites on quit, so neither can be a symlink. VS Code and `~/.claude/` are user-level state. `~/.aws/config` and `~/.pgpass` hold reconnaissance material and secrets, and this repo is public — write them by hand (`chmod 600 ~/.pgpass`).
 
 ## Traps
 
 The things that will bite you, and nothing else:
 
 - **`~/.gitconfig` is a symlink into this repo**, so `git config --global …` writes here and the repo shows dirty. That is deliberate — the change gets versioned instead of drifting.
-- **`brew bundle cleanup` uninstalls anything not in the Brewfile.** The Brewfile is the source of truth; an app you want to keep has to be declared — Chrome included, which is no longer the default browser but is still needed.
+- **`brew bundle cleanup` uninstalls anything not in the Brewfile.** The Brewfile is the source of truth; an app you want to keep has to be declared — Helium included, which is no longer the default browser but is kept as a second one.
 - **Hammerspoon and Maccy both need Accessibility permission**, granted by hand on first launch. Without it Hammerspoon's placements silently no-op — `init.lua` raises an alert when it detects the permission missing, which is the only reason you find out.
 - **`~/.aws/config` has no `[default]` profile on purpose.** Without one every command fails with `NoCredentials` unless `AWS_PROFILE` is set, which is what stops a command from silently hitting the wrong account. `AWS_PROFILE` follows **the directory you are in**: `work` under `~/work`, personal everywhere else, re-evaluated on every `cd`. Claude does not: the terminal always runs the personal account, and the work one is only ever used from the web.
+- **The prompt's `precmd` opens with `local _st=$?` and ends with `return $_st`.** `%(?…)` and `%?` in `PROMPT`/`RPROMPT` read `$?`, and without saving it first they report the hook's own exit code — the failed command would always look successful. Any new `precmd` hook has to do the same.
+- **`envinfo` runs `emulate -L zsh` before printing.** `PROMPT_SUBST` is on globally and `print -P` honours it, so without it a `$` or a backtick in a branch name, a docker context or an ARN would be evaluated instead of printed.
+- **The prompt shells out to `git` once per prompt, and only inside a repo.** An ancestor walk for `.git` in `_prompt_git` gates the fork; `--porcelain=v2 --branch --show-stash` is what folds the branch, the counts, the ahead/behind and the stash depth into that single call.
 - **`psql` reads `psqlrc` non-interactively too.** A script parsing output sees the `Ø` for NULL and the unicode borders. Use `psql -X`.
 - **`$PATH` is assembled twice, on purpose.** `.zshenv` runs before `/etc/zprofile`, which calls `path_helper` and pushes `/usr/bin` back in front of everything — so `zshrc` calls `__path_setup` again. `typeset -U path` is what makes the second call reorder instead of duplicate. Delete either half and a system runtime shadows the mise-pinned one.
 - **`zsh-syntax-highlighting` is sourced on the last line of `zshrc`, and has to be.** It wraps the widgets that exist when it loads, and fzf's own widgets come from the init cache sourced just above it. Move the `source` up and they stop being highlighted.
@@ -121,8 +124,8 @@ The things that will bite you, and nothing else:
 - **Neovim formatting is strict and runs before every write.** A missing formatter or invalid source aborts the write; `:noautocmd write` is the deliberate escape hatch.
 - **There is deliberately no `~/.curlrc`.** That file is read by *every* curl invocation, Homebrew's installer included.
 - **`fd` and `bat` are not optional next to fzf** — `FZF_DEFAULT_COMMAND` and the `Ctrl-T` preview shell out to them.
-- **`font-jetbrains-mono-nerd-font`, not `font-jetbrains-mono`.** The plain cask carries no Nerd Font glyphs, which is what the eza icon column and starship need. The cask installs three families whose names differ by one word — `Mono`, `Propo` and `NL` — and only the Mono build keeps the icon column aligned. **The family name is `JetBrainsMono NFM`** — not `JetBrainsMono Nerd Font Mono`, which is what the Nerd Fonts docs and the cask's filenames suggest and what nothing on macOS registers. Check it with `system_profiler SPFontsDataType`; a family CoreText cannot find falls back to Menlo silently, and `ll` showing boxes instead of icons is what tells you the name was wrong.
-- **A command taking longer than ten seconds flashes the window.** `_notify_end` in `zshrc` prints a `\a` and `[bell]` turns it into a flash. It is deliberately not a macOS notification: giving `[bell]` a `command` that shells out to `osascript` would reach you behind other windows, at the cost of a popup on every long command — carrying Script Editor's icon, since `osascript` is what posts it.
+- **`font-jetbrains-mono-nerd-font`, not `font-jetbrains-mono`.** The plain cask carries no Nerd Font glyphs, which is what the eza icon column and the prompt need. The cask installs three families whose names differ by one word — `Mono`, `Propo` and `NL` — and only the Mono build keeps the icon column aligned. **The family name is `JetBrainsMono NFM`** — not `JetBrainsMono Nerd Font Mono`, which is what the Nerd Fonts docs and the cask's filenames suggest and what nothing on macOS registers. Check it with `system_profiler SPFontsDataType`; a family CoreText cannot find falls back to Menlo silently, and `ll` showing boxes instead of icons is what tells you the name was wrong.
+- **A command taking longer than ten seconds flashes the window.** `_prompt_precmd` in `zshrc` prints a `\a` and `[bell]` turns it into a flash. It is deliberately not a macOS notification: giving `[bell]` a `command` that shells out to `osascript` would reach you behind other windows, at the cost of a popup on every long command — carrying Script Editor's icon, since `osascript` is what posts it.
 - **`decorations` and `startup_mode` are read at launch only.** `live_config_reload` picks up colours, font and padding live, but not those two — edit either and Alacritty has to be relaunched before anything changes.
 - **`SimpleFullscreen`, not `Fullscreen`.** Native macOS fullscreen covers the menu bar but moves the window to a Space of its own, where `hammerspoon/init.lua` can no longer tile it — `cmd+alt+2` would have nothing to place it beside. `Maximized` keeps the window ordinary but stops below the menu bar. `SimpleFullscreen` is the only mode that does both.
 - **`decorations = "none"` removes the drag area too.** `buttonless` only drops the three traffic lights and keeps the titlebar strip with the window title in it. With `none` there is nothing to grab, which is affordable only because the window opens fullscreen and Hammerspoon moves it.

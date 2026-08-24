@@ -164,7 +164,7 @@ vim.lsp.config("lua_ls", {
   },
 })
 
--- Four TOML files in this repo drive alacritty, mise, starship and herdr. A
+-- Three TOML files in this repo drive alacritty, mise and herdr. A
 -- misspelled key in any of them is currently found by the program behaving oddly.
 vim.lsp.config("taplo", {
   cmd = { "taplo", "lsp", "stdio" },

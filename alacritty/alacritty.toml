@@ -8,18 +8,23 @@ TERM = "xterm-256color"
 [window]
 padding = { x = 1, y = 1 }
 dynamic_padding = true
-# "none" and not "buttonless": buttonless only removes the three traffic
-# lights, it keeps the titlebar strip and the window title centred in it —
-# which is what was still showing. "none" removes the bar outright.
+# "buttonless" and not "none", for the rounded corners. macOS draws the corner
+# rounding as part of the window frame, and "none" removes the frame outright,
+# so square corners are what that setting costs — Alacritty has no radius option
+# of its own (verified: no such key exists in the 0.17 binary).
 #
-# The cost is the drag area. It is affordable here because the window opens
-# Maximized and hammerspoon/init.lua is what moves and sizes it; go back to
-# "buttonless" if a draggable strip turns out to be worth the title.
-decorations = "none"
+# The trade is real and goes the other way: "buttonless" drops the three traffic
+# lights but keeps the titlebar strip with the window title centred in it. That
+# strip is why this was set to "none" before. `window.title` is emptied below to
+# make it as unobtrusive as it gets.
+#
+# It does bring back a drag area, which "none" had given up.
+decorations = "buttonless"
 option_as_alt = "Both"
-# SimpleFullscreen, and the three modes are genuinely different on macOS:
+# Maximized, and the three modes are genuinely different on macOS:
 #
-#   Maximized       fills the screen BELOW the menu bar
+#   Maximized       fills the screen below the menu bar, respecting the usable
+#                   area, and stays an ordinary window
 #   Fullscreen      covers everything, but moves the window to a Space of its
 #                   own, where hammerspoon/init.lua can no longer tile it —
 #                   `cmd+alt+2` (setLeftPane) would have nothing to place it
@@ -27,9 +32,21 @@ option_as_alt = "Both"
 #   SimpleFullscreen  covers everything, menu bar included, and stays in the
 #                   current Space
 #
-# The third is the only one that satisfies both: the whole screen, still an
-# ordinary window as far as Hammerspoon is concerned.
-startup_mode = "SimpleFullscreen"
+# SimpleFullscreen was the choice here and it is wrong on this display. It sizes
+# the window to the FULL screen height but leaves the origin at the usable area,
+# so the window overshoots the bottom edge by exactly the height of the menu bar
+# and the last rows of the terminal render off-screen. Measured: screen 0..982
+# with a 33px menu bar, window y=33 h=982, ending at 1015.
+#
+# Maximized gives up covering the menu bar and gets the geometry right in
+# exchange, which is the better half of that trade. Hammerspoon can still tile
+# it, which is what ruled out Fullscreen.
+#
+# There is deliberately no `dimensions` key: Alacritty only honours it when
+# startup_mode is "Windowed", so under any other mode it is silently ignored.
+# An explicit size means Windowed plus dimensions = { columns, lines } — in
+# cells, not pixels — and letting hammerspoon/init.lua place the window.
+startup_mode = "Maximized"
 opacity = 0.92
 blur = true
 

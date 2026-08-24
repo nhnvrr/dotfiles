@@ -27,7 +27,7 @@ setopt INTERACTIVE_COMMENTS
 # the compinit cache are parse errors without it.
 setopt EXTENDED_GLOB
 
-# The bell is a deliberate signal here (see _notify_long_command), so only zle's
+# The bell is a deliberate signal here (see _prompt_precmd), so only zle's
 # own beeping is silenced.
 unsetopt BEEP LIST_BEEP
 
@@ -221,7 +221,7 @@ function __ctx {
 
 # ~/.aws/config has no [default] profile: without this every aws command outside
 # ~/work fails with NoCredentials. On chpwd rather than once at startup, because
-# a directory can change under a shell — starship's aws module makes it visible.
+# a directory can change under a shell — `envinfo` is what makes it visible.
 function _aws_profile {
   if [[ $(__ctx) == work ]]; then
     export AWS_PROFILE=work
@@ -262,49 +262,203 @@ function ask {
   return $rc
 }
 
-# ─── prompt hooks ───────────────────────────────────────────────────────────
+# Everything the prompt used to redraw on every command, on demand instead.
+#
+# Not named `env`: a function by that name shadows /usr/bin/env for every
+# interactive command line, and `env FOO=bar cmd` would quietly stop working.
+#
+# One fork for the whole toolchain — `mise ls --current`, not eight `--version`
+# calls. mise owns all eight pinned tools (mise/config.toml) and reports the
+# resolved version per directory, which is the answer the eight calls approximate.
+function envinfo {
+  # emulate -L is load-bearing, not hygiene: PROMPT_SUBST is on globally and
+  # `print -P` honours it, so without this a $ or a backtick in a branch name,
+  # a docker context or an ARN would be evaluated rather than printed.
+  emulate -L zsh
+  # An empty label still pads, which is what continuation rows want.
+  local REPLY
+  function _env_row { print -P "  %F{4}${(r:9:)1}%f $2" }
+
+  _env_row shell "zsh $ZSH_VERSION   %F{8}editor ${EDITOR:-—}%f"
+  _env_row dir   "${(%):-%~}"
+
+  _prompt_git
+  [[ -n $REPLY ]] && _env_row git "$REPLY"
+
+  if (( $+commands[mise] )); then
+    local -a tools
+    local name version rest
+    while read -r name version rest; do
+      # `rust  stable (symlink)` — the parenthesised note is not a version.
+      tools+=("%F{7}${name}%f ${version}")
+    done < <(mise ls --current 2>/dev/null)
+    local -i i
+    for (( i = 1; i <= $#tools; i += 3 )); do
+      _env_row "${${(M)i:#1}:+mise}" "${(j:   :)tools[i,i+2]}"
+    done
+  fi
+
+  local region=${AWS_REGION:-${AWS_DEFAULT_REGION:-—}}
+  _env_row aws "${AWS_PROFILE:-—}   %F{8}region $region%f"
+  # Behind the flag on purpose: this one goes over the network, and a command
+  # that silently makes a network call is a command you stop running.
+  if (( $+commands[aws] )) && [[ ${1:-} == -a ]]; then
+    _env_row '' "$(aws sts get-caller-identity --query Arn --output text 2>&1)"
+  fi
+
+  local dctx=${DOCKER_CONTEXT:-}
+  if [[ -z $dctx && -r $HOME/.docker/config.json ]]; then
+    local line=${${(f)"$(<$HOME/.docker/config.json)"}[(r)*\"currentContext\"*]}
+    [[ -n $line ]] && dctx=${${line##*:*\"}%\"*}
+  fi
+  [[ -n $dctx ]] && _env_row docker "$dctx"
+
+  _env_row term "${TERM_PROGRAM:-—}   %F{8}TERM=$TERM%f"
+
+  unfunction _env_row
+}
+
+# ─── prompt ─────────────────────────────────────────────────────────────────
+
+# One line, and only what changes between two commands: where you are, which
+# branch, and how the last one went. Everything a prompt cannot answer without
+# being asked — runtime versions, the AWS profile, the docker context — lives in
+# `envinfo` above. This replaced starship, which drew all of it on every prompt.
+#
+# Colours by ANSI slot number, same rule as the highlighter further down: the
+# sixteen slots of alacritty/alacritty.toml are the single source of truth.
+
+setopt PROMPT_SUBST
+
+# Fish-style: every ancestor cut to one character, the leaf left whole, so the
+# width barely moves with depth. %~ first, so $HOME is already ~. The dot is
+# kept alongside the letter — .config is `.c`, not `.`.
+function _prompt_dir {
+  local d=${(%):-%~}
+  if [[ $d == / ]]; then REPLY=/; return; fi
+  local -a p=(${(s:/:)d})
+  (( $#p > 1 )) && p[1,-2]=(${p[1,-2]/(#b)(.|)(?)*/$match[1]$match[2]})
+  REPLY=${(j:/:)p}
+  # (s:/:) drops the empty leading field, so an absolute path loses its root.
+  [[ $d == /* ]] && REPLY=/$REPLY
+}
+
+# One git call per prompt and not one more: --porcelain=v2 is the stable machine
+# format and --branch/--show-stash fold the branch, the ahead/behind counts and
+# the stash depth into the same output. The ancestor walk above it is what keeps
+# even that fork out of every non-repo directory.
+function _prompt_git {
+  REPLY=''
+  local dir=$PWD
+  while [[ -n $dir ]]; do
+    [[ -e $dir/.git ]] && break
+    dir=${dir%/*}
+  done
+  [[ -n $dir ]] || return 0
+
+  local -i conflict=0 stashed=0 staged=0 modified=0 untracked=0 deleted=0
+  local -i renamed=0 ahead=0 behind=0
+  local branch='' line xy
+  local -a ab
+  # Fields: `1`/`2` are tracked changes with an XY status pair at columns 3-4,
+  # `u` unmerged, `?` untracked. Parsed with case, so no grep and no wc.
+  while IFS= read -r line; do
+    case $line in
+      '# branch.head '*) branch=${line#'# branch.head '} ;;
+      '# branch.ab '*)   ab=(${=line#'# branch.ab '}); ahead=${ab[1]#+}; behind=${ab[2]#-} ;;
+      '# stash '*)       stashed=${line#'# stash '} ;;
+      'u '*)             (( conflict++ )) ;;
+      '? '*)             (( untracked++ )) ;;
+      [12]' '*)
+        xy=${line[3,4]}
+        case ${xy[1]} in
+          R|C) (( renamed++ )) ;;
+          D)   (( deleted++ )) ;;
+          .)   ;;
+          *)   (( staged++ )) ;;
+        esac
+        case ${xy[2]} in
+          D)   (( deleted++ )) ;;
+          .)   ;;
+          *)   (( modified++ )) ;;
+        esac ;;
+    esac
+  done < <(command git status --porcelain=v2 --branch --show-stash --ignore-submodules=all 2>/dev/null)
+
+  # No branch.head at all means git itself failed — a .git that is not a repo,
+  # or a permission error. Nothing to draw, and no error to print into a prompt.
+  [[ -n $branch ]] || return 0
+  # A % in a branch name is a prompt escape once PROMPT expands this.
+  REPLY="%F{2} ${branch//\%/%%}%f "
+  (( conflict  )) && REPLY+="%F{1}=${conflict}%f "
+  (( stashed   )) && REPLY+="%F{6}*${stashed}%f "
+  (( staged    )) && REPLY+="%F{2}+${staged}%f "
+  (( modified  )) && REPLY+="%F{3}!${modified}%f "
+  (( untracked )) && REPLY+="%F{5}?${untracked}%f "
+  (( deleted   )) && REPLY+="%F{1}✘${deleted}%f "
+  (( renamed   )) && REPLY+="%F{3}»${renamed}%f "
+  (( ahead     )) && REPLY+="%F{6}⇡${ahead}%f "
+  (( behind    )) && REPLY+="%F{6}⇣${behind}%f "
+  return 0
+}
+
+function _fmt_duration {
+  local -i s=$1
+  if   (( s < 60 ));   then REPLY="${s}s"
+  elif (( s < 3600 )); then REPLY="$(( s / 60 ))m$(( s % 60 ))s"
+  else                      REPLY="$(( s / 3600 ))h$(( s % 3600 / 60 ))m"
+  fi
+}
 
 # The bell is the signal. alacritty/alacritty.toml turns it into a flash of the
 # window and nothing more — deliberately no notification, so a long command
 # never raises a popup. That means it only reaches you when the window is
 # visible; raise _notify_threshold if even the flash is noise.
-
+#
+# Same clock as the duration segment, hence one hook pair rather than two: the
+# elapsed seconds the bell tests against 10 are the ones the prompt prints past 2.
 _notify_threshold=10
 _notify_ignore=(less man ssh claude fzf watch top tail nvim btop lazygit)
+_duration_threshold=2
 
-function _notify_start { _notify_cmd=$1; _notify_at=$EPOCHSECONDS }
-function _notify_end {
-  [[ -n ${_notify_at:-} ]] || return
-  local elapsed=$(( EPOCHSECONDS - _notify_at ))
-  local cmd=${${(z)_notify_cmd}[1]}
-  unset _notify_at
-  (( ${_notify_ignore[(I)$cmd]} )) && return
-  (( elapsed >= _notify_threshold )) && print -n '\a'
+function _prompt_preexec {
+  _cmd_at=$EPOCHSECONDS
+  _cmd_name=${${(z)1}[1]}
 }
-add-zsh-hook preexec _notify_start
-add-zsh-hook precmd  _notify_end
 
-# Only STARSHIP_PNPM: starship has no pnpm module and its detect_files does not
-# walk ancestors. The docker half used to live here and was dropped — starship's
-# own docker_context reads the same config.json and hides the same two contexts.
-#
-# Builtins only: no forks, and nothing that can clobber the $? the exit-code
-# module reads — hence the _st dance.
-function _starship_env {
+# The _st dance is load-bearing: %(?..) and %? in the prompts below read $?, and
+# without saving it first this hook's own exit code is what they would see.
+function _prompt_precmd {
   local _st=$?
-  unset STARSHIP_PNPM
-  local dir=$PWD
-  while [[ -n $dir ]]; do
-    if [[ -f $dir/pnpm-lock.yaml ]]; then
-      export STARSHIP_PNPM=1
-      break
+  _p_dur=''
+  if [[ -n ${_cmd_at:-} ]]; then
+    local -i elapsed=$(( EPOCHSECONDS - _cmd_at ))
+    unset _cmd_at
+    if (( elapsed >= _duration_threshold )); then
+      _fmt_duration $elapsed
+      _p_dur="%F{14}󰅐 $REPLY%f "
     fi
-    [[ $dir == $HOME ]] && break
-    dir=${dir%/*}
-  done
+    (( elapsed >= _notify_threshold )) &&
+      (( ! ${_notify_ignore[(I)$_cmd_name]} )) && print -n '\a'
+  fi
+  _prompt_dir; _p_pwd=$REPLY
+  _prompt_git; _p_git=$REPLY
   return $_st
 }
-add-zsh-hook precmd _starship_env
+add-zsh-hook preexec _prompt_preexec
+add-zsh-hook precmd  _prompt_precmd
+
+# Only over ssh, and it is the one thing kept from the old right prompt: losing
+# "you are not on this machine" is the removal that can actually cost something.
+_p_ssh=''
+[[ -n ${SSH_CONNECTION:-} ]] && _p_ssh='%F{1}%n@%m%f '
+
+# The mode indicator is the cursor shape, not the ❯ — see _cursor_shape above.
+# Colouring the caret per keymap would need a `zle reset-prompt` on every
+# keymap change, a full redraw to say what the caret already says.
+PROMPT='${_p_ssh}%F{15}${_p_pwd}%f ${_p_git}%(?.%F{10}.%F{9})❯%f '
+# The two transient segments live here so the typing position never shifts.
+RPROMPT='${_p_dur}%(?..%F{9}✘%?%f)'
 
 # The per-pane --state-label block that used to live here is gone. It fed the
 # `state_text` token, which no sidebar row draws any more, and `herdr pane
@@ -317,8 +471,8 @@ add-zsh-hook precmd _starship_env
 
 # Two, and only because zsh has no equivalent built in: the inline suggestion
 # from history and the syntax colouring on the command line. Everything else a
-# framework would bundle is already here — starship draws the prompt, fzf owns
-# history search, the git shortcuts are six abbreviations.
+# framework would bundle is already here — the prompt is thirty lines above,
+# fzf owns history search, the git shortcuts are six abbreviations.
 _zsh_plugins=/opt/homebrew/share
 
 if [[ -r $_zsh_plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
@@ -381,16 +535,12 @@ if [[ ! -s $_init_cache || ${(%):-%N} -nt $_init_cache || /opt/homebrew/bin -nt 
     print -r -- 'if [[ -o zle ]]; then'
     fzf --zsh
     print -r -- 'fi'
-    starship init zsh --print-full-init
   } >$_init_cache
 fi
 source $_init_cache
 
 # fzf's history popup is Ctrl-R and nothing else: the snippet sourced above
 # binds it. The arrows stay on the prefix search bound near the top of the file.
-
-# starship has no transient prompt for zsh — `enable_transience` is fish, cmd
-# and powershell only as of 1.26, so there is nothing to call here.
 
 # Genuinely last, and it has to be: it wraps every widget that exists when it is
 # sourced. fzf's own widgets come from the init cache sourced just above, so
