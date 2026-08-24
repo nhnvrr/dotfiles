@@ -20,7 +20,7 @@ Then, by hand:
 
 1. **Paste the SSH pubkey on GitHub** — already on your clipboard. Add it at <https://github.com/settings/ssh/new> as **both** an authentication and a signing key, or signed commits won't show as Verified.
 2. `gh auth login`
-3. **Set Chrome as the default browser** — System Settings → Desktop & Dock.
+3. **Set Helium as the default browser** — System Settings → Desktop & Dock.
 4. **Launch Alacritty once** — font, palette, window mode and `option_as_alt` all come from [`alacritty/alacritty.toml`](./alacritty/alacritty.toml), so there is nothing to click. It opens covering the whole screen, menu bar included, with no titlebar.
 
 ## The stack
@@ -34,7 +34,7 @@ Then, by hand:
 | Quick questions | `?` → `ask` — one-off question to Claude, read-only, web search when needed | [`zsh/zshrc`](./zsh/zshrc) |
 | Editor | Neovim for fast local code reading; VS Code alongside | [`nvim/init.lua`](./nvim/init.lua) |
 | `$EDITOR` | Neovim | [`zsh/zshenv`](./zsh/zshenv) |
-| Browser | Chrome — the only one, and the default handler | — user-level |
+| Browser | Helium — the default handler. Chrome stays installed for the Claude in Chrome extension, which only ships through the Chrome Web Store | — user-level |
 | Database | `psql` for scripts, a GUI client for interactive | [`psql/psqlrc`](./psql/psqlrc) |
 | Redis | `redis-cli` | — history path in [`zsh/zshenv`](./zsh/zshenv) |
 | HTTP | `curl` via `req`; Postman and Bruno for exploratory work | [`zsh/zshrc`](./zsh/zshrc) |
@@ -44,7 +44,7 @@ Then, by hand:
 | Listings | eza — `ls`, `ll`, `la`, `lt`, with icons and per-file git status | [`eza/theme.yml`](./eza/theme.yml), [`zsh/zshrc`](./zsh/zshrc) |
 | Monitoring | btop — `color_theme = "TTY"`, so it follows the terminal's sixteen slots | [`btop/btop.conf`](./btop/btop.conf) |
 | Clipboard | Maccy | [`Brewfile`](./Brewfile) |
-| Window tiling | Hammerspoon — right pane Chrome, left pane on `cmd+alt+1/2/3` | [`hammerspoon/init.lua`](./hammerspoon/init.lua) |
+| Window tiling | Hammerspoon — right pane the browser, left pane on `cmd+alt+1/2/3` | [`hammerspoon/init.lua`](./hammerspoon/init.lua) |
 
 Neovim has no plugin manager: the handful of plugins it does use — the [`kanso.nvim`](https://github.com/webhooked/kanso.nvim) colorscheme, neo-tree and Telescope with their dependencies — are added through Neovim 0.12's own `vim.pack`. `Space-f` then `f`/`g`/`b`/`h`/`r`/`d` opens Telescope on files, a project-wide grep, buffers, help tags, recent files and diagnostics, and `Space-/` searches the current buffer; `telescope-fzf-native` is compiled on install so the matching ranks the same way as the shell's `Ctrl-T`. Its native LSP client provides automatic completion and diagnostics for TypeScript, Go, Rust, Bash, YAML and JSON; `Tab`/`Shift-Tab` select, `Enter` accepts, and `Ctrl-Space` triggers completion manually. Every write runs exactly one formatter: Prettier for TypeScript/YAML/JSON, gofumpt for Go, rustfmt for Rust, and shfmt for Bash. `Space-f` formats without writing and `gd` jumps to a definition. `Space-sv` and `Space-sh` split the window, `Ctrl-hjkl` moves between splits, and each language adds its own: `Space-co`/`cm`/`cu` for TypeScript imports, `Space-cc`/`ck`/`ct`/`cr` for cargo, and `Space-cp`/`cm`/`cs` to pretty-print, minify or sort a JSON buffer through `jq`.
 
@@ -101,16 +101,16 @@ The one thing to know: `black` is the background itself, so a program that expli
 | `psql/psqlrc` | `~/.psqlrc` |
 | `gh/config.yml` | `~/.config/gh/config.yml` |
 
-Single files only, no directory symlinks. `link_file` moves any pre-existing regular file to `<dst>.bak.<timestamp>` before replacing it.
+Single files, with one exception: `~/.config/nvim` is a directory symlink, because the config is `init.lua` plus `lua/config/*.lua` and `require` only resolves those through the runtimepath. `link_file` moves any pre-existing regular file to `<dst>.bak.<timestamp>` before replacing it.
 
-**Not managed, and why not:** Chrome keeps its settings in a file the app rewrites on quit, so it cannot be a symlink. VS Code and `~/.claude/` are user-level state. `~/.aws/config` and `~/.pgpass` hold reconnaissance material and secrets, and this repo is public — write them by hand (`chmod 600 ~/.pgpass`).
+**Not managed, and why not:** Helium and Chrome both keep their settings in a file the app rewrites on quit, so neither can be a symlink. VS Code and `~/.claude/` are user-level state. `~/.aws/config` and `~/.pgpass` hold reconnaissance material and secrets, and this repo is public — write them by hand (`chmod 600 ~/.pgpass`).
 
 ## Traps
 
 The things that will bite you, and nothing else:
 
 - **`~/.gitconfig` is a symlink into this repo**, so `git config --global …` writes here and the repo shows dirty. That is deliberate — the change gets versioned instead of drifting.
-- **`brew bundle cleanup` uninstalls anything not in the Brewfile.** The Brewfile is the source of truth; an app you want to keep has to be declared, Chrome included.
+- **`brew bundle cleanup` uninstalls anything not in the Brewfile.** The Brewfile is the source of truth; an app you want to keep has to be declared — Chrome included, which is no longer the default browser but is still needed.
 - **Hammerspoon and Maccy both need Accessibility permission**, granted by hand on first launch. Without it Hammerspoon's placements silently no-op — `init.lua` raises an alert when it detects the permission missing, which is the only reason you find out.
 - **`~/.aws/config` has no `[default]` profile on purpose.** Without one every command fails with `NoCredentials` unless `AWS_PROFILE` is set, which is what stops a command from silently hitting the wrong account. `AWS_PROFILE` follows **the directory you are in**: `work` under `~/work`, personal everywhere else, re-evaluated on every `cd`. Claude does not: the terminal always runs the personal account, and the work one is only ever used from the web.
 - **`psql` reads `psqlrc` non-interactively too.** A script parsing output sees the `Ø` for NULL and the unicode borders. Use `psql -X`.

@@ -11,11 +11,37 @@ if not hs.accessibilityState(true) then
 end
 
 local APPS = {
+  helium    = "net.imput.helium",
   chrome    = "com.google.Chrome",
   terminal  = "org.alacritty",
   vscode    = "com.microsoft.VSCode",
   datagrip  = "com.jetbrains.datagrip",
 }
+
+-- The right pane is bound to whichever of these is actually installed, in this
+-- order, and not to one hardcoded bundle ID. That is what makes swapping the
+-- browser a Brewfile edit rather than a Hammerspoon edit, and it keeps the pane
+-- working on a machine that still has both during a transition.
+--
+-- Resolved once at load: pathForBundleID hits Launch Services, and this runs on
+-- every cmd+alt+1/2/3 otherwise. Reload Hammerspoon after installing a browser.
+local BROWSER_PREFERENCE = { APPS.helium, APPS.chrome }
+
+local function firstInstalled(bundleIDs)
+  for _, id in ipairs(bundleIDs) do
+    -- Compared against "" and not just truthiness: the docs say the return is
+    -- "string or nil", but for an app that is not installed it is the empty
+    -- string, which Lua treats as true. Checking only `if path then` picks the
+    -- first candidate every time, installed or not.
+    local path = hs.application.pathForBundleID(id)
+    if path and path ~= "" then
+      return id
+    end
+  end
+  -- Nothing installed: fall back to the last one so the caller still gets a
+  -- string, and placeApp simply finds no window rather than erroring.
+  return bundleIDs[#bundleIDs]
+end
 
 local GAP = 2
 local function waitFor(cond, onReady, timeout)
@@ -111,7 +137,7 @@ local function placeApp(bundleID, rect, onPlaced)
   hs.timer.doAfter(9, function() claimed[bundleID] = nil end)
 end
 
-local RIGHT_PANE = APPS.chrome
+local RIGHT_PANE = firstInstalled(BROWSER_PREFERENCE)
 local RIGHT_RATIO = 0.3
 
 local function rightPaneIsPlaced(win)

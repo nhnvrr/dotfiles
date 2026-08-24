@@ -13,9 +13,30 @@ brew "rust-analyzer"
 brew "bash-language-server"
 brew "yaml-language-server"
 brew "vscode-langservers-extracted"
+# The config is ~1200 lines of Lua that edits itself; without a server a typo in
+# an API name is found by restarting nvim and reading a traceback.
+brew "lua-language-server"
+# Four TOML files here drive alacritty, mise, starship and herdr. A misspelled
+# key in any of them is otherwise discovered by the program behaving oddly.
+brew "taplo"
+
 brew "prettier"
 brew "gofumpt"
 brew "shfmt"
+brew "stylua"
+
+# Nothing calls this by hand: bash-language-server runs it itself as soon as the
+# binary is on PATH, which is the whole reason it is declared here rather than
+# wired up in the editor.
+brew "shellcheck"
+# The linter gopls is not — gopls reports type errors, this reports the rest.
+# nvim-lint is what feeds it into the diagnostics list.
+brew "golangci-lint"
+
+# Required by nvim-treesitter's `main` branch to compile parsers, together with
+# a C compiler. It must be this build and NOT the npm package of the same name:
+# that one is a different program and cannot generate the parsers.
+brew "tree-sitter-cli"
 
 brew "fzf"
 brew "fd"
@@ -69,6 +90,17 @@ cask "font-jetbrains-mono-nerd-font"
 cask "visual-studio-code"
 cask "maccy"
 cask "hammerspoon"
+# The browser. The cask name matters: plain `helium` is a
+# different application entirely (koush's), and it is deprecated for failing the
+# Gatekeeper check — the same trap alacritty is in above.
+#
+# Still 0.x and it auto-updates outside Homebrew, so the version pinned here is
+# only what a fresh machine starts from.
+cask "helium-browser"
+# No longer the default browser — Helium is. Kept because the Claude in Chrome
+# extension ships only through the Chrome Web Store and has no equivalent
+# elsewhere, and because a second engine is worth having even when both are
+# Chromium. Undeclared it would be removed by `brew bundle cleanup`.
 cask "google-chrome"
 cask "docker-desktop"
 # The only database GUI left standing, now that TablePlus is uninstalled. It is

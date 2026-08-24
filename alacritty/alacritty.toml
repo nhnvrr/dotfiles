@@ -30,7 +30,7 @@ option_as_alt = "Both"
 # The third is the only one that satisfies both: the whole screen, still an
 # ordinary window as far as Hammerspoon is concerned.
 startup_mode = "SimpleFullscreen"
-opacity = 0.97
+opacity = 0.92
 blur = true
 
 # Belt and braces: with no titlebar there is nothing to draw the title on, but
@@ -43,9 +43,9 @@ history = 10000
 
 [font]
 size = 14.0
-normal      = { family = "JetBrainsMono NFM", style = "Regular" }
-bold        = { family = "JetBrainsMono NFM", style = "Bold" }
-italic      = { family = "JetBrainsMono NFM", style = "Italic" }
+normal = { family = "JetBrainsMono NFM", style = "Regular" }
+bold = { family = "JetBrainsMono NFM", style = "Bold" }
+italic = { family = "JetBrainsMono NFM", style = "Italic" }
 bold_italic = { family = "JetBrainsMono NFM", style = "Bold Italic" }
 offset = { x = 0, y = 1 }
 builtin_box_drawing = true
@@ -79,7 +79,7 @@ background = '#14171d'
 foreground = '#C5C9C7'
 
 [colors.cursor]
-text   = '#14171d'
+text = '#14171d'
 cursor = '#C5C9C7'
 
 [colors.selection]
@@ -87,24 +87,24 @@ background = '#393B44'
 foreground = '#C5C9C7'
 
 [colors.normal]
-black   = '#14171d'
-red     = '#c4746e'
-green   = '#8a9a7b'
-yellow  = '#c4b28a'
-blue    = '#8ba4b0'
+black = '#14171d'
+red = '#c4746e'
+green = '#8a9a7b'
+yellow = '#c4b28a'
+blue = '#8ba4b0'
 magenta = '#a292a3'
-cyan    = '#8ea4a2'
-white   = '#c8c093'
+cyan = '#8ea4a2'
+white = '#c8c093'
 
 [colors.bright]
-black   = '#A4A7A4'
-red     = '#e46876'
-green   = '#87a987'
-yellow  = '#e6c384'
-blue    = '#7fb4ca'
+black = '#A4A7A4'
+red = '#e46876'
+green = '#87a987'
+yellow = '#e6c384'
+blue = '#7fb4ca'
 magenta = '#938aa9'
-cyan    = '#7aa89f'
-white   = '#C5C9C7'
+cyan = '#7aa89f'
+white = '#C5C9C7'
 
 [[colors.indexed_colors]]
 index = 16
