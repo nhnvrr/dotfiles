@@ -1,0 +1,30 @@
+font-family = Ioskeley Mono Term
+font-size = 14
+adjust-cell-height = 1
+
+cursor-style = bar
+cursor-style-blink = true
+mouse-hide-while-typing = true
+copy-on-select = clipboard
+confirm-close-surface = false
+
+macos-option-as-alt = true
+macos-titlebar-style = transparent
+window-theme = ghostty
+macos-titlebar-proxy-icon = hidden
+maximize = true
+window-padding-x = 1
+window-padding-y = 1
+window-padding-balance = true
+resize-overlay = never
+window-save-state = never
+
+shell-integration-features = ssh-env,ssh-terminfo
+bell-features = no-attention,no-title,border
+
+# Not the default clear_screen: that one wipes the scrollback too.
+keybind = super+k=text:\x0c
+
+theme = Nord
+split-divider-color = #3b4252
+unfocused-split-opacity = 0.85

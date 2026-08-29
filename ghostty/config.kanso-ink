@@ -1,0 +1,56 @@
+font-family = Ioskeley Mono Term
+font-size = 14
+adjust-cell-height = 1
+
+cursor-style = bar
+cursor-style-blink = true
+mouse-hide-while-typing = true
+copy-on-select = clipboard
+clipboard-read = allow
+confirm-close-surface = false
+
+macos-option-as-alt = true
+macos-titlebar-style = transparent
+window-theme = ghostty
+title = 🧉
+maximize = true
+window-padding-x = 1
+window-padding-y = 1
+window-padding-balance = true
+resize-overlay = never
+window-save-state = never
+
+shell-integration-features = no-title,ssh-env,ssh-terminfo
+bell-features = no-attention,no-title,border
+
+keybind = super+k=text:\x0c
+keybind = super+backspace=text:\x15
+
+background = #14171d
+foreground = #C5C9C7
+cursor-color = #C5C9C7
+cursor-text = #14171d
+selection-background = #393B44
+selection-foreground = #C5C9C7
+
+palette = 0=#14171d
+palette = 1=#c4746e
+palette = 2=#8a9a7b
+palette = 3=#c4b28a
+palette = 4=#8ba4b0
+palette = 5=#a292a3
+palette = 6=#8ea4a2
+palette = 7=#c8c093
+palette = 8=#A4A7A4
+palette = 9=#e46876
+palette = 10=#87a987
+palette = 11=#e6c384
+palette = 12=#7fb4ca
+palette = 13=#938aa9
+palette = 14=#7aa89f
+palette = 15=#C5C9C7
+palette = 16=#b6927b
+palette = 17=#b98d7b
+
+split-divider-color = #393B44
+unfocused-split-opacity = 0.85

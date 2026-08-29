@@ -11,9 +11,8 @@ if not hs.accessibilityState(true) then
 end
 
 local APPS = {
-  helium    = "net.imput.helium",
   chrome    = "com.google.Chrome",
-  terminal  = "org.alacritty",
+  terminal  = "com.mitchellh.ghostty",
   vscode    = "com.microsoft.VSCode",
   datagrip  = "com.jetbrains.datagrip",
 }
@@ -25,7 +24,7 @@ local APPS = {
 --
 -- Resolved once at load: pathForBundleID hits Launch Services, and this runs on
 -- every cmd+alt+1/2/3 otherwise. Reload Hammerspoon after installing a browser.
-local BROWSER_PREFERENCE = { APPS.chrome, APPS.helium }
+local BROWSER_PREFERENCE = { APPS.chrome }
 
 local function firstInstalled(bundleIDs)
   for _, id in ipairs(bundleIDs) do

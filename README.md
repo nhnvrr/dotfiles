@@ -1,6 +1,6 @@
 # dotfiles
 
-macOS. zsh in Alacritty, Hammerspoon for window tiling, herdr for agents, Neovim, VS Code, Kanso Ink.
+macOS. fish in Ghostty, Hammerspoon for window tiling, herdr for agents, VS Code, Kanso Ink.
 
 ## Install
 
@@ -14,58 +14,54 @@ cd ~/Develop/dotfiles
 ./install.sh              # --skipBrew to only re-link configs
 ```
 
-Idempotent: re-run it anytime. It installs Homebrew and applies the [`Brewfile`](./Brewfile), installs the runtimes pinned in [`mise/config.toml`](./mise/config.toml), generates an `ed25519` SSH key and registers it with the Keychain, symlinks the files listed below, applies a few macOS defaults (key repeat, Finder extensions, screenshots into `~/Screenshots`), and switches the login shell to zsh.
+Idempotent: re-run it anytime. It installs Homebrew and applies the [`Brewfile`](./Brewfile), installs the runtimes pinned in [`mise/config.toml`](./mise/config.toml), generates an `ed25519` SSH key and registers it with the Keychain, symlinks the files listed below, applies a few macOS defaults (key repeat, Finder extensions, screenshots into `~/Screenshots`), and switches the login shell to fish.
 
 Then, by hand:
 
 1. **Paste the SSH pubkey on GitHub** — already on your clipboard. Add it at <https://github.com/settings/ssh/new> as **both** an authentication and a signing key, or signed commits won't show as Verified.
 2. `gh auth login`
 3. **Set Chrome as the default browser** — System Settings → Desktop & Dock.
-4. **Launch Alacritty once** — font, palette, window mode and `option_as_alt` all come from [`alacritty/alacritty.toml`](./alacritty/alacritty.toml), so there is nothing to click. It opens covering the whole screen, menu bar included, with no titlebar.
+4. **Launch Ghostty once** — font, palette, window mode and `macos-option-as-alt` all come from [`ghostty/config`](./ghostty/config), so there is nothing to click. It opens maximized, in a native macOS window titled `🧉`.
 
 ## The stack
 
 | Layer | Tool | Config |
 |---|---|---|
-| Shell | zsh — macOS's own `/bin/zsh`, no framework | [`zsh/zshrc`](./zsh/zshrc), [`zsh/zshenv`](./zsh/zshenv) |
-| Prompt | zsh, one line — path, branch, dirty counts; `envinfo` prints the rest on demand | [`zsh/zshrc`](./zsh/zshrc) |
-| Terminal | Alacritty | [`alacritty/alacritty.toml`](./alacritty/alacritty.toml) |
+| Shell | fish — bobthefish prompt (terminal scheme, cloned by install.sh), stock completions, stock highlighting; `/bin/zsh` stays for scripts | [`fish/config.fish`](./fish/config.fish), [`fish/conf.d/00-env.fish`](./fish/conf.d/00-env.fish) |
+| Terminal | Ghostty | [`ghostty/config`](./ghostty/config) |
 | Agents | herdr — agent state over its socket API, not a shell multiplexer | [`herdr/config.toml`](./herdr/config.toml) |
-| Quick questions | `?` → `ask` — one-off question to Claude, read-only, web search when needed | [`zsh/zshrc`](./zsh/zshrc) |
-| Environment | `envinfo` — shell, path, git, the mise toolchain, AWS profile, docker context, on demand | [`zsh/zshrc`](./zsh/zshrc) |
-| Editor | Neovim for fast local code reading; VS Code alongside | [`nvim/init.lua`](./nvim/init.lua) |
-| `$EDITOR` | Neovim | [`zsh/zshenv`](./zsh/zshenv) |
-| Browser | Chrome — the default handler, and where the Claude in Chrome extension lives. Helium stays installed as a second browser | — user-level |
+| Sessions | tmux — persistence across a disconnect, and the multiplexer that exists on a remote host | [`tmux/tmux.conf`](./tmux/tmux.conf) |
+| Quick questions | `?` → `ask` — one-off question to Claude, read-only, web search when needed | [`fish/functions/ask.fish`](./fish/functions/ask.fish) |
+| Environment | `envinfo` — shell, path, git, the mise toolchain, AWS profile, docker context, on demand | [`fish/functions/envinfo.fish`](./fish/functions/envinfo.fish) |
+| Editor | Neovim — Everforest, native `vim.pack`, LSP for TypeScript, Go, Rust, YAML and JSON | [`nvim/init.lua`](./nvim/init.lua), [`nvim/lua/lsp.lua`](./nvim/lua/lsp.lua) |
+| Editor (GUI) | VS Code | — user-level |
+| `$EDITOR` | `code --wait` | [`fish/conf.d/00-env.fish`](./fish/conf.d/00-env.fish) |
+| Browser | Chrome — the default handler, and where the Claude in Chrome extension lives | — user-level |
 | Database | `psql` for scripts, a GUI client for interactive | [`psql/psqlrc`](./psql/psqlrc) |
-| Redis | `redis-cli` | — history path in [`zsh/zshenv`](./zsh/zshenv) |
-| HTTP | `curl` via `req`; Postman and Bruno for exploratory work | [`zsh/zshrc`](./zsh/zshrc) |
+| Redis | `redis-cli` | — history path in [`fish/conf.d/00-env.fish`](./fish/conf.d/00-env.fish) |
+| HTTP | `curl`; Bruno for exploratory work | — |
 | Git | SSH-signed commits, delta as pager | [`git/gitconfig`](./git/gitconfig) |
 | Runtimes | mise | [`mise/config.toml`](./mise/config.toml) |
-| Fuzzy find | fzf + fd + bat | [`zsh/zshrc`](./zsh/zshrc) |
-| Listings | eza — `ls`, `ll`, `la`, `lt`, with icons and per-file git status | [`eza/theme.yml`](./eza/theme.yml), [`zsh/zshrc`](./zsh/zshrc) |
+| Fuzzy find | fzf + fd + bat | [`fish/config.fish`](./fish/config.fish) |
 | Monitoring | btop — `color_theme = "TTY"`, so it follows the terminal's sixteen slots | [`btop/btop.conf`](./btop/btop.conf) |
 | Clipboard | Maccy | [`Brewfile`](./Brewfile) |
 | Window tiling | Hammerspoon — right pane the browser, left pane on `cmd+alt+1/2/3` | [`hammerspoon/init.lua`](./hammerspoon/init.lua) |
 
-Neovim has no plugin manager: the handful of plugins it does use — the [`kanso.nvim`](https://github.com/webhooked/kanso.nvim) colorscheme, neo-tree and Telescope with their dependencies — are added through Neovim 0.12's own `vim.pack`. `Space-f` then `f`/`g`/`b`/`h`/`r`/`d` opens Telescope on files, a project-wide grep, buffers, help tags, recent files and diagnostics, and `Space-/` searches the current buffer; `telescope-fzf-native` is compiled on install so the matching ranks the same way as the shell's `Ctrl-T`. Its native LSP client provides automatic completion and diagnostics for TypeScript, Go, Rust, Bash, YAML and JSON; `Tab`/`Shift-Tab` select, `Enter` accepts, and `Ctrl-Space` triggers completion manually. Every write runs exactly one formatter: Prettier for TypeScript/YAML/JSON, gofumpt for Go, rustfmt for Rust, and shfmt for Bash. `Space-f` formats without writing and `gd` jumps to a definition. `Space-sv` and `Space-sh` split the window, `Ctrl-hjkl` moves between splits, and each language adds its own: `Space-co`/`cm`/`cu` for TypeScript imports, `Space-cc`/`ck`/`ct`/`cr` for cargo, and `Space-cp`/`cm`/`cs` to pretty-print, minify or sort a JSON buffer through `jq`.
-
-The rest of the editing layer is builtin and costs nothing at startup: `inccommand = "split"` previews `:s` live against every line it would touch, `Esc` clears the search highlight, `Ctrl-d`/`Ctrl-u`/`n`/`N` centre on landing, `J`/`K` move a visual selection and reindent it, `<`/`>` keep the selection, `p` over a selection pastes without clobbering the register, `Shift-h`/`Shift-l` walk buffers, `Ctrl-<arrows>` resize splits, a yank flashes, and a reopened file lands where it was left.
-
-Keys split by modifier: Alacritty takes `cmd`, zsh takes bare `ctrl`, and inside a herdr pane `ctrl+b` is the prefix before any of it.
+Keys split by modifier: Ghostty takes `cmd`, fish takes bare `ctrl`, and inside a herdr pane `ctrl+b` is the prefix before any of it.
 
 Typing `?` and a space expands to `ask ""` with the cursor between the quotes — a one-off question, streamed. The first word lands at ~1.7s no matter how long the answer runs; buffered, nothing appears until it is finished, which is 2.4s for one line and 9.2s for a long one. So the gain scales with the answer and is nil on a two-word reply. Answers needing live data cost ~12s and cite their sources.
 
-It is read-only by construction: `--disallowedTools` blocks the file and shell tools, because `--allowedTools` only auto-approves and does not restrict. The abbreviation exists so the question lands inside quotes; typed bare, `? why is 5 > 3` would be a redirection and zsh would write a file named `3`.
+It is read-only by construction: `--disallowedTools` blocks the file and shell tools, because `--allowedTools` only auto-approves and does not restrict. The abbreviation exists so the question lands inside quotes; typed bare, `? why is 5 > 3` would be a redirection and fish would write a file named `3`.
 
 ## Theme
 
-**[Kanso Ink](https://github.com/webhooked/kanso.nvim).** [`alacritty/alacritty.toml`](./alacritty/alacritty.toml) carries the palette slot by slot, so the terminal owns the sixteen slots and everything downstream follows them for free: `bat` and delta run `syntax-theme = ansi`, the prompt styles by ANSI slot number and so does zsh-syntax-highlighting, `psql` writes the raw SGR slots, `eza` styles by ANSI name, and `btop` runs `color_theme = "TTY"`. None of them carries a colour of its own.
+Ghostty runs its built-in Nord theme; Neovim runs [Everforest](https://github.com/sainnhe/everforest) (`hard`). The Kanso Ink palette below is kept in [`ghostty/config.kanso-ink`](./ghostty/config.kanso-ink) as the alternative.
 
-Two things restate the palette as hex, and both have to. Neovim runs [`kanso.nvim`](https://github.com/webhooked/kanso.nvim) because a colorscheme addresses far more groups than sixteen; herdr's theme tokens accept no ANSI reference, so [`herdr/config.toml`](./herdr/config.toml) writes them out under `[theme.custom]`, using the theme's own `bg0`–`bg4` ramp for its surfaces.
+**[Kanso Ink](https://github.com/webhooked/kanso.nvim).** [`ghostty/config`](./ghostty/config) carries the palette slot by slot, so the terminal owns the sixteen slots and everything downstream follows them for free: `bat` and delta run `syntax-theme = ansi`, fish's stock colours are ANSI names, `psql` writes the raw SGR slots, and `btop` runs `color_theme = "TTY"`. None of them carries a colour of its own.
 
-**The palette is verbatim, and that is the reason it is here.** The two themes this replaced both repeat the normal colours in the bright half, which collapses three distinctions [`zsh/zshrc`](./zsh/zshrc) draws on — `command` against `reserved-word`, `default` against `--option`, `redirection` against `commandseparator` — and each needed eight slots relit by hand to survive. Kanso Ink gives all sixteen genuinely different values, so nothing is hand-tuned.
+One thing restates the palette as hex, and has to: herdr's theme tokens accept no ANSI reference, so [`herdr/config.toml`](./herdr/config.toml) writes them out under `[theme.custom]`, using the theme's own `bg0`–`bg4` ramp for its surfaces.
 
-Neovim needs no override either. The theme's `bg0` is `#14171d`, exactly what the terminal paints, so with `transparent = true` the surfaces it defines as a distance above the background land where they were designed to. Its `Comment` sits at 4.10:1, above the floor, where the previous two themes both needed lifting.
+**The palette is verbatim, and that is the reason it is here.** The two themes this replaced both repeat the normal colours in the bright half, which collapses the distinctions fish's highlighter draws on — `command` against `keyword`, `redirection` against `end` — and each needed eight slots relit by hand to survive. Kanso Ink gives all sixteen genuinely different values, so nothing is hand-tuned.
 
 | | Ratio on `#14171d` |
 |---|---|
@@ -76,21 +72,14 @@ Neovim needs no override either. The theme's `bg0` is `#14171d`, exactly what th
 
 The one thing to know: `black` is the background itself, so a program that explicitly asks for ANSI black draws invisibly. That is upstream's choice, kept here; swapping slot 0 for `#1f1f26` is a one-line change if it ever bites.
 
-**Alacritty's cask is deprecated.** Homebrew flagged it in August 2026 for failing the macOS Gatekeeper check and disables it on 2026-09-01. An installed copy keeps working; a fresh machine after that date needs `cargo install alacritty` or the signed build from the project's releases.
-
-
 ## Managed files
 
 | Repo | Destination |
 |---|---|
-| `zsh/zshenv` | `~/.zshenv` |
-| `zsh/zshrc` | `~/.zshrc` |
-| `zsh/completions/_aws` | `~/.config/zsh/completions/_aws` |
-| `alacritty/alacritty.toml` | `~/.config/alacritty/alacritty.toml` |
+| `fish/` | `~/.config/fish` |
+| `ghostty/config` | `~/.config/ghostty/config` |
 | `btop/btop.conf` | `~/.config/btop/btop.conf` |
 | `mise/config.toml` | `~/.config/mise/config.toml` |
-| `eza/theme.yml` | `~/.config/eza/theme.yml` |
-| `nvim/init.lua` | `~/.config/nvim/init.lua` |
 | `herdr/config.toml` | `~/.config/herdr/config.toml` |
 | `herdr/sounds/done.mp3` | `~/.config/herdr/sounds/done.mp3` |
 | `herdr/sounds/request.mp3` | `~/.config/herdr/sounds/request.mp3` |
@@ -98,39 +87,31 @@ The one thing to know: `black` is the background itself, so a program that expli
 | `git/gitconfig` | `~/.gitconfig` |
 | `git/ignore` | `~/.config/git/ignore` |
 | `git/allowed_signers` | `~/.config/git/allowed_signers` |
+| `tmux/tmux.conf` | `~/.config/tmux/tmux.conf` |
 | `psql/psqlrc` | `~/.psqlrc` |
 | `gh/config.yml` | `~/.config/gh/config.yml` |
 
-Single files, with one exception: `~/.config/nvim` is a directory symlink, because the config is `init.lua` plus `lua/config/*.lua` and `require` only resolves those through the runtimepath. `link_file` moves any pre-existing regular file to `<dst>.bak.<timestamp>` before replacing it.
+Single files, except `fish/`, which is linked as a directory so a new function file needs no install step. `link_file` moves any pre-existing regular file to `<dst>.bak.<timestamp>` before replacing it.
 
-**Not managed, and why not:** Chrome and Helium both keep their settings in a file the app rewrites on quit, so neither can be a symlink. VS Code and `~/.claude/` are user-level state. `~/.aws/config` and `~/.pgpass` hold reconnaissance material and secrets, and this repo is public — write them by hand (`chmod 600 ~/.pgpass`).
+**Not managed, and why not:** the terminal font is installed by hand from `IoskeleyMono-Term.zip` into `~/Library/Fonts`, because there is no cask for it — a fresh machine needs it dropped there before Ghostty renders as intended. Chrome keeps its settings in a file the app rewrites on quit, so it cannot be a symlink. VS Code and `~/.claude/` are user-level state. `~/.aws/config` and `~/.pgpass` hold reconnaissance material and secrets, and this repo is public — write them by hand (`chmod 600 ~/.pgpass`).
 
 ## Traps
 
 The things that will bite you, and nothing else:
 
+- **tmux's prefix is `ctrl+b`, the same as herdr's.** Inside a herdr pane the outer one wins and tmux never sees it. That is affordable only because `herdr/config.toml` sets `allow_nested = false`, so herdr refuses to nest at all — the two are meant to sit side by side, not stacked. Wanting them stacked means moving one of the two prefixes.
+- **fish is not POSIX.** `export FOO=bar`, `source .env` and `$(...)`-heavy snippets pasted from a README fail; use `set -gx`, or run them under `/bin/zsh -c`, which is why zsh stays installed with no config.
+- **`$PATH` is set in `conf.d/00-env.fish`, and the `00-` prefix matters.** Homebrew's `vendor_conf.d/mise-activate.fish` sources after it and prepends the mise shims; sort the file later and `~/.bun/bin` shadows the mise-pinned runtime.
 - **`~/.gitconfig` is a symlink into this repo**, so `git config --global …` writes here and the repo shows dirty. That is deliberate — the change gets versioned instead of drifting.
-- **`brew bundle cleanup` uninstalls anything not in the Brewfile.** The Brewfile is the source of truth; an app you want to keep has to be declared — Helium included, which is no longer the default browser but is kept as a second one.
+- **`brew bundle cleanup` uninstalls anything not in the Brewfile.** The Brewfile is the source of truth in both directions: an app you want to keep has to be declared, and deleting a line is how you uninstall — the `cleanup` run is what actually removes it, not the edit.
 - **Hammerspoon and Maccy both need Accessibility permission**, granted by hand on first launch. Without it Hammerspoon's placements silently no-op — `init.lua` raises an alert when it detects the permission missing, which is the only reason you find out.
 - **`~/.aws/config` has no `[default]` profile on purpose.** Without one every command fails with `NoCredentials` unless `AWS_PROFILE` is set, which is what stops a command from silently hitting the wrong account. `AWS_PROFILE` follows **the directory you are in**: `work` under `~/work`, personal everywhere else, re-evaluated on every `cd`. Claude does not: the terminal always runs the personal account, and the work one is only ever used from the web.
-- **The prompt's `precmd` opens with `local _st=$?` and ends with `return $_st`.** `%(?…)` and `%?` in `PROMPT`/`RPROMPT` read `$?`, and without saving it first they report the hook's own exit code — the failed command would always look successful. Any new `precmd` hook has to do the same.
-- **`envinfo` runs `emulate -L zsh` before printing.** `PROMPT_SUBST` is on globally and `print -P` honours it, so without it a `$` or a backtick in a branch name, a docker context or an ARN would be evaluated instead of printed.
-- **The prompt shells out to `git` once per prompt, and only inside a repo.** An ancestor walk for `.git` in `_prompt_git` gates the fork; `--porcelain=v2 --branch --show-stash` is what folds the branch, the counts, the ahead/behind and the stash depth into that single call.
 - **`psql` reads `psqlrc` non-interactively too.** A script parsing output sees the `Ø` for NULL and the unicode borders. Use `psql -X`.
-- **`$PATH` is assembled twice, on purpose.** `.zshenv` runs before `/etc/zprofile`, which calls `path_helper` and pushes `/usr/bin` back in front of everything — so `zshrc` calls `__path_setup` again. `typeset -U path` is what makes the second call reorder instead of duplicate. Delete either half and a system runtime shadows the mise-pinned one.
-- **`zsh-syntax-highlighting` is sourced on the last line of `zshrc`, and has to be.** It wraps the widgets that exist when it loads, and fzf's own widgets come from the init cache sourced just above it. Move the `source` up and they stop being highlighted.
-- **Homebrew ships no zsh auto-activation for mise.** fish got one from `vendor_conf.d`; zsh needs the explicit `eval "$(mise activate zsh)"` in `zshrc`. Drop it and every runtime falls back to whatever is on `$PATH`.
-- **The history popup is `Ctrl-R` and nothing else.** Both arrows are bound to `up-line-or-beginning-search` / `down-line-or-beginning-search`, so with a partial command typed they walk only the entries starting with it, and inside a multi-line buffer they still move the cursor between lines. Each arrow is bound twice — `^[[A` is normal mode and `^[OA` application cursor mode, and which one the terminal sends depends on what the last program left it in.
-- **Neovim formatting is strict and runs before every write.** A missing formatter or invalid source aborts the write; `:noautocmd write` is the deliberate escape hatch.
 - **There is deliberately no `~/.curlrc`.** That file is read by *every* curl invocation, Homebrew's installer included.
 - **`fd` and `bat` are not optional next to fzf** — `FZF_DEFAULT_COMMAND` and the `Ctrl-T` preview shell out to them.
-- **`font-jetbrains-mono-nerd-font`, not `font-jetbrains-mono`.** The plain cask carries no Nerd Font glyphs, which is what the eza icon column and the prompt need. The cask installs three families whose names differ by one word — `Mono`, `Propo` and `NL` — and only the Mono build keeps the icon column aligned. **The family name is `JetBrainsMono NFM`** — not `JetBrainsMono Nerd Font Mono`, which is what the Nerd Fonts docs and the cask's filenames suggest and what nothing on macOS registers. Check it with `system_profiler SPFontsDataType`; a family CoreText cannot find falls back to Menlo silently, and `ll` showing boxes instead of icons is what tells you the name was wrong.
-- **A command taking longer than ten seconds flashes the window.** `_prompt_precmd` in `zshrc` prints a `\a` and `[bell]` turns it into a flash. It is deliberately not a macOS notification: giving `[bell]` a `command` that shells out to `osascript` would reach you behind other windows, at the cost of a popup on every long command — carrying Script Editor's icon, since `osascript` is what posts it.
-- **`decorations` and `startup_mode` are read at launch only.** `live_config_reload` picks up colours, font and padding live, but not those two — edit either and Alacritty has to be relaunched before anything changes.
-- **`SimpleFullscreen`, not `Fullscreen`.** Native macOS fullscreen covers the menu bar but moves the window to a Space of its own, where `hammerspoon/init.lua` can no longer tile it — `cmd+alt+2` would have nothing to place it beside. `Maximized` keeps the window ordinary but stops below the menu bar. `SimpleFullscreen` is the only mode that does both.
-- **`decorations = "none"` removes the drag area too.** `buttonless` only drops the three traffic lights and keeps the titlebar strip with the window title in it. With `none` there is nothing to grab, which is affordable only because the window opens fullscreen and Hammerspoon moves it.
-- **`env.TERM` is `xterm-256color`, not `alacritty`.** The entry resolves locally, but `TERM` travels over ssh and almost no remote host has it, which breaks `clear`, `less` and nvim there. The cost is undercurl degrading to a plain underline; truecolor is unaffected, since that is read from `COLORTERM`.
-- **lualine's mode section is transparent, and that needs the colour moved.** The theme paints it as near-black text on a coloured chip; `nvim/init.lua` drops every section background to `NONE`, and dropping the chip alone would leave near-black text on the terminal background. The chip's colour is promoted to the text colour instead, so each mode still reads as its own.
+- **The terminal font comes from no cask, and its family name is not its filename.** The files are `IoskeleyMonoTerm-*.ttf` in `~/Library/Fonts`; **the family CoreText registers is `Ioskeley Mono Term`**, which is what `ghostty/config` has to say. Check it with `ghostty +list-fonts`; a family CoreText cannot find falls back to Menlo silently, so the terminal still renders and nothing tells you the name was wrong.
+- **`maximize`, not `fullscreen`.** Native macOS fullscreen moves the window to a Space of its own, where `hammerspoon/init.lua` can no longer tile it — `cmd+alt+2` would have nothing to place it beside.
+- **`TERM` is `xterm-ghostty`, and ssh is covered.** `shell-integration-features = ssh-terminfo` copies the terminfo entry to the remote host on first connect, so `clear` and `less` keep working there without downgrading `TERM` locally.
 
 ## Homebrew
 
@@ -140,11 +121,7 @@ brew bundle --file=./Brewfile           # install it
 brew bundle cleanup --file=./Brewfile   # uninstall what's not declared
 ```
 
-**The Alacritty cask is on borrowed time.** Homebrew deprecated it in August 2026 for failing the macOS Gatekeeper check and disables it on 2026-09-01. An installed copy keeps working and updating itself; a machine set up after that date will not get one from `brew bundle` and needs `cargo install alacritty` or the signed build from the project's own releases.
-
 ## Notes
 
-- macOS only. Prompts for your password once, for `chsh`.
-- `~/.cache/zsh/` is generated state — `init.zsh`, the compinit dump and the aws description tables. Delete it and the next shell rebuilds all of it.
-- Neovim starts in ~18ms, measured with `nvim --headless --startuptime`. There is no plugin manager and no lazy-loading: the builtin plugins this profile never reaches (netrw above all, since neo-tree replaces it) are switched off at the top of `init.lua`, before `$VIMRUNTIME` is sourced, and the ergonomics layer is entirely builtin, so it costs nothing measurable.
-- Shell startup is ~70ms warm, measured end-to-end with `/usr/bin/time -p /bin/zsh -l -i -c exit`. fish did the same in ~40ms; the difference is `compinit` plus the two plugins, and it is the price of the move.
+- macOS only. Prompts for your password once, for `chsh`, and for `sudo` only if fish is not yet in `/etc/shells`.
+- Shell startup is ~40ms warm, measured end-to-end with `/usr/bin/time -p fish -l -i -c exit`.

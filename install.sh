@@ -118,82 +118,10 @@ fi
 echo "Preparing Go workspace..."
 mkdir -p "${HOME}/Develop/go/bin"
 
-# vscode-js-debug is the DAP adapter for Node and TypeScript. It is neither a
-# Homebrew formula nor a published npm package, so the release tarball is
-# vendored by hand.
-#
-# The version is pinned rather than tracking `latest`: nvim/lua/config/debug.lua
-# hardcodes src/dapDebugServer.js, which is a path inside this tarball's layout,
-# not a stable public interface.
-#
-# The guard compares a stamp file rather than testing for the entry point: the
-# tarball carries no readable version of its own, so "the file is there" would
-# leave whatever build a previous setup happened to drop — and the pin above
-# would then describe a version that is not on disk.
-JS_DEBUG_VERSION="1.105.0"
-JS_DEBUG_DIR="${HOME}/.local/share/nvim/js-debug"
-JS_DEBUG_STAMP="${JS_DEBUG_DIR}/.dotfiles-version"
-if [[ "$(cat "${JS_DEBUG_STAMP}" 2>/dev/null || true)" != "${JS_DEBUG_VERSION}" ]]; then
-  echo "Installing vscode-js-debug ${JS_DEBUG_VERSION}..."
-  JS_DEBUG_TMP="$(mktemp -d)"
-  # Download, unpack and probe all inside the condition. Under `set -e` a
-  # truncated tarball or a changed layout would otherwise abort install.sh
-  # outright — and this block runs before any symlink is created, so the machine
-  # would be left with no configuration at all over a failed optional download.
-  # The tarball unpacks into a top-level js-debug/ directory.
-  if curl -fsSL \
-    "https://github.com/microsoft/vscode-js-debug/releases/download/v${JS_DEBUG_VERSION}/js-debug-dap-v${JS_DEBUG_VERSION}.tar.gz" \
-    -o "${JS_DEBUG_TMP}/js-debug.tar.gz" &&
-    tar -xzf "${JS_DEBUG_TMP}/js-debug.tar.gz" -C "${JS_DEBUG_TMP}" &&
-    [[ -f "${JS_DEBUG_TMP}/js-debug/src/dapDebugServer.js" ]]; then
-    mkdir -p "$(dirname "${JS_DEBUG_DIR}")"
-    rm -rf "${JS_DEBUG_DIR}"
-    mv "${JS_DEBUG_TMP}/js-debug" "${JS_DEBUG_DIR}"
-    echo "${JS_DEBUG_VERSION}" > "${JS_DEBUG_STAMP}"
-  else
-    # Not fatal: nvim only registers the Node adapter when the file exists, so
-    # this costs Node debugging and nothing else.
-    echo "  ! Could not install vscode-js-debug; Node/TS debugging will be unavailable."
-  fi
-  rm -rf "${JS_DEBUG_TMP}"
-fi
-
 echo "Linking config files..."
-link_file "${CONFIG_DIR}/zsh/zshenv" "${HOME}/.zshenv"
-link_file "${CONFIG_DIR}/zsh/zshrc" "${HOME}/.zshrc"
-link_file "${CONFIG_DIR}/zsh/completions/_aws" "${HOME}/.config/zsh/completions/_aws"
-# zsh won't create it and history is dropped silently without it, same as psql.
-mkdir -p "${HOME}/.local/state/zsh" "${HOME}/.cache/zsh"
+link_file "${CONFIG_DIR}/fish" "${HOME}/.config/fish"
+link_file "${CONFIG_DIR}/nvim" "${HOME}/.config/nvim"
 link_file "${CONFIG_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"
-# Only read because zsh/zshenv exports EZA_CONFIG_DIR to this path; eza's own
-# default on macOS is ~/Library/Application Support/eza.
-link_file "${CONFIG_DIR}/eza/theme.yml" "${HOME}/.config/eza/theme.yml"
-# The whole directory, because the config is init.lua plus lua/config/*.lua and
-# `require` resolves those through runtimepath — a symlink to init.lua alone
-# leaves every module unreachable.
-#
-# The previous revision linked the single file, so ~/.config/nvim is a real
-# directory holding that symlink. It has to go before the directory symlink can
-# be created, and only when it holds nothing but what this script put there.
-# Anything else is the user's, and link_file backs it up rather than deleting.
-#
-# nvim-pack-lock.json is the exception worth carrying across: vim.pack writes it
-# to stdpath('config'), so after this switch it lives inside the repo and gets
-# version-controlled, which is what :h vim.pack recommends. Moving it preserves
-# the pinned plugin revisions instead of resolving them again.
-NVIM_DST="${HOME}/.config/nvim"
-if [[ ! -L "${NVIM_DST}" && -L "${NVIM_DST}/init.lua" ]] &&
-  [[ "$(readlink "${NVIM_DST}/init.lua")" == "${CONFIG_DIR}/nvim/init.lua" ]]; then
-  rm "${NVIM_DST}/init.lua"
-  if [[ -f "${NVIM_DST}/nvim-pack-lock.json" && ! -f "${CONFIG_DIR}/nvim/nvim-pack-lock.json" ]]; then
-    mv "${NVIM_DST}/nvim-pack-lock.json" "${CONFIG_DIR}/nvim/nvim-pack-lock.json"
-    echo "  moved nvim-pack-lock.json into the repo (it is version-controlled now)"
-  fi
-  # Only if nothing else is left; a non-empty directory falls through to
-  # link_file, which backs it up.
-  rmdir "${NVIM_DST}" 2>/dev/null || true
-fi
-link_file "${CONFIG_DIR}/nvim" "${NVIM_DST}"
 # Only config.toml and not the directory: herdr keeps its sockets, logs and
 # workspace state in the same folder and writes to them at runtime.
 link_file "${CONFIG_DIR}/herdr/config.toml" "${HOME}/.config/herdr/config.toml"
@@ -206,10 +134,20 @@ link_file "${CONFIG_DIR}/herdr/sounds/request.mp3" "${HOME}/.config/herdr/sounds
 # btop rewrites this file on exit, comments and all, so the reason it is here
 # cannot live inside it: color_theme = "TTY" makes btop draw from the terminal's
 # sixteen ANSI slots instead of a theme file of its own, which is what keeps it
-# following alacritty/alacritty.toml for free. Expect btop to churn the file whenever a
+# following ghostty/config for free. Expect btop to churn the file whenever a
 # setting is changed from its UI.
-link_file "${CONFIG_DIR}/alacritty/alacritty.toml" "${HOME}/.config/alacritty/alacritty.toml"
+link_file "${CONFIG_DIR}/ghostty/config" "${HOME}/.config/ghostty/config"
 link_file "${CONFIG_DIR}/btop/btop.conf" "${HOME}/.config/btop/btop.conf"
+# The XDG path, which tmux has read since 3.1, and not ~/.tmux.conf — still
+# honoured, but only as a fallback and only when this file is absent. An older
+# ~/.tmux.conf left over from a previous machine is not touched by this and
+# silently stops being read, which is the confusing half of the move.
+# The file and not the directory: a plugin manager would clone into the same
+# folder, and linking the directory would drag those clones into the repo.
+link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.config/tmux/tmux.conf"
+# Same trap as psql: history-file is dropped silently without the first, and
+# resurrect saves nowhere without the second. tmux creates neither.
+mkdir -p "${HOME}/.local/state/tmux/resurrect" "${HOME}/.local/share/tmux/plugins"
 # Only init.lua: ~/.hammerspoon/Spoons is downloaded state, not config.
 link_file "${CONFIG_DIR}/hammerspoon/init.lua" "${HOME}/.hammerspoon/init.lua"
 # psql won't create this directory and history fails silently without it.
@@ -219,6 +157,20 @@ link_file "${CONFIG_DIR}/psql/psqlrc" "${HOME}/.psqlrc"
 mkdir -p "${HOME}/.local/state/redis"
 if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
   link_file "${CONFIG_DIR}/gh/config.yml" "${HOME}/.config/gh/config.yml"
+fi
+
+# Without this the plugins only arrive when someone presses prefix + I by hand,
+# and continuum silently restores nothing until they do.
+TPM_INSTALL="$("${BREW_BIN:-brew}" --prefix 2>/dev/null)/opt/tpm/share/tpm/bin/install_plugins"
+if [[ "${SKIP_BREW}" == false && -x "${TPM_INSTALL}" ]]; then
+  echo "Installing tmux plugins..."
+  TMUX_PLUGIN_MANAGER_PATH="${HOME}/.local/share/tmux/plugins" "${TPM_INSTALL}"
+fi
+
+BOBTHEFISH="${HOME}/.local/share/fish/bobthefish"
+if [[ ! -d "${BOBTHEFISH}" ]]; then
+  echo "Installing bobthefish..."
+  git clone -q --depth 1 https://github.com/oh-my-fish/theme-bobthefish "${BOBTHEFISH}"
 fi
 
 if [[ "${SKIP_BREW}" == false ]] && command -v mise >/dev/null 2>&1; then
@@ -239,14 +191,19 @@ defaults write com.apple.screencapture type -string "png"
 killall Finder 2>/dev/null || true
 killall SystemUIServer 2>/dev/null || true
 
-# /bin/zsh is macOS's default and is already in /etc/shells, so there is nothing
-# to register and no sudo — this only matters on a machine left on bash or fish.
+# chsh refuses a shell missing from /etc/shells; registering it is the one sudo.
 # dscl reads the real login shell, not $SHELL.
-ZSH_BIN=/bin/zsh
-LOGIN_SHELL="$(dscl . -read "/Users/${USER}" UserShell 2>/dev/null | awk '{print $2}')"
-if [[ "${LOGIN_SHELL}" != "${ZSH_BIN}" ]]; then
-  echo "Changing login shell to ${ZSH_BIN} (chsh will prompt for your password)..."
-  chsh -s "${ZSH_BIN}"
+FISH_BIN="$(dirname "${BREW_BIN}")/fish"
+if [[ -x "${FISH_BIN}" ]]; then
+  if ! grep -qxF "${FISH_BIN}" /etc/shells; then
+    echo "Registering ${FISH_BIN} in /etc/shells (sudo)..."
+    echo "${FISH_BIN}" | sudo tee -a /etc/shells >/dev/null
+  fi
+  LOGIN_SHELL="$(dscl . -read "/Users/${USER}" UserShell 2>/dev/null | awk '{print $2}')"
+  if [[ "${LOGIN_SHELL}" != "${FISH_BIN}" ]]; then
+    echo "Changing login shell to ${FISH_BIN} (chsh will prompt for your password)..."
+    chsh -s "${FISH_BIN}"
+  fi
 fi
 
 echo "macOS standalone setup complete. Happy Coding 🧉"

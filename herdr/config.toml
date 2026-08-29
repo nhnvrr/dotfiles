@@ -9,7 +9,7 @@ onboarding = false
 version_check = false
 
 [terminal]
-default_shell = "/bin/zsh"
+default_shell = "/opt/homebrew/bin/fish"
 shell_mode = "login"
 new_cwd = "follow"
 
@@ -100,7 +100,7 @@ rows = [
 # The colour answers "whose pane is this" at a glance, which is the question a
 # sidebar with several agents actually gets asked.
 #
-# #b6927b is the theme's own indexed colour 16, which alacritty.toml also
+# #b6927b is the theme's own indexed colour 16, which ghostty/config also
 # defines — the one warm hue far enough from both the blue above and the yellow
 # state_text uses to tell the two agents apart at a glance.
 [ui.sidebar.agents.rows_by_agent]
@@ -163,9 +163,9 @@ enabled = true
 done_path = "sounds/done.mp3"
 request_path = "sounds/request.mp3"
 
-# Kanso Ink, matching alacritty/alacritty.toml slot for slot. herdr's theme
-# tokens accept no ANSI reference, so this is the one place besides
-# nvim/init.lua that has to restate the palette as hex.
+# Kanso Ink, matching ghostty/config slot for slot. herdr's theme
+# tokens accept no ANSI reference, so this is the one place that has to restate
+# the palette as hex.
 [theme]
 auto_switch = false
 # The base only fills tokens [theme.custom] leaves alone; every token herdr
@@ -189,7 +189,7 @@ active_row_bg = "#1f1f26"
 selection_bg  = "#22262D"
 
 # subtext0 is ANSI slot 8, which holds 7.39:1 on this background — the value
-# alacritty.toml carries precisely because it paints dim text everywhere.
+# ghostty/config carries precisely because it paints dim text everywhere.
 text     = "#C5C9C7"
 subtext0 = "#A4A7A4"
 
