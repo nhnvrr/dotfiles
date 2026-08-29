@@ -22,9 +22,8 @@ window-save-state = never
 shell-integration-features = ssh-env,ssh-terminfo
 bell-features = no-attention,no-title,border
 
-# Not the default clear_screen: that one wipes the scrollback too.
 keybind = super+k=text:\x0c
 
-theme = Nord
-split-divider-color = #3b4252
-unfocused-split-opacity = 0.85
+split-divider-color = #4c566a
+unfocused-split-opacity = 0.55
+unfocused-split-fill = #14171e
