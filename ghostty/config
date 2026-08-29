@@ -26,6 +26,6 @@ bell-features = no-attention,no-title,border
 
 keybind = super+k=text:\x0c
 
-split-divider-color = #4c566a
+split-divider-color = #88c0d0
 unfocused-split-opacity = 0.55
 unfocused-split-fill = #14171e

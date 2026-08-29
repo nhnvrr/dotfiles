@@ -18,6 +18,6 @@ set -g __fish_git_prompt_color_branch green
 set -g __fish_git_prompt_color_dirtystate yellow
 set -g __fish_git_prompt_color_stagedstate green
 set -g __fish_git_prompt_color_untrackedfiles cyan
-set -g __fish_git_prompt_color_stashstate magenta
+set -g __fish_git_prompt_color_stashstate yellow
 set -g __fish_git_prompt_color_invalidstate red
 set -g __fish_git_prompt_color_upstream white
