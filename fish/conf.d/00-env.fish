@@ -24,6 +24,7 @@ set -gx AWS_MAX_ATTEMPTS 3
 
 set -gx REDISCLI_HISTFILE $HOME/.local/state/redis/history
 set -gx BAT_THEME ansi
+set -gx EZA_CONFIG_DIR $HOME/.config/eza
 
 fish_add_path -g $GOPATH/bin /opt/homebrew/bin /opt/homebrew/sbin \
     /opt/homebrew/opt/libpq/bin $HOME/.bun/bin $HOME/.local/bin \

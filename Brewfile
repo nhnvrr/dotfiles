@@ -36,6 +36,8 @@ brew "fd"
 brew "bat"
 brew "ripgrep"
 brew "jq"
+brew "eza"
+brew "duti"
 
 brew "git"
 brew "gh"
@@ -69,6 +71,8 @@ brew "btop"
 # The terminal; ghostty/config carries the sixteen ANSI slots the rest of the
 # stack resolves through.
 cask "ghostty"
+# Glyph fallback for the fish prompt; ghostty/config lists it after the main face.
+cask "font-symbols-only-nerd-font"
 
 cask "visual-studio-code"
 cask "maccy"

@@ -138,6 +138,7 @@ link_file "${CONFIG_DIR}/herdr/sounds/request.mp3" "${HOME}/.config/herdr/sounds
 # setting is changed from its UI.
 link_file "${CONFIG_DIR}/ghostty/config" "${HOME}/.config/ghostty/config"
 link_file "${CONFIG_DIR}/btop/btop.conf" "${HOME}/.config/btop/btop.conf"
+link_file "${CONFIG_DIR}/eza/theme.yml" "${HOME}/.config/eza/theme.yml"
 # The XDG path, which tmux has read since 3.1, and not ~/.tmux.conf — still
 # honoured, but only as a fallback and only when this file is absent. An older
 # ~/.tmux.conf left over from a previous machine is not touched by this and
@@ -167,12 +168,6 @@ if [[ "${SKIP_BREW}" == false && -x "${TPM_INSTALL}" ]]; then
   TMUX_PLUGIN_MANAGER_PATH="${HOME}/.local/share/tmux/plugins" "${TPM_INSTALL}"
 fi
 
-BOBTHEFISH="${HOME}/.local/share/fish/bobthefish"
-if [[ ! -d "${BOBTHEFISH}" ]]; then
-  echo "Installing bobthefish..."
-  git clone -q --depth 1 https://github.com/oh-my-fish/theme-bobthefish "${BOBTHEFISH}"
-fi
-
 if [[ "${SKIP_BREW}" == false ]] && command -v mise >/dev/null 2>&1; then
   echo "Installing mise-managed tools..."
   mise install
@@ -188,6 +183,13 @@ defaults write NSGlobalDomain AppleShowAllExtensions -bool true
 mkdir -p "${HOME}/Screenshots"
 defaults write com.apple.screencapture location "${HOME}/Screenshots"
 defaults write com.apple.screencapture type -string "png"
+if command -v duti >/dev/null 2>&1; then
+  duti -s com.microsoft.VSCode public.json all
+  duti -s com.microsoft.VSCode public.yaml all
+  for ext in toml ini cfg; do
+    duti -s com.microsoft.VSCode ".${ext}" all
+  done
+fi
 killall Finder 2>/dev/null || true
 killall SystemUIServer 2>/dev/null || true
 

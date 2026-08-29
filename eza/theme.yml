@@ -1,0 +1,104 @@
+filekinds:
+  normal: { is_bold: false }
+  directory: { foreground: Cyan, is_bold: false }
+  symlink: { foreground: LightBlue, is_bold: false }
+  pipe: { is_bold: false }
+  block_device: { is_bold: false }
+  char_device: { is_bold: false }
+  socket: { is_bold: false }
+  special: { is_bold: false }
+  executable: { is_bold: false, is_underline: false }
+  mount_point: { is_bold: false }
+
+perms:
+  user_read: { is_bold: false }
+  user_write: { is_bold: false }
+  user_execute_file: { is_bold: false, is_underline: false }
+  user_execute_other: { is_bold: false, is_underline: false }
+  group_read: { is_bold: false }
+  group_write: { is_bold: false }
+  group_execute: { is_bold: false }
+  other_read: { is_bold: false }
+  other_write: { is_bold: false }
+  other_execute: { is_bold: false }
+  special_user_file: { is_bold: false }
+  special_other: { is_bold: false }
+  attribute: { is_bold: false }
+
+size:
+  major: { is_bold: false }
+  minor: { is_bold: false }
+  number_byte: { is_bold: false }
+  number_kilo: { is_bold: false }
+  number_mega: { is_bold: false }
+  number_giga: { is_bold: false }
+  number_huge: { is_bold: false }
+  unit_byte: { is_bold: false }
+  unit_kilo: { is_bold: false }
+  unit_mega: { is_bold: false }
+  unit_giga: { is_bold: false }
+  unit_huge: { is_bold: false }
+
+users:
+  user_you: { foreground: DarkGray, is_bold: false }
+  user_root: { is_bold: false }
+  user_other: { is_bold: false }
+  group_yours: { is_bold: false }
+  group_other: { is_bold: false }
+  group_root: { is_bold: false }
+
+links:
+  normal: { is_bold: false }
+  multi_link_file: { is_bold: false }
+
+git:
+  new: { foreground: LightGreen, is_bold: false }
+  modified: { foreground: LightYellow, is_bold: false }
+  deleted: { foreground: LightRed, is_bold: false }
+  renamed: { is_bold: false }
+  ignored: { is_bold: false }
+  conflicted: { is_bold: false }
+
+git_repo:
+  branch_main: { is_bold: false }
+  branch_other: { is_bold: false }
+  git_clean: { is_bold: false }
+  git_dirty: { is_bold: false }
+
+file_type:
+  image: { is_bold: false }
+  video: { is_bold: false }
+  music: { is_bold: false }
+  crypto: { is_bold: false }
+  document: { is_bold: false }
+  compressed: { is_bold: false }
+  temp: { is_bold: false }
+  compiled: { is_bold: false }
+  build: { is_bold: false, is_underline: false }
+  source: { is_bold: false, is_underline: false }
+
+punctuation: { is_bold: false }
+date: { foreground: DarkGray, is_bold: false }
+inode: { is_bold: false }
+blocks: { is_bold: false }
+octal: { is_bold: false }
+flags: { is_bold: false }
+control_char: { is_bold: false }
+broken_symlink: { is_bold: false }
+broken_path_overlay: { is_bold: false }
+
+filenames:
+  # eza only ships icons for dotted dirs (.git, .config); bare names fall back to a folder
+  git: { icon: { glyph: "\uE5FB" } }
+  gh: { icon: { glyph: "\uE709" } }
+  nvim: { icon: { glyph: "\uE6AE" } }
+  fish: { icon: { glyph: "\U000F023A" } }
+  tmux: { icon: { glyph: "\uEBC8" } }
+  ghostty: { icon: { glyph: "\uE795" } }
+  psql: { icon: { glyph: "\uE76E" } }
+  .psqlrc: { icon: { glyph: "\uE76E" } }
+  psqlrc: { icon: { glyph: "\uE76E" } }
+  .nvmrc: { icon: { glyph: "\uE718" } }
+
+extensions:
+  bru: { icon: { glyph: "\U000F0A43" } }

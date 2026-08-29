@@ -27,7 +27,7 @@ Then, by hand:
 
 | Layer | Tool | Config |
 |---|---|---|
-| Shell | fish — bobthefish prompt (terminal scheme, cloned by install.sh), stock completions, stock highlighting; `/bin/zsh` stays for scripts | [`fish/config.fish`](./fish/config.fish), [`fish/conf.d/00-env.fish`](./fish/conf.d/00-env.fish) |
+| Shell | fish — hand-written prompt (pwd, `fish_git_prompt`, date on the right; no theme), stock completions, stock highlighting; `/bin/zsh` stays for scripts | [`fish/config.fish`](./fish/config.fish), [`fish/conf.d/00-env.fish`](./fish/conf.d/00-env.fish), [`fish/functions/fish_prompt.fish`](./fish/functions/fish_prompt.fish) |
 | Terminal | Ghostty | [`ghostty/config`](./ghostty/config) |
 | Agents | herdr — agent state over its socket API, not a shell multiplexer | [`herdr/config.toml`](./herdr/config.toml) |
 | Sessions | tmux — persistence across a disconnect, and the multiplexer that exists on a remote host | [`tmux/tmux.conf`](./tmux/tmux.conf) |
@@ -42,6 +42,7 @@ Then, by hand:
 | HTTP | `curl`; Bruno for exploratory work | — |
 | Git | SSH-signed commits, delta as pager | [`git/gitconfig`](./git/gitconfig) |
 | Runtimes | mise | [`mise/config.toml`](./mise/config.toml) |
+| Listing | eza — icons, directories first, theme from the sixteen slots | [`eza/theme.yml`](./eza/theme.yml) |
 | Fuzzy find | fzf + fd + bat | [`fish/config.fish`](./fish/config.fish) |
 | Monitoring | btop — `color_theme = "TTY"`, so it follows the terminal's sixteen slots | [`btop/btop.conf`](./btop/btop.conf) |
 | Clipboard | Maccy | [`Brewfile`](./Brewfile) |
@@ -108,6 +109,9 @@ The things that will bite you, and nothing else:
 - **`~/.aws/config` has no `[default]` profile on purpose.** Without one every command fails with `NoCredentials` unless `AWS_PROFILE` is set, which is what stops a command from silently hitting the wrong account. `AWS_PROFILE` follows **the directory you are in**: `work` under `~/work`, personal everywhere else, re-evaluated on every `cd`. Claude does not: the terminal always runs the personal account, and the work one is only ever used from the web.
 - **`psql` reads `psqlrc` non-interactively too.** A script parsing output sees the `Ø` for NULL and the unicode borders. Use `psql -X`.
 - **There is deliberately no `~/.curlrc`.** That file is read by *every* curl invocation, Homebrew's installer included.
+- **eza reads `~/Library/Application Support/eza` on macOS**, not `~/.config`. `EZA_CONFIG_DIR` in [`fish/conf.d/00-env.fish`](./fish/conf.d/00-env.fish) is what makes the theme load at all; without it nothing fails, the theme is just never read.
+- **The `ls` icons come from the Nerd Font symbols Ghostty embeds**, not from Ioskeley. Outside Ghostty — Terminal.app, a plain ssh client — `ls` shows boxes. `--icons=auto` only drops them when stdout is a pipe, not on another terminal.
+- **`duti` hands `.json`, `.yaml`/`.yml`, `.toml`, `.ini` and `.cfg` to VS Code** from `install.sh`; `duti -x json` shows the current binding. A bare `config`, `tmux.conf` or `.env` cannot be bound from a script: macOS files them under `public.data` or a dynamic UTI, VS Code declares neither, and `duti` answers `error -50`. `public.plain-text` accepts the call and then stays on TextEdit. Those stay on Finder's "Open With → Always" or `code <file>`.
 - **`fd` and `bat` are not optional next to fzf** — `FZF_DEFAULT_COMMAND` and the `Ctrl-T` preview shell out to them.
 - **The terminal font comes from no cask, and its family name is not its filename.** The files are `IoskeleyMonoTerm-*.ttf` in `~/Library/Fonts`; **the family CoreText registers is `Ioskeley Mono Term`**, which is what `ghostty/config` has to say. Check it with `ghostty +list-fonts`; a family CoreText cannot find falls back to Menlo silently, so the terminal still renders and nothing tells you the name was wrong.
 - **`maximize`, not `fullscreen`.** Native macOS fullscreen moves the window to a Space of its own, where `hammerspoon/init.lua` can no longer tile it — `cmd+alt+2` would have nothing to place it beside.

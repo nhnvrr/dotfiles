@@ -32,6 +32,13 @@ abbr -a gd 'git diff'
 
 alias code 'code --new-window'
 
+if command -q eza
+    alias ls 'eza --icons=auto --group-directories-first'
+    alias ll 'eza --icons=auto --group-directories-first --long --git --header'
+    alias la 'eza --icons=auto --group-directories-first --long --git --header --all'
+    alias lt 'eza --icons=auto --group-directories-first --tree --level=2'
+end
+
 set -gx FZF_DEFAULT_COMMAND 'fd --type f --hidden --follow --exclude .git'
 set -gx FZF_CTRL_T_COMMAND $FZF_DEFAULT_COMMAND
 set -gx FZF_ALT_C_COMMAND 'fd --type d --hidden --follow --exclude .git'
@@ -41,7 +48,7 @@ set -gx FZF_DEFAULT_OPTS '
   --bind="ctrl-/:toggle-preview,ctrl-y:execute-silent(echo {} | pbcopy)+abort"
   --color=bg+:bright-black,fg:white,fg+:bright-white,hl:bright-cyan,hl+:cyan,info:bright-black,prompt:blue,pointer:bright-red,marker:bright-green,border:bright-black,header:blue,spinner:cyan'
 set -gx FZF_CTRL_T_OPTS "--preview 'bat --style=numbers --color=always --line-range :200 {}'"
-set -gx FZF_ALT_C_OPTS "--preview 'ls -la {} | head -100'"
+set -gx FZF_ALT_C_OPTS "--preview 'eza --icons=always --group-directories-first -1 {} 2>/dev/null || ls -la {} | head -100'"
 set -gx FZF_CTRL_R_OPTS '
   --height=60%
   --preview="echo {} | bat --color=always --style=plain --language=fish"

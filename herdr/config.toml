@@ -170,7 +170,7 @@ request_path = "sounds/request.mp3"
 auto_switch = false
 # The base only fills tokens [theme.custom] leaves alone; every token herdr
 # exposes is overridden below, so the name is a floor, not the look.
-name = "terminal"
+name = "nord"
 
 [theme.custom]
 # Surfaces, straight off the theme's own bg0-bg4 ramp. panel_bg matches the
