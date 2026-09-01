@@ -134,11 +134,12 @@ link_file "${CONFIG_DIR}/herdr/sounds/request.mp3" "${HOME}/.config/herdr/sounds
 # btop rewrites this file on exit, comments and all, so the reason it is here
 # cannot live inside it: color_theme = "TTY" makes btop draw from the terminal's
 # sixteen ANSI slots instead of a theme file of its own, which is what keeps it
-# following ghostty/config for free. Expect btop to churn the file whenever a
+# following alacritty/mate.toml for free. Expect btop to churn the file whenever a
 # setting is changed from its UI.
-link_file "${CONFIG_DIR}/ghostty/config" "${HOME}/.config/ghostty/config"
+link_file "${CONFIG_DIR}/alacritty/alacritty.toml" "${HOME}/.config/alacritty/alacritty.toml"
+# Generated from nvim/lua/mate/palette.lua; alacritty.toml imports it by path.
+link_file "${CONFIG_DIR}/alacritty/mate.toml" "${HOME}/.config/alacritty/mate.toml"
 link_file "${CONFIG_DIR}/btop/btop.conf" "${HOME}/.config/btop/btop.conf"
-link_file "${CONFIG_DIR}/eza/theme.yml" "${HOME}/.config/eza/theme.yml"
 # The XDG path, which tmux has read since 3.1, and not ~/.tmux.conf — still
 # honoured, but only as a fallback and only when this file is absent. An older
 # ~/.tmux.conf left over from a previous machine is not touched by this and

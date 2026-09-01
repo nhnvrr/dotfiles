@@ -12,7 +12,7 @@ end
 
 local APPS = {
   chrome    = "com.google.Chrome",
-  terminal  = "com.mitchellh.ghostty",
+  terminal  = "org.alacritty",
   vscode    = "com.microsoft.VSCode",
   datagrip  = "com.jetbrains.datagrip",
 }

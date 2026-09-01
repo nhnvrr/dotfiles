@@ -36,7 +36,6 @@ brew "fd"
 brew "bat"
 brew "ripgrep"
 brew "jq"
-brew "eza"
 brew "duti"
 
 brew "git"
@@ -68,11 +67,11 @@ brew "yt-dlp"
 brew "ffmpeg"
 brew "btop"
 
-# The terminal; ghostty/config carries the sixteen ANSI slots the rest of the
-# stack resolves through.
-cask "ghostty"
-# Glyph fallback for the fish prompt; ghostty/config lists it after the main face.
-cask "font-symbols-only-nerd-font"
+# The terminal. Its cask is `disable!`d since 2026-09-01 (fails the Gatekeeper
+# check), so `brew bundle` refuses it; the app is installed from the upstream
+# DMG by hand — see README "Not managed". Kept here, commented, so the reason
+# is next to the place a reader will look for the line.
+# cask "alacritty"
 
 cask "visual-studio-code"
 cask "maccy"
@@ -83,10 +82,11 @@ cask "hammerspoon"
 # build.
 cask "google-chrome"
 cask "docker-desktop"
-# The only database GUI left standing, now that TablePlus is uninstalled. It is
-# also the one with the JetBrains keymap the rest of the toolchain already uses.
-cask "datagrip"
+cask "tableplus"
+cask "redis-insight"
 cask "bruno"
+cask "proxyman"
+cask "figma"
 
 cask "aws-vpn-client"
 
@@ -101,5 +101,6 @@ cask "slack"
 cask "discord"
 cask "telegram"
 cask "granola"
+cask "notion"
 
 cask "ledger-wallet"

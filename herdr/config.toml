@@ -100,9 +100,9 @@ rows = [
 # The colour answers "whose pane is this" at a glance, which is the question a
 # sidebar with several agents actually gets asked.
 #
-# #b6927b is the theme's own indexed colour 16, which ghostty/config also
-# defines — the one warm hue far enough from both the blue above and the yellow
-# state_text uses to tell the two agents apart at a glance.
+# #c2946e is mate's signal, indexed colour 16 in alacritty/mate.toml — the one
+# warm hue far enough from both the blue above and the yellow state_text uses
+# to tell the two agents apart at a glance.
 [ui.sidebar.agents.rows_by_agent]
 claude = [
   [
@@ -110,7 +110,7 @@ claude = [
     { token = "workspace", bold = false },
     { token = "tab", bold = false },
   ],
-  [{ token = "agent", fg = "#b6927b", bold = false }, { token = "state_text" }],
+  [{ token = "agent", fg = "#c2946e", bold = false }, { token = "state_text" }],
 ]
 
 codex = [
@@ -163,9 +163,9 @@ enabled = true
 done_path = "sounds/done.mp3"
 request_path = "sounds/request.mp3"
 
-# Kanso Ink, matching ghostty/config slot for slot. herdr's theme
-# tokens accept no ANSI reference, so this is the one place that has to restate
-# the palette as hex.
+# mate, restated as hex: herdr's theme tokens accept no ANSI reference, so
+# this is the one place outside nvim/lua/mate/palette.lua that carries the
+# values. Regenerate with `nvim -l nvim/lua/mate/build.lua` and paste.
 [theme]
 auto_switch = false
 # The base only fills tokens [theme.custom] leaves alone; every token herdr
@@ -173,36 +173,31 @@ auto_switch = false
 name = "nord"
 
 [theme.custom]
-# Surfaces, straight off the theme's own bg0-bg4 ramp. panel_bg matches the
-# terminal background so herdr does not paint its own ground behind the blur.
-panel_bg    = "#14171d"   # bg0, the terminal background
-sidebar_bg  = "#14171d"
-# bg0 again, and it has to be: bg0 is the darkest value the palette defines, so
-# there is nothing to sit below the ground.
-surface_dim = "#14171d"
-surface0    = "#1f1f26"   # bg1 — the selected row
-surface1    = "#22262D"   # bg2 — raised fills
-overlay0    = "#393B44"   # bg3 — borders, menus, and the terminal's selection
-overlay1    = "#4b4e57"   # bg4
+# Surfaces. panel_bg matches the terminal background so herdr does not paint
+# its own ground behind the blur; bg is the darkest value the palette defines.
+panel_bg      = "#13151a"   # bg
+sidebar_bg    = "#13151a"
+surface_dim   = "#13151a"
+surface0      = "#1f2229"   # bg_soft — the selected row
+surface1      = "#272b33"   # surface — raised fills
+overlay0      = "#2f343d"   # selection — borders, menus
+overlay1      = "#383d47"   # border
 
-active_row_bg = "#1f1f26"
-selection_bg  = "#22262D"
+active_row_bg = "#1f2229"
+selection_bg  = "#272b33"
 
-# subtext0 is ANSI slot 8, which holds 7.39:1 on this background — the value
-# ghostty/config carries precisely because it paints dim text everywhere.
-text     = "#C5C9C7"
-subtext0 = "#A4A7A4"
+text          = "#dfe2e7"   # fg
+subtext0      = "#aab0b8"   # grey_light
 
-# Hues, by ANSI slot. The bright half where herdr uses a colour to carry meaning
-# on a dark panel, the normal half where it is decoration.
-accent = "#7fb4ca"   # slot 12
-blue   = "#8ba4b0"   # slot 4
-mauve  = "#938aa9"   # slot 13
-green  = "#87a987"   # slot 10
-yellow = "#e6c384"   # slot 11
-red    = "#e46876"   # slot 9
-teal   = "#7aa89f"   # slot 14
-peach  = "#c4b28a"   # slot 3
+# Hues, by role. accent is ANSI slot 12, the rest the normal half.
+accent        = "#8c9cb8"   # info
+blue          = "#7ea6c9"   # func
+mauve         = "#bfa7d3"   # type
+teal          = "#86b3b3"   # teal
+green         = "#9db58f"   # string
+yellow        = "#d6a55e"   # warning
+red           = "#df8a8a"   # error
+peach         = "#c2946e"   # signal
 
 [experimental]
 allow_nested = false

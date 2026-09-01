@@ -43,7 +43,6 @@ opt.winborder = "rounded"
 -- ─── plugins ────────────────────────────────────────────────────────────────
 
 vim.pack.add({
-  "https://github.com/sainnhe/everforest",
   { src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
   "https://github.com/neovim/nvim-lspconfig",
   { src = "https://github.com/Saghen/blink.cmp", version = vim.version.range("1") },
@@ -53,10 +52,8 @@ vim.pack.add({
   "https://github.com/b0o/SchemaStore.nvim",
 })
 
-vim.g.everforest_background = "hard"
-vim.g.everforest_better_performance = 1
 vim.o.background = "dark"
-vim.cmd.colorscheme("everforest")
+vim.cmd.colorscheme("mate")
 
 local parsers = {
   "typescript", "tsx", "javascript", "jsdoc", "go", "gomod", "gosum", "gowork", "rust",
@@ -119,7 +116,7 @@ vim.api.nvim_create_autocmd("BufWritePost", {
   callback = function() require("lint").try_lint() end,
 })
 
-require("fzf-lua").setup({ "hide" })
+require("fzf-lua").setup({ "hide", fzf_colors = true })
 require("gitsigns").setup({ current_line_blame_opts = { delay = 500 } })
 
 -- ─── keymaps ────────────────────────────────────────────────────────────────

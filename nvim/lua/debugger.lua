@@ -37,7 +37,7 @@ dap.listeners.before.event_exited["dapui"] = function() dapui.close() end
 vim.fn.sign_define("DapBreakpoint", { text = "B", texthl = "DiagnosticError" })
 vim.fn.sign_define("DapBreakpointCondition", { text = "C", texthl = "DiagnosticWarn" })
 vim.fn.sign_define("DapLogPoint", { text = "L", texthl = "DiagnosticInfo" })
-vim.fn.sign_define("DapStopped", { text = ">", texthl = "DiagnosticOk", linehl = "Visual" })
+vim.fn.sign_define("DapStopped", { text = ">", texthl = "DiagnosticOk", linehl = "DapStoppedLine" })
 
 require("dap-go").setup()
 

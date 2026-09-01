@@ -1,17 +1,17 @@
 # fish_git_prompt shows only the branch until told otherwise.
-# ANSI names, not hex: ghostty/config's sixteen slots are the single source.
-# State glyphs follow the starship convention (! modified, + staged, ? untracked)
-# as nf-fa-* Nerd Font icons; they need a patched face.
+# ANSI names, not hex: alacritty/mate.toml's sixteen slots are the single source.
+# Plain ASCII state markers: no patched font needed, so ssh and Terminal.app
+# show the same prompt.
 set -g __fish_git_prompt_showdirtystate yes
 set -g __fish_git_prompt_showuntrackedfiles yes
 set -g __fish_git_prompt_showstashstate yes
 set -g __fish_git_prompt_showupstream informative
 set -g __fish_git_prompt_char_stateseparator ' '
-set -g __fish_git_prompt_char_dirtystate \uf12a
-set -g __fish_git_prompt_char_stagedstate \uf067
-set -g __fish_git_prompt_char_untrackedfiles \uf128
-set -g __fish_git_prompt_char_stashstate \uf01c
-set -g __fish_git_prompt_char_invalidstate \uf071
+set -g __fish_git_prompt_char_dirtystate '*'
+set -g __fish_git_prompt_char_stagedstate '+'
+set -g __fish_git_prompt_char_untrackedfiles '?'
+set -g __fish_git_prompt_char_stashstate '$'
+set -g __fish_git_prompt_char_invalidstate '!'
 set -g __fish_git_prompt_char_upstream_ahead ⇡
 set -g __fish_git_prompt_char_upstream_behind ⇣
 set -g __fish_git_prompt_color_branch green

@@ -1,13 +1,14 @@
 vim.pack.add({
   "https://github.com/nvim-lualine/lualine.nvim",
-  "https://github.com/nvim-tree/nvim-web-devicons",
   "https://github.com/folke/which-key.nvim",
   "https://github.com/kylechui/nvim-surround",
 })
 
 require("lualine").setup({
   options = {
-    theme = "everforest",
+    theme = "mate",
+    -- No nvim-web-devicons: the terminal font is not a Nerd Font build.
+    icons_enabled = false,
     section_separators = "",
     component_separators = "|",
     globalstatus = true,
@@ -23,7 +24,22 @@ require("lualine").setup({
   extensions = { "neo-tree", "nvim-dap-ui", "quickfix" },
 })
 
-require("which-key").setup({ preset = "helix", icons = { mappings = false, separator = "->" } })
+require("which-key").setup({
+  preset = "helix",
+  icons = {
+    mappings = false,
+    separator = "->",
+    -- Plain names: which-key's defaults are Nerd Font glyphs.
+    keys = {
+      Up = "<Up> ", Down = "<Down> ", Left = "<Left> ", Right = "<Right> ",
+      C = "C-", M = "M-", D = "D-", S = "S-",
+      CR = "<CR> ", Esc = "<Esc> ", NL = "<NL> ", BS = "<BS> ", Space = "<Space> ", Tab = "<Tab> ",
+      ScrollWheelDown = "<ScrollWheelDown> ", ScrollWheelUp = "<ScrollWheelUp> ",
+      F1 = "F1", F2 = "F2", F3 = "F3", F4 = "F4", F5 = "F5", F6 = "F6",
+      F7 = "F7", F8 = "F8", F9 = "F9", F10 = "F10", F11 = "F11", F12 = "F12",
+    },
+  },
+})
 require("which-key").add({
   { "<leader>c", group = "code" },
   { "<leader>d", group = "debug" },
@@ -44,6 +60,7 @@ local function tree()
     close_if_last_window = true,
     window = { width = 32 },
     default_component_configs = {
+      icon = { folder_closed = "+", folder_open = "-", folder_empty = " ", default = " " },
       git_status = {
         symbols = {
           added = "+", modified = "~", deleted = "-", renamed = ">",

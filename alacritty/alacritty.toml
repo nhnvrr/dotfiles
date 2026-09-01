@@ -1,0 +1,52 @@
+# Colours live in mate.toml, generated from nvim/lua/mate/palette.lua.
+
+[general]
+import = ["~/.config/alacritty/mate.toml"]
+live_config_reload = true
+
+[window]
+# Maximized, not Fullscreen: native fullscreen moves the window to its own
+# Space, where hammerspoon/init.lua can no longer tile it.
+startup_mode = "Maximized"
+# Buttonless: "Transparent" keeps the traffic lights and paints the first
+# terminal row under them. hammerspoon/init.lua places the window anyway.
+decorations = "Buttonless"
+padding = { x = 1, y = 1 }
+dynamic_padding = true
+# Both, so option+b / option+f word-jump in fish and alt-mappings reach nvim.
+option_as_alt = "Both"
+dynamic_title = true
+
+[font]
+# Family name as CoreText registers it, not the file name. Alacritty has no
+# fallback list, so nothing in the prompt may need a glyph outside this face.
+normal = { family = "Ioskeley Mono Term", style = "Regular" }
+bold = { family = "Ioskeley Mono Term", style = "Bold" }
+italic = { family = "Ioskeley Mono Term", style = "Italic" }
+bold_italic = { family = "Ioskeley Mono Term", style = "Bold Italic" }
+size = 14
+offset = { x = 0, y = 1 }
+
+[cursor]
+style = { shape = "Beam", blinking = "On" }
+vi_mode_style = { shape = "Block", blinking = "Off" }
+unfocused_hollow = true
+
+[selection]
+save_to_clipboard = true
+
+[mouse]
+hide_when_typing = true
+
+[bell]
+duration = 0
+
+[terminal]
+osc52 = "CopyPaste"
+
+[keyboard]
+bindings = [
+  # Send ctrl-l so the shell (or tmux, or nvim) clears — not Alacritty's
+  # default ClearHistory, which wipes the scrollback.
+  { key = "K", mods = "Command", chars = "\u000c" },
+]
