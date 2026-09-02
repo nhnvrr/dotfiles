@@ -166,11 +166,14 @@ request_path = "sounds/request.mp3"
 # mate, restated as hex: herdr's theme tokens accept no ANSI reference, so
 # this is the one place outside nvim/lua/mate/palette.lua that carries the
 # values. Regenerate with `nvim -l nvim/lua/mate/build.lua` and paste.
+# Two deliberate divergences survive a regenerate: `accent` and `overlay1`
+# below are tuned for the tab bar, not copied from the palette — see their
+# own comments before pasting over them.
 [theme]
 auto_switch = false
 # The base only fills tokens [theme.custom] leaves alone; every token herdr
 # exposes is overridden below, so the name is a floor, not the look.
-name = "nord"
+name = "terminal"
 
 [theme.custom]
 # Surfaces. panel_bg matches the terminal background so herdr does not paint
@@ -181,7 +184,7 @@ surface_dim   = "#13151a"
 surface0      = "#1f2229"   # bg_soft — the selected row
 surface1      = "#272b33"   # surface — raised fills
 overlay0      = "#2f343d"   # selection — borders, menus
-overlay1      = "#383d47"   # border
+overlay1      = "#545b66"   # border, lifted — inactive tab numbers read at ~3.5:1
 
 active_row_bg = "#1f2229"
 selection_bg  = "#272b33"
@@ -189,8 +192,11 @@ selection_bg  = "#272b33"
 text          = "#dfe2e7"   # fg
 subtext0      = "#aab0b8"   # grey_light
 
-# Hues, by role. accent is ANSI slot 12, the rest the normal half.
-accent        = "#8c9cb8"   # info
+# Hues, by role, the normal half — except accent: herdr paints the active
+# tab pill with it (fg is always panel_bg, not configurable), and the slot-12
+# slate read washed-out there. `signal` orange on purpose, same value as
+# peach below.
+accent        = "#c2946e"   # signal — the active tab pill
 blue          = "#7ea6c9"   # func
 mauve         = "#bfa7d3"   # type
 teal          = "#86b3b3"   # teal
