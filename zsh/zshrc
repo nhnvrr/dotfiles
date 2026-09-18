@@ -1,0 +1,128 @@
+# Interactive zsh. Environment and $PATH live in zshenv.
+#
+# Load order matters twice in this file, and both are marked below:
+#   - mise activates LAST so its prepend beats path_helper and ~/.bun/bin.
+#   - zsh-syntax-highlighting sources LAST of all; it wraps every widget that
+#     exists at the time, so anything binding keys after it is not highlighted.
+
+stty -ixon 2>/dev/null
+
+# --- history ----------------------------------------------------------------
+# fish gave all of this for free.
+HISTFILE="$HOME/.local/state/zsh/history"
+HISTSIZE=50000
+SAVEHIST=50000
+setopt HIST_IGNORE_ALL_DUPS HIST_IGNORE_SPACE HIST_REDUCE_BLANKS
+setopt SHARE_HISTORY INC_APPEND_HISTORY EXTENDED_HISTORY
+
+setopt AUTO_CD INTERACTIVE_COMMENTS NO_BEEP
+setopt GLOB_DOTS NO_CASE_GLOB
+
+# --- completion -------------------------------------------------------------
+fpath=(/opt/homebrew/share/zsh/site-functions "$HOME/.config/zsh/functions" $fpath)
+autoload -Uz compinit
+compinit -d "$HOME/.cache/zsh/zcompdump"
+
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path "$HOME/.cache/zsh/zcompcache"
+
+# aws ships a bash completer and nothing else. bashcompinit is the whole port
+# of the 123-line hand-written fish completion that used to live here.
+autoload -Uz bashcompinit && bashcompinit
+command -v aws_completer >/dev/null && complete -C aws_completer aws
+
+autoload -Uz "$HOME/.config/zsh/functions"/*(:t) 2>/dev/null
+
+# --- vi mode ----------------------------------------------------------------
+bindkey -v
+KEYTIMEOUT=1
+
+# Block in normal, blinking bar in insert. The cursor is the only vi-mode
+# indicator: the prompt draws git state, not the keymap.
+function _cursor_shape {
+  case $KEYMAP in
+    vicmd) printf '\e[2 q' ;;
+    *)     printf '\e[5 q' ;;
+  esac
+}
+function zle-keymap-select { _cursor_shape }
+function zle-line-init { _cursor_shape }
+zle -N zle-keymap-select
+zle -N zle-line-init
+precmd_functions+=(_cursor_shape)
+
+# vi mode loses these, and they are worth more than the modality.
+bindkey '^A' beginning-of-line
+bindkey '^E' end-of-line
+bindkey '^R' history-incremental-search-backward
+bindkey -M viins '^?' backward-delete-char
+bindkey -M viins '^W' backward-kill-word
+
+# --- prompt -----------------------------------------------------------------
+source "$HOME/.config/zsh/prompt.zsh"
+
+# --- aws profile ------------------------------------------------------------
+# ~/.aws/config has no [default] profile on purpose, so AWS_PROFILE must be
+# explicit: work under ~/work, personal everywhere else.
+function _aws_profile {
+  case "$PWD" in
+    "$HOME"/work|"$HOME"/work/*) export AWS_PROFILE=work ;;
+    *)                           export AWS_PROFILE=personal ;;
+  esac
+}
+autoload -Uz add-zsh-hook
+add-zsh-hook chpwd _aws_profile
+_aws_profile
+
+# --- aliases ----------------------------------------------------------------
+alias gc='git commit -m'
+alias gco='git checkout'
+alias ga='git add'
+alias gb='git branch'
+alias gd='git diff'
+
+alias code='code --new-window'
+
+# BSD ls, not eza. -G is the colour flag; LSCOLORS is its palette, eleven
+# foreground/background pairs in directory, symlink, socket, ... order.
+export CLICOLOR=1
+export LSCOLORS=ExGxbxdxCxegedabagaced
+alias ll='ls -lhG'
+alias la='ls -lhAG'
+
+# --- fzf --------------------------------------------------------------------
+export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
+# ANSI names, not hex: the active theme's sixteen ANSI slots are the single source.
+export FZF_DEFAULT_OPTS='
+  --height 40% --layout=reverse --border=rounded
+  --bind="ctrl-/:toggle-preview,ctrl-y:execute-silent(echo {} | pbcopy)+abort"
+  --color=bg+:bright-black,fg:white,fg+:bright-white,hl:bright-cyan,hl+:cyan,info:bright-black,prompt:blue,pointer:bright-red,marker:bright-green,border:bright-black,header:blue,spinner:cyan'
+export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always --line-range :200 {}'"
+export FZF_ALT_C_OPTS="--preview 'ls -lhAG {} | head -100'"
+export FZF_CTRL_R_OPTS='
+  --height=60%
+  --preview="echo {} | bat --color=always --style=plain --language=sh"
+  --preview-window=down:5:wrap
+  --header="ctrl-y copy · ctrl-/ preview"'
+
+source <(fzf --zsh)
+
+# --- mise -------------------------------------------------------------------
+# LAST but one: Homebrew's vendor_conf.d did this for fish, nothing does it for
+# zsh. It prepends, so it has to run after path_helper and after ~/.bun/bin or
+# the pinned runtime is shadowed.
+eval "$(mise activate zsh)"
+
+# --- zsh extras -------------------------------------------------------------
+# What fish had built in. Two brew formulas, no plugin manager.
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
+source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh 2>/dev/null
+bindkey '^ ' autosuggest-accept
+
+# Strictly last: it wraps the widgets that exist when it loads.
+source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh 2>/dev/null

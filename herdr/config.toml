@@ -9,7 +9,7 @@ onboarding = false
 version_check = false
 
 [terminal]
-default_shell = "/opt/homebrew/bin/fish"
+default_shell = "/bin/zsh"
 shell_mode = "login"
 new_cwd = "follow"
 
@@ -23,6 +23,16 @@ switch_workspace = "prefix+shift+1..9"
 next_agent = "prefix+a"
 previous_agent = "prefix+shift+a"
 focus_agent = "prefix+alt+1..9"
+
+# Navigate mode keys are local to the overlay and reject `prefix+`. The overlay
+# is laid out with the workspace list running vertically and the panes
+# horizontally, so the axes are split to match: j/k walk the workspaces, h/l the
+# panes. navigate_pane_down/up have to be cleared explicitly or they keep herdr's
+# default j/k and collide with the workspace pair; `tab` still cycles panes.
+navigate_workspace_down = "j"
+navigate_workspace_up = "k"
+navigate_pane_down = ""
+navigate_pane_up = ""
 
 goto = "prefix+s"
 settings = "prefix+g"
@@ -163,47 +173,67 @@ enabled = true
 done_path = "sounds/done.mp3"
 request_path = "sounds/request.mp3"
 
-# mate, restated as hex: herdr's theme tokens accept no ANSI reference, so
-# this is the one place outside nvim/lua/mate/palette.lua that carries the
-# values. Regenerate with `nvim -l nvim/lua/mate/build.lua` and paste.
-# Two deliberate divergences survive a regenerate: `accent` and `overlay1`
-# below are tuned for the tab bar, not copied from the palette — see their
-# own comments before pasting over them.
+# Mate as hex: herdr's theme tokens take no ANSI reference. accent is the
+# green slot -- herdr paints the active tab pill with it and forces the pill's
+# text to panel_bg, so that pair is what has to measure: 6.83:1 dark,
+# 4.98:1 light.
 [theme]
-auto_switch = false
 # The base only fills tokens [theme.custom] leaves alone; every token herdr
 # exposes is overridden below, so the name is a floor, not the look.
 name = "terminal"
+# Off: it waits for DEC mode 2031, which Alacritty 0.17 does not send. `mate`
+# flattens one block below into [theme.custom] instead.
+auto_switch = false
 
-[theme.custom]
-# Surfaces. panel_bg matches the terminal background so herdr does not paint
-# its own ground behind the blur; bg is the darkest value the palette defines.
-panel_bg      = "#13151a"   # bg
-sidebar_bg    = "#13151a"
-surface_dim   = "#13151a"
-surface0      = "#1f2229"   # bg_soft — the selected row
-surface1      = "#272b33"   # surface — raised fills
-overlay0      = "#2f343d"   # selection — borders, menus
-overlay1      = "#545b66"   # border, lifted — inactive tab numbers read at ~3.5:1
+# The selected row is active_row_bg/selection_bg, not overlay0/1. No border
+# token exists, so the selection can only be a fill.
+[theme.custom.dark]
+panel_bg = "#1f1f1f"
+sidebar_bg = "#1f1f1f"
+surface_dim = "#1f1f1f"
+surface0 = "#262626"
+surface1 = "#2d2d2d"
+overlay0 = "#a6a6a6"
+overlay1 = "#b0b4ba"
 
-active_row_bg = "#1f2229"
-selection_bg  = "#272b33"
+active_row_bg = "#303540"
+selection_bg = "#383f4b"
 
-text          = "#dfe2e7"   # fg
-subtext0      = "#aab0b8"   # grey_light
+text = "#c8ccd2"
+subtext0 = "#bcc0c6"
 
-# Hues, by role, the normal half — except accent: herdr paints the active
-# tab pill with it (fg is always panel_bg, not configurable), and the slot-12
-# slate read washed-out there. `signal` orange on purpose, same value as
-# peach below.
-accent        = "#c2946e"   # signal — the active tab pill
-blue          = "#7ea6c9"   # func
-mauve         = "#bfa7d3"   # type
-teal          = "#86b3b3"   # teal
-green         = "#9db58f"   # string
-yellow        = "#d6a55e"   # warning
-red           = "#df8a8a"   # error
-peach         = "#c2946e"   # signal
+accent = "#86b45e"
+blue = "#5b9bd5"
+mauve = "#b578d9"
+teal = "#4fb3ab"
+green = "#86b45e"
+yellow = "#d9a03f"
+red = "#e05f5f"
+peach = "#f5c268"
+
+[theme.custom.light]
+panel_bg = "#f2f1ee"
+sidebar_bg = "#f2f1ee"
+surface_dim = "#f2f1ee"
+surface0 = "#e2e2e2"
+surface1 = "#d7d7d7"
+overlay0 = "#6b6b6b"
+overlay1 = "#5c5c5c"
+
+active_row_bg = "#c9d3e1"
+selection_bg = "#b8c5d6"
+
+text = "#36393d"
+subtext0 = "#43464a"
+
+accent = "#467322"
+blue = "#08649a"
+mauve = "#8249a5"
+teal = "#06756e"
+green = "#467322"
+yellow = "#906300"
+red = "#b4393e"
+peach = "#705000"
 
 [experimental]
 allow_nested = false

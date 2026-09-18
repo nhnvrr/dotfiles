@@ -1,0 +1,24 @@
+# One-off question to Claude, read-only, no session.
+# autoloaded: the file name is the function name.
+
+if (( $# == 0 )); then
+  print -u2 'ask: <question>'
+  return 2
+fi
+
+# --disallowedTools is what makes this read-only; --allowedTools only
+# auto-approves. --verbose is required or stream-json prints nothing.
+claude -p --safe-mode --no-session-persistence --strict-mcp-config \
+  --disable-slash-commands --model sonnet --effort low \
+  --output-format stream-json --include-partial-messages --verbose \
+  --allowedTools WebSearch WebFetch \
+  --disallowedTools Bash Write Edit NotebookEdit Read Glob Grep Task \
+  --system-prompt 'Answer directly and concisely: a few sentences, no preamble, no follow-up offers. Search the web when the answer depends on current or recent information, and cite the sources when you do. Reply in the language of the question.' \
+  -- "$*" \
+  | jq --unbuffered -j 'select(.type == "stream_event" and .event.delta.type == "text_delta") | .event.delta.text'
+
+# $pipestatus[1], not $?: jq exits 0 after printing nothing when claude dies.
+local rc=$pipestatus[1]
+print
+(( rc != 0 )) && print -u2 "ask: claude exited $rc"
+return $rc

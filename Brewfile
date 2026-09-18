@@ -1,20 +1,16 @@
-tap "getsentry/tools"
-
-brew "fish"
+brew "zsh-autosuggestions"
+brew "zsh-syntax-highlighting"
 
 brew "herdr"
-# Not a second copy of the line above. herdr supervises agents over a socket API
-# and dies with the terminal that started it; tmux is what holds a session
-# across an ssh disconnect and the only one of the two that exists on a remote
-# host. Read as alternatives they look redundant, and `brew bundle cleanup`
-# would take this one out.
+# Not a second copy of the line below. herdr supervises agents over a socket API
+# and dies with the terminal that started it; tmux is what holds a session across
+# an ssh disconnect and the only one of the two that exists on a remote host.
+# Read as alternatives they look redundant, and `brew bundle cleanup` would take
+# this one out.
 brew "tmux"
-# tmux's plugin manager, and the only reason it is a package instead of a clone
-# in install.sh. It is what pulls resurrect and continuum, which are what make a
-# session — and its scrollback — survive a reboot rather than just a disconnect.
-brew "tpm"
 
 brew "neovim"
+
 brew "vtsls"
 brew "gopls"
 brew "rust-analyzer"
@@ -41,52 +37,36 @@ brew "duti"
 brew "git"
 brew "gh"
 brew "git-delta"
-brew "lazygit"
 
 brew "libpq"
+brew "pgcli"
 brew "redis"
-# Nothing Homebrew can see depends on this, which makes it look removable. It is
-# not: it was installed for the reconciliation work in vesto, and ODBC drivers
-# dlopen libodbc.2.dylib at runtime, where `brew uses` cannot follow.
 brew "unixodbc"
 brew "mise"
 
-# Both for ~/work/vesto-react-native, and neither shows up in shell history:
-# `pod install` runs when the iOS deps change, watchman is started by Metro
-# rather than by hand. Absence from history is not evidence here.
 brew "cocoapods"
 brew "watchman"
-
-brew "getsentry/tools/sentry"
-# The Go debugger. Two Go repos live under ~/Develop, both occasional — this is
-# the one line here that would survive being cut, kept because it is 20MB and
-# reinstalling it mid-debug is the wrong moment to find out.
 brew "delve"
 
 brew "yt-dlp"
 brew "ffmpeg"
 brew "btop"
+brew "fastfetch"
 
 # The terminal. Its cask is `disable!`d since 2026-09-01 (fails the Gatekeeper
-# check), so `brew bundle` refuses it; the app is installed from the upstream
-# DMG by hand — see README "Not managed". Kept here, commented, so the reason
-# is next to the place a reader will look for the line.
+# check), so `brew bundle` refuses it and an uncommented line here would abort
+# the whole run; the app is installed from the upstream DMG by hand — see the
+# README, "Not managed". Kept here, commented, so the reason sits where a reader
+# will look for the line.
 # cask "alacritty"
 
 cask "visual-studio-code"
+cask "zed"
+cask "datagrip"
 cask "maccy"
 cask "hammerspoon"
-# The browser and the default handler, and the only one here. The Claude in
-# Chrome extension ships solely through the Chrome Web Store and has no
-# equivalent elsewhere, which is what settles it against any other Chromium
-# build.
 cask "google-chrome"
 cask "docker-desktop"
-cask "tableplus"
-cask "redis-insight"
-cask "bruno"
-cask "proxyman"
-cask "figma"
 
 cask "aws-vpn-client"
 
@@ -100,7 +80,4 @@ cask "cap"
 cask "slack"
 cask "discord"
 cask "telegram"
-cask "granola"
-cask "notion"
-
 cask "ledger-wallet"

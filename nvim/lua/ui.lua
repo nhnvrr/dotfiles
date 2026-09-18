@@ -4,9 +4,16 @@ vim.pack.add({
   "https://github.com/kylechui/nvim-surround",
 })
 
+-- Ships with luna.nvim, at lua/lualine/themes/luna.lua, and reads luna.palette
+-- directly -- on_colors never reaches it. Take the bg the colorscheme applied.
+local lualine_theme = require("lualine.themes.luna")
+local normal_bg = string.format("#%06x", vim.api.nvim_get_hl(0, { name = "Normal" }).bg)
+for _, mode in pairs(lualine_theme) do
+  mode.c.bg = normal_bg
+end
 require("lualine").setup({
   options = {
-    theme = "mate",
+    theme = lualine_theme,
     -- No nvim-web-devicons: the terminal font is not a Nerd Font build.
     icons_enabled = false,
     section_separators = "",

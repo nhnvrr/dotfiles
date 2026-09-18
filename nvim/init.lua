@@ -43,6 +43,9 @@ opt.winborder = "rounded"
 -- ─── plugins ────────────────────────────────────────────────────────────────
 
 vim.pack.add({
+  -- First in the list so the colorscheme is on disk before the line below asks
+  -- for it: vim.pack.add installs synchronously, in order.
+  "https://github.com/wtfox/luna.nvim",
   { src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
   "https://github.com/neovim/nvim-lspconfig",
   { src = "https://github.com/Saghen/blink.cmp", version = vim.version.range("1") },
@@ -52,8 +55,11 @@ vim.pack.add({
   "https://github.com/b0o/SchemaStore.nvim",
 })
 
-vim.o.background = "dark"
-vim.cmd.colorscheme("mate")
+-- Light and dark both live in mate/, which reads the appearance Hammerspoon
+-- last wrote and hands luna the matching palette.
+local mate = require("mate")
+mate.apply(mate.mode())
+mate.watch()
 
 local parsers = {
   "typescript", "tsx", "javascript", "jsdoc", "go", "gomod", "gosum", "gowork", "rust",

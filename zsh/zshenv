@@ -1,0 +1,43 @@
+# Read for every zsh, interactive or not. Only environment and $PATH go here.
+#
+# The $PATH order set below does NOT survive: macOS ships /etc/zprofile, which
+# runs path_helper after this file and hoists /usr/bin and /bin to the front.
+# That is why mise is activated at the END of .zshrc instead of here -- its
+# prepend has to be the last word.
+
+export HOMEBREW_PREFIX=/opt/homebrew
+export HOMEBREW_CELLAR=/opt/homebrew/Cellar
+export HOMEBREW_REPOSITORY=/opt/homebrew
+
+export INFOPATH="/opt/homebrew/share/info${INFOPATH:+:$INFOPATH}"
+
+export LANG=en_US.UTF-8
+
+# --wait, or git reads the still-empty buffer and aborts the commit.
+export EDITOR="code --wait"
+export VISUAL="code --wait"
+
+export GOPATH="$HOME/Develop/go"
+export GOPRIVATE=github.com/nhnvrr
+export PNPM_HOME="$HOME/Library/pnpm"
+
+export AWS_PAGER=""
+export AWS_RETRY_MODE=standard
+export AWS_MAX_ATTEMPTS=3
+
+export REDISCLI_HISTFILE="$HOME/.local/state/redis/history"
+export BAT_THEME=ansi
+
+# -U dedups the array in place, which is what fish_add_path did for free.
+typeset -U path PATH
+path=(
+  "$GOPATH/bin"
+  /opt/homebrew/{bin,sbin}
+  /opt/homebrew/opt/libpq/bin
+  "$HOME/.bun/bin"
+  "$HOME/.local/bin"
+  "$PNPM_HOME/bin"
+  "$HOME/.docker/bin"
+  /usr/local/bin
+  $path
+)
