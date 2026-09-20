@@ -59,6 +59,13 @@ bind({ "ctrl", "alt" }, "c", motion.centre)
 bind({ "cmd", "alt" }, "z", function() motion.half("h") end)
 bind({ "cmd", "alt" }, "x", function() motion.half("l") end)
 
+-- Centre on the same modifier as the halves, so the three placements a window
+-- actually gets sit together. ctrl+alt+c stays bound to the same function.
+--
+-- This takes cmd+alt+c globally, and Finder spends it on "Copy as Pathname" —
+-- the Option variant of cmd+c. A hotkey here wins, so that stops working.
+bind({ "cmd", "alt" }, "c", motion.centre)
+
 bind({ "ctrl", "alt" }, ",", function() screen.moveToScreen(-1) end)
 bind({ "ctrl", "alt" }, ".", function() screen.moveToScreen(1) end)
 

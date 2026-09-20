@@ -38,6 +38,12 @@ goto = "prefix+s"
 settings = "prefix+g"
 toggle_sidebar = "prefix+b"
 
+# tmux's rename-window key. prompt_new_tab_name = false below means tabs are
+# born unnamed, so this is the only way to label one — herdr's default
+# prefix+shift+t is a two-modifier chord for something done several times a
+# session.
+rename_tab = "prefix+comma"
+
 [ui]
 prompt_new_tab_name = false
 copy_on_select = true
@@ -50,10 +56,6 @@ agent_panel_sort = "priority"
 # zsh/zshrc used to send, since this reaches every pane, not just the ones that
 # sourced that file.
 status_indicators = "symbols"
-
-# Kanso Ink's bright blue, the same accent the agent rows use below. Left alone
-# herdr picks a generic cyan that matches nothing else on screen.
-accent = "#7fb4ca"
 
 # 36 truncates a worktree branch at `chore/sc-109…` — and the ticket number is
 # the only thing telling two worktrees of the same repo apart. The width still
@@ -93,45 +95,9 @@ rows = [
   # slack. Between the symbol on row 1 and the word here, the state reads
   # without depending on hue at all.
   #
-  # `agent` carries an explicit fg and no dim. Left to the theme it inherits
-  # subtext0, and herdr already renders the second row at reduced intensity — the
-  # two stack and the agent name washes out to near-invisible against #32302f.
-  # The hex is ANSI slot 12, the same accent the sidebar uses elsewhere.
-  #
-  # No dim on state_text either, for the same reason: herdr colours it by state,
-  # and dimming a signal that exists to be noticed defeats it.
-  [{ token = "agent", fg = "#a4c6bf", bold = false }, { token = "state_text" }],
-]
-
-# Per-agent colour, and nothing else. Row 1 is copied verbatim from the block
-# above — herdr takes complete row overrides, so it has to be repeated, and if
-# it ever drifts the agents panel stops lining up with the spaces panel.
-#
-# The colour answers "whose pane is this" at a glance, which is the question a
-# sidebar with several agents actually gets asked.
-#
-# #c2946e is mate's signal, indexed colour 16 in alacritty/mate.toml — the one
-# warm hue far enough from both the blue above and the yellow state_text uses
-# to tell the two agents apart at a glance.
-[ui.sidebar.agents.rows_by_agent]
-claude = [
-  [
-    { token = "state_icon" },
-    { token = "workspace", bold = false },
-    { token = "tab", bold = false },
-  ],
-  [{ token = "agent", fg = "#c2946e", bold = false }, { token = "state_text" }],
-]
-
-codex = [
-  [
-    { token = "state_icon" },
-    { token = "workspace", bold = false },
-    { token = "tab", bold = false },
-  ],
-  # Plain text, the maximum separation from the peach above without reaching
-  # for a hue that means something else.
-  [{ token = "agent", fg = "#C5C9C7", bold = false }, { token = "state_text" }],
+  # No fg and no dim: the theme colours both tokens. A hex here would be a dark
+  # value baked into a config that now renders on a light background too.
+  [{ token = "agent", bold = false }, { token = "state_text" }],
 ]
 
 [ui.sidebar.spaces]
@@ -173,67 +139,46 @@ enabled = true
 done_path = "sounds/done.mp3"
 request_path = "sounds/request.mp3"
 
-# Mate as hex: herdr's theme tokens take no ANSI reference. accent is the
-# green slot -- herdr paints the active tab pill with it and forces the pill's
-# text to panel_bg, so that pair is what has to measure: 6.83:1 dark,
-# 4.98:1 light.
+# `terminal` fills every token from the sixteen ANSI slots Alacritty is serving,
+# so the hues, the ground and the text all follow the light/dark switch for
+# free. Six tokens are overridden below and nothing else is.
 [theme]
-# The base only fills tokens [theme.custom] leaves alone; every token herdr
-# exposes is overridden below, so the name is a floor, not the look.
 name = "terminal"
 # Off: it waits for DEC mode 2031, which Alacritty 0.17 does not send. `mate`
-# flattens one block below into [theme.custom] instead.
+# flattens the matching block below into [theme.custom] instead.
 auto_switch = false
 
-# The selected row is active_row_bg/selection_bg, not overlay0/1. No border
-# token exists, so the selection can only be a fill.
+# ANSI has no concept of a surface. Asked for one anyway, `terminal` reaches for
+# slot 8 — and it hands the same slot to the dimmed second row, so the branch
+# name was drawn in exactly the colour it sat on: #6b6863 on #6b6863 in light,
+# #6b6b6b on #6b6b6b in dark. 1.00:1, invisible in both appearances, whatever
+# the palette underneath.
+#
+# So these three tokens per mode, and no others. active_row_bg and selection_bg
+# are the surfaces ANSI cannot express; overlay0 is the dim text that has to
+# stay legible on top of them. Every hue still comes from the terminal.
+#
+# Measured, light on #f7f9fb / dark on #181818:
+#   row against the panel   1.31  /  1.41   enough to read as a block
+#   text on the row         9.73  /  8.85
+#   branch on the row       5.08  /  4.82   was 1.00
+#   branch on selection     4.61  /  3.80
+#
+# The fill is tinted rather than a lighter grey: herdr offers no border token,
+# so hue is the only second dimension available to say "this row is selected"
+# instead of "this row is slightly brighter". Blue and not green, which
+# state_text already spends on idle.
 [theme.custom.dark]
-panel_bg = "#1f1f1f"
-sidebar_bg = "#1f1f1f"
-surface_dim = "#1f1f1f"
-surface0 = "#262626"
-surface1 = "#2d2d2d"
-overlay0 = "#a6a6a6"
-overlay1 = "#b0b4ba"
-
-active_row_bg = "#303540"
-selection_bg = "#383f4b"
-
-text = "#c8ccd2"
-subtext0 = "#bcc0c6"
-
-accent = "#86b45e"
-blue = "#5b9bd5"
-mauve = "#b578d9"
-teal = "#4fb3ab"
-green = "#86b45e"
-yellow = "#d9a03f"
-red = "#e05f5f"
-peach = "#f5c268"
+panel_bg = "#181818"
+active_row_bg = "#24344a"
+selection_bg = "#2f445f"
+overlay0 = "#a0a0a0"
 
 [theme.custom.light]
-panel_bg = "#f2f1ee"
-sidebar_bg = "#f2f1ee"
-surface_dim = "#f2f1ee"
-surface0 = "#e2e2e2"
-surface1 = "#d7d7d7"
-overlay0 = "#6b6b6b"
-overlay1 = "#5c5c5c"
-
-active_row_bg = "#c9d3e1"
-selection_bg = "#b8c5d6"
-
-text = "#36393d"
-subtext0 = "#43464a"
-
-accent = "#467322"
-blue = "#08649a"
-mauve = "#8249a5"
-teal = "#06756e"
-green = "#467322"
-yellow = "#906300"
-red = "#b4393e"
-peach = "#705000"
+panel_bg = "#f7f9fb"
+active_row_bg = "#d6dee9"
+selection_bg = "#cbd4e2"
+overlay0 = "#5c5a55"
 
 [experimental]
 allow_nested = false

@@ -1,5 +1,6 @@
---- Keeps Alacritty on the same side of light/dark as macOS. Zed and herdr are
---- handled by `mate auto` itself.
+--- Keeps Alacritty on the same side of light/dark as macOS. herdr reads the
+--- terminal's ANSI slots and nvim watches the state file, so both follow from
+--- the one rewrite `mate auto` does here.
 
 local M = {}
 

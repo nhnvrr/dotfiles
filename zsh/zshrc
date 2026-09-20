@@ -86,6 +86,15 @@ alias gd='git diff'
 
 alias code='code --new-window'
 
+# `?? cual es la capital de Francia?` -- noglob is not optional on either line.
+# A question is full of the characters zsh globs: without it the trailing `?`
+# and any `*` in the text make the whole command die on "no matches found"
+# before ask ever runs. Aliasing ask itself gives the long name the same
+# protection, and does not recurse -- an alias value that does not end in a
+# space stops zsh expanding the word after it.
+alias ask='noglob ask'
+alias '??'='noglob ask'
+
 # BSD ls, not eza. -G is the colour flag; LSCOLORS is its palette, eleven
 # foreground/background pairs in directory, symlink, socket, ... order.
 export CLICOLOR=1
@@ -98,10 +107,30 @@ export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
 # ANSI names, not hex: the active theme's sixteen ANSI slots are the single source.
-export FZF_DEFAULT_OPTS='
+#
+# The selected line is the exception, because it needs a *surface* and ANSI has
+# none. bg+:bright-black with fg+:bright-white is a dark bar with light text on
+# a dark ground -- and on a light ground the same two slots are both dark,
+# 2.38:1, which is what the light palette used to render.
+#
+# So the selection inverts instead: ground becomes figure and figure becomes
+# ground, 12.50:1, and no colour exists here that is not already the palette's
+# own primary pair. `-1` is fzf's "whatever the terminal is using", which is
+# right for unselected text in both polarities -- fg:white was slot 7, the
+# de-emphasis slot, and washed out at 3.40:1 on a light ground.
+#
+# Read once, at shell start: a `mate` switch does not reach a shell that is
+# already open. Start a new one, or re-source this file.
+if [[ "${(f)$(<${XDG_STATE_HOME:-$HOME/.local/state}/mate/appearance 2>/dev/null)}" == light ]]; then
+  _mate_fzf_sel='bg+:#2f3033,fg+:#f7f9fb'
+else
+  _mate_fzf_sel='bg+:bright-black,fg+:bright-white'
+fi
+export FZF_DEFAULT_OPTS="
   --height 40% --layout=reverse --border=rounded
-  --bind="ctrl-/:toggle-preview,ctrl-y:execute-silent(echo {} | pbcopy)+abort"
-  --color=bg+:bright-black,fg:white,fg+:bright-white,hl:bright-cyan,hl+:cyan,info:bright-black,prompt:blue,pointer:bright-red,marker:bright-green,border:bright-black,header:blue,spinner:cyan'
+  --bind=\"ctrl-/:toggle-preview,ctrl-y:execute-silent(echo {} | pbcopy)+abort\"
+  --color=${_mate_fzf_sel},fg:-1,hl:bright-cyan,hl+:cyan,info:bright-black,prompt:blue,pointer:bright-red,marker:bright-green,border:bright-black,header:blue,spinner:cyan"
+unset _mate_fzf_sel
 export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always --line-range :200 {}'"
 export FZF_ALT_C_OPTS="--preview 'ls -lhAG {} | head -100'"
 export FZF_CTRL_R_OPTS='

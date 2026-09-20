@@ -6,13 +6,12 @@
 set -euo pipefail
 
 # Hammerspoon runs this through hs.task, which inherits launchd's PATH and has
-# no /opt/homebrew/bin. herdr and nvim were silently not found there, so the
-# files were rewritten and nothing was ever told to reload.
+# no /opt/homebrew/bin. nvim was silently not found there, so the files were
+# rewritten and nothing was ever told to reload.
 PATH="/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:${PATH}"
 
 XDG_CONFIG="${XDG_CONFIG_HOME:-${HOME}/.config}"
-ALACRITTY="${XDG_CONFIG}/alacritty"
-ALACRITTY_DST="${ALACRITTY}/alacritty.toml"
+ALACRITTY_DST="${XDG_CONFIG}/alacritty/alacritty.toml"
 STATE_DIR="${XDG_STATE_HOME:-${HOME}/.local/state}/mate"
 STATE="${STATE_DIR}/appearance"
 NVIM_SOCKETS="${STATE_DIR}/nvim"
@@ -46,34 +45,45 @@ case "${mode}" in
   status) read_state || system_mode; echo; exit 0 ;;
   toggle) [[ "$(read_state || system_mode)" == dark ]] && mode=light || mode=dark ;;
   auto)   mode="$(system_mode)" ;;
-esac
-
-case "${mode}" in
-  dark)  palette="mate.toml" ;;
-  light) palette="mate-light.toml" ;;
+  light|dark) ;;
   *) echo "mate: expected light, dark, auto, toggle or status, got '${mode}'" >&2; exit 2 ;;
 esac
-[[ -e "${ALACRITTY}/${palette}" ]] || { echo "mate: ${ALACRITTY}/${palette} is missing" >&2; exit 1; }
 
 # Generated, not linked: live_config_reload never fires on a symlinked config,
 # so the file Alacritty was launched with has to be the one that changes.
+#
+# Dark is the absence of an import — Alacritty's own default palette — so the
+# two modes are the same line commented and uncommented, and there is no second
+# file to keep in sync with the first.
+[[ -e "${ALACRITTY_SRC}" ]] || { echo "mate: ${ALACRITTY_SRC} not found" >&2; exit 1; }
 [[ -L "${ALACRITTY_DST}" ]] && rm -f "${ALACRITTY_DST}"
-if [[ -e "${ALACRITTY_SRC}" ]]; then
-  tmp="$(mktemp)"
-  sed -E "s|^import = \[\"~/\.config/alacritty/mate(-light)?\.toml\"\]$|import = [\"~/.config/alacritty/${palette}\"]|" \
-    "${ALACRITTY_SRC}" > "${tmp}"
-  grep -q "${palette}" "${tmp}" || { echo "mate: import line not found in ${ALACRITTY_SRC}" >&2; rm -f "${tmp}"; exit 1; }
-  cat "${tmp}" > "${ALACRITTY_DST}"
-  rm -f "${tmp}"
-else
-  echo "mate: ${ALACRITTY_SRC} not found" >&2; exit 1
-fi
+IMPORT='import = ["~/.config/alacritty/light.toml"]'
+tmp="$(mktemp)"
+# awk with a literal == and not sed: the line is full of [ ] / . and quotes, and
+# escaping all of them into a regex is how the first version of this broke.
+awk -v want="${IMPORT}" -v mode="${mode}" '
+  BEGIN { commented = "# " want; hit = 0 }
+  $0 == want || $0 == commented {
+    hit = 1
+    print (mode == "light") ? want : commented
+    next
+  }
+  { print }
+  END { exit hit ? 0 : 1 }
+' "${ALACRITTY_SRC}" > "${tmp}" || {
+  echo "mate: import line not found in ${ALACRITTY_SRC}" >&2; rm -f "${tmp}"; exit 1
+}
+cat "${tmp}" > "${ALACRITTY_DST}"
+rm -f "${tmp}"
 
 mkdir -p "${STATE_DIR}"
 printf '%s\n' "${mode}" > "${STATE}"
 
-# herdr has no include and its auto_switch needs DEC 2031, which Alacritty
-# lacks, so the matching [theme.custom.<mode>] is flattened into [theme.custom].
+# herdr takes its hues from the ANSI slots, so the line above already switched
+# those. What it cannot take from ANSI is a surface, and the six tokens that
+# cover that gap are per-mode. auto_switch would pick the right block on its
+# own, but it waits for DEC 2031 and Alacritty does not send it — so the
+# matching [theme.custom.<mode>] is flattened into [theme.custom] here.
 if [[ -e "${HERDR_SRC}" ]]; then
   [[ -L "${HERDR_DST}" ]] && rm -f "${HERDR_DST}"
   if [[ "$(cd "$(dirname "${HERDR_SRC}")" && pwd)" == "$(cd "$(dirname "${HERDR_DST}")" 2>/dev/null && pwd)" ]]; then
@@ -108,7 +118,7 @@ if [[ -d "${NVIM_SOCKETS}" ]] && command -v nvim >/dev/null 2>&1; then
       continue
     fi
     # Detached: --remote-expr blocks while that nvim sits in a prompt.
-    ( nvim --server "${sock}" --remote-expr "execute('MateAppearance ${mode}')" >/dev/null 2>&1 & ) 
+    ( nvim --server "${sock}" --remote-expr "execute('MateAppearance ${mode}')" >/dev/null 2>&1 & )
   done
 fi
 

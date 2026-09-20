@@ -1,5 +1,5 @@
 --- Window layout for a single-screen macOS desktop: a two-app workspace on
---- cmd+alt, an i3-style set of motions on ctrl+alt, and a focus ring.
+--- cmd+alt and an i3-style set of motions on ctrl+alt.
 ---
 --- Everything lives in ./mate; this file only wires it up. The keymap is
 --- mate/keys.lua and nothing else binds a key.
@@ -26,7 +26,6 @@ end
 
 require("mate.workspace")
 require("mate.autozoom") -- every new window opens at full screen
-require("mate.border")
 require("mate.appearance")
 require("mate.keys")
 

@@ -24,10 +24,7 @@ local M = {}
 --- padding, which made the seam between two windows twice the outer margin --
 --- 4 at the edge and 8 down the middle. frameFor splits it in half instead, see
 --- there.
----
---- The focus ring in border.lua draws half its 1pt stroke outside the window, so
---- half a point of this belongs to the ring.
-M.GAP = 10
+M.GAP = 6
 
 --- Polls `cond` until it returns something truthy, then hands that value to
 --- `onReady`. Gives up after `timeout` seconds (default 5).
@@ -101,35 +98,6 @@ end
 --- minimum size — but it is also what a slow app looks like mid-apply, so
 --- giving up on the first unchanged sample turns a delay into a permanent wrong
 --- frame. Two in a row is the evidence; one is a guess.
---- The focus ring is off while a placement is in flight, or it outlines the
---- frame the window is leaving. Required lazily: init.lua loads workspace, and
---- so this file, before border.
----
---- resume is trailing, so a layout placing three windows does not flash the ring
---- back between them, and armed on a failsafe as well -- a ring that never comes
---- back is a worse bug than one that lags.
-local border, resumeAt, failsafe
-
-local function ringSuspend()
-  border = border or require("mate.border")
-  if resumeAt then resumeAt:stop() resumeAt = nil end
-  if failsafe then failsafe:stop() end
-  failsafe = hs.timer.doAfter(3, function() failsafe = nil border.resume() end)
-  border.suspend()
-end
-
-local function ringResume()
-  if not border then return end
-  if resumeAt then resumeAt:stop() end
-  -- A flat batching delay, not animationDuration again: applyFrame has already
-  -- waited the slide out by the time it calls this.
-  resumeAt = hs.timer.doAfter(0.06, function()
-    resumeAt = nil
-    if failsafe then failsafe:stop() failsafe = nil end
-    border.resume()
-  end)
-end
-
 local function applyFrame(win, rect, deadline, previous, stalls)
   deadline = deadline or (hs.timer.secondsSinceEpoch() + 2)
   win:setFrame(rect)
@@ -137,20 +105,18 @@ local function applyFrame(win, rect, deadline, previous, stalls)
   -- Past the end of the slide: mid-animation the frame is an interpolated one,
   -- and checking there reads it as a stall and restarts the animation.
   hs.timer.doAfter(hs.window.animationDuration + 0.1, function()
-    if not win:isVisible() then ringResume() return end
+    if not win:isVisible() then return end
     local current = win:frame()
-    if M.frameMatches(current, rect) then ringResume() return end
+    if M.frameMatches(current, rect) then return end
 
     local stalled = (previous and M.frameMatches(current, previous)) and (stalls or 0) + 1 or 0
     if stalled >= 2 then
       log.i("window won't take that frame (own minimum size); leaving it where it landed")
-      ringResume()
       return
     end
 
     if hs.timer.secondsSinceEpoch() >= deadline then
       log.w("could not position window")
-      ringResume()
       return
     end
     applyFrame(win, rect, deadline, current, stalled)
@@ -161,13 +127,10 @@ function M.placeWindow(win, rect)
   if not win:isFullScreen() then
     -- Load-bearing: a window already in its slot is left alone, so calling a
     -- layout twice costs nothing and only the halves that actually move move.
-    -- Before ringSuspend, so a no-op placement does not blink the ring.
     if M.frameMatches(win:frame(), rect) then return end
-    ringSuspend()
     applyFrame(win, rect)
     return
   end
-  ringSuspend()
   win:setFullScreen(false)
   M.waitFor(function() return not win:isFullScreen() end,
     function() applyFrame(win, rect) end, 3)

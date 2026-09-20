@@ -1,9 +1,10 @@
 [general]
 live_config_reload = true
-# `mate` rewrites this line and regenerates ~/.config/alacritty/alacritty.toml,
-# which is a real file: live_config_reload does not see through a symlink, so
-# a linked config never reloads at all.
-import = ["~/.config/alacritty/mate.toml"]
+# `mate` adds or removes this line and regenerates
+# ~/.config/alacritty/alacritty.toml, which is a real file: live_config_reload
+# does not see through a symlink, so a linked config never reloads at all.
+# Absent means dark, which is Alacritty's own default palette.
+# import = ["~/.config/alacritty/light.toml"]
 
 [window]
 startup_mode = "Maximized"

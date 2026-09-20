@@ -1,14 +1,9 @@
 version: 1
+
+# gh's default is https, and this repo signs and pushes over ssh.
 git_protocol: ssh
-editor:
-prompt: enabled
-prefer_editor_prompt: disabled
-pager:
+
+# Not a gh default any more: it shipped `co` until they dropped the built-in
+# aliases, and `gh alias list` on a bare config now comes back empty.
 aliases:
-    co: pr checkout
-http_unix_socket:
-browser:
-color_labels: disabled
-accessible_colors: disabled
-accessible_prompter: disabled
-spinner: enabled
+  co: pr checkout

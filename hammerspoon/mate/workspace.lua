@@ -59,7 +59,7 @@ local function ownedBundles()
 end
 
 --- Never hidden. Hammerspoon because hiding the thing running this would take
---- the alert and the focus ring with it, Finder because it owns the desktop and
+--- the alert with it, Finder because it owns the desktop and
 --- hiding it buys nothing — it has no window in the way to begin with.
 local KEEP = {
   ["org.hammerspoon.Hammerspoon"] = true,

@@ -1,14 +1,12 @@
---- luna is dark-only, so light mode is its own palette re-solved in
---- mate/light.lua and fed back through on_colors.
+--- Light/dark only. No palette: Neovim's built-in colorscheme reads
+--- `background`, so switching the mode is the whole job and there is nothing
+--- here to keep in sync with the terminal.
 
 local M = {}
 
 local STATE = vim.env.XDG_STATE_HOME or (vim.env.HOME .. "/.local/state")
 local STATE_FILE = STATE .. "/mate/appearance"
 local SOCKET_DIR = STATE .. "/mate/nvim"
-
-local DARK_BG = "#1f1f1f"
-local LIGHT_BG = "#f2f1ee"
 
 --- Written by bin/mate. Falls back to what nvim guessed from the terminal.
 function M.mode()
@@ -22,40 +20,8 @@ function M.mode()
 end
 
 function M.apply(mode)
-	local light = mode == "light"
-	local map = light and require("mate.light") or nil
-	local bg = light and LIGHT_BG or DARK_BG
-
-	vim.o.background = light and "light" or "dark"
-	require("luna").setup({
-		on_colors = function(c)
-			local blend = require("luna.util").blend
-			if map then
-				-- Recursive: git and diag are nested tables of their own.
-				local function swap(t)
-					for k, v in pairs(t) do
-						if type(v) == "table" then
-							swap(v)
-						elseif type(v) == "string" then
-							t[k] = map[v] or v
-						end
-					end
-				end
-				swap(c)
-			end
-			c.bg = bg
-			-- luna/palette.lua blends these against bg and stores the result, so a
-			-- new bg does not reach them.
-			c.line_nr = blend(c.grey_warm, 0.45, c.bg)
-			c.git.add.bg = blend(c.ok, 0.14, c.bg)
-			c.git.change.bg = blend(c.signal, 0.10, c.bg)
-			c.git.text.bg = blend(c.signal, 0.30, c.bg)
-			-- luna's #7c7c7c is 3.95:1 here; lifted to clear the 4.5:1 floor.
-			c.comment = light and "#6e6e6e" or "#868686"
-		end,
-	})
-	vim.cmd.colorscheme("luna")
-	M.applied = mode
+	vim.o.background = mode == "light" and "light" or "dark"
+	M.applied = vim.o.background
 end
 
 local function sync()
