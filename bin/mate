@@ -81,7 +81,7 @@ printf '%s\n' "${mode}" > "${STATE}"
 
 # tmux draws from the ANSI slots like everything else, but three things do not
 # survive the switch on their own. The pane border grey is not the same slot
-# name in both palettes -- brightblack in gruvbox dark, white in GitHub light.
+# name in both palettes -- brightblack in bathory, white in GitHub light.
 # The dim applied to the inactive pane has no slot at all: its background sits
 # one step off the ground. And the text on the green status bar cannot be a
 # slot either in light, where nothing is light enough to sit on #024c1a.
@@ -89,7 +89,9 @@ printf '%s\n' "${mode}" > "${STATE}"
 # starts later.
 if command -v tmux >/dev/null 2>&1 && tmux has-session >/dev/null 2>&1; then
   dim=brightblack
-  inactive='fg=#928374,bg=#141617'
+  # Neutral, from bathory's own greys. The hexes here used to be gruvbox's and
+  # outlived two palette changes: a warm #928374 on a scheme with no warm grey.
+  inactive='fg=#8a8a8a,bg=#141516'
   status_fg=black
   if [[ "${mode}" == light ]]; then
     dim=white
