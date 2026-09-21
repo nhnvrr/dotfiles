@@ -5,11 +5,22 @@
 # That is why mise is activated at the END of .zshrc instead of here -- its
 # prepend has to be the last word.
 
-export HOMEBREW_PREFIX=/opt/homebrew
-export HOMEBREW_CELLAR=/opt/homebrew/Cellar
-export HOMEBREW_REPOSITORY=/opt/homebrew
+# macOS or Debian. Everything below that differs between them is decided here,
+# once, so the rest of the file can stay flat.
+export MATE_OS="${OSTYPE%%[0-9.]*}"
 
-export INFOPATH="/opt/homebrew/share/info${INFOPATH:+:$INFOPATH}"
+# Homebrew on macOS, or Linuxbrew if someone installed it; absent on a plain
+# Debian, where the same tools come from apt and are already on PATH.
+for _brew in /opt/homebrew /usr/local /home/linuxbrew/.linuxbrew; do
+  if [[ -x "${_brew}/bin/brew" ]]; then
+    export HOMEBREW_PREFIX="${_brew}"
+    export HOMEBREW_CELLAR="${_brew}/Cellar"
+    export HOMEBREW_REPOSITORY="${_brew}"
+    export INFOPATH="${_brew}/share/info${INFOPATH:+:$INFOPATH}"
+    break
+  fi
+done
+unset _brew
 
 export LANG=en_US.UTF-8
 
@@ -19,21 +30,25 @@ export VISUAL="code --wait"
 
 export GOPATH="$HOME/Develop/go"
 export GOPRIVATE=github.com/nhnvrr
-export PNPM_HOME="$HOME/Library/pnpm"
+if [[ "$MATE_OS" == darwin ]]; then
+  export PNPM_HOME="$HOME/Library/pnpm"
+else
+  export PNPM_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/pnpm"
+fi
 
 export AWS_PAGER=""
 export AWS_RETRY_MODE=standard
 export AWS_MAX_ATTEMPTS=3
 
 export REDISCLI_HISTFILE="$HOME/.local/state/redis/history"
-export BAT_THEME=ansi
-
 # -U dedups the array in place, which is what fish_add_path did for free.
 typeset -U path PATH
+# Entries that do not exist are harmless: zsh keeps them in the array but never
+# finds anything there, and the (N) glob qualifier below drops them anyway.
 path=(
   "$GOPATH/bin"
-  /opt/homebrew/{bin,sbin}
-  /opt/homebrew/opt/libpq/bin
+  ${HOMEBREW_PREFIX:+${HOMEBREW_PREFIX}/{bin,sbin}}
+  ${HOMEBREW_PREFIX:+${HOMEBREW_PREFIX}/opt/libpq/bin}
   "$HOME/.bun/bin"
   "$HOME/.local/bin"
   "$PNPM_HOME/bin"
@@ -41,3 +56,6 @@ path=(
   /usr/local/bin
   $path
 )
+# Drop what is not there, so `which` and completion do not stat dead paths on
+# every lookup. (N) is the null glob qualifier; (-/) keeps only directories.
+path=(${^path}(N-/))

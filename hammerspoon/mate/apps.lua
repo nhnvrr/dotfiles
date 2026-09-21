@@ -3,12 +3,9 @@ local M = {}
 M.bundles = {
 	terminal = "org.alacritty",
 	-- browser is what the layouts and cmd+alt+§ place; defaultBrowser is what
-	-- opens a link. Same app today, separate jobs -- Chrome stays installed for
-	-- work and is opened by hand.
-	browser = "com.apple.Safari",
-	defaultBrowser = "com.apple.Safari",
-	-- The work browser, placed only by cmd+alt+4.
-	chrome = "com.google.Chrome",
+	-- opens a link. One app, two jobs, and they stay two keys.
+	browser = "com.google.Chrome",
+	defaultBrowser = "com.google.Chrome",
 	vscode = "com.microsoft.VSCode",
 	datagrip = "com.jetbrains.datagrip",
 	notes = "com.apple.Notes",

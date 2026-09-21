@@ -1,50 +1,28 @@
-# The light palette, and the only colour file in this repo. Dark is Alacritty's
-# own default, which is the absence of an import — `mate` adds this line or
-# removes it, and there is no second file to keep in sync.
-#
-# Built against the background, not by eye: every slot but one clears 4.5:1 on
-# #f7f9fb. The exception is normal white at 3.40, which is the de-emphasis slot
-# — comments, inactive text — and lifting it to the floor would defeat what it
-# is for.
-#
-# The background is the one value the rest is solved against. Darkening it
-# toward a cool grey costs contrast on every slot at once: #e7eaed still clears
-# the floor at 4.60, and anything below that needs the sixteen slots re-darkened
-# rather than just this line changed.
-
 [colors.primary]
-background = "#f7f9fb"
-foreground = "#2f3033"
+background = "0xffffff"
+foreground = "0x0e1116"
+dim_foreground = "0x373e47"
 
 [colors.cursor]
-text = "#f7f9fb"
-cursor = "#2f3033"
+cursor = "0x0e1116"
+text = "0xffffff"
 
-[colors.selection]
-text = "#2f3033"
-background = "#d5dbe5"
-
-# Black is the foreground here, not a colour: a light palette inverts the pair,
-# and text printed as "black" has to stay the most legible thing on screen.
 [colors.normal]
-black = "#2f3033"
-red = "#a32b31"
-green = "#3f6b1f"
-yellow = "#7a5600"
-blue = "#1b5c94"
-magenta = "#783f9e"
-cyan = "#0f6660"
-white = "#8a8780"
+black = "0x0e1116"
+red = "0xa0111f"
+green = "0x024c1a"
+yellow = "0x3f2200"
+blue = "0x0349b4"
+magenta = "0x622cbc"
+cyan = "0x1b7c83"
+white = "0x66707b"
 
-# Darker than normal, not lighter. On a pale background "bright" has to mean
-# more contrast, and the usual lightening moves it the wrong way — bright red
-# on white is the classic unreadable slot.
 [colors.bright]
-black = "#6b6862"
-red = "#821f25"
-green = "#2f5216"
-yellow = "#5e4200"
-blue = "#134672"
-magenta = "#5c2f7a"
-cyan = "#0a4d48"
-white = "#2f3033"
+black = "0x4b535d"
+red = "0x86061d"
+green = "0x055d20"
+yellow = "0x4e2c00"
+blue = "0x1168e3"
+magenta = "0x622cbc"
+cyan = "0x1b7c83"
+white = "0x66707b"

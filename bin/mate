@@ -25,8 +25,6 @@ while [[ -L "${self}" ]]; do
 done
 REPO="$(cd "$(dirname "${self}")/.." && pwd)"
 ALACRITTY_SRC="${REPO}/alacritty/alacritty.toml"
-HERDR_SRC="${REPO}/herdr/config.toml"
-HERDR_DST="${XDG_CONFIG}/herdr/config.toml"
 
 read_state() {
   [[ -r "${STATE}" ]] || return 1
@@ -52,20 +50,20 @@ esac
 # Generated, not linked: live_config_reload never fires on a symlinked config,
 # so the file Alacritty was launched with has to be the one that changes.
 #
-# Dark is the absence of an import — Alacritty's own default palette — so the
-# two modes are the same line commented and uncommented, and there is no second
-# file to keep in sync with the first.
+# Both modes are a full palette in their own file and the import line names
+# which one. alacritty.toml itself defines no colour, because the importing
+# file overrides the imported one and any slot left up there would outlive the
+# switch.
 [[ -e "${ALACRITTY_SRC}" ]] || { echo "mate: ${ALACRITTY_SRC} not found" >&2; exit 1; }
 [[ -L "${ALACRITTY_DST}" ]] && rm -f "${ALACRITTY_DST}"
-IMPORT='import = ["~/.config/alacritty/light.toml"]'
 tmp="$(mktemp)"
-# awk with a literal == and not sed: the line is full of [ ] / . and quotes, and
-# escaping all of them into a regex is how the first version of this broke.
-awk -v want="${IMPORT}" -v mode="${mode}" '
-  BEGIN { commented = "# " want; hit = 0 }
-  $0 == want || $0 == commented {
+# awk on a literal prefix and not sed: the line is full of [ ] / . and quotes,
+# and escaping all of them into a regex is how the first version of this broke.
+awk -v mode="${mode}" '
+  BEGIN { prefix = "import = ["; hit = 0 }
+  substr($0, 1, length(prefix)) == prefix {
     hit = 1
-    print (mode == "light") ? want : commented
+    printf "import = [\"~/.config/alacritty/%s.toml\"]\n", mode
     next
   }
   { print }
@@ -73,38 +71,36 @@ awk -v want="${IMPORT}" -v mode="${mode}" '
 ' "${ALACRITTY_SRC}" > "${tmp}" || {
   echo "mate: import line not found in ${ALACRITTY_SRC}" >&2; rm -f "${tmp}"; exit 1
 }
+mkdir -p "$(dirname "${ALACRITTY_DST}")"
 cat "${tmp}" > "${ALACRITTY_DST}"
 rm -f "${tmp}"
 
 mkdir -p "${STATE_DIR}"
 printf '%s\n' "${mode}" > "${STATE}"
 
-# herdr takes its hues from the ANSI slots, so the line above already switched
-# those. What it cannot take from ANSI is a surface, and the six tokens that
-# cover that gap are per-mode. auto_switch would pick the right block on its
-# own, but it waits for DEC 2031 and Alacritty does not send it — so the
-# matching [theme.custom.<mode>] is flattened into [theme.custom] here.
-if [[ -e "${HERDR_SRC}" ]]; then
-  [[ -L "${HERDR_DST}" ]] && rm -f "${HERDR_DST}"
-  if [[ "$(cd "$(dirname "${HERDR_SRC}")" && pwd)" == "$(cd "$(dirname "${HERDR_DST}")" 2>/dev/null && pwd)" ]]; then
-    echo "mate: herdr source and destination are the same file" >&2; exit 1
+
+# tmux draws from the ANSI slots like everything else, but three things do not
+# survive the switch on their own. The pane border grey is not the same slot
+# name in both palettes -- brightblack in gruvbox dark, white in GitHub light.
+# The dim applied to the inactive pane has no slot at all: its background sits
+# one step off the ground. And the text on the green status bar cannot be a
+# slot either in light, where nothing is light enough to sit on #024c1a.
+# tmux.conf reads the state file for the same reason, covering a server that
+# starts later.
+if command -v tmux >/dev/null 2>&1 && tmux has-session >/dev/null 2>&1; then
+  dim=brightblack
+  inactive='fg=#928374,bg=#141617'
+  status_fg=black
+  if [[ "${mode}" == light ]]; then
+    dim=white
+    inactive='fg=#66707b,bg=#f0f2f4'
+    status_fg='#ffffff'
   fi
-  other=dark; [[ "${mode}" == dark ]] && other=light
-  mkdir -p "$(dirname "${HERDR_DST}")"
-  tmp="$(mktemp)"
-  awk -v mode="${mode}" -v other="${other}" '
-    /^\[/ {
-      skip = 0
-      if ($0 == "[theme.custom." other "]") { skip = 1; next }
-      if ($0 == "[theme.custom." mode  "]") { print "[theme.custom]"; next }
-    }
-    skip { next }
-    { print }
-  ' "${HERDR_SRC}" > "${tmp}"
-  mv -f "${tmp}" "${HERDR_DST}"
-  command -v herdr >/dev/null 2>&1 && herdr server reload-config >/dev/null 2>&1 || true
-else
-  echo "mate: ${HERDR_SRC} not found, herdr not switched" >&2
+  tmux set -g window-style "${inactive}" \
+    \; set -g pane-border-style "fg=${dim}" \
+    \; set -g pane-active-border-style "fg=${dim}" \
+    \; set -g status-style "bg=green,fg=${status_fg}" \
+    >/dev/null 2>&1 || true
 fi
 
 # nvim reloads itself off the state file, but the fs_event does not always

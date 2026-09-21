@@ -86,7 +86,7 @@ end
 --- setFrame and not setSize followed by setTopLeft. The two-call form looks
 --- equivalent and is not: an app whose accessibility implementation is slow
 --- applies one of them and drops the other, and which one it drops depends on
---- the order. Measured against Firefox going from full width to a half:
+--- the order. Measured against a browser going from full width to a half:
 ---
 ---   setSize then setTopLeft    x=902 w=1792   moved, never resized
 ---   setTopLeft then setSize    x=  4 w=1792   neither took

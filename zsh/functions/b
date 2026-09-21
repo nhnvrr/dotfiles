@@ -1,0 +1,128 @@
+# Open something in the browser. autoloaded: the file name is the function name.
+#
+#   b                    the browser, empty
+#   b index.html         opened as-is
+#   b 3000               http://localhost:3000
+#   b -r [path]          this repo on its forge, at the current branch
+#   b github.com/x/y     opened as a URL
+#   b que es gecko       searched
+#
+# Everything goes out as a file:// or http(s):// URL, never as a path -- `open`
+# on a path consults the handler for that extension, and install.sh binds .json
+# and friends to VS Code. That is the whole reason for the encoder below.
+#
+# A file:// URL is not enough on its own, though: LaunchServices resolves it
+# back to the item and uses that item's handler anyway, so a directory lands in
+# Finder. _b_go names the browser for those. http(s) is left alone, so changing
+# the default browser keeps working.
+
+emulate -L zsh
+setopt local_options no_nomatch
+
+local opener
+if (( $+commands[open] )); then
+  opener=(open)
+elif (( $+commands[xdg-open] )); then
+  opener=(xdg-open)
+else
+  print -u2 'b: no opener (open, xdg-open)'
+  return 1
+fi
+
+# LC_ALL=C so ${#s} and $s[i] count bytes: a multibyte character has to come
+# out as one %XX per UTF-8 byte, and under a UTF-8 locale the loop would see
+# one wide character and emit its code point instead.
+_b_urlencode() {
+  local LC_ALL=C
+  local s=$1 out='' c i
+  for (( i = 1; i <= ${#s}; i++ )); do
+    c=$s[i]
+    case $c in
+      ([A-Za-z0-9._~/-]) out+=$c ;;
+      (*) out+=$(printf '%%%02X' "'$c") ;;
+    esac
+  done
+  print -r -- $out
+}
+
+_b_go() {
+  if [[ $1 == file://* && ${opener[1]} == open ]]; then
+    "${opener[@]}" -a "${B_BROWSER:-Google Chrome}" "$1"
+  else
+    "${opener[@]}" "$1"
+  fi
+}
+
+# --- no arguments -----------------------------------------------------------
+if (( $# == 0 )); then
+  "${opener[@]}" -a "${B_BROWSER:-Google Chrome}" 2>/dev/null || "${opener[@]}" 'about:blank'
+  return
+fi
+
+# --- -r: this repo on its forge ---------------------------------------------
+if [[ $1 == -r || $1 == --repo ]]; then
+  shift
+  local remote branch root url
+  remote=$(git remote get-url origin 2>/dev/null) || {
+    print -u2 'b: not in a git repository, or no origin remote'
+    return 1
+  }
+  # git@host:owner/repo.git and ssh://git@host/owner/repo.git both have to end
+  # up as https://host/owner/repo.
+  remote=${remote%.git}
+  remote=${remote#ssh://}
+  remote=${remote#https://}
+  remote=${remote#git@}
+  remote=${remote/://}
+  url="https://${remote}"
+
+  if (( $# )); then
+    branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+    root=$(git rev-parse --show-toplevel 2>/dev/null)
+    local abs=${1:A}
+    url+="/blob/$(_b_urlencode "$branch")/$(_b_urlencode "${abs#$root/}")"
+  fi
+  _b_go "$url"
+  return
+fi
+
+local arg="$*"
+
+# --- a bare port ------------------------------------------------------------
+if [[ $arg == <-> ]]; then
+  _b_go "http://localhost:${arg}"
+  return
+fi
+
+# --- an existing path -------------------------------------------------------
+if (( $# == 1 )) && [[ -e $1 ]]; then
+  local abs=${1:A}
+  # A directory goes out as itself: Chrome's own index, at the real location.
+  if [[ -d $abs ]]; then
+    _b_go "file://$(_b_urlencode "${abs%/}")/"
+    return
+  fi
+  _b_go "file://$(_b_urlencode "$abs")"
+  return
+fi
+
+# --- a URL, or something with a scheme --------------------------------------
+if [[ $arg == *://* ]]; then
+  _b_go "$arg"
+  return
+fi
+
+# A single token with a dot and no spaces is a hostname, not a search. The
+# `<->` guard keeps 3.14 and version numbers out of it.
+if (( $# == 1 )) && [[ $arg == *.*[^.]* && $arg != *[[:space:]]* && $arg != <->.<-> ]]; then
+  _b_go "https://${arg}"
+  return
+fi
+
+if [[ $arg == localhost* ]]; then
+  _b_go "http://${arg}"
+  return
+fi
+
+# --- anything else is a search ----------------------------------------------
+_b_go "${B_SEARCH:-https://duckduckgo.com/?q=}$(_b_urlencode "$arg")"

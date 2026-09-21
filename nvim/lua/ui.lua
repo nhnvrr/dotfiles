@@ -23,7 +23,7 @@ require("lualine").setup({
     lualine_y = { "progress" },
     lualine_z = { "location" },
   },
-  extensions = { "neo-tree", "nvim-dap-ui", "quickfix" },
+  extensions = { "neo-tree", "quickfix" },
 })
 
 require("which-key").setup({
@@ -44,10 +44,9 @@ require("which-key").setup({
 })
 require("which-key").add({
   { "<leader>c", group = "code" },
-  { "<leader>d", group = "debug" },
   { "<leader>f", group = "find" },
   { "<leader>g", group = "git" },
-  { "<leader>t", group = "test" },
+  { "<leader>s", group = "split" },
 })
 
 require("nvim-surround").setup({})

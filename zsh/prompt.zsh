@@ -1,7 +1,6 @@
-# The prompt. Sourced from .zshrc; lives apart the way fish kept fish_prompt
-# and 10-git-prompt in separate files.
+# The prompt. Sourced from .zshrc.
 #
-# ANSI names, not hex: the active theme's sixteen slots are the single source.
+# ANSI colour names, not hex: whatever palette the terminal is serving.
 # Plain ASCII state markers, so ssh and Terminal.app draw the same prompt with
 # no patched font, and no double-width glyph to knock the cursor column out of
 # step with what the terminal drew.
@@ -10,7 +9,6 @@
 setopt PROMPT_SUBST
 
 autoload -Uz vcs_info add-zsh-hook
-add-zsh-hook precmd vcs_info
 
 # git only: the other eleven backends are one stat() each, every prompt.
 zstyle ':vcs_info:*' enable git
@@ -28,8 +26,16 @@ zstyle ':vcs_info:git:*' check-for-changes false
 zstyle ':vcs_info:git*:*' patch-format ''
 zstyle ':vcs_info:git*:*' nopatch-format ''
 
-zstyle ':vcs_info:git:*' formats       ' %F{green}%b%f%m'
-zstyle ':vcs_info:git:*' actionformats ' %F{green}%b%f|%F{red}%a%f%m'
+# Brackets, because in RPROMPT the next thing to the right is %~ and without
+# them the branch and the path read as one string. Trailing space separates them.
+#
+# They are punctuation, not information, so they sit on slot 8 and the branch
+# keeps the green to itself. %F{8} and not %F{brightblack}: zsh knows the eight
+# base names only, and emits \e[39m -- plain default -- for anything else,
+# without a word. The number is still an ANSI slot, so it follows the palette
+# like every other colour here.
+zstyle ':vcs_info:git:*' formats       '%F{8}[%F{green}%b%f%m%F{8}]%f '
+zstyle ':vcs_info:git:*' actionformats '%F{8}[%F{green}%b%f|%F{red}%a%f%m%F{8}]%f '
 
 zstyle ':vcs_info:git+set-message:*' hooks git-status git-shorten-branch
 
@@ -67,11 +73,13 @@ function +vi-git-status {
   done
 
   [[ -n $unstaged  ]] && hook_com[misc]+='%F{yellow}*%f'
-  [[ -n $staged    ]] && hook_com[misc]+='%F{green}+%f'
-  [[ -n $untracked ]] && hook_com[misc]+='%F{cyan}?%f'
-  [[ -n $stash     ]] && hook_com[misc]+='%F{yellow}$%f'
-  (( ahead  )) && hook_com[misc]+="%F{white}⇡${ahead}%f"
-  (( behind )) && hook_com[misc]+="%F{white}⇣${behind}%f"
+  # cyan, not green: green is the branch and the brackets around it now, and a
+  # green + inside a green [] is a + you cannot see.
+  [[ -n $staged    ]] && hook_com[misc]+='%F{cyan}+%f'
+  [[ -n $untracked ]] && hook_com[misc]+='%F{red}?%f'
+  [[ -n $stash     ]] && hook_com[misc]+='%F{magenta}$%f'
+  (( ahead  )) && hook_com[misc]+="%F{blue}⇡${ahead}%f"
+  (( behind )) && hook_com[misc]+="%F{blue}⇣${behind}%f"
 
   # Mandatory. VCS_INFO_hook breaks out of its loop the moment a hook returns
   # non-zero, silently skipping every hook after it -- and the last line above
@@ -93,13 +101,106 @@ function +vi-git-shorten-branch {
   return 0
 }
 
+# Integer SECONDS reports everything under a second as 0s.
+typeset -F SECONDS
+
+typeset -g _mate_cmd_start=
+typeset -g _mate_elapsed=
+typeset -g _mate_chevrons='❯'
+
+# %{...%} tells zsh these bytes take no columns. Without it the italic escapes
+# are counted as printable and RPROMPT is placed that many columns too far left.
+typeset -g _mate_italic_on=$'%{\e[3m%}'
+typeset -g _mate_italic_off=$'%{\e[23m%}'
+
+# SGR 22 clears bold as well as faint. Nothing here is bold -- PROMPT dropped
+# its %B, and the terminal draws SGR 1 at Regular -- so there is nothing to lose.
+typeset -g _mate_faint_on=$'%{\e[2m%}'
+typeset -g _mate_faint_off=$'%{\e[22m%}'
+
+function _mate_preexec_timer { _mate_cmd_start=$SECONDS }
+add-zsh-hook preexec _mate_preexec_timer
+
+# Writes to $REPLY instead of printing: $(...) around this would be a fork per
+# prompt, which is the thing the rest of this file goes out of its way to avoid.
+# printf -v for the same reason.
+function _mate_format_elapsed {
+  local -F delta=$1
+  local -i d h m
+  typeset -g REPLY=''
+
+  d=$(( delta / 86400 ))
+  h=$(( (delta - d * 86400) / 3600 ))
+  m=$(( (delta - d * 86400 - h * 3600) / 60 ))
+  local -F s=$(( delta - d * 86400 - h * 3600 - m * 60 ))
+
+  (( d )) && REPLY+="${d}d"
+  (( h )) && REPLY+="${h}h"
+  (( m )) && REPLY+="${m}m"
+
+  if (( d )); then
+    :                          # past a day the seconds are noise
+  elif [[ -n $REPLY ]]; then
+    # Not int(): that one lives in zsh/mathfunc. Assigning to an integer
+    # truncates just the same, with no module to load.
+    local -i whole=$s
+    REPLY+="${whole}s"
+  else
+    local fmt
+    printf -v fmt '%.2f' $s
+    REPLY+="${fmt}s"
+  fi
+}
+
+# One precmd for all three. The relative order of separate add-zsh-hook calls
+# is just the order the lines happen to sit in, and RPROMPT needs both the
+# elapsed time and vcs_info already computed.
+function _mate_precmd {
+  if [[ -n $_mate_cmd_start ]]; then
+    _mate_format_elapsed $(( SECONDS - _mate_cmd_start ))
+    # No %F: every ANSI colour already means something else here, and cyan in
+    # particular is the git block sitting immediately to the right.
+    _mate_elapsed="${_mate_faint_on}${_mate_italic_on}${REPLY}${_mate_italic_off}${_mate_faint_off} "
+    _mate_cmd_start=
+  else
+    _mate_elapsed=''
+  fi
+
+  # One ❯ per nesting level. Inside tmux $SHLVL already counts the shell tmux
+  # itself spawned, so it arrives one too high.
+  local -i lvl=$SHLVL
+  [[ -n $TMUX ]] && (( lvl-- ))
+  (( lvl < 1 )) && lvl=1
+  _mate_chevrons=''
+  repeat $lvl _mate_chevrons+='❯'
+
+  vcs_info
+}
+add-zsh-hook precmd _mate_precmd
+
+# Buys back a column. Only inside tmux: outside it, zsh eats the space after
+# PS1 instead and the prompt comes out corrupted.
+[[ -n $TMUX ]] && export ZLE_RPROMPT_INDENT=0
+
+# Left stays short past the user name: %1~ is the leaf of the path only, so the
+# command starts near the margin no matter how deep the tree or how long the
+# branch; everything else that is context rather than input lives in RPROMPT.
+#
+# %n is cyan, which is also the staged marker inside the git block in RPROMPT.
+# They sit at opposite ends of the line and are never read together, so the
+# colour is reused rather than reserved.
+#
+#   %n         user name
+#   %1~        leaf of $PWD, or ~ at $HOME
+#   %(1j.*.)   a * while there are background jobs
+#   %(?..!)    a ! when the last command exited non-zero
+#   %(!.a.b)   root vs not
+#
+# No %B anywhere: colour already separates every one of these, and weight is
+# handled once in alacritty.toml rather than per-escape here.
+PROMPT='%F{cyan}%n%f %F{blue}%1~%f%F{yellow}%(1j.*.)%(?..!)%f %(!.%F{yellow}.%F{red})${_mate_chevrons}%f '
+
 # %~ is the whole path, abbreviating nothing. Not %2~: that one drops the
 # leading components instead of shortening them, so ~/work/x and ~/Develop/x
 # render identically.
-#
-# %m is the hostname up to the first dot -- `mbp`, not `mbp.local`. If it ever
-# reads as Nicolass-MacBook-Pro, fix it with `scutil --set HostName`, not here.
-#
-# %(?.a.b) is the exit status of the last command; no precmd needed to capture it.
-PROMPT='%F{cyan}%n%f%F{white}@%m%f %F{white}%~%f${vcs_info_msg_0_} %(?.%F{white}.%F{red})❯%f '
-RPROMPT='%F{red}%D{%H:%M:%S %z}%f'
+RPROMPT='${_mate_elapsed}${vcs_info_msg_0_}%F{blue}%~%f'

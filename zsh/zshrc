@@ -19,13 +19,12 @@ setopt AUTO_CD INTERACTIVE_COMMENTS NO_BEEP
 setopt GLOB_DOTS NO_CASE_GLOB
 
 # --- completion -------------------------------------------------------------
-fpath=(/opt/homebrew/share/zsh/site-functions "$HOME/.config/zsh/functions" $fpath)
+fpath=(${HOMEBREW_PREFIX:+${HOMEBREW_PREFIX}/share/zsh/site-functions}(N) "$HOME/.config/zsh/functions" $fpath)
 autoload -Uz compinit
 compinit -d "$HOME/.cache/zsh/zcompdump"
 
 zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
-zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-path "$HOME/.cache/zsh/zcompcache"
 
@@ -95,44 +94,54 @@ alias code='code --new-window'
 alias ask='noglob ask'
 alias '??'='noglob ask'
 
-# BSD ls, not eza. -G is the colour flag; LSCOLORS is its palette, eleven
-# foreground/background pairs in directory, symlink, socket, ... order.
-export CLICOLOR=1
-export LSCOLORS=ExGxbxdxCxegedabagaced
-alias ll='ls -lhG'
-alias la='ls -lhAG'
+# Not eza. The colour flag differs by platform: BSD ls takes -G, GNU ls takes
+# --color. No LSCOLORS or LS_COLORS either way -- both defaults are fine.
+if [[ "$MATE_OS" == darwin ]]; then
+  export CLICOLOR=1
+  _ls_colour='-G'
+else
+  _ls_colour='--color=auto'
+fi
+alias ls="ls ${_ls_colour}"
+alias ll="ls -lh ${_ls_colour}"
+alias la="ls -lhA ${_ls_colour}"
+
+# bat is batcat on Debian: the name was already taken by a different package.
+# Same for fd, which is fdfind. _mate_bat is the name the fzf previews below
+# have to spell, since an alias does not reach a --preview subshell.
+if (( $+commands[bat] )); then
+  _mate_bat='bat'
+elif (( $+commands[batcat] )); then
+  _mate_bat='batcat'
+  alias bat='batcat'
+else
+  _mate_bat='cat'
+fi
+if (( ! $+commands[fd] )) && (( $+commands[fdfind] )); then
+  alias fd='fdfind'
+fi
+
+# pbcopy is macOS only; Wayland and X11 each have their own.
+if (( $+commands[pbcopy] )); then
+  _mate_clip='pbcopy'
+elif (( $+commands[wl-copy] )); then
+  _mate_clip='wl-copy'
+elif (( $+commands[xclip] )); then
+  _mate_clip='xclip -selection clipboard'
+else
+  _mate_clip='cat >/dev/null'
+fi
+alias clipcopy="${_mate_clip}"
 
 # --- fzf --------------------------------------------------------------------
 export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
-# ANSI names, not hex: the active theme's sixteen ANSI slots are the single source.
-#
-# The selected line is the exception, because it needs a *surface* and ANSI has
-# none. bg+:bright-black with fg+:bright-white is a dark bar with light text on
-# a dark ground -- and on a light ground the same two slots are both dark,
-# 2.38:1, which is what the light palette used to render.
-#
-# So the selection inverts instead: ground becomes figure and figure becomes
-# ground, 12.50:1, and no colour exists here that is not already the palette's
-# own primary pair. `-1` is fzf's "whatever the terminal is using", which is
-# right for unselected text in both polarities -- fg:white was slot 7, the
-# de-emphasis slot, and washed out at 3.40:1 on a light ground.
-#
-# Read once, at shell start: a `mate` switch does not reach a shell that is
-# already open. Start a new one, or re-source this file.
-if [[ "${(f)$(<${XDG_STATE_HOME:-$HOME/.local/state}/mate/appearance 2>/dev/null)}" == light ]]; then
-  _mate_fzf_sel='bg+:#2f3033,fg+:#f7f9fb'
-else
-  _mate_fzf_sel='bg+:bright-black,fg+:bright-white'
-fi
 export FZF_DEFAULT_OPTS="
   --height 40% --layout=reverse --border=rounded
-  --bind=\"ctrl-/:toggle-preview,ctrl-y:execute-silent(echo {} | pbcopy)+abort\"
-  --color=${_mate_fzf_sel},fg:-1,hl:bright-cyan,hl+:cyan,info:bright-black,prompt:blue,pointer:bright-red,marker:bright-green,border:bright-black,header:blue,spinner:cyan"
-unset _mate_fzf_sel
-export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always --line-range :200 {}'"
-export FZF_ALT_C_OPTS="--preview 'ls -lhAG {} | head -100'"
+  --bind=\"ctrl-/:toggle-preview,ctrl-y:execute-silent(echo {} | ${_mate_clip})+abort\""
+export FZF_CTRL_T_OPTS="--preview '${_mate_bat} --style=numbers --color=always --line-range :200 {}'"
+export FZF_ALT_C_OPTS="--preview 'ls -lhA ${_ls_colour} {} | head -100'"
 export FZF_CTRL_R_OPTS='
   --height=60%
   --preview="echo {} | bat --color=always --style=plain --language=sh"
@@ -148,10 +157,24 @@ source <(fzf --zsh)
 eval "$(mise activate zsh)"
 
 # --- zsh extras -------------------------------------------------------------
-# What fish had built in. Two brew formulas, no plugin manager.
-ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
-source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh 2>/dev/null
+# What fish had built in. No plugin manager: brew formulas on macOS, the
+# zsh-autosuggestions and zsh-syntax-highlighting apt packages on Debian, which
+# land under /usr/share instead.
+_mate_source_plugin() {
+  local name="$1" dir
+  for dir in \
+    ${HOMEBREW_PREFIX:+${HOMEBREW_PREFIX}/share/${name}} \
+    "/usr/share/${name}" \
+    "/usr/share/zsh/plugins/${name}"; do
+    if [[ -r "${dir}/${name}.zsh" ]]; then
+      source "${dir}/${name}.zsh"
+      return 0
+    fi
+  done
+  return 1
+}
+_mate_source_plugin zsh-autosuggestions
 bindkey '^ ' autosuggest-accept
 
 # Strictly last: it wraps the widgets that exist when it loads.
-source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh 2>/dev/null
+_mate_source_plugin zsh-syntax-highlighting

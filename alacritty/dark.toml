@@ -1,0 +1,50 @@
+# base16 black-metal-bathory. Same six corrections as nvim/lua/mate/init.lua,
+# plus base01/base02 lifted further here: in a buffer they are only paper, out
+# here any program may use slots 18-19 as secondary text.
+[colors.primary]
+background = "0x1d2021"
+foreground = "0xc1c1c1"
+dim_foreground = "0x999999"
+
+[colors.cursor]
+cursor = "0xc1c1c1"
+text = "0x1d2021"
+
+[colors.normal]
+black = "0x1d2021"
+red = "0x6a9494"
+green = "0xfbcb97"
+yellow = "0xe78a53"
+blue = "0x888888"
+magenta = "0x999999"
+cyan = "0xaaaaaa"
+white = "0xc1c1c1"
+
+[colors.bright]
+black = "0x8a8a8a"
+red = "0xaaaaaa"
+green = "0x606060"
+yellow = "0x929292"
+blue = "0x999999"
+magenta = "0x999999"
+cyan = "0x949494"
+white = "0xc1c1c1"
+
+[[colors.indexed_colors]]
+color = "#aaaaaa"
+index = 16
+[[colors.indexed_colors]]
+color = "#949494"
+index = 17
+[[colors.indexed_colors]]
+color = "#606060"
+index = 18
+[[colors.indexed_colors]]
+color = "#929292"
+index = 19
+[[colors.indexed_colors]]
+color = "#999999"
+index = 20
+[[colors.indexed_colors]]
+color = "#999999"
+index = 21

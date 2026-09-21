@@ -172,14 +172,6 @@ function M.development()
   place()
 end
 
---- cmd+alt+4 — Alacritty on the left half and Chrome on the right: cmd+alt+1
---- with the work browser, and the only layout that places Chrome.
-function M.work()
-  M.current = { apps.bundles.terminal, apps.bundles.chrome }
-  hideOthers()
-  place()
-end
-
 --- cmd+alt+§ — every app in apps.stack at full screen, same gap as the halves.
 ---
 --- unhide is not optional: a hidden app returns an empty allWindows(), so there

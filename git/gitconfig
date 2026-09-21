@@ -37,7 +37,6 @@
 [delta]
 	navigate = true
 	line-numbers = true
-	syntax-theme = ansi
 
 [rerere]
 	enabled = true

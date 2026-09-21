@@ -2,7 +2,7 @@
 ---
 --- Keys split by modifier: Alacritty takes cmd, Hammerspoon takes cmd+alt for
 --- the workspace and the display, ctrl+alt for the i3-style bindings, zsh
---- takes bare ctrl, and herdr takes ctrl+b as its prefix.
+--- takes bare ctrl, and tmux takes ctrl+b as its prefix.
 ---
 --- ctrl+alt and not bare alt: alacritty.toml sets option_as_alt = "Both" so
 --- option+b and option+f word-jump in the shell, and a hotkey here is global —
@@ -33,7 +33,6 @@ end
 bind({ "cmd", "alt" }, "1", workspace.layout)
 bind({ "cmd", "alt" }, "2", workspace.code)
 bind({ "cmd", "alt" }, "3", workspace.development)
-bind({ "cmd", "alt" }, "4", workspace.work)
 bind({ "cmd", "alt" }, "R", workspace.rotate)
 bind({ "cmd", "alt" }, "0", screen.toggleResolution)
 bind({ "cmd", "alt" }, "F", motion.toggleZoom)
