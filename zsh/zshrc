@@ -35,6 +35,19 @@ command -v aws_completer >/dev/null && complete -C aws_completer aws
 
 autoload -Uz "$HOME/.config/zsh/functions"/*(:t) 2>/dev/null
 
+# --- tmux sessions ----------------------------------------------------------
+# Alacritty is a tmux frontend here, so opening one lands inside `dev`.
+# $ALACRITTY_WINDOW_ID is set by Alacritty itself and keeps this out of the
+# VS Code terminal and out of ssh; $TMUX keeps it from re-entering from a pane.
+#
+# A second window finds dev already attached and stays a plain shell -- the
+# check is list-clients and not has-session, since the session exists either
+# way and what differs is whether something is hanging off it.
+if [[ -o interactive && -n $ALACRITTY_WINDOW_ID && -z $TMUX ]] && (( $+commands[tmux] )); then
+  tsess -n
+  [[ -z "$(tmux list-clients -t=dev 2>/dev/null)" ]] && tsess
+fi
+
 # --- vi mode ----------------------------------------------------------------
 bindkey -v
 KEYTIMEOUT=1

@@ -23,6 +23,7 @@ opt.breakindent = true
 opt.breakindentopt = "shift:2"
 opt.scrolloff = 4
 opt.cursorline = true
+opt.colorcolumn = "81"
 opt.showmode = false
 opt.termguicolors = true
 opt.tabstop = 2
@@ -56,6 +57,8 @@ vim.pack.add({
   "https://github.com/hrsh7th/cmp-nvim-lsp",
   "https://github.com/hrsh7th/cmp-buffer",
   "https://github.com/hrsh7th/cmp-path",
+  "https://github.com/hrsh7th/cmp-cmdline",
+  "https://github.com/windwp/nvim-autopairs",
   "https://github.com/stevearc/conform.nvim",
   "https://github.com/ibhagwan/fzf-lua",
   "https://github.com/lewis6991/gitsigns.nvim",
@@ -85,6 +88,8 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
+require("nvim-autopairs").setup({ check_ts = true })
+
 local cmp = require("cmp")
 cmp.setup({
   -- Required by nvim-cmp even with no snippet plugin; vim.snippet is built in.
@@ -94,6 +99,28 @@ cmp.setup({
     ["<C-f>"] = cmp.mapping.scroll_docs(4),
     ["<C-Space>"] = cmp.mapping.complete(),
     ["<C-e>"] = cmp.mapping.abort(),
+    -- fallback() keeps <C-k> as the native digraph insert when no menu is open.
+    ["<C-j>"] = cmp.mapping(function(fallback)
+      if cmp.visible() then cmp.select_next_item() else fallback() end
+    end, { "i" }),
+    ["<C-k>"] = cmp.mapping(function(fallback)
+      if cmp.visible() then cmp.select_prev_item() else fallback() end
+    end, { "i" }),
+    -- completeopt has noselect, so nothing is highlighted when the menu opens:
+    -- the first <Tab> picks an entry, the second one accepts it.
+    ["<Tab>"] = cmp.mapping(function(fallback)
+      if not cmp.visible() then
+        return fallback()
+      end
+      if cmp.get_selected_entry() then
+        cmp.confirm({ behavior = cmp.ConfirmBehavior.Insert })
+      else
+        cmp.select_next_item()
+      end
+    end, { "i", "s" }),
+    ["<S-Tab>"] = cmp.mapping(function(fallback)
+      if cmp.visible() then cmp.select_prev_item() else fallback() end
+    end, { "i", "s" }),
     ["<CR>"] = cmp.mapping.confirm({ select = true, behavior = cmp.ConfirmBehavior.Insert }),
   }),
   sources = cmp.config.sources({
@@ -105,7 +132,15 @@ cmp.setup({
   experimental = { ghost_text = true },
 })
 
-cmp.setup.cmdline(":", { sources = cmp.config.sources({ { name = "path" } }) })
+-- Confirming a function completion appends the pair: `map` -> `map()`.
+cmp.event:on("confirm_done", require("nvim-autopairs.completion.cmp").on_confirm_done())
+
+-- path first so `:e src/` completes the tree; command names only once no path
+-- matches, otherwise every `:` would list the whole command set.
+cmp.setup.cmdline(":", {
+  mapping = cmp.mapping.preset.cmdline(),
+  sources = cmp.config.sources({ { name = "path" } }, { { name = "cmdline" } }),
+})
 
 -- blink had signature help built in; nvim-cmp does not. doc_lines = 0 keeps it
 -- to the signature itself instead of dragging the whole docstring along.
@@ -199,6 +234,12 @@ map("n", "<leader>gs", "<Cmd>Gitsigns stage_hunk<CR>", { desc = "Stage hunk" })
 map("n", "<leader>gr", "<Cmd>Gitsigns reset_hunk<CR>", { desc = "Reset hunk" })
 map("n", "<leader>gp", "<Cmd>Gitsigns preview_hunk<CR>", { desc = "Preview hunk" })
 map("n", "<leader>gb", "<Cmd>Gitsigns toggle_current_line_blame<CR>", { desc = "Blame" })
+-- git_status previews the diff and stages from the picker itself: ctrl-s stage,
+-- ctrl-u unstage, ctrl-x reset.
+map("n", "<leader>gf", fzf("git_status"), { desc = "Changed files" })
+map("n", "<leader>gc", fzf("git_commits"), { desc = "Commits" })
+map("n", "<leader>gC", fzf("git_bcommits"), { desc = "Commits (this file)" })
+map("n", "<leader>gB", fzf("git_branches"), { desc = "Branches" })
 map("n", "]h", "<Cmd>Gitsigns nav_hunk next<CR>", { desc = "Next hunk" })
 map("n", "[h", "<Cmd>Gitsigns nav_hunk prev<CR>", { desc = "Previous hunk" })
 

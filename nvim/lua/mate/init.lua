@@ -34,6 +34,9 @@ local THEMES = {
 		-- Pitched between base01 and base02: a float needs a ground one step
 		-- off the buffer's, and a border above both.
 		separator = 0x3a3d3e,
+		-- bathory gives ColorColumn the same base01 as CursorLine, so the rule
+		-- disappears on the line being edited. One step above it.
+		color_column = 0x3a3d3e,
 		float_bg = 0x2e3233,
 		float_fg = 0x4a4f50,
 		-- No comment_from: base03 is lifted in the swap above, which carries
@@ -50,6 +53,9 @@ local THEMES = {
 		-- and FloatBorder ship as #20252c, a hard black rule much heavier than
 		-- anything on the dark side; these keep both modes equally quiet.
 		separator = 0xe7ecf0,
+		-- Its ColorColumn is lighter than CursorLine, so the rule reads as a gap
+		-- where the two cross. One step below it instead.
+		color_column = 0xdde3e9,
 		float_bg = 0xf0f1f2,
 		float_fg = 0x66707b,
 		-- No comment_from: this theme puts Comment at #4b535d, 7.8:1 on white.
@@ -92,6 +98,7 @@ function M.apply(mode)
 	vim.cmd("hi Normal ctermbg=NONE")
 
 	vim.api.nvim_set_hl(0, "WinSeparator", { fg = theme.separator })
+	vim.api.nvim_set_hl(0, "ColorColumn", { bg = theme.color_column })
 	vim.api.nvim_set_hl(0, "NormalFloat", { bg = theme.float_bg })
 	vim.api.nvim_set_hl(0, "FloatBorder", { fg = theme.float_fg, bg = theme.float_bg })
 

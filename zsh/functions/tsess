@@ -1,0 +1,33 @@
+# The three work sessions, created once and reused forever.
+# autoloaded: the file name is the function name.
+#
+#   tsess          create what is missing, then attach to dev
+#   tsess -n       create what is missing and return (what .zshrc calls)
+#
+#   dev  -> ~/develop      work -> ~/work      side -> ~/side
+
+emulate -L zsh
+
+(( $+commands[tmux] )) || { print -u2 'tsess: tmux not found'; return 1 }
+
+local -a sessions=(dev "$HOME/develop" work "$HOME/work" side "$HOME/side")
+local name dir
+
+local i
+for (( i = 1; i <= $#sessions; i += 2 )); do
+  name=$sessions[i] dir=$sessions[i+1]
+  # -t=name, with the `=`, is an exact match. Without it tmux matches by
+  # prefix, so `dev` would find `devops` and the session would never be made.
+  tmux has-session -t="$name" 2>/dev/null && continue
+  if [[ ! -d $dir ]]; then
+    print -u2 "tsess: $dir does not exist, skipping $name"
+    continue
+  fi
+  tmux new-session -d -s "$name" -c "$dir"
+done
+
+[[ $1 == -n ]] && return 0
+
+# No exec: a tmux that fails to attach leaves a usable shell instead of a
+# window that closes on its own, and a detach comes back here.
+tmux has-session -t=dev 2>/dev/null && tmux attach -t=dev

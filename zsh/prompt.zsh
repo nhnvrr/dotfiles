@@ -26,8 +26,8 @@ zstyle ':vcs_info:git:*' check-for-changes false
 zstyle ':vcs_info:git*:*' patch-format ''
 zstyle ':vcs_info:git*:*' nopatch-format ''
 
-# Brackets, because in RPROMPT the next thing to the right is %~ and without
-# them the branch and the path read as one string. Trailing space separates them.
+# Brackets, so the branch reads as a block of its own next to the elapsed time
+# rather than running into it.
 #
 # They are punctuation, not information, so they sit on slot 8 and the branch
 # keeps the green to itself. %F{8} and not %F{brightblack}: zsh knows the eight
@@ -182,25 +182,27 @@ add-zsh-hook precmd _mate_precmd
 # PS1 instead and the prompt comes out corrupted.
 [[ -n $TMUX ]] && export ZLE_RPROMPT_INDENT=0
 
-# Left stays short past the user name: %1~ is the leaf of the path only, so the
-# command starts near the margin no matter how deep the tree or how long the
-# branch; everything else that is context rather than input lives in RPROMPT.
+# The path is on the left and nowhere else. It used to be in both places -- the
+# leaf here and the whole thing at the far right -- which spent the widest slot
+# in the line restating what the left already said.
+#
+# %~ and not %2~: that one drops the leading components instead of shortening
+# them, so ~/work/x and ~/Develop/x render identically.
 #
 # %n is cyan, which is also the staged marker inside the git block in RPROMPT.
 # They sit at opposite ends of the line and are never read together, so the
 # colour is reused rather than reserved.
 #
 #   %n         user name
-#   %1~        leaf of $PWD, or ~ at $HOME
+#   %~         $PWD with $HOME as ~
 #   %(1j.*.)   a * while there are background jobs
 #   %(?..!)    a ! when the last command exited non-zero
 #   %(!.a.b)   root vs not
 #
 # No %B anywhere: colour already separates every one of these, and weight is
 # handled once in alacritty.toml rather than per-escape here.
-PROMPT='%F{cyan}%n%f %F{blue}%1~%f%F{yellow}%(1j.*.)%(?..!)%f %(!.%F{yellow}.%F{red})${_mate_chevrons}%f '
+PROMPT='%F{cyan}%n%f %F{blue}%~%f%F{yellow}%(1j.*.)%(?..!)%f %(!.%F{yellow}.%F{red})${_mate_chevrons}%f '
 
-# %~ is the whole path, abbreviating nothing. Not %2~: that one drops the
-# leading components instead of shortening them, so ~/work/x and ~/Develop/x
-# render identically.
-RPROMPT='${_mate_elapsed}${vcs_info_msg_0_}%F{blue}%~%f'
+# The git block keeps its trailing space from `formats`, which used to separate
+# it from the path. Stripped here so the branch ends at the margin.
+RPROMPT='${_mate_elapsed}${vcs_info_msg_0_% }'

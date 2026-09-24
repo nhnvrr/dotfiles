@@ -166,6 +166,12 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		map("[e", function()
 			vim.diagnostic.jump({ count = -1, severity = vim.diagnostic.severity.ERROR })
 		end, "Previous error")
+		if client:supports_method("textDocument/hover") then
+			map("<leader>ci", vim.lsp.buf.hover, "Info (hover)")
+		end
+		if client:supports_method("textDocument/signatureHelp") then
+			map("<leader>cs", vim.lsp.buf.signature_help, "Signature")
+		end
 		if client:supports_method("textDocument/inlayHint") then
 			map("<leader>ch", function()
 				vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = args.buf }), { bufnr = args.buf })

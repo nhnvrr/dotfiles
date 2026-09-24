@@ -59,7 +59,7 @@ local function tree()
   })
   require("neo-tree").setup({
     close_if_last_window = true,
-    window = { width = 32 },
+    window = { position = "right", width = 32 },
     default_component_configs = {
       icon = { folder_closed = "+", folder_open = "-", folder_empty = " ", default = " " },
       git_status = {
@@ -81,6 +81,11 @@ vim.keymap.set("n", "<leader>e", function()
   tree()
   vim.cmd("Neotree toggle reveal")
 end, { desc = "File tree" })
+
+vim.keymap.set("n", "<leader>gt", function()
+  tree()
+  vim.cmd("Neotree toggle git_status")
+end, { desc = "Git tree" })
 
 vim.api.nvim_create_autocmd("VimEnter", {
   group = vim.api.nvim_create_augroup("dotfiles.tree", { clear = true }),
