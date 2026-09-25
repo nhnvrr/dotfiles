@@ -8,44 +8,11 @@ local STATE = vim.env.XDG_STATE_HOME or (vim.env.HOME .. "/.local/state")
 local STATE_FILE = STATE .. "/mate/appearance"
 local SOCKET_DIR = STATE .. "/mate/nvim"
 
---- One entry per mode: the scheme that matches the palette alacritty imports,
---- and the few groups that scheme leaves wrong. `swap` is the same correction
---- alacritty's own file makes -- the ground and the slots the scheme puts
---- under 4.5:1 on it -- and both files have to carry the same numbers.
+--- One entry per mode. Dark is colors/mate.lua, built on alacritty's own
+--- dark.toml, so it needs no corrections; light is upstream and gets a few.
 local THEMES = {
 	dark = {
-		colorscheme = "black-metal-bathory",
-		-- bathory grounds on #000000 -- halation at a full workday -- and is nearly
-		-- monochrome: five greys, one orange, one teal. Lifting the ground alone is
-		-- not enough. Its three darkest slots sit level with or below #1d2021, so
-		-- the surfaces vanish and Comment goes to 1.30:1 unless they move too.
-		--
-		-- base01 is the one with two jobs: paper under CursorLine and PMenu, and
-		-- ink in Search, IncSearch and PMenuSel. #2a2d2e is a 1.18 step off the
-		-- ground as paper, and still 5.39:1 as ink on base0A.
-		swap = {
-			[0x000000] = 0x1d2021, -- base00 ground
-			[0x121212] = 0x2a2d2e, -- base01 1.14 below the ground -> 1.18 above
-			[0x222222] = 0x3a3d3e, -- base02 1.03, level with it -> 1.50
-			[0x333333] = 0x8a8a8a, -- base03 Comment   1.30 -> 4.75
-			[0x444444] = 0x949494, -- base0F Delimiter 1.68 -> 5.40
-			[0x5f8787] = 0x6a9494, -- base08 red slot  4.14 -> 4.90
-		},
-		-- Pitched between base01 and base02: a float needs a ground one step
-		-- off the buffer's, and a border above both.
-		separator = 0x3a3d3e,
-		-- bathory gives ColorColumn the same base01 as CursorLine, so the rule
-		-- disappears on the line being edited. One step above it.
-		color_column = 0x3a3d3e,
-		float_bg = 0x2e3233,
-		float_fg = 0x4a4f50,
-		-- No comment_from: base03 is lifted in the swap above, which carries
-		-- Comment to 4.75:1 along with LineNr and the rest of the chrome.
-		--
-		-- base16 gives these a bg meant for the signcolumn, and neo-tree copies
-		-- it onto the filename -- a grey box behind every dirty entry. gitsigns
-		-- and neo-tree both resolve through GitGutter*, so this fixes both.
-		strip_gitgutter = true,
+		colorscheme = "mate",
 	},
 	light = {
 		colorscheme = "github_light_high_contrast",
@@ -58,29 +25,8 @@ local THEMES = {
 		color_column = 0xdde3e9,
 		float_bg = 0xf0f1f2,
 		float_fg = 0x66707b,
-		-- No comment_from: this theme puts Comment at #4b535d, 7.8:1 on white.
 	},
 }
-
---- Patching Normal alone would leave every group that baked the same hex in,
---- so the swap walks the whole table. Linked groups are skipped: writing one
---- back would resolve the link and detach it from whatever it follows.
-local function reslot(swap)
-	for name, def in pairs(vim.api.nvim_get_hl(0, {})) do
-		if not def.link then
-			local touched = false
-			for _, key in ipairs({ "fg", "bg", "sp" }) do
-				local to = def[key] and swap[def[key]]
-				if to then
-					def[key], touched = to, true
-				end
-			end
-			if touched then
-				vim.api.nvim_set_hl(0, name, def)
-			end
-		end
-	end
-end
 
 function M.apply(mode)
 	mode = mode == "light" and "light" or "dark"
@@ -89,31 +35,15 @@ function M.apply(mode)
 	vim.o.background = mode
 	vim.cmd.colorscheme(theme.colorscheme)
 
-	if theme.swap then
-		reslot(theme.swap)
-	end
-
 	-- termguicolors is on, so this only bites on a terminal without truecolor:
 	-- there the ground stays the terminal's own and opacity keeps working.
 	vim.cmd("hi Normal ctermbg=NONE")
 
-	vim.api.nvim_set_hl(0, "WinSeparator", { fg = theme.separator })
-	vim.api.nvim_set_hl(0, "ColorColumn", { bg = theme.color_column })
-	vim.api.nvim_set_hl(0, "NormalFloat", { bg = theme.float_bg })
-	vim.api.nvim_set_hl(0, "FloatBorder", { fg = theme.float_fg, bg = theme.float_bg })
-
-	if theme.strip_gitgutter then
-		for _, group in ipairs({
-			"GitGutterAdd", "GitGutterChange", "GitGutterDelete", "GitGutterChangeDelete",
-		}) do
-			local hl = vim.api.nvim_get_hl(0, { name = group })
-			hl.bg, hl.ctermbg = nil, nil
-			vim.api.nvim_set_hl(0, group, hl)
-		end
-	end
-
-	if theme.comment_from then
-		vim.api.nvim_set_hl(0, "Comment", vim.api.nvim_get_hl(0, { name = theme.comment_from }))
+	if theme.separator then
+		vim.api.nvim_set_hl(0, "WinSeparator", { fg = theme.separator })
+		vim.api.nvim_set_hl(0, "ColorColumn", { bg = theme.color_column })
+		vim.api.nvim_set_hl(0, "NormalFloat", { bg = theme.float_bg })
+		vim.api.nvim_set_hl(0, "FloatBorder", { fg = theme.float_fg, bg = theme.float_bg })
 	end
 
 	local marked = vim.api.nvim_get_hl(0, { name = "PMenu" })

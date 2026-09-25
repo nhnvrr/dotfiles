@@ -45,6 +45,10 @@
       "rev": "5be654f2232c10ddcad19c1607a67b6b4b78fc29",
       "src": "https://github.com/lewis6991/gitsigns.nvim"
     },
+    "kanagawa.nvim": {
+      "rev": "bb85e4bfc8d89b0e62c8fa53ccdd13d12e2f77b3",
+      "src": "https://github.com/rebelot/kanagawa.nvim"
+    },
     "lsp_signature.nvim": {
       "rev": "1997451c4c9956a1380d8bea4b0e33ebdf07976e",
       "src": "https://github.com/ray-x/lsp_signature.nvim"

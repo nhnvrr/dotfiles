@@ -190,4 +190,5 @@ _mate_source_plugin zsh-autosuggestions
 bindkey '^ ' autosuggest-accept
 
 # Strictly last: it wraps the widgets that exist when it loads.
-_mate_source_plugin zsh-syntax-highlighting
+_mate_source_plugin zsh-syntax-highlighting &&
+  ZSH_HIGHLIGHT_STYLES[default]='fg=white'

@@ -63,7 +63,6 @@ vim.pack.add({
   "https://github.com/ibhagwan/fzf-lua",
   "https://github.com/lewis6991/gitsigns.nvim",
   "https://github.com/b0o/SchemaStore.nvim",
-  "https://github.com/wincent/base16-nvim",
   "https://github.com/projekt0n/github-nvim-theme",
 })
 

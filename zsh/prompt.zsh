@@ -26,16 +26,10 @@ zstyle ':vcs_info:git:*' check-for-changes false
 zstyle ':vcs_info:git*:*' patch-format ''
 zstyle ':vcs_info:git*:*' nopatch-format ''
 
-# Brackets, so the branch reads as a block of its own next to the elapsed time
-# rather than running into it.
-#
-# They are punctuation, not information, so they sit on slot 8 and the branch
-# keeps the green to itself. %F{8} and not %F{brightblack}: zsh knows the eight
-# base names only, and emits \e[39m -- plain default -- for anything else,
-# without a word. The number is still an ANSI slot, so it follows the palette
-# like every other colour here.
-zstyle ':vcs_info:git:*' formats       '%F{8}[%F{green}%b%f%m%F{8}]%f '
-zstyle ':vcs_info:git:*' actionformats '%F{8}[%F{green}%b%f|%F{red}%a%f%m%F{8}]%f '
+# Leading space, not trailing: the block sits right after the path in PROMPT.
+# U+E0A0 is the powerline branch glyph; Ioskeley ships it.
+zstyle ':vcs_info:git:*' formats       $' %F{green}\ue0a0 %b%f%m'
+zstyle ':vcs_info:git:*' actionformats $' %F{green}\ue0a0 %b%f|%F{red}%a%f%m'
 
 zstyle ':vcs_info:git+set-message:*' hooks git-status git-shorten-branch
 
@@ -73,8 +67,7 @@ function +vi-git-status {
   done
 
   [[ -n $unstaged  ]] && hook_com[misc]+='%F{yellow}*%f'
-  # cyan, not green: green is the branch and the brackets around it now, and a
-  # green + inside a green [] is a + you cannot see.
+  # cyan, not green: a green + right after the green branch is a + you cannot see.
   [[ -n $staged    ]] && hook_com[misc]+='%F{cyan}+%f'
   [[ -n $untracked ]] && hook_com[misc]+='%F{red}?%f'
   [[ -n $stash     ]] && hook_com[misc]+='%F{magenta}$%f'
@@ -158,8 +151,7 @@ function _mate_format_elapsed {
 function _mate_precmd {
   if [[ -n $_mate_cmd_start ]]; then
     _mate_format_elapsed $(( SECONDS - _mate_cmd_start ))
-    # No %F: every ANSI colour already means something else here, and cyan in
-    # particular is the git block sitting immediately to the right.
+    # No %F: every ANSI colour already means something else in the prompt.
     _mate_elapsed="${_mate_faint_on}${_mate_italic_on}${REPLY}${_mate_italic_off}${_mate_faint_off} "
     _mate_cmd_start=
   else
@@ -182,27 +174,17 @@ add-zsh-hook precmd _mate_precmd
 # PS1 instead and the prompt comes out corrupted.
 [[ -n $TMUX ]] && export ZLE_RPROMPT_INDENT=0
 
-# The path is on the left and nowhere else. It used to be in both places -- the
-# leaf here and the whole thing at the far right -- which spent the widest slot
-# in the line restating what the left already said.
-#
 # %~ and not %2~: that one drops the leading components instead of shortening
 # them, so ~/work/x and ~/Develop/x render identically.
 #
-# %n is cyan, which is also the staged marker inside the git block in RPROMPT.
-# They sit at opposite ends of the line and are never read together, so the
-# colour is reused rather than reserved.
-#
-#   %n         user name
 #   %~         $PWD with $HOME as ~
-#   %(1j.*.)   a * while there are background jobs
+#   %(1j.*.)   a * while there are background jobs, before the branch so it
+#              is never read as the branch's unstaged *
 #   %(?..!)    a ! when the last command exited non-zero
 #   %(!.a.b)   root vs not
 #
 # No %B anywhere: colour already separates every one of these, and weight is
 # handled once in alacritty.toml rather than per-escape here.
-PROMPT='%F{cyan}%n%f %F{blue}%~%f%F{yellow}%(1j.*.)%(?..!)%f %(!.%F{yellow}.%F{red})${_mate_chevrons}%f '
+PROMPT='%F{cyan}%~%f%F{yellow}%(1j.*.)%(?..!)%f${vcs_info_msg_0_} %(!.%F{yellow}.%F{red})${_mate_chevrons}%f '
 
-# The git block keeps its trailing space from `formats`, which used to separate
-# it from the path. Stripped here so the branch ends at the margin.
-RPROMPT='${_mate_elapsed}${vcs_info_msg_0_% }'
+RPROMPT='${_mate_elapsed% }'

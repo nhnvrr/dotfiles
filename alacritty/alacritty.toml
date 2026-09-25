@@ -4,7 +4,7 @@ import = ["~/.config/alacritty/dark.toml"]
 
 [window]
 startup_mode = "Maximized"
-decorations = "Buttonless"
+decorations = "None"
 padding = { x = 1, y = 1 }
 dynamic_padding = true
 option_as_alt = "Both"
