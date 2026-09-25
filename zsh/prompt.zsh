@@ -73,6 +73,7 @@ function +vi-git-status {
   [[ -n $stash     ]] && hook_com[misc]+='%F{magenta}$%f'
   (( ahead  )) && hook_com[misc]+="%F{blue}⇡${ahead}%f"
   (( behind )) && hook_com[misc]+="%F{blue}⇣${behind}%f"
+  [[ -n ${hook_com[misc]} ]] && hook_com[misc]=" %F{white}[%f${hook_com[misc]}%F{white}]%f"
 
   # Mandatory. VCS_INFO_hook breaks out of its loop the moment a hook returns
   # non-zero, silently skipping every hook after it -- and the last line above
