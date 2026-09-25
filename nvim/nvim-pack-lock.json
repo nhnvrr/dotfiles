@@ -4,10 +4,6 @@
       "rev": "c8170f9628265f5a01510182703bab9125ef15d8",
       "src": "https://github.com/b0o/SchemaStore.nvim"
     },
-    "base16-nvim": {
-      "rev": "12d13ab893cddbdc11891eac9f7f599050bc00ce",
-      "src": "https://github.com/wincent/base16-nvim"
-    },
     "blink.cmp": {
       "rev": "78336bc89ee5365633bcf754d93df01678b5c08f",
       "src": "https://github.com/Saghen/blink.cmp",
