@@ -37,6 +37,17 @@
 [delta]
 	navigate = true
 	line-numbers = true
+	# ansi paints syntax with the terminal's sixteen slots, so diffs follow
+	# alacritty/dark.toml. The tints are its red and green over the #141516
+	# ground; they are fixed hex and will look heavy on the light palette.
+	syntax-theme = ansi
+	minus-style = syntax "#351817"
+	minus-emph-style = syntax "#541a18"
+	plus-style = syntax "#2c2c17"
+	plus-emph-style = syntax "#424217"
+	line-numbers-minus-style = brightred
+	line-numbers-plus-style = green
+	line-numbers-zero-style = brightblack
 
 [rerere]
 	enabled = true

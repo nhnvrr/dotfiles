@@ -23,7 +23,7 @@ require("lualine").setup({
     lualine_y = { "progress" },
     lualine_z = { "location" },
   },
-  extensions = { "neo-tree", "quickfix" },
+  extensions = { "quickfix" },
 })
 
 require("which-key").setup({
@@ -51,49 +51,15 @@ require("which-key").add({
 
 require("nvim-surround").setup({})
 
-local function tree()
-  vim.pack.add({
-    { src = "https://github.com/nvim-neo-tree/neo-tree.nvim", version = vim.version.range("3") },
-    "https://github.com/nvim-lua/plenary.nvim",
-    "https://github.com/MunifTanjim/nui.nvim",
-  })
-  require("neo-tree").setup({
-    close_if_last_window = true,
-    window = { position = "right", width = 32 },
-    default_component_configs = {
-      icon = { folder_closed = "+", folder_open = "-", folder_empty = " ", default = " " },
-      git_status = {
-        symbols = {
-          added = "+", modified = "~", deleted = "-", renamed = ">",
-          untracked = "?", conflict = "!", staged = "=", unstaged = "", ignored = "",
-        },
-      },
-    },
-    filesystem = {
-      filtered_items = { hide_dotfiles = false, hide_gitignored = true },
-      follow_current_file = { enabled = true },
-      use_libuv_file_watcher = true,
-    },
-  })
-  tree = function() end
-end
+-- Toggle: opens on the current file's directory with the cursor on that file,
+-- and from netrw goes back to the file it was opened from.
 vim.keymap.set("n", "<leader>e", function()
-  tree()
-  vim.cmd("Neotree toggle reveal")
-end, { desc = "File tree" })
-
-vim.keymap.set("n", "<leader>gt", function()
-  tree()
-  vim.cmd("Neotree toggle git_status")
-end, { desc = "Git tree" })
-
-vim.api.nvim_create_autocmd("VimEnter", {
-  group = vim.api.nvim_create_augroup("dotfiles.tree", { clear = true }),
-  callback = function()
-    local arg = vim.fn.argv(0)
-    if arg ~= "" and vim.fn.isdirectory(arg) == 1 then
-      tree()
-      vim.cmd("Neotree dir=" .. vim.fn.fnameescape(arg))
+  if vim.bo.filetype ~= "netrw" then
+    vim.cmd("Explore")
+  elseif not pcall(vim.cmd, "Rexplore") then
+    local alt = vim.fn.bufnr("#")
+    if alt > 0 and vim.bo[alt].filetype ~= "netrw" then
+      vim.cmd("buffer #")
     end
-  end,
-})
+  end
+end, { desc = "File tree" })

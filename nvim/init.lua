@@ -2,8 +2,9 @@ vim.loader.enable()
 
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
-vim.g.loaded_netrw = 1
-vim.g.loaded_netrwPlugin = 1
+-- netrw is the file tree: `nvim .` or <leader>e. No banner, tree listing.
+vim.g.netrw_banner = 0
+vim.g.netrw_liststyle = 3
 
 local augroup = vim.api.nvim_create_augroup("dotfiles", { clear = true })
 
@@ -151,7 +152,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
   group = augroup,
   once = true,
   callback = function()
-    require("lsp_signature").setup({ doc_lines = 0, handler_opts = { border = "none" } })
+    require("lsp_signature").setup({ doc_lines = 0, hint_prefix = "» ", handler_opts = { border = "none" } })
   end,
 })
 
@@ -303,6 +304,15 @@ vim.api.nvim_create_autocmd("FileType", {
   pattern = { "help", "qf", "man", "checkhealth" },
   callback = function(args)
     map("n", "q", "<Cmd>close<CR>", { buffer = args.buf, silent = true })
+  end,
+})
+
+-- fzf has no normal mode, so jk closes the picker the way it leaves insert.
+vim.api.nvim_create_autocmd("FileType", {
+  group = augroup,
+  pattern = "fzf",
+  callback = function(args)
+    map("t", "jk", "<Esc>", { buffer = args.buf })
   end,
 })
 
