@@ -1,19 +1,19 @@
-# black-metal-bathory greys on a #1d2021 ground, with gruvbox's orange, green
+# black-metal-bathory greys on a #141516 ground, with gruvbox's orange, green
 # and gold in red/green/yellow and bathory's teal in cyan. The bright row is
 # grey except bright red, gruvbox's #cc241d. Under 4.5:1 on purpose: bright
-# red 3.00, orange 4.24, and slot 8 at 1.44 -- it only carries autosuggestion
-# ghost text, fzf's info line and tmux pane borders, which should recede.
+# red 3.34 and slot 8 at 1.61 -- it only carries autosuggestion ghost text,
+# fzf's info line and tmux pane borders, which should recede.
 [colors.primary]
-background = "0x1d2021"
+background = "0x141516"
 foreground = "0xc1c1c1"
 dim_foreground = "0xa7a7a7"
 
 [colors.cursor]
 cursor = "0xc1c1c1"
-text = "0x1d2021"
+text = "0x141516"
 
 [colors.normal]
-black = "0x1d2021"
+black = "0x141516"
 red = "0xd65d0e"
 green = "0x98971a"
 yellow = "0xd79921"

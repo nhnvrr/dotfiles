@@ -16,7 +16,7 @@ bold = { family = "Ioskeley Mono Term", style = "Regular" }
 italic = { family = "Ioskeley Mono Term", style = "SemiLight Italic" }
 bold_italic = { family = "Ioskeley Mono Term", style = "Italic" }
 size = 14
-offset = { x = 2, y = 2 }
+offset = { x = 0, y = 0 }
 
 [cursor]
 style = { shape = "Beam", blinking = "On" }

@@ -2,7 +2,7 @@
 -- so the terminal and the editor cannot drift. Surfaces and the comment grey
 -- are not in the palette; they are blended from the ground. No group paints
 -- the ground itself: the terminal shows through, so it is alacritty's by
--- definition, and tmux can still dim an unfocused pane.
+-- definition.
 
 local function read_palette()
 	local paths = {
