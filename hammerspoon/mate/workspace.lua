@@ -3,14 +3,14 @@
 ---   cmd+alt+1                      cmd+alt+2
 ---   +-----------+-----------+      +-----------+-----------+
 ---   |           |           |      |           |           |
----   | Terminal  |  Chrome   |      |  VS Code  |  Chrome   |
+---   | Terminal  |  Chrome   |      |    Zed    |  Chrome   |
 ---   |           |           |      |           |           |
 ---   +-----------+-----------+      +-----------+-----------+
 ---
 ---   cmd+alt+3
 ---   +-----------+-----------+
 ---   |           |  Chrome   |
----   |  VS Code  +-----------+
+---   |    Zed    +-----------+
 ---   |           | Terminal  |
 ---   +-----------+-----------+
 ---
@@ -155,19 +155,19 @@ function M.layout()
   place()
 end
 
---- cmd+alt+2 — VS Code on the left and the browser on the right. Unlike
+--- cmd+alt+2 — Zed on the left and the browser on the right. Unlike
 --- cmd+alt+1, this is a distinct pair, so invoking it restores the declared
 --- sides after a rotation.
 function M.code()
-  M.current = { apps.bundles.vscode, apps.bundles.browser }
+  M.current = { apps.bundles.zed, apps.bundles.browser }
   hideOthers()
   place()
 end
 
---- cmd+alt+3 — VS Code takes the left half; the browser and the terminal split
+--- cmd+alt+3 — Zed takes the left half; the browser and the terminal split
 --- the right half. Invoking it always restores that order after a rotation.
 function M.development()
-  M.current = { apps.bundles.vscode, apps.bundles.browser, apps.bundles.terminal }
+  M.current = { apps.bundles.zed, apps.bundles.browser, apps.bundles.terminal }
   hideOthers()
   place()
 end

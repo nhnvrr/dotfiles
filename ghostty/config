@@ -1,0 +1,23 @@
+command = /opt/homebrew/bin/fish
+theme = light:mate-light,dark:mate-dark
+
+font-family = Ioskeley Mono Term
+font-size = 17
+adjust-cell-height = 1
+
+cursor-style = block
+mouse-hide-while-typing = true
+copy-on-select = clipboard
+confirm-close-surface = false
+
+macos-option-as-alt = true
+macos-titlebar-style = transparent
+window-save-state = never
+window-padding-x = 2
+window-padding-y = 1
+split-divider-color = #ff8000
+
+shell-integration-features = ssh-env,ssh-terminfo
+
+keybind = super+k=text:\x0c
+keybind = global:super+grave_accent=toggle_quick_terminal

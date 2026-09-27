@@ -119,42 +119,28 @@ echo "Preparing Go workspace..."
 mkdir -p "${HOME}/Develop/go/bin"
 
 echo "Linking config files..."
-# zsh has no single config directory to link: .zshenv and .zshrc are read from
-# $HOME by name. Only the autoloaded functions and the prompt live under
-# ~/.config/zsh.
-link_file "${CONFIG_DIR}/zsh/zshenv" "${HOME}/.zshenv"
-link_file "${CONFIG_DIR}/zsh/zshrc" "${HOME}/.zshrc"
-link_file "${CONFIG_DIR}/zsh/functions" "${HOME}/.config/zsh/functions"
-link_file "${CONFIG_DIR}/zsh/prompt.zsh" "${HOME}/.config/zsh/prompt.zsh"
-link_file "${CONFIG_DIR}/nvim" "${HOME}/.config/nvim"
-link_file "${CONFIG_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"
-# alacritty.toml is linked only until the first `mate` run, which replaces it
-# with a generated copy: live_config_reload never fires on a symlink. The two
-# palettes stay symlinks -- the generated file imports one of them by path.
-link_file "${CONFIG_DIR}/alacritty/alacritty.toml" "${HOME}/.config/alacritty/alacritty.toml"
-link_file "${CONFIG_DIR}/alacritty/dark.toml" "${HOME}/.config/alacritty/dark.toml"
-link_file "${CONFIG_DIR}/alacritty/light.toml" "${HOME}/.config/alacritty/light.toml"
-# btop rewrites this file on exit, comments and all, so the reason it is here
-# cannot live inside it: color_theme = "TTY" makes btop draw from the terminal's
-# sixteen ANSI slots instead of a theme file of its own, which is what keeps it
-# following Alacritty's own default palette for free. Expect btop to churn the
-# file whenever a setting is changed from its UI.
-link_file "${CONFIG_DIR}/btop/btop.conf" "${HOME}/.config/btop/btop.conf"
-# The XDG path, which tmux has read since 3.1, and not ~/.tmux.conf — still
-# honoured, but only as a fallback and only when this file is absent. An older
-# ~/.tmux.conf left over from a previous machine is not touched by this and
-# silently stops being read, which is the confusing half of the move.
-link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.config/tmux/tmux.conf"
-# history-file is dropped silently without this directory, and tmux does not
-# create it.
-mkdir -p "${HOME}/.local/state/zsh" "${HOME}/.cache/zsh"
-mkdir -p "${HOME}/.local/state/tmux"
-# init.lua and the mate/ directory it requires, but never ~/.hammerspoon itself:
-# Spoons lives there and is downloaded state, not config. Hammerspoon's
-# package.path already covers ~/.hammerspoon/?.lua, so the symlinked directory
-# is enough for require("mate.frame") to resolve.
+link_file "${CONFIG_DIR}/fish" "${HOME}/.config/fish"
+link_file "${CONFIG_DIR}/ghostty" "${HOME}/.config/ghostty"
+# Files, not the directory: Zed writes prompts/ and conversations/ next to them.
+link_file "${CONFIG_DIR}/zed/settings.json" "${HOME}/.config/zed/settings.json"
+link_file "${CONFIG_DIR}/zed/keymap.json" "${HOME}/.config/zed/keymap.json"
+link_file "${CONFIG_DIR}/zed/themes" "${HOME}/.config/zed/themes"
+# Only these two: ~/.vim also holds undo/ and pack/.
+link_file "${CONFIG_DIR}/vim/vimrc" "${HOME}/.vim/vimrc"
+link_file "${CONFIG_DIR}/vim/colors" "${HOME}/.vim/colors"
+VIM_LSP="${HOME}/.vim/pack/plugins/start/lsp"
+if [[ -d "${VIM_LSP}/.git" ]]; then
+  git -C "${VIM_LSP}" pull --ff-only --quiet
+else
+  git clone --depth 1 --quiet https://github.com/yegappan/lsp "${VIM_LSP}"
+fi
+# Files, not ~/.hammerspoon: Spoons/ lives there and is downloaded state.
 link_file "${CONFIG_DIR}/hammerspoon/init.lua" "${HOME}/.hammerspoon/init.lua"
 link_file "${CONFIG_DIR}/hammerspoon/mate" "${HOME}/.hammerspoon/mate"
+link_file "${CONFIG_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"
+# btop rewrites this file on exit, so the reason it is here cannot live inside
+# it: color_theme = "TTY" draws from the terminal's sixteen slots.
+link_file "${CONFIG_DIR}/btop/btop.conf" "${HOME}/.config/btop/btop.conf"
 # REDISCLI_HISTFILE points inside this one, and redis-cli won't mkdir.
 mkdir -p "${HOME}/.local/state/redis"
 if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
@@ -168,7 +154,7 @@ fi
 
 # No terminal font here, and none in the Brewfile either: the font-ioskeley-mono
 # cask ships only the Normal build, with no Term cut. It is a manual install, see
-# the README; the face is named in alacritty/alacritty.toml.
+# the README; the face is named in ghostty/config and zed/settings.json.
 
 echo "Applying macOS defaults..."
 defaults write NSGlobalDomain InitialKeyRepeat -int 15
@@ -181,22 +167,25 @@ mkdir -p "${HOME}/Screenshots"
 defaults write com.apple.screencapture location "${HOME}/Screenshots"
 defaults write com.apple.screencapture type -string "png"
 if command -v duti >/dev/null 2>&1; then
-  duti -s com.microsoft.VSCode public.json all
-  duti -s com.microsoft.VSCode public.yaml all
+  duti -s dev.zed.Zed public.json all
+  duti -s dev.zed.Zed public.yaml all
   for ext in toml ini cfg; do
-    duti -s com.microsoft.VSCode ".${ext}" all
+    duti -s dev.zed.Zed ".${ext}" all
   done
   # No browser line here on purpose. macOS 27 ignores duti for http/https —
   # error -50 on the schemes, silence on public.html — because only the browser
-  # itself may ask for the handler. hammerspoon/mate/browser.lua checks it on
-  # every load and says so when it is wrong; setting it is a click.
+  # itself may ask for the handler; setting it is a click.
 fi
 killall Finder 2>/dev/null || true
 killall SystemUIServer 2>/dev/null || true
 
-# /bin/zsh is in /etc/shells out of the box on macOS, so unlike the fish setup
-# this needs no sudo. dscl reads the real login shell, not $SHELL.
-SHELL_BIN=/bin/zsh
+# Homebrew's fish is not in /etc/shells, and chsh refuses a shell that is not.
+# dscl reads the real login shell, not $SHELL.
+SHELL_BIN="${HOMEBREW_PREFIX:-/opt/homebrew}/bin/fish"
+if [[ -x "${SHELL_BIN}" ]] && ! grep -qxF "${SHELL_BIN}" /etc/shells; then
+  echo "Adding ${SHELL_BIN} to /etc/shells (sudo)..."
+  echo "${SHELL_BIN}" | sudo tee -a /etc/shells >/dev/null
+fi
 LOGIN_SHELL="$(dscl . -read "/Users/${USER}" UserShell 2>/dev/null | awk '{print $2}')"
 if [[ "${LOGIN_SHELL}" != "${SHELL_BIN}" ]]; then
   echo "Changing login shell to ${SHELL_BIN} (chsh will prompt for your password)..."

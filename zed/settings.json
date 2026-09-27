@@ -1,0 +1,29 @@
+{
+  "project_panel": {
+    "folder_indicator": "both",
+    "dock": "right"
+  },
+  "theme": {
+    "mode": "system",
+    "light": "mate light",
+    "dark": "mate dark"
+  },
+  "buffer_font_family": "Ioskeley Mono Term",
+  "buffer_font_size": 13,
+  "ui_font_size": 16,
+  "vim_mode": true,
+  "cli_default_open_behavior": "existing_window",
+  "terminal": {
+    "font_family": "Ioskeley Mono Term",
+    "shell": { "program": "/opt/homebrew/bin/fish" }
+  },
+  "agent": {
+    "sidebar_side": "right",
+    "button": false,
+    "dock": "right"
+  },
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false
+  }
+}

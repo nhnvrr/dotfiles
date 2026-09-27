@@ -1,0 +1,71 @@
+set nocompatible
+let mapleader = ' '
+
+set number relativenumber
+set signcolumn=number
+set cursorline cursorlineopt=number
+set expandtab shiftwidth=2 tabstop=2 autoindent
+set ignorecase smartcase incsearch hlsearch
+set scrolloff=4 splitbelow splitright
+set noswapfile undofile undodir=~/.vim/undo
+set clipboard=unnamed
+set path+=** wildmenu wildignore+=*/node_modules/*,*/target/*,*/.git/*
+set backspace=indent,eol,start
+set laststatus=1 ruler
+set completeopt=menuone,noinsert
+set notermguicolors
+" Colour comes from Ghostty's cursor-color; only the shape is set here.
+" \e[0 q on exit hands the shape back to Ghostty's cursor-style.
+let &t_ti .= "\e[2 q"
+let &t_SI = "\e[2 q"
+let &t_EI = "\e[2 q"
+let &t_SR = "\e[2 q"
+let &t_te = "\e[0 q" . &t_te
+" $SHELL is still /bin/zsh: Ghostty launches fish via `command`.
+if executable('/opt/homebrew/bin/fish')
+  set shell=/opt/homebrew/bin/fish
+endif
+
+filetype plugin indent on
+syntax on
+colorscheme mate
+" Vim sets 'background' from the terminal's reply after startup.
+autocmd OptionSet background colorscheme mate
+
+nnoremap <leader>e :Explore<CR>
+nnoremap <leader>p :find<Space>
+nnoremap <Esc><Esc> :nohlsearch<CR>
+
+autocmd User LspSetup call LspOptionsSet(#{
+      \ autoComplete: v:false,
+      \ omniComplete: v:true,
+      \ showDiagWithVirtualText: v:false,
+      \ highlightDiagInline: v:false,
+      \ showDiagInPopup: v:false,
+      \ showSignature: v:false,
+      \ diagSignErrorText: '●',
+      \ diagSignWarningText: '●',
+      \ diagSignInfoText: '●',
+      \ diagSignHintText: '●',
+      \ })
+
+autocmd User LspSetup call LspAddServer([
+      \ #{name: 'vtsls', filetype: ['typescript', 'typescriptreact', 'javascript', 'javascriptreact'],
+      \   path: exepath('vtsls'), args: ['--stdio']},
+      \ #{name: 'gopls', filetype: ['go', 'gomod'], path: exepath('gopls'), args: []},
+      \ #{name: 'rust-analyzer', filetype: ['rust'],
+      \   path: exepath('rust-analyzer') ?? expand('~/.cargo/bin/rust-analyzer'), args: []},
+      \ ])
+
+function! s:lsp_maps() abort
+  nnoremap <buffer> gd :LspGotoDefinition<CR>
+  nnoremap <buffer> gr :LspShowReferences<CR>
+  nnoremap <buffer> K :LspHover<CR>
+  nnoremap <buffer> <leader>r :LspRename<CR>
+  nnoremap <buffer> <leader>a :LspCodeAction<CR>
+  nnoremap <buffer> <leader>f :LspFormat<CR>
+  nnoremap <buffer> <leader>d :LspDiag current<CR>
+  nnoremap <buffer> [d :LspDiag prev<CR>
+  nnoremap <buffer> ]d :LspDiag next<CR>
+endfunction
+autocmd User LspAttached call s:lsp_maps()

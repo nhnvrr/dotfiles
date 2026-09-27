@@ -26,7 +26,6 @@ end
 
 require("mate.workspace")
 require("mate.autozoom") -- every new window opens at full screen
-require("mate.appearance")
 require("mate.keys")
 
 -- Reasserted on every load rather than left to install.sh: LaunchServices drops

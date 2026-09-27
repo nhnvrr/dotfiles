@@ -1,13 +1,13 @@
 --- The whole keymap, in one file.
 ---
---- Keys split by modifier: Alacritty takes cmd, Hammerspoon takes cmd+alt for
---- the workspace and the display, ctrl+alt for the i3-style bindings, zsh
---- takes bare ctrl, and tmux takes ctrl+b as its prefix.
+--- Keys split by modifier: Ghostty takes cmd, Hammerspoon takes cmd+alt for
+--- the workspace and the display, ctrl+alt for the i3-style bindings, and fish
+--- takes bare ctrl.
 ---
---- ctrl+alt and not bare alt: alacritty.toml sets option_as_alt = "Both" so
---- option+b and option+f word-jump in the shell, and a hotkey here is global —
---- it takes the key before the terminal ever sees it. cmd+alt is taken by the
---- workspace bindings.
+--- ctrl+alt and not bare alt: Ghostty sets macos-option-as-alt so option+b and
+--- option+f word-jump in the shell, and a hotkey here is global — it takes the
+--- key before the terminal ever sees it. cmd+alt is taken by the workspace
+--- bindings.
 ---
 --- This is not a tiling window manager and does not pretend to be one: there is
 --- no tree, so nothing reflows when a window opens or closes and two windows can
