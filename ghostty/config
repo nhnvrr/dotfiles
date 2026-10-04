@@ -1,5 +1,7 @@
 command = /opt/homebrew/bin/fish
-theme = light:mate-light,dark:mate-dark
+theme = mate-dark
+# Written by `mate`; loaded after this file, so its theme wins.
+config-file = ?mode.local
 
 font-family = Ioskeley Mono Term
 font-size = 17
@@ -17,7 +19,7 @@ window-padding-x = 2
 window-padding-y = 1
 split-divider-color = #ff8000
 
-shell-integration-features = ssh-env,ssh-terminfo
+shell-integration-features = no-cursor,ssh-env,ssh-terminfo
 
 keybind = super+k=text:\x0c
 keybind = global:super+grave_accent=toggle_quick_terminal

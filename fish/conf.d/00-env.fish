@@ -10,9 +10,8 @@ contains -- /opt/homebrew/share/info $INFOPATH
 or set -gx INFOPATH /opt/homebrew/share/info $INFOPATH
 
 set -gx LANG en_US.UTF-8
-# --wait, or git reads the still-empty buffer and aborts the commit.
-set -gx EDITOR "zed --wait"
-set -gx VISUAL "zed --wait"
+set -gx EDITOR vim
+set -gx VISUAL vim
 
 set -gx GOPATH $HOME/Develop/go
 set -gx GOPRIVATE github.com/nhnvrr

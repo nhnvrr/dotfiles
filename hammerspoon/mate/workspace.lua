@@ -3,14 +3,14 @@
 ---   cmd+alt+1                      cmd+alt+2
 ---   +-----------+-----------+      +-----------+-----------+
 ---   |           |           |      |           |           |
----   | Terminal  |  Chrome   |      |    Zed    |  Chrome   |
+---   | Terminal  |  Chrome   |      |  VS Code  |  Chrome   |
 ---   |           |           |      |           |           |
 ---   +-----------+-----------+      +-----------+-----------+
 ---
 ---   cmd+alt+3
 ---   +-----------+-----------+
 ---   |           |  Chrome   |
----   |    Zed    +-----------+
+---   |  VS Code  +-----------+
 ---   |           | Terminal  |
 ---   +-----------+-----------+
 ---
@@ -155,28 +155,25 @@ function M.layout()
   place()
 end
 
---- cmd+alt+2 — Zed on the left and the browser on the right. Unlike
+--- cmd+alt+2 — VS Code on the left and the browser on the right. Unlike
 --- cmd+alt+1, this is a distinct pair, so invoking it restores the declared
 --- sides after a rotation.
 function M.code()
-  M.current = { apps.bundles.zed, apps.bundles.browser }
+  M.current = { apps.bundles.editor, apps.bundles.browser }
   hideOthers()
   place()
 end
 
---- cmd+alt+3 — Zed takes the left half; the browser and the terminal split
+--- cmd+alt+3 — VS Code takes the left half; the browser and the terminal split
 --- the right half. Invoking it always restores that order after a rotation.
 function M.development()
-  M.current = { apps.bundles.zed, apps.bundles.browser, apps.bundles.terminal }
+  M.current = { apps.bundles.editor, apps.bundles.browser, apps.bundles.terminal }
   hideOthers()
   place()
 end
 
---- cmd+alt+§ — every app in apps.stack at full screen, same gap as the halves.
----
---- unhide is not optional: a hidden app returns an empty allWindows(), so there
---- is no window to place until it is back. Nothing is launched -- an app that is
---- not running is skipped, because a key that opens six apps is a different key.
+--- cmd+alt+§ — every window of every running app at full screen, same gap as
+--- the halves. Nothing is launched.
 ---
 --- The focused window is restored at the end; unhiding steals focus otherwise.
 --- cmd+alt+1/2/3 are the way back, and they hide the rest again.
@@ -184,9 +181,9 @@ function M.zoomAll()
   local rect = frame.frameFor(0, 0, 1, 1, GAP)
   local focused = hs.window.focusedWindow()
 
-  for _, bid in ipairs(apps.stack) do
-    local app = hs.application.get(bid)
-    if app then
+  for _, app in ipairs(hs.application.runningApplications()) do
+    -- kind() == 1: an app with a Dock icon, the same test hideOthers uses.
+    if app:kind() == 1 and app:bundleID() ~= "org.hammerspoon.Hammerspoon" then
       if app:isHidden() then app:unhide() end
       for _, win in ipairs(app:allWindows()) do
         if win:isStandard() and not win:isMinimized() then

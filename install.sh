@@ -121,10 +121,12 @@ mkdir -p "${HOME}/Develop/go/bin"
 echo "Linking config files..."
 link_file "${CONFIG_DIR}/fish" "${HOME}/.config/fish"
 link_file "${CONFIG_DIR}/ghostty" "${HOME}/.config/ghostty"
-# Files, not the directory: Zed writes prompts/ and conversations/ next to them.
-link_file "${CONFIG_DIR}/zed/settings.json" "${HOME}/.config/zed/settings.json"
-link_file "${CONFIG_DIR}/zed/keymap.json" "${HOME}/.config/zed/keymap.json"
-link_file "${CONFIG_DIR}/zed/themes" "${HOME}/.config/zed/themes"
+# Settings come from VS Code's Settings Sync; only the theme lives here. The
+# folder name must match the entry in ~/.vscode/extensions/extensions.json.
+VSCODE_THEME="${HOME}/.vscode/extensions/nhnvrr.mate-theme-0.0.1"
+# A vsix install is a plain copy; a .bak of it beside the link would load twice.
+[[ -d "${VSCODE_THEME}" && ! -L "${VSCODE_THEME}" ]] && rm -rf "${VSCODE_THEME}"
+link_file "${CONFIG_DIR}/vscode/extensions/mate" "${VSCODE_THEME}"
 # Only these two: ~/.vim also holds undo/ and pack/.
 link_file "${CONFIG_DIR}/vim/vimrc" "${HOME}/.vim/vimrc"
 link_file "${CONFIG_DIR}/vim/colors" "${HOME}/.vim/colors"
@@ -138,9 +140,11 @@ fi
 link_file "${CONFIG_DIR}/hammerspoon/init.lua" "${HOME}/.hammerspoon/init.lua"
 link_file "${CONFIG_DIR}/hammerspoon/mate" "${HOME}/.hammerspoon/mate"
 link_file "${CONFIG_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"
-# btop rewrites this file on exit, so the reason it is here cannot live inside
-# it: color_theme = "TTY" draws from the terminal's sixteen slots.
 link_file "${CONFIG_DIR}/btop/btop.conf" "${HOME}/.config/btop/btop.conf"
+link_file "${CONFIG_DIR}/btop/themes/mate.theme" "${HOME}/.config/btop/themes/mate.theme"
+link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.config/tmux/tmux.conf"
+# history-file is dropped silently without this directory.
+mkdir -p "${HOME}/.local/state/tmux"
 # REDISCLI_HISTFILE points inside this one, and redis-cli won't mkdir.
 mkdir -p "${HOME}/.local/state/redis"
 if [[ -f "${CONFIG_DIR}/gh/config.yml" ]]; then
@@ -154,7 +158,7 @@ fi
 
 # No terminal font here, and none in the Brewfile either: the font-ioskeley-mono
 # cask ships only the Normal build, with no Term cut. It is a manual install, see
-# the README; the face is named in ghostty/config and zed/settings.json.
+# the README; the face is named in ghostty/config.
 
 echo "Applying macOS defaults..."
 defaults write NSGlobalDomain InitialKeyRepeat -int 15
@@ -166,11 +170,12 @@ defaults write NSGlobalDomain AppleShowAllExtensions -bool true
 mkdir -p "${HOME}/Screenshots"
 defaults write com.apple.screencapture location "${HOME}/Screenshots"
 defaults write com.apple.screencapture type -string "png"
-if command -v duti >/dev/null 2>&1; then
-  duti -s dev.zed.Zed public.json all
-  duti -s dev.zed.Zed public.yaml all
+# Guarded on the app: duti fails on an unknown bundle id and set -e would stop here.
+if command -v duti >/dev/null 2>&1 && open -Ra "Visual Studio Code" 2>/dev/null; then
+  duti -s com.microsoft.VSCode public.json all
+  duti -s com.microsoft.VSCode public.yaml all
   for ext in toml ini cfg; do
-    duti -s dev.zed.Zed ".${ext}" all
+    duti -s com.microsoft.VSCode ".${ext}" all
   done
   # No browser line here on purpose. macOS 27 ignores duti for http/https —
   # error -50 on the schemes, silence on public.html — because only the browser

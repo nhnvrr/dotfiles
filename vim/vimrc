@@ -4,6 +4,7 @@ let mapleader = ' '
 set number relativenumber
 set signcolumn=number
 set cursorline cursorlineopt=number
+set colorcolumn=81
 set expandtab shiftwidth=2 tabstop=2 autoindent
 set ignorecase smartcase incsearch hlsearch
 set scrolloff=4 splitbelow splitright
@@ -35,6 +36,8 @@ autocmd OptionSet background colorscheme mate
 nnoremap <leader>e :Explore<CR>
 nnoremap <leader>p :find<Space>
 nnoremap <Esc><Esc> :nohlsearch<CR>
+vnoremap J :m '>+1<CR>gv=gv
+vnoremap K :m '<-2<CR>gv=gv
 
 autocmd User LspSetup call LspOptionsSet(#{
       \ autoComplete: v:false,

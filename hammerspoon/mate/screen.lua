@@ -3,15 +3,30 @@
 
 local M = {}
 
-local RESOLUTIONS = {
-  { w = 1512, h = 982 },
-  { w = 1800, h = 1169 },
-}
+-- The two largest HiDPI modes of the panel: Apple's default and "More Space"
+-- on every Apple Silicon MacBook, whatever its size.
+local function resolutions(screen)
+  local seen, modes = {}, {}
+  for _, m in pairs(screen:availableModes()) do
+    local key = m.w .. "x" .. m.h
+    if m.scale == 2 and not seen[key] then
+      seen[key] = true
+      modes[#modes + 1] = { w = m.w, h = m.h }
+    end
+  end
+  table.sort(modes, function(a, b) return a.w > b.w end)
+  return modes[2], modes[1]
+end
 
 function M.toggleResolution()
   local screen = hs.screen.mainScreen()
   local cur = screen:currentMode()
-  local target = cur.w == RESOLUTIONS[1].w and RESOLUTIONS[2] or RESOLUTIONS[1]
+  local default, spacious = resolutions(screen)
+  if not default then
+    hs.alert.show("no HiDPI modes")
+    return
+  end
+  local target = cur.w == default.w and spacious or default
 
   if screen:setMode(target.w, target.h, 2, cur.freq, cur.depth) then
     hs.alert.show(("%dx%d"):format(target.w, target.h))

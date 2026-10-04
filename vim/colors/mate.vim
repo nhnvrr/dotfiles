@@ -1,5 +1,5 @@
-" ANSI slots only, so the hex values stay in ghostty/themes. Slots 4 and 8
-" swap roles between the two palettes (grey text vs surface), hence the split.
+" ANSI slots only, so the hex values stay in ghostty/themes. Exception: dark
+" s:dim is 256-colour grey 248, because slot 4 is blue.
 
 hi clear
 if exists('syntax_on')
@@ -7,7 +7,7 @@ if exists('syntax_on')
 endif
 let g:colors_name = 'mate'
 
-let s:dim  = &background ==# 'dark' ? 4 : 8
+let s:dim  = &background ==# 'dark' ? 248 : 8
 let s:surf = &background ==# 'dark' ? 8 : 0
 
 function! s:hi(group, fg, bg, attr) abort
@@ -31,6 +31,7 @@ call s:hi('Underlined', 'NONE', 'NONE', 'underline')
 call s:hi('LineNr', s:dim, 'NONE', 'NONE')
 call s:hi('CursorLineNr', 'NONE', 'NONE', 'bold')
 call s:hi('CursorLine', 'NONE', 'NONE', 'NONE')
+call s:hi('ColorColumn', 'NONE', s:surf, 'NONE')
 call s:hi('SignColumn', 'NONE', 'NONE', 'NONE')
 call s:hi('NonText', s:dim, 'NONE', 'NONE')
 call s:hi('SpecialKey', s:dim, 'NONE', 'NONE')
@@ -63,3 +64,8 @@ call s:hi('LspDiagSignErrorText', 9, 'NONE', 'NONE')
 call s:hi('LspDiagSignWarningText', 3, 'NONE', 'NONE')
 call s:hi('LspDiagSignInfoText', 6, 'NONE', 'NONE')
 call s:hi('LspDiagSignHintText', 6, 'NONE', 'NONE')
+
+call s:hi('markdownH1', 1, 'NONE', 'bold')
+call s:hi('markdownH2', 3, 'NONE', 'NONE')
+call s:hi('markdownH3', 6, 'NONE', 'NONE')
+call s:hi('markdownHeadingDelimiter', s:dim, 'NONE', 'NONE')
