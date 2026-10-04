@@ -4,15 +4,17 @@
 local M = {}
 
 -- The two largest HiDPI modes of the panel: Apple's default and "More Space"
--- on every Apple Silicon MacBook, whatever its size.
+-- on every Apple Silicon MacBook, whatever its size. A notched panel lists each
+-- width twice (1800x1169 full, 1800x1125 below the notch): keep the taller one.
 local function resolutions(screen)
-  local seen, modes = {}, {}
+  local tallest, modes = {}, {}
   for _, m in pairs(screen:availableModes()) do
-    local key = m.w .. "x" .. m.h
-    if m.scale == 2 and not seen[key] then
-      seen[key] = true
-      modes[#modes + 1] = { w = m.w, h = m.h }
+    if m.scale == 2 and (not tallest[m.w] or m.h > tallest[m.w]) then
+      tallest[m.w] = m.h
     end
+  end
+  for w, h in pairs(tallest) do
+    modes[#modes + 1] = { w = w, h = h }
   end
   table.sort(modes, function(a, b) return a.w > b.w end)
   return modes[2], modes[1]
