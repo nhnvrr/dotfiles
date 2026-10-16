@@ -20,21 +20,23 @@ local function resolutions(screen)
   return modes[2], modes[1]
 end
 
+--- Returns true when the mode changed, so the caller can reflow windows.
 function M.toggleResolution()
   local screen = hs.screen.mainScreen()
   local cur = screen:currentMode()
   local default, spacious = resolutions(screen)
   if not default then
     hs.alert.show("no HiDPI modes")
-    return
+    return false
   end
   local target = cur.w == default.w and spacious or default
 
   if screen:setMode(target.w, target.h, 2, cur.freq, cur.depth) then
     hs.alert.show(("%dx%d"):format(target.w, target.h))
-  else
-    hs.alert.show(("Could not apply %dx%d"):format(target.w, target.h))
+    return true
   end
+  hs.alert.show(("Could not apply %dx%d"):format(target.w, target.h))
+  return false
 end
 
 --- Throws the focused window at the next (`delta > 0`) or previous display.

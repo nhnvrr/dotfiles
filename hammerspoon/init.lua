@@ -27,6 +27,7 @@ end
 require("mate.workspace")
 require("mate.autozoom") -- every new window opens at full screen
 require("mate.keys")
+require("mate.wallpaper") -- dark/light picture follows the macOS appearance
 
 -- Reasserted on every load rather than left to install.sh: LaunchServices drops
 -- duti's call for http/https often enough, and any browser that runs can offer
