@@ -14,6 +14,11 @@
 ---   |           | Terminal  |
 ---   +-----------+-----------+
 ---
+--- On the MacBook alone (one display) cmd+alt+1..5 show one app at full screen
+--- instead, since halves are too narrow there: 1 Claude, 2 Chrome, 3 Rex,
+--- 4 VS Code, 5 TablePlus. With an external display 1..3 are the pairs above
+--- and 4 and 5 only say so.
+---
 --- Every layout hides every other application first and then places what it
 --- owns, so the result is the same screen every time rather than whatever was
 --- left over from the last one.
@@ -42,6 +47,9 @@ M.current = { apps.bundles.terminal, apps.bundles.browser }
 --- call: the resolution toggle on cmd+alt+0 changes them underneath, so they
 --- cannot be cached at load.
 local function geometryFor(n)
+  if n == 1 then
+    return { frame.frameFor(0, 0, 1, 1, GAP) }
+  end
   if n == 3 then
     return {
       frame.frameFor(0, 0, 0.5, 1, GAP),
@@ -137,6 +145,21 @@ local function place()
   end
 end
 
+--- One display means the built-in panel: with the lid closed on a monitor there
+--- is also one, and a single full-screen app is right there too. Checked per
+--- press rather than watched, so plugging a monitor in changes nothing until
+--- the next key.
+local function singleDisplay()
+  return #hs.screen.allScreens() == 1
+end
+
+--- One app at full screen, everything else hidden.
+local function solo(bid)
+  M.current = { bid }
+  hideOthers()
+  place()
+end
+
 --- cmd+alt+1 — the terminal and the browser, half the screen each.
 ---
 --- The pair is rebuilt only when the workspace is not already showing it, so
@@ -170,6 +193,23 @@ function M.development()
   M.current = { apps.bundles.editor, apps.bundles.browser, apps.bundles.terminal }
   hideOthers()
   place()
+end
+
+--- cmd+alt+N. One display: the solo app for N. Otherwise the pair layouts for
+--- 1..3, and the rest said out loud rather than silently ignored.
+local SOLO = {
+  apps.bundles.claude,
+  apps.bundles.browser,
+  apps.bundles.rex,
+  apps.bundles.editor,
+  apps.bundles.tableplus,
+}
+local PAIRS = { M.layout, M.code, M.development }
+
+function M.select(n)
+  if singleDisplay() then return solo(SOLO[n]) end
+  if PAIRS[n] then return PAIRS[n]() end
+  hs.alert.show(("external display: no cmd+alt+%d layout"):format(n))
 end
 
 --- cmd+alt+§ — every window of every running app at full screen, same gap as

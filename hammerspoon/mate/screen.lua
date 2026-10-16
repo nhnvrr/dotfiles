@@ -1,5 +1,5 @@
---- Display-level keys: the resolution toggle and moving a window between
---- monitors.
+--- Display-level keys: the resolution, the appearance and moving a window
+--- between monitors.
 
 local M = {}
 
@@ -20,8 +20,9 @@ local function resolutions(screen)
   return modes[2], modes[1]
 end
 
---- Returns true when the mode changed, so the caller can reflow windows.
-function M.toggleResolution()
+--- `which` is "default" or "spacious". Returns true when the mode changed, so
+--- the caller can reflow windows; already there is false, nothing to reflow.
+function M.setResolution(which)
   local screen = hs.screen.mainScreen()
   local cur = screen:currentMode()
   local default, spacious = resolutions(screen)
@@ -29,7 +30,11 @@ function M.toggleResolution()
     hs.alert.show("no HiDPI modes")
     return false
   end
-  local target = cur.w == default.w and spacious or default
+  local target = which == "spacious" and spacious or default
+  if cur.w == target.w and cur.h == target.h then
+    hs.alert.show(("%dx%d already"):format(target.w, target.h))
+    return false
+  end
 
   if screen:setMode(target.w, target.h, 2, cur.freq, cur.depth) then
     hs.alert.show(("%dx%d"):format(target.w, target.h))
@@ -37,6 +42,14 @@ function M.toggleResolution()
   end
   hs.alert.show(("Could not apply %dx%d"):format(target.w, target.h))
   return false
+end
+
+--- Flips macOS between Dark and Light. The wallpaper follows through
+--- mate/wallpaper.lua, VS Code through its own autoDetectColorScheme.
+function M.toggleAppearance()
+  hs.osascript.applescript(
+    'tell application "System Events" to tell appearance preferences to set dark mode to not dark mode'
+  )
 end
 
 --- Throws the focused window at the next (`delta > 0`) or previous display.

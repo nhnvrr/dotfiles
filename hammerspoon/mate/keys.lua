@@ -30,17 +30,22 @@ end
 
 -- ─── cmd+alt: the workspace and the display ─────────────────────────────────
 
-bind({ "cmd", "alt" }, "1", workspace.layout)
-bind({ "cmd", "alt" }, "2", workspace.code)
-bind({ "cmd", "alt" }, "3", workspace.development)
+for n = 1, 5 do
+  bind({ "cmd", "alt" }, tostring(n), function() workspace.select(n) end)
+end
 bind({ "cmd", "alt" }, "R", workspace.rotate)
 -- setMode returns before the display has settled; zoomAll placed on the old
 -- frame otherwise.
-bind({ "cmd", "alt" }, "0", function()
-  if screen.toggleResolution() then
-    hs.timer.doAfter(0.5, workspace.zoomAll)
+local function resolution(which)
+  return function()
+    if screen.setResolution(which) then
+      hs.timer.doAfter(0.5, workspace.zoomAll)
+    end
   end
-end)
+end
+bind({ "cmd", "alt" }, "-", resolution("default"))
+bind({ "cmd", "alt" }, "=", resolution("spacious"))
+bind({ "cmd", "alt" }, "0", screen.toggleAppearance)
 bind({ "cmd", "alt" }, "F", motion.toggleZoom)
 -- Keycode 10, the ISO key left of 1. Absent from an ANSI keyboard.
 bind({ "cmd", "alt" }, "§", workspace.zoomAll)
