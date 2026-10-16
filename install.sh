@@ -143,6 +143,7 @@ link_file "${CONFIG_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"
 link_file "${CONFIG_DIR}/btop/btop.conf" "${HOME}/.config/btop/btop.conf"
 link_file "${CONFIG_DIR}/btop/themes/mate.theme" "${HOME}/.config/btop/themes/mate.theme"
 link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.config/tmux/tmux.conf"
+link_file "${CONFIG_DIR}/claude/statusline.sh" "${HOME}/.claude/statusline.sh"
 # history-file is dropped silently without this directory.
 mkdir -p "${HOME}/.local/state/tmux"
 # REDISCLI_HISTFILE points inside this one, and redis-cli won't mkdir.
@@ -170,6 +171,18 @@ defaults write NSGlobalDomain AppleShowAllExtensions -bool true
 mkdir -p "${HOME}/Screenshots"
 defaults write com.apple.screencapture location "${HOME}/Screenshots"
 defaults write com.apple.screencapture type -string "png"
+# Copied out of the clone so moving or deleting the repo does not blank the
+# desktop. defaults write is ignored since Sonoma, and "tell every desktop"
+# returns without applying; only the per-desktop loop sets it.
+mkdir -p "${HOME}/Pictures"
+cp "${CONFIG_DIR}/macos/wallpaper.jpg" "${HOME}/Pictures/wallpaper.jpg"
+osascript -e 'on run argv
+  tell application "System Events"
+    repeat with d in desktops
+      set picture of d to POSIX file (item 1 of argv)
+    end repeat
+  end tell
+end run' "${HOME}/Pictures/wallpaper.jpg"
 # Guarded on the app: duti fails on an unknown bundle id and set -e would stop here.
 if command -v duti >/dev/null 2>&1 && open -Ra "Visual Studio Code" 2>/dev/null; then
   duti -s com.microsoft.VSCode public.json all

@@ -40,6 +40,8 @@ Then, by hand:
 | Git       | SSH-signed commits                                                                    | [`git/gitconfig`](./git/gitconfig)       |
 | Runtimes  | mise                                                                                   | [`mise/config.toml`](./mise/config.toml) |
 | Questions | `? <question>` expands to `ask "…"` — one-off, read-only Claude                        | [`fish/functions/ask.fish`](./fish/functions/ask.fish) |
+| Claude Code | custom status line: model, dir + branch, cost, lines, rate limits | [`claude/statusline.sh`](./claude/statusline.sh) |
+| Desktop   | wallpaper, copied to `~/Pictures` and set on every display by the install     | [`macos/wallpaper.jpg`](./macos/wallpaper.jpg) |
 
 **Colours.** One palette, `mate`, in [`ghostty/themes/`](./ghostty/themes) — dark and light. The terminal switches on its own, apart from macOS: `mate` toggles it from fish ([`fish/functions/mate.fish`](./fish/functions/mate.fish)), `mate dark` / `mate light` force a side. It writes the theme to the git-ignored `ghostty/mode.local` and reloads Ghostty; vim, fzf and tmux follow the terminal's colours. VS Code gets *Mate Dark* and *Mate Light* from [`vscode/extensions/mate/`](./vscode/extensions/mate) and follows the macOS appearance (`window.autoDetectColorScheme`). Both were derived from the Ghostty files; the light one darkens yellow and green for contrast on its background.
 

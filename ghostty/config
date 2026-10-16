@@ -1,6 +1,5 @@
 command = /opt/homebrew/bin/fish
 theme = mate-dark
-# Written by `mate`; loaded after this file, so its theme wins.
 config-file = ?mode.local
 
 font-family = Ioskeley Mono Term
