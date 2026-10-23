@@ -1,6 +1,9 @@
 --- The desktop picture follows the macOS appearance: wallpaper-dark.jpg in
 --- Dark, wallpaper-light.jpg in Light. install.sh copies both to ~/Pictures and
 --- sets the first one; this keeps it right after every switch.
+---
+--- desktopImageURL only reaches the space on screen, and macOS keeps one
+--- picture per space, so the switch is re-applied on every space change too.
 
 local M = {}
 
@@ -17,6 +20,9 @@ end
 -- Held on the module or Hammerspoon collects it and the switch stops firing.
 M.watcher = hs.distributednotifications.new(apply, "AppleInterfaceThemeChangedNotification")
 M.watcher:start()
+
+M.spaces = hs.spaces.watcher.new(apply)
+M.spaces:start()
 
 apply()
 

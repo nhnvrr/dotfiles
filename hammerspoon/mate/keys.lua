@@ -51,8 +51,6 @@ bind({ "cmd", "alt" }, "F", motion.toggleZoom)
 bind({ "cmd", "alt" }, "§", workspace.zoomAll)
 bind({ "cmd", "alt", "ctrl" }, "R", hs.reload)
 
-bind({ "cmd" }, "`", workspace.toggleTerminal)
-
 -- ─── ctrl+alt: the i3-style set ─────────────────────────────────────────────
 
 for key in pairs(motion.directions) do

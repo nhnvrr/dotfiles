@@ -245,14 +245,4 @@ function M.rotate()
   place()
 end
 
---- cmd+` — the terminal, front and centre or out of the way.
-function M.toggleTerminal()
-  local app = hs.application.get(apps.bundles.terminal)
-  if app and app:isFrontmost() then
-    app:hide()
-  else
-    hs.application.launchOrFocusByBundleID(apps.bundles.terminal)
-  end
-end
-
 return M
