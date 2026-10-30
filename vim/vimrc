@@ -1,0 +1,36 @@
+set nocompatible
+let mapleader = ' '
+
+set number relativenumber
+set signcolumn=number
+set cursorline cursorlineopt=number
+set colorcolumn=81
+set expandtab shiftwidth=2 tabstop=2 autoindent
+set ignorecase smartcase incsearch hlsearch
+set scrolloff=4 splitbelow splitright
+set noswapfile undofile undodir=~/.vim/undo
+set clipboard=unnamed
+set path+=** wildmenu wildignore+=*/node_modules/*,*/target/*,*/.git/*
+set backspace=indent,eol,start
+set laststatus=1 ruler
+set completeopt=menuone,noinsert
+set notermguicolors
+" Colour comes from Ghostty's cursor-color; only the shape is set here.
+" \e[0 q on exit hands the shape back to Ghostty's cursor-style.
+let &t_ti .= "\e[2 q"
+let &t_SI = "\e[2 q"
+let &t_EI = "\e[2 q"
+let &t_SR = "\e[2 q"
+let &t_te = "\e[0 q" . &t_te
+
+filetype plugin indent on
+syntax on
+colorscheme mate
+" Vim sets 'background' from the terminal's reply after startup.
+autocmd OptionSet background colorscheme mate
+
+nnoremap <leader>e :Explore<CR>
+nnoremap <leader>p :find<Space>
+nnoremap <Esc><Esc> :nohlsearch<CR>
+vnoremap J :m '>+1<CR>gv=gv
+vnoremap K :m '<-2<CR>gv=gv

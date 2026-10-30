@@ -1,0 +1,22 @@
+{
+  "layer" : {
+    "bindings" : [
+      {
+        "action" : "client.tab.rename",
+        "keys" : [
+          "shift+cmd+t"
+        ],
+        "source" : "settings"
+      },
+      {
+        "action" : "session.rename",
+        "keys" : [
+          "shift+cmd+a"
+        ],
+        "source" : "settings"
+      }
+    ],
+    "name" : "settings"
+  },
+  "version" : 1
+}

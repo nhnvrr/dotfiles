@@ -1,0 +1,125 @@
+#!/usr/bin/env bash
+#
+# codex-review — run an exhaustive Codex review of the current branch and talk back to it.
+#
+# Usage:
+#   codex-review start [--base <ref>] [--focus <text>]   # round 1, prints the run dir
+#   codex-review reply <run-dir> <message-file>          # next round in the same Codex thread
+#
+# Each round writes <run-dir>/round-<n>.json (schema.json next to this script).
+# Run dirs live under the worktree's git dir, so nothing shows up in git status.
+# Model/effort: CODEX_REVIEW_MODEL (default gpt-5.6-sol), CODEX_REVIEW_EFFORT (default max).
+#
+set -euo pipefail
+
+die()  { echo "codex-review: $*" >&2; exit 1; }
+info() { echo "[codex-review] $*" >&2; }
+usage() { awk 'NR==1{next} /^#/{sub(/^# ?/,""); print; next} {exit}' "$0"; }
+
+SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SCHEMA="$SKILL_DIR/schema.json"
+MODEL="${CODEX_REVIEW_MODEL:-gpt-5.6-sol}"
+EFFORT="${CODEX_REVIEW_EFFORT:-max}"
+command -v codex >/dev/null 2>&1 || die "codex CLI not found"
+command -v jq >/dev/null 2>&1 || die "jq is required"
+
+STRUCTURE_RULES='Answer ONLY with JSON matching the provided schema.
+- One entry per distinct defect. Stable ids (e.g. F1, F2); keep ids across rounds.
+- file is repo-relative; line is 1-based (0 if not applicable).
+- failure_scenario: concrete inputs/state -> wrong output, crash, leak or violated rule.
+- reply: your answer to anything Claude said about that finding, else "".
+- response_to_claude: your answer to points Claude raised that are not tied to one finding, else "".
+- verdict is "clean" only when no finding has status new or still_open.
+- Never include PR titles, PR bodies or commit messages anywhere.'
+
+thread_of() { jq -r 'select(.type=="thread.started").thread_id' "$1" | head -1; }
+
+run_resume() { # thread, round-file, events-file; prompt on stdin
+  codex exec resume "$1" - -m "$MODEL" -c "model_reasoning_effort=\"$EFFORT\"" \
+    --output-schema "$SCHEMA" --json -o "$2" >"$3" 2>>"$RUN/stderr.log" \
+    || die "codex exited non-zero (see $RUN/stderr.log and $3)"
+  [[ -s "$2" ]] || die "codex produced no output for $2 (killed early?)"
+  jq -e . "$2" >/dev/null || die "$2 is not valid JSON"
+}
+
+[[ $# -ge 1 ]] || { usage; exit 1; }
+cmd="$1"; shift
+
+case "$cmd" in
+  -h|--help|help) usage ;;
+
+  start)
+    base="" focus=""
+    while [[ $# -gt 0 ]]; do
+      case "$1" in
+        --base) base="${2:?--base needs a ref}"; shift 2 ;;
+        --focus) focus="${2:?--focus needs text}"; shift 2 ;;
+        *) die "unknown argument: $1" ;;
+      esac
+    done
+    git rev-parse --is-inside-work-tree >/dev/null 2>&1 || die "not inside a git repository"
+    if [[ -z "$base" ]]; then
+      if git show-ref --verify --quiet refs/remotes/origin/development; then base=origin/development
+      elif ref="$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD)"; then base="$ref"
+      else base=main; fi
+    fi
+    mb="$(git merge-base HEAD "$base")" || die "no merge-base between HEAD and $base"
+
+    RUN="$(git rev-parse --path-format=absolute --git-dir)/codex-review/$(date +%Y%m%d-%H%M%S)"
+    mkdir -p "$RUN"
+    printf '%s\n' "$base" >"$RUN/base"
+
+    # `review` cannot take --base and a prompt together, so the target is spelled out here.
+    prompt="Review every change on the current branch relative to merge-base $mb (base $base):
+committed (git diff $mb...HEAD), staged, unstaged and untracked files. Inspect the full files
+around each hunk, not only the diff.
+
+The code was written by Claude Code, another AI agent. Assume nothing was verified. The goal is a
+review with zero misses: correctness and edge cases, error handling, concurrency and ordering,
+security and data isolation, performance at realistic scale, type safety, API and contract
+compatibility, migrations, test coverage of the changed behaviour, and dead or duplicated code.
+
+Treat the repository's instruction files (AGENTS.md, CLAUDE.md, .claude/CLAUDE.md and any nested
+ones) as the coding standard, and report violations of them.
+
+Every finding needs file:line and a concrete failure scenario. Do not report pure style
+preferences that no standard requires. Do not modify any file. Do not write PR titles, PR bodies
+or commit messages.${focus:+
+
+Extra focus from the user: $focus}"
+
+    info "round 1: codex review ($MODEL, effort $EFFORT) against $base -> $RUN"
+    codex exec review "$prompt" -m "$MODEL" -c "model_reasoning_effort=\"$EFFORT\"" \
+      --json -o "$RUN/round-1.review.md" </dev/null >"$RUN/events-1.jsonl" 2>>"$RUN/stderr.log" \
+      || die "codex review exited non-zero (see $RUN/stderr.log)"
+    thread="$(thread_of "$RUN/events-1.jsonl")"
+    [[ -n "$thread" ]] || die "no thread id in $RUN/events-1.jsonl"
+    printf '%s\n' "$thread" >"$RUN/thread"
+
+    # `review` ignores --output-schema; a resumed turn in the same thread structures it.
+    printf 'Restate the review you just produced as structured findings. Every finding has status "new".\n%s\n' \
+      "$STRUCTURE_RULES" | run_resume "$thread" "$RUN/round-1.json" "$RUN/events-1b.jsonl"
+    printf '1\n' >"$RUN/round"
+    echo "$RUN"
+    ;;
+
+  reply)
+    RUN="${1:?reply needs <run-dir>}"; msg="${2:?reply needs <message-file>}"
+    [[ -f "$RUN/thread" ]] || die "$RUN is not a codex-review run dir"
+    [[ -s "$msg" ]] || die "message file $msg is empty"
+    thread="$(cat "$RUN/thread")"
+    n=$(( $(cat "$RUN/round") + 1 ))
+    info "round $n: resuming thread $thread"
+    {
+      cat "$msg"
+      printf '\n\nRe-inspect the CURRENT working tree (Claude may have changed files since your last turn).\n'
+      printf 'Re-check every previous finding: resolved if fixed correctly, withdrawn if Claude convinced you, still_open otherwise.\n'
+      printf 'Look again for anything missed, including regressions introduced by the fixes (status new).\n'
+      printf '%s\n' "$STRUCTURE_RULES"
+    } | run_resume "$thread" "$RUN/round-$n.json" "$RUN/events-$n.jsonl"
+    printf '%s\n' "$n" >"$RUN/round"
+    echo "$RUN/round-$n.json"
+    ;;
+
+  *) die "unknown command '$cmd' (start | reply | help)" ;;
+esac

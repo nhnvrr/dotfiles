@@ -1,0 +1,247 @@
+[
+  {
+    "key": "cmd+f",
+    "command": "list.find",
+    "when": "listFocus && listSupportsFind && !inputFocus"
+  },
+  {
+    "key": "cmd+f",
+    "command": "list.toggleFindMode",
+    "when": "listFocus && listSupportsFind && inputFocus"
+  },
+  {
+    "key": "alt+n",
+    "command": "explorer.newFile"
+  },
+  {
+    "key": "alt+f",
+    "command": "explorer.newFolder"
+  },
+  {
+    "key": "cmd+r cmd+n",
+    "command": "editor.action.rename",
+    "when": "editorHasRenameProvider && editorTextFocus && !editorReadonly"
+  },
+  {
+    "key": "f2",
+    "command": "-editor.action.rename",
+    "when": "editorHasRenameProvider && editorTextFocus && !editorReadonly"
+  },
+  {
+    "key": "space",
+    "command": "renameFile",
+    "when": "filesExplorerFocus && foldersViewVisible && !explorerResourceIsRoot && !explorerResourceReadonly && !inputFocus"
+  },
+  {
+    "key": "enter",
+    "command": "-renameFile",
+    "when": "filesExplorerFocus && foldersViewVisible && !explorerResourceIsRoot && !explorerResourceReadonly && !inputFocus"
+  },
+  {
+    "key": "cmd+, cmd+.",
+    "command": "workbench.action.terminal.new",
+    "when": "terminalProcessSupported || terminalWebExtensionContributedProfile"
+  },
+  {
+    "key": "ctrl+shift+`",
+    "command": "-workbench.action.terminal.new",
+    "when": "terminalProcessSupported || terminalWebExtensionContributedProfile"
+  },
+  {
+    "key": "cmd+. cmd+,",
+    "command": "workbench.action.terminal.kill"
+  },
+  {
+    "key": "cmd+, cmd+d",
+    "command": "extension.js-debug.createDebuggerTerminal"
+  },
+  {
+    "key": "alt+d alt+b",
+    "command": "editor.debug.action.toggleBreakpoint",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "cmd+t cmd+t",
+    "command": "workbench.action.quickOpenTerm"
+  },
+  {
+    "key": "cmd+r cmd+t",
+    "command": "workbench.action.terminal.rename"
+  },
+  {
+    "key": "cmd+t cmd+c",
+    "command": "workbench.action.terminal.changeColor"
+  },
+  {
+    "key": "shift+enter",
+    "command": "workbench.action.terminal.sendSequence",
+    "args": {
+      "text": "\\\r\n"
+    },
+    "when": "terminalFocus"
+  },
+  {
+    "key": "alt+c alt+f",
+    "command": "workbench.files.action.collapseExplorerFolders"
+  },
+  {
+    "key": "shift+cmd+g",
+    "command": "-workbench.action.terminal.findPrevious",
+    "when": "terminalFindFocused && terminalHasBeenCreated || terminalFindFocused && terminalProcessSupported || terminalFocusInAny && terminalHasBeenCreated || terminalFocusInAny && terminalProcessSupported"
+  },
+  {
+    "key": "shift+cmd+g",
+    "command": "-editor.action.previousMatchFindAction",
+    "when": "editorFocus"
+  },
+  {
+    "key": "shift+cmd+g",
+    "command": "workbench.view.scm",
+    "when": "workbench.scm.active"
+  },
+  {
+    "key": "ctrl+shift+g",
+    "command": "-workbench.view.scm",
+    "when": "workbench.scm.active"
+  },
+  {
+    "key": "cmd+t cmd+s",
+    "command": "workbench.action.createTerminalEditorSide"
+  },
+  {
+    "key": "cmd+t cmd+n",
+    "command": "workbench.action.createTerminalEditor"
+  },
+  {
+    "key": "cmd+t cmd+d",
+    "command": "todo-tree-view.focus"
+  },
+  {
+    "key": "shift+cmd+e",
+    "command": "workbench.view.explorer",
+    "when": "viewContainer.workbench.view.explorer.enabled"
+  },
+  {
+    "key": "shift+cmd+e",
+    "command": "-workbench.view.explorer",
+    "when": "viewContainer.workbench.view.explorer.enabled"
+  },
+  {
+    "key": "cmd+q cmd+e",
+    "command": "pgsql.runQuery",
+    "when": "editorTextFocus && editorLangId == 'sql'"
+  },
+  {
+    "key": "shift+cmd+e",
+    "command": "-pgsql.runQuery",
+    "when": "editorTextFocus && editorLangId == 'sql'"
+  },
+  {
+    "key": "cmd+, cmd+,",
+    "command": "workbench.action.terminal.toggleTerminal",
+    "when": "terminal.active"
+  },
+  {
+    "key": "ctrl+`",
+    "command": "-workbench.action.terminal.toggleTerminal",
+    "when": "terminal.active"
+  },
+  {
+    "key": "cmd+n",
+    "command": "-workbench.action.chat.newChat",
+    "when": "chatIsEnabled && inChat && chatLocation == 'panel'"
+  },
+  {
+    "key": "cmd+n",
+    "command": "-workbench.action.openChat",
+    "when": "chatIsEnabled && inChat && inChatEditor"
+  },
+  {
+    "key": "cmd+n",
+    "command": "-chatEditor.action.undoHunk",
+    "when": "chatEdits.cursorInChangeRange && chatEdits.hasEditorModifications && editorFocus && !chatEdits.isCurrentlyBeingModified || chatEdits.cursorInChangeRange && chatEdits.hasEditorModifications && notebookCellListFocused && !chatEdits.isCurrentlyBeingModified"
+  },
+  {
+    "key": "cmd+n",
+    "command": "-claude-vscode.newConversation",
+    "when": "config.claudeCode.enableNewConversationShortcut && activeWebviewPanelId == 'claudeVSCodePanel' || claude-vscode.sideBarActive && config.claudeCode.enableNewConversationShortcut && !editorFocus && !panelFocus"
+  },
+  {
+    "key": "cmd+n",
+    "command": "-chatgpt.newChat",
+    "when": "chatgpt.supportsNewChatKeyShortcut"
+  },
+  {
+    "key": "shift+cmd+p",
+    "command": "pgsql.disconnect",
+    "when": "editorTextFocus && editorLangId == 'sql'"
+  },
+  {
+    "key": "shift+cmd+d",
+    "command": "-pgsql.disconnect",
+    "when": "editorTextFocus && editorLangId == 'sql'"
+  },
+  {
+    "key": "shift+cmd+t shift+cmd+p",
+    "command": "workbench.action.quickOpenNavigatePreviousInTerminalPicker"
+  },
+  {
+    "key": "shift+cmd+t shift+cmd+n",
+    "command": "workbench.action.terminal.switchTerminal"
+  },
+  {
+    "key": "alt+c alt+c",
+    "command": "claude-vscode.editor.open",
+    "when": "!config.claudeCode.useTerminal"
+  },
+  {
+    "key": "shift+cmd+escape",
+    "command": "-claude-vscode.editor.open",
+    "when": "!config.claudeCode.useTerminal"
+  },
+  {
+    "key": "shift+f9",
+    "command": "-editor.debug.action.toggleInlineBreakpoint",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "alt+cmd+c alt+cmd+a",
+    "command": "workbench.view.extension.claude-sidebar-secondary"
+  },
+  {
+    "key": "shift+cmd+0",
+    "command": "workbench.action.toggleAuxiliaryBar"
+  },
+  {
+    "key": "alt+cmd+b",
+    "command": "-workbench.action.toggleAuxiliaryBar"
+  },
+  {
+    "key": "cmd+0",
+    "command": "-workbench.action.focusSideBar"
+  },
+  {
+    "key": "cmd+0",
+    "command": "claude-vscode.editor.openLast",
+    "when": "!config.claudeCode.useTerminal"
+  },
+  {
+    "key": "cmd+escape",
+    "command": "-claude-vscode.focus",
+    "when": "editorTextFocus && !config.claudeCode.useTerminal"
+  },
+  {
+    "key": "alt+c alt+c",
+    "command": "claudeVSCodeSidebarSecondary.focus"
+  },
+  {
+    "key": "alt+d",
+    "command": "deleteFile",
+    "when": "filesExplorerFocus && foldersViewVisible && !explorerResourceMoveableToTrash && !inputFocus"
+  },
+  {
+    "key": "cmd+backspace",
+    "command": "-deleteFile",
+    "when": "filesExplorerFocus && foldersViewVisible && !explorerResourceMoveableToTrash && !inputFocus"
+  }
+]

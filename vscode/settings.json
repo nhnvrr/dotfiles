@@ -1,0 +1,298 @@
+{
+  "window.commandCenter": false,
+  "workbench.startupEditor": "none",
+  "window.nativeTabs": false,
+  "workbench.layoutControl.enabled": false,
+  "workbench.editor.showTabs": "multiple",
+  "workbench.editor.tabSizing": "shrink",
+  "workbench.editor.empty.hint": "hidden",
+  "files.autoSave": "onWindowChange",
+  "explorer.compactFolders": false,
+  "explorer.confirmDelete": false,
+  "explorer.confirmDragAndDrop": false,
+  "editor.fontFamily": "IoskeleyMonoTerm Nerd Font Mono",
+  "editor.fontSize": 12,
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.wordWrap": "off",
+  "editor.lineNumbers": "on",
+  "editor.stickyScroll.enabled": false,
+  "editor.cursorBlinking": "expand",
+  "editor.cursorStyle": "line-thin",
+  "editor.cursorSmoothCaretAnimation": "on",
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.renderWhitespace": "none",
+  "editor.renderControlCharacters": false,
+  "editor.inlineSuggest.enabled": false,
+  "editor.semanticTokenColorCustomizations": {
+    "enabled": true
+  },
+  "editor.rulers": [
+    {
+      "column": 100,
+      "color": "#77777792",
+    },
+  ],
+  "editor.guides.bracketPairs": true,
+  "editor.guides.indentation": true,
+  "editor.guides.highlightActiveBracketPair": false,
+  "editor.bracketPairColorization.independentColorPoolPerBracketType": true,
+  "editor.tokenColorCustomizations": {
+    "textMateRules": [
+      {
+        "scope": "comment",
+        "settings": {
+          "fontStyle": "italic",
+        },
+      },
+      {
+        "scope": "entity.name.function",
+        "settings": {
+          "fontStyle": "italic",
+        },
+      },
+    ],
+  },
+  "editor.tabCompletion": "off",
+  "terminal.integrated.defaultProfile.osx": "zsh",
+  "terminal.integrated.fontFamily": "IoskeleyMonoTerm Nerd Font Mono",
+  "terminal.integrated.cursorBlinking": true,
+  "terminal.integrated.cursorStyle": "line",
+  "terminal.integrated.cursorStyleInactive": "block",
+  "terminal.integrated.shellIntegration.enabled": true,
+  "terminal.integrated.initialHint": false,
+  "git.enableSmartCommit": true,
+  "git.autofetch": true,
+  "js/ts.updateImportsOnFileMove.enabled": "always",
+  "prettier.printWidth": 100,
+  "prettier.useTabs": false,
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features",
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+  },
+  "[html]": {
+    "editor.defaultFormatter": "vscode.html-language-features",
+  },
+  "[terraform]": {
+    "editor.defaultFormatter": "hashicorp.terraform",
+  },
+  "vim.easymotion": true,
+  "vim.leader": "<Space>",
+  "vim.insertModeKeyBindings": [
+    {
+      "before": [
+        "j",
+        "k"
+      ],
+      "after": [
+        "<Esc>"
+      ],
+    },
+  ],
+  "vim.normalModeKeyBindings": [
+    {
+      "before": [
+        "<S-h>"
+      ],
+      "commands": [
+        "workbench.action.previousEditor"
+      ],
+    },
+    {
+      "before": [
+        "<S-l>"
+      ],
+      "commands": [
+        "workbench.action.nextEditor"
+      ],
+    },
+    {
+      "before": [
+        "<C-h>"
+      ],
+      "commands": [
+        "workbench.action.focusLeftGroup"
+      ],
+    },
+    {
+      "before": [
+        "<C-j>"
+      ],
+      "commands": [
+        "workbench.action.focusBelowGroup"
+      ],
+    },
+    {
+      "before": [
+        "<C-k>"
+      ],
+      "commands": [
+        "workbench.action.focusAboveGroup"
+      ],
+    },
+    {
+      "before": [
+        "<C-l>"
+      ],
+      "commands": [
+        "workbench.action.focusRightGroup"
+      ],
+    },
+    {
+      "before": [
+        "<leader>",
+        "w"
+      ],
+      "commands": [
+        ":w"
+      ],
+    },
+    {
+      "before": [
+        "<leader>",
+        "q"
+      ],
+      "commands": [
+        ":q"
+      ],
+    },
+    {
+      "before": [
+        "<leader>",
+        "x"
+      ],
+      "commands": [
+        ":x"
+      ],
+    },
+    {
+      "before": [
+        "<leader>",
+        "f"
+      ],
+      "commands": [
+        "workbench.action.quickOpen"
+      ],
+    },
+    {
+      "before": [
+        "<leader>",
+        "p"
+      ],
+      "commands": [
+        "editor.action.formatDocument"
+      ],
+    },
+    {
+      "before": [
+        "[",
+        "d"
+      ],
+      "commands": [
+        "editor.action.marker.prev"
+      ],
+    },
+    {
+      "before": [
+        "]",
+        "d"
+      ],
+      "commands": [
+        "editor.action.marker.next"
+      ],
+    },
+  ],
+  "vim.normalModeKeyBindingsNonRecursive": [
+    {
+      "before": [
+        "<leader>",
+        "s",
+        "v"
+      ],
+      "commands": [
+        "workbench.action.splitEditorRight"
+      ]
+    },
+    {
+      "before": [
+        "<leader>",
+        "s",
+        "h"
+      ],
+      "commands": [
+        "workbench.action.splitEditorDown"
+      ]
+    }
+  ],
+  "vim.visualModeKeyBindings": [
+    {
+      "before": [
+        "<"
+      ],
+      "commands": [
+        "editor.action.outdentLines"
+      ],
+    },
+    {
+      "before": [
+        ">"
+      ],
+      "commands": [
+        "editor.action.indentLines"
+      ],
+    },
+    {
+      "before": [
+        "J"
+      ],
+      "commands": [
+        "editor.action.moveLinesDownAction"
+      ],
+    },
+    {
+      "before": [
+        "K"
+      ],
+      "commands": [
+        "editor.action.moveLinesUpAction"
+      ],
+    },
+  ],
+  "git.blame.editorDecoration.enabled": true,
+  "git.blame.statusBarItem.enabled": true,
+  "claudeCode.preferredLocation": "panel",
+  "go.toolsManagement.autoUpdate": true,
+  "terminal.integrated.tabs.location": "left",
+  "terminal.integrated.tabs.enabled": false,
+  "terminal.integrated.drawBoldTextInBrightColors": false,
+  "terminal.integrated.minimumContrastRatio": 1,
+  "chat.viewSessions.orientation": "stacked",
+  "workbench.secondarySideBar.defaultVisibility": "hidden",
+  "git.blame.editorDecoration.disableHover": true,
+  "editor.minimap.size": "fit",
+  "git.confirmSync": false,
+  "editor.inlineSuggest.showToolbar": "always",
+  "workbench.editor.enablePreview": false,
+  "editor.minimap.enabled": false,
+  "claudeCode.hideOnboarding": true,
+  "workbench.activityBar.compact": true,
+  "workbench.colorTheme": "Mate Dark",
+  "window.autoDetectColorScheme": true,
+  "workbench.preferredDarkColorTheme": "Mate Dark",
+  "workbench.preferredLightColorTheme": "Mate Light",
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
+}

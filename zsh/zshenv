@@ -1,0 +1,55 @@
+# Read by every zsh, interactive or not. Only environment and $PATH go here.
+#
+# The $PATH order set below does NOT survive as-is: macOS ships /etc/zprofile,
+# which runs path_helper after this file and hoists /usr/bin and /bin to the
+# front. That is why mise is activated at the END of .zshrc instead of here.
+
+export HOMEBREW_PREFIX=/opt/homebrew
+export HOMEBREW_CELLAR=/opt/homebrew/Cellar
+export HOMEBREW_REPOSITORY=/opt/homebrew
+export INFOPATH="/opt/homebrew/share/info${INFOPATH:+:$INFOPATH}"
+
+export LANG=en_US.UTF-8
+export EDITOR=vim
+export VISUAL=vim
+
+export GOPATH="$HOME/Develop/go"
+export GOPRIVATE=github.com/nhnvrr
+export PNPM_HOME="$HOME/Library/pnpm"
+
+export AWS_PAGER=""
+export AWS_RETRY_MODE=standard
+export AWS_MAX_ATTEMPTS=3
+
+export REDISCLI_HISTFILE="$HOME/.local/state/redis/history"
+export BAT_THEME=ansi
+
+export NVM_DIR="$HOME/.nvm"
+
+# -U dedups the array in place.
+typeset -U path PATH
+path=(
+  "$GOPATH/bin"
+  /opt/homebrew/bin
+  /opt/homebrew/sbin
+  /opt/homebrew/opt/libpq/bin
+  "$HOME/.bun/bin"
+  "$HOME/.local/bin"
+  "$PNPM_HOME/bin"
+  "$HOME/.docker/bin"
+  /usr/local/bin
+  $path
+)
+
+# nvm's default node goes on PATH here, without sourcing nvm.sh (~60ms): the
+# alias file holds a major ("24") and the (On) glob keeps the newest match.
+# .zshrc loads nvm itself only when something needs `nvm use`.
+if [[ -r "$NVM_DIR/alias/default" ]]; then
+  _nvm_default=$(<"$NVM_DIR/alias/default")
+  _nvm_bins=("$NVM_DIR"/versions/node/v${_nvm_default#v}*/bin(On-/))
+  (( $#_nvm_bins )) && path=("$_nvm_bins[1]" $path)
+  unset _nvm_default _nvm_bins
+fi
+
+# Drop what is not there, so completion does not stat dead paths on every lookup.
+path=(${^path}(N-/))

@@ -1,0 +1,171 @@
+#!/usr/bin/env bash
+#
+# rex-wt — one git worktree per Rex session, with a coding agent (Claude Code or Codex) running in it.
+#
+# Worktrees live INSIDE the repo at <repo>/.claude/worktrees/<name>, and the Rex
+# session gets the same <name> (--name, or the branch slugified). When the repo
+# ships scripts/spexs-tree, creation is delegated to it so the worktree gets fully
+# provisioned (.env*, pnpm install, generated clients).
+#
+# Usage:
+#   rex-wt new <branch> [--name <session>] [--from <base>] [--prompt <text>] [--agent claude|codex|none]
+#
+# --agent defaults to $REX_WT_AGENT, then claude. --no-claude is an alias of --agent none.
+#   rex-wt ls
+#   rex-wt rm <name|branch> [--branch] [--yes]
+#
+set -euo pipefail
+
+die()  { echo "rex-wt: $*" >&2; exit 1; }
+info() { echo "[rex-wt] $*" >&2; }
+usage() { awk 'NR==1{next} /^#/{sub(/^# ?/,""); print; next} {exit}' "$0"; }
+
+# Outside a Rex terminal the CLI is not on PATH; fall back to the app bundle.
+REX="${REX_BIN_DIR:+$REX_BIN_DIR/}rex"
+command -v "$REX" >/dev/null 2>&1 \
+  || REX="/Applications/Rex Beta.app/Contents/Helpers/Rex Server.app/Contents/MacOS/rex"
+[[ -x "$REX" ]] || command -v "$REX" >/dev/null 2>&1 || die "rex CLI not found"
+command -v jq >/dev/null 2>&1 || die "jq is required"
+
+# Primary worktree = parent of the shared git dir, so this works from linked worktrees too.
+common="$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)" \
+  || die "not inside a git repository"
+ROOT="$(cd "$(dirname "$common")" && pwd)"
+WT_DIR="$ROOT/.claude/worktrees"
+
+slugify() { printf '%s' "$1" | tr '[:upper:]' '[:lower:]' | sed -E 's#[^a-z0-9]+#-#g; s#^-+|-+$##g'; }
+
+session_exists() {
+  "$REX" ls --json | jq -e --arg l "$1" '.sessions[] | select(.label | ascii_downcase == ($l | ascii_downcase))' >/dev/null
+}
+
+ensure_ignored() {
+  git -C "$ROOT" check-ignore -q "$WT_DIR/probe" && return 0
+  # Local-only exclude: never edit the repo's tracked .gitignore.
+  local exclude
+  exclude="$(git -C "$ROOT" rev-parse --path-format=absolute --git-path info/exclude)"
+  mkdir -p "$(dirname "$exclude")"
+  echo "/.claude/worktrees/" >> "$exclude"
+  info "added /.claude/worktrees/ to $exclude"
+}
+
+[[ $# -ge 1 ]] || { usage; exit 1; }
+cmd="$1"; shift
+
+case "$cmd" in
+  -h|--help|help) usage; exit 0 ;;
+
+  ls|list)
+    sessions="$("$REX" ls --json | jq -r '.sessions[].label | ascii_downcase')"
+    git -C "$ROOT" worktree list --porcelain | awk '
+      /^worktree /{p=substr($0,10)} /^branch /{b=substr($0,8); sub("refs/heads/","",b); print p "\t" b}' |
+    while IFS=$'\t' read -r path branch; do
+      [[ "$path" == "$WT_DIR/"* ]] || continue
+      slug="$(basename "$path")"
+      grep -qx "$slug" <<<"$sessions" && state="rex:live" || state="rex:none"
+      printf '%-40s %-10s %s\n' "$branch" "$state" "${path#"$ROOT"/}"
+    done
+    ;;
+
+  new)
+    branch="" name="" base="" prompt="" agent="${REX_WT_AGENT:-claude}"
+    while [[ $# -gt 0 ]]; do
+      case "$1" in
+        --from) base="${2:?--from needs a ref}"; shift 2 ;;
+        --name) name="${2:?--name needs a label}"; shift 2 ;;
+        --prompt) prompt="${2:?--prompt needs text}"; shift 2 ;;
+        --agent) agent="${2:?--agent needs claude|codex|none}"; shift 2 ;;
+        --no-claude) agent=none; shift ;;
+        --*) die "unknown flag: $1" ;;
+        *) [[ -z "$branch" ]] && branch="$1" || die "unexpected argument: $1"; shift ;;
+      esac
+    done
+    [[ -n "$branch" ]] || die "new needs a <branch>"
+    case "$agent" in claude|codex|none) ;; *) die "--agent must be claude, codex or none" ;; esac
+    slug="$(slugify "${name:-$branch}")"
+    [[ -n "$slug" ]] || die "name '${name:-$branch}' has no usable characters"
+    dest="$WT_DIR/$slug"
+
+    session_exists "$slug" && die "Rex session '$slug' already exists (switch to it from the session picker)"
+
+    if [[ ! -d "$dest" ]]; then
+      mkdir -p "$WT_DIR"
+      ensure_ignored
+      exists=0
+      git -C "$ROOT" show-ref --verify --quiet "refs/heads/$branch" && exists=1
+      git -C "$ROOT" show-ref --verify --quiet "refs/remotes/origin/$branch" && exists=1
+      if [[ -x "$ROOT/scripts/spexs-tree" ]]; then
+        if [[ "$exists" == 1 ]]; then
+          "$ROOT/scripts/spexs-tree" existing "$branch" --as "$dest" >&2
+        else
+          "$ROOT/scripts/spexs-tree" new "$branch" --as "$dest" ${base:+--from "$base"} >&2
+        fi
+      elif [[ "$exists" == 1 ]]; then
+        git -C "$ROOT" worktree add "$dest" "$branch" >&2
+      else
+        git -C "$ROOT" worktree add -b "$branch" "$dest" "${base:-HEAD}" >&2
+      fi
+    else
+      info "worktree already exists at $dest, reusing it"
+    fi
+
+    if [[ "$agent" != none ]]; then
+      # Both CLIs take the initial prompt as a positional argument.
+      cmdline=("$agent")
+      [[ -n "$prompt" ]] && cmdline+=("$prompt")
+      created="$("$REX" new "$slug" --cwd "$dest" --keep-open --json -- "${cmdline[@]}")"
+      main_label="$agent"
+    else
+      created="$("$REX" new "$slug" --cwd "$dest" --json)"
+      main_label=main
+    fi
+    sid="$(jq -r '.session_id' <<<"$created")"
+    main_block="$(jq -r '.initial_windows[0].block_ids[0]' <<<"$created")"
+    "$REX" block rename -s "$sid" "$main_block" "$main_label" >/dev/null
+    shell_block="$("$REX" split -s "$sid" -b "$main_block" --split=below --ratio 30 --cwd "$dest" \
+      --label shell --focus=false --json | jq -r '.block_ids[0]')"
+
+    jq -n --arg session_id "$sid" --arg label "$slug" --arg branch "$branch" --arg path "$dest" \
+      --arg main_block "$main_block" --arg shell_block "$shell_block" \
+      '{session_id: $session_id, label: $label, branch: $branch, path: $path,
+        main_block: $main_block, shell_block: $shell_block}'
+    ;;
+
+  rm|remove)
+    target="" del_branch=0 yes=0
+    while [[ $# -gt 0 ]]; do
+      case "$1" in
+        --branch) del_branch=1; shift ;;
+        --yes) yes=1; shift ;;
+        --*) die "unknown flag: $1" ;;
+        *) [[ -z "$target" ]] && target="$1" || die "unexpected argument: $1"; shift ;;
+      esac
+    done
+    [[ -n "$target" ]] || die "rm needs a <name|branch>"
+    dest="$WT_DIR/$(slugify "$target")"
+    if [[ ! -d "$dest" ]]; then
+      # --name may differ from the branch: resolve the branch to its worktree path.
+      dest="$(git -C "$ROOT" worktree list --porcelain | awk -v b="refs/heads/$target" '
+        /^worktree /{p=substr($0,10)} /^branch /{if (substr($0,8)==b) print p}')"
+      [[ "$dest" == "$WT_DIR/"* ]] || die "no worktree under $WT_DIR for '$target'"
+    fi
+    slug="$(basename "$dest")"
+
+    if [[ "$yes" != 1 ]]; then
+      read -r -p "Remove worktree $dest and kill Rex session '$slug'? [y/N] " ok
+      [[ "$ok" == y || "$ok" == Y ]] || die "aborted"
+    fi
+
+    session_exists "$slug" && "$REX" kill "$slug" >/dev/null
+    if [[ -x "$ROOT/scripts/spexs-tree" ]]; then
+      "$ROOT/scripts/spexs-tree" remove "$dest" $([[ "$del_branch" == 1 ]] && echo --branch)
+    else
+      wt_branch="$(git -C "$dest" rev-parse --abbrev-ref HEAD)"
+      git -C "$ROOT" worktree remove "$dest"
+      [[ "$del_branch" == 1 && "$wt_branch" != HEAD ]] && git -C "$ROOT" branch -D "$wt_branch"
+    fi
+    info "removed $slug"
+    ;;
+
+  *) die "unknown command '$cmd' (new | ls | rm | help)" ;;
+esac

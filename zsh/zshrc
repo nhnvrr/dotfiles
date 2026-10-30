@@ -1,0 +1,199 @@
+# Interactive zsh. Environment and $PATH live in zshenv.
+#
+# Load order matters three times in this file, and each is marked below:
+#   - the cursor-shape widgets are defined BEFORE starship, which wraps them.
+#   - mise activates after fzf and before starship: it prepends to $PATH.
+#   - fzf-tab sources after compinit and before zsh-autosuggestions.
+#   - zsh-syntax-highlighting sources LAST of all; it wraps every widget that
+#     exists at the time, so anything binding keys after it is not highlighted.
+
+stty -ixon 2>/dev/null
+
+# --- history ----------------------------------------------------------------
+HISTFILE="$HOME/.local/state/zsh/history"
+HISTSIZE=50000
+SAVEHIST=50000
+setopt HIST_IGNORE_ALL_DUPS HIST_IGNORE_SPACE HIST_REDUCE_BLANKS
+setopt SHARE_HISTORY INC_APPEND_HISTORY EXTENDED_HISTORY
+
+setopt AUTO_CD INTERACTIVE_COMMENTS NO_BEEP
+setopt GLOB_DOTS NO_CASE_GLOB
+
+# --- completion -------------------------------------------------------------
+# Some `init`/`completion` commands print a static script; forking the binary
+# to get it is ~25ms each, every shell. The script is cached and regenerated
+# only when the binary is newer than the cache (a brew or app upgrade).
+function _cached_init {
+  local name=$1; shift
+  local cache="$HOME/.cache/zsh/init-${name}.zsh"
+  if [[ ! -s $cache || $commands[$name] -nt $cache ]]; then
+    "$@" >| "$cache"
+  fi
+  source "$cache"
+}
+
+fpath=(/opt/homebrew/share/zsh/site-functions /opt/homebrew/share/zsh-completions "$HOME/.config/zsh/functions" $fpath)
+autoload -Uz compinit
+# -C skips the security scan of every fpath dir (~100ms); the dump is rebuilt
+# once a day. (N.mh+24) matches only when the dump exists and is older than
+# 24h; an array assignment, since [[ ]] does not glob.
+_zcompdump="$HOME/.cache/zsh/zcompdump"
+_zcompdump_stale=("$_zcompdump"(N.mh+24))
+if [[ ! -f "$_zcompdump" || -n "$_zcompdump_stale" ]]; then
+  compinit -d "$_zcompdump"
+else
+  compinit -C -d "$_zcompdump"
+fi
+# A compiled dump loads ~2x faster; recompiled only when the dump changed.
+[[ "$_zcompdump.zwc" -nt "$_zcompdump" ]] || zcompile "$_zcompdump"
+unset _zcompdump _zcompdump_stale
+
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path "$HOME/.cache/zsh/zcompcache"
+
+# aws ships a bash completer and nothing else.
+autoload -Uz bashcompinit && bashcompinit
+(( $+commands[aws_completer] )) && complete -C aws_completer aws
+# kubectl comes from Docker Desktop and terraform from mise: neither drops a
+# file in site-functions, so they register here.
+(( $+commands[kubectl] )) && _cached_init kubectl kubectl completion zsh
+(( $+commands[terraform] )) && complete -o nospace -C terraform terraform
+
+autoload -Uz "$HOME/.config/zsh/functions"/*(:t) 2>/dev/null
+
+# --- vi mode ----------------------------------------------------------------
+bindkey -v
+KEYTIMEOUT=1
+
+# Block in normal, blinking bar in insert.
+# Defined BEFORE starship init: starship wraps an existing zle-keymap-select
+# instead of replacing it, so its ❯/❮ switch and this cursor both run.
+function _cursor_shape {
+  case $KEYMAP in
+    vicmd) printf '\e[1 q' ;;
+    *)     printf '\e[5 q' ;;
+  esac
+}
+function zle-keymap-select { _cursor_shape }
+function zle-line-init { _cursor_shape }
+zle -N zle-keymap-select
+zle -N zle-line-init
+
+# vi mode loses these, and they are worth more than the modality.
+bindkey '^A' beginning-of-line
+bindkey '^E' end-of-line
+bindkey -M viins '^?' backward-delete-char
+bindkey -M viins '^W' backward-kill-word
+bindkey -M viins '^U' backward-kill-line
+
+# --- aws profile ------------------------------------------------------------
+# ~/.aws/config has no [default] profile on purpose: work under ~/Work,
+# personal everywhere else.
+function _aws_profile {
+  case "$PWD" in
+    "$HOME"/Work|"$HOME"/Work/*) export AWS_PROFILE=work ;;
+    *)                           export AWS_PROFILE=personal ;;
+  esac
+}
+autoload -Uz add-zsh-hook
+add-zsh-hook chpwd _aws_profile
+_aws_profile
+
+# --- claude config dir ------------------------------------------------------
+# One Claude Code config per workspace (~/Work, ~/Side, ~/Orange): its own
+# CLAUDE.md, skills, plugins, MCP servers and settings, nothing shared.
+# Exported on cd, not wrapped around the binary, so Rex, Herdr and `ask`
+# spawned from this shell inherit it. A workspace missing on this machine
+# is simply skipped; outside all of them Claude falls back to ~/.claude.
+# Scaffold a new one with claude/workspace-init.sh from the dotfiles repo.
+function _claude_config_dir {
+  local ws
+  for ws in Work Side Orange; do
+    case "$PWD" in
+      "$HOME/$ws"|"$HOME/$ws"/*)
+        if [[ -d "$HOME/$ws/.claude-config" ]]; then
+          export CLAUDE_CONFIG_DIR="$HOME/$ws/.claude-config"
+          return
+        fi ;;
+    esac
+  done
+  unset CLAUDE_CONFIG_DIR
+}
+add-zsh-hook chpwd _claude_config_dir
+_claude_config_dir
+
+# --- aliases ----------------------------------------------------------------
+alias gc='git commit -m'
+alias gco='git checkout'
+alias gd='git diff'
+
+alias ls='ls -lhG'
+alias la='ls -lahG'
+
+# `? cual es la capital de Francia?` -- noglob is not optional: the trailing ?
+# would otherwise make zsh die on "no matches found" before ask ever runs.
+alias ask='noglob ask'
+alias '?'='noglob ask'
+
+# --- fzf --------------------------------------------------------------------
+export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
+# ANSI slots only, so fzf follows mate-dark/mate-light like Starship does.
+export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border=rounded --color=16,fg:-1,bg:-1,fg+:-1,bg+:8,hl:3,hl+:3:bold,prompt:1,pointer:1,marker:1,spinner:3,info:8,header:4,border:8,separator:8,scrollbar:8,label:8'
+export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always --line-range :200 {}'"
+source <(fzf --zsh)
+
+# --- nvm --------------------------------------------------------------------
+# nvm.sh costs ~60ms to source, so it is not sourced here. zshenv already put
+# the default node on PATH; these stubs load nvm the first time it is actually
+# needed and then get out of the way. The stubs are only for the commands that
+# must see the current nvm state (`nvm use` switches what `node` resolves to).
+function _nvm_load {
+  unfunction nvm node npm npx corepack _nvm_load 2>/dev/null
+  source /opt/homebrew/opt/nvm/nvm.sh
+}
+for _cmd in nvm node npm npx corepack; do
+  eval "function ${_cmd} { _nvm_load; ${_cmd} \"\$@\" }"
+done
+unset _cmd
+
+# `.nvmrc` switches the version on cd, and leaving the tree switches back.
+function _nvm_auto {
+  if [[ -f .nvmrc ]]; then
+    (( $+functions[_nvm_load] )) && _nvm_load
+    # The loud retry is what says "version not installed, run nvm install".
+    nvm use --silent 2>/dev/null || nvm use
+  elif (( ! $+functions[_nvm_load] )) && [[ $(nvm current) != $(nvm version default) ]]; then
+    nvm use --silent default
+  fi
+}
+add-zsh-hook chpwd _nvm_auto
+[[ -f .nvmrc ]] && _nvm_auto
+
+# --- mise, starship ---------------------------------------------------------
+# Both go through _cached_init (defined in the completion section).
+# mise after fzf and the nvm paths: it prepends. node is not a mise tool here,
+# so mise never puts a node ahead of nvm's.
+_cached_init mise mise activate zsh
+_cached_init starship starship init zsh --print-full-init
+
+# --- zsh extras -------------------------------------------------------------
+# No plugin manager: all three are brew formulas.
+# fzf-tab replaces the `menu select` list with an fzf picker; menu select stays
+# as the fallback when the plugin is missing.
+source /opt/homebrew/share/fzf-tab/fzf-tab.zsh
+# fzf-tab empties FZF_DEFAULT_OPTS unless told otherwise; --height still has to
+# be repeated because fzf-tab passes its own computed height after the defaults.
+zstyle ':fzf-tab:*' use-fzf-default-opts yes
+zstyle ':fzf-tab:*' fzf-flags --height=40%
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls -1 $realpath'
+
+source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+bindkey '^ ' autosuggest-accept
+ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+
+# Strictly last: it wraps the widgets that exist when it loads.
+source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh

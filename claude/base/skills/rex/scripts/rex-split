@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+#
+# rex-split — open a command in a split next to the current Rex block.
+#
+#   rex-split [right|left|above|below] [--ratio N] [--label L] [-s SESSION] [-b BLOCK] -- <cmd...>
+#
+# Defaults: right, 40%, label = first word of the command, current session/block,
+# cwd = $PWD. The command runs inside `fish -c` because interactive programs
+# launched bare by `rex run` (psql, for one) exit immediately.
+set -euo pipefail
+
+dir=right ratio=40 label="" session="${REX_SESSION:-}" block="${REX_BLOCK:-}"
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    right|left|above|below) dir=$1 ;;
+    --ratio) ratio=$2; shift ;;
+    --label) label=$2; shift ;;
+    -s) session=$2; shift ;;
+    -b) block=$2; shift ;;
+    --) shift; break ;;
+    -h|--help) sed -n '2,10p' "$0"; exit 0 ;;
+    *) echo "rex-split: unknown argument: $1" >&2; exit 2 ;;
+  esac
+  shift
+done
+
+[ $# -gt 0 ] || { echo "rex-split: missing command after --" >&2; exit 2; }
+[ -n "$session" ] || { echo "rex-split: not inside Rex and no -s given" >&2; exit 4; }
+[ -n "$label" ] || label=$(basename "$1")
+
+rex=rex
+command -v rex >/dev/null 2>&1 || rex="/Applications/Rex Beta.app/Contents/Helpers/Rex Server.app/Contents/MacOS/rex"
+
+# Re-quote the command so fish sees it exactly as given.
+cmd=$(printf '%q ' "$@")
+
+args=(-s "$session" --split="$dir" --ratio "$ratio" --keep-open --label "$label" -c "$PWD" --json)
+[ -n "$block" ] && args+=(-b "$block")
+
+exec "$rex" run "${args[@]}" -- fish -c "$cmd"
