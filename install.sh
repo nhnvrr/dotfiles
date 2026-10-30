@@ -226,19 +226,20 @@ defaults write "${REX_DOMAIN}" Workspace.appIcon -string "default"
 link_file "${CONFIG_DIR}/rex/shortcuts.json" "${HOME}/Library/Application Support/${REX_DOMAIN}/Shortcuts/shortcuts.json"
 
 # Rebuilt from scratch on every run; an app that is not installed is skipped.
-defaults write com.apple.dock autohide -bool true
-defaults write com.apple.dock tilesize -int 64
-defaults write com.apple.dock magnification -bool true
-defaults write com.apple.dock largesize -int 96
+defaults write com.apple.dock autohide -bool false
+for key in tilesize magnification largesize; do defaults delete com.apple.dock "${key}" 2>/dev/null || true; done
 defaults write com.apple.dock orientation -string "bottom"
 defaults write com.apple.dock show-recents -bool false
 defaults write com.apple.dock minimize-to-application -bool false
 defaults delete com.apple.dock persistent-apps 2>/dev/null || true
 defaults delete com.apple.dock persistent-others 2>/dev/null || true
-for app in "Visual Studio Code" "Claude" "Docker" "Rex Beta" "TablePlus"; do
-  [[ -d "/Applications/${app}.app" ]] || continue
-  defaults write com.apple.dock persistent-apps -array-add \
-    "<dict><key>tile-data</key><dict><key>file-data</key><dict><key>_CFURLString</key><string>/Applications/${app}.app</string><key>_CFURLStringType</key><integer>0</integer></dict></dict><key>tile-type</key><string>file-tile</string></dict>"
+for app in "Slack" "Visual Studio Code" "TablePlus" "Claude" "Docker" "Notes" "Calendar" "Messages" "Calculator"; do
+  for dir in /Applications /System/Applications; do
+    [[ -d "${dir}/${app}.app" ]] || continue
+    defaults write com.apple.dock persistent-apps -array-add \
+      "<dict><key>tile-data</key><dict><key>file-data</key><dict><key>_CFURLString</key><string>${dir}/${app}.app</string><key>_CFURLStringType</key><integer>0</integer></dict></dict><key>tile-type</key><string>file-tile</string></dict>"
+    break
+  done
 done
 defaults write com.apple.dock persistent-others -array-add \
   "<dict><key>tile-data</key><dict><key>file-data</key><dict><key>_CFURLString</key><string>file://${HOME}/Downloads/</string><key>_CFURLStringType</key><integer>15</integer></dict><key>arrangement</key><integer>2</integer><key>displayas</key><integer>0</integer><key>showas</key><integer>0</integer></dict><key>tile-type</key><string>directory-tile</string></dict>"

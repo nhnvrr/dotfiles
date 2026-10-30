@@ -17,7 +17,7 @@ curl -fsSL https://raw.githubusercontent.com/nhnvrr/dotfiles/main/bootstrap.sh |
 ./check.sh                # validates configs and symlinks without changing anything
 ```
 
-Idempotent. It installs Homebrew and applies the [`Brewfile`](./Brewfile), installs the runtimes pinned in [`mise/config.toml`](./mise/config.toml) and node 24 through nvm, generates an `ed25519` SSH key and registers it with the Keychain, symlinks the files listed below, applies a few macOS defaults (key repeat, Finder, screenshots, the Dock: VS Code, Claude, Docker, Rex and TablePlus plus Downloads, auto-hidden) and makes `/bin/zsh` the login shell.
+Idempotent. It installs Homebrew and applies the [`Brewfile`](./Brewfile), installs the runtimes pinned in [`mise/config.toml`](./mise/config.toml) and node 24 through nvm, generates an `ed25519` SSH key and registers it with the Keychain, symlinks the files listed below, applies a few macOS defaults (key repeat, Finder, screenshots, the Dock: Slack, VS Code, TablePlus, Claude, Docker, Notes, Calendar, Messages, Calculator and Downloads, never hidden) and makes `/bin/zsh` the login shell.
 
 Then, by hand:
 
