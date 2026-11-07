@@ -1,6 +1,5 @@
 --- Three window keys on cmd+alt: 0 puts every window at full screen, - and =
---- drop the focused one in the left or right pane. New windows open at full
---- screen on their own.
+--- drop the focused one in the left or right pane.
 ---
 --- Everything lives in ./mate; this file only wires it up. The keymap is
 --- mate/keys.lua and nothing else binds a key.
@@ -26,6 +25,5 @@ if not hs.accessibilityState(true) then
 end
 
 require("mate.keys")
-require("mate.spawn") -- every new window opens at full size
 
 hs.alert.show("Hammerspoon loaded")

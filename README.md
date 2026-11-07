@@ -36,7 +36,7 @@ Then, by hand:
 | Quick edits | vim, no plugins; colours from the terminal palette; `$EDITOR`                  | [`vim/`](./vim)                          |
 | Terminal  | Ghostty — tabs and splits are its own                                                 | [`ghostty/config`](./ghostty/config)     |
 | Agents    | Rex — one session per worktree; Mate themes, font and layout written to its preferences by `install.sh`, shortcuts linked. The app itself is a manual install, no cask | [`rex/`](./rex)                          |
-| Windows   | Hammerspoon — cmd+alt+0 zooms every window, cmd+alt+- / = drop one in a pane; new windows open at full size | [`hammerspoon/`](./hammerspoon)          |
+| Windows   | Hammerspoon — cmd+alt+0 zooms every window, cmd+alt+- / = drop one in a pane; cmd+§ cycles windows like cmd+` | [`hammerspoon/`](./hammerspoon)          |
 | Shell     | zsh, [Starship](https://starship.rs) prompt, fzf, fzf-tab completion; vi mode          | [`zsh/`](./zsh), [`starship/`](./starship) |
 | Database  | TablePlus; `psql`, `redis-cli` in the terminal                                         | —                                        |
 | Runtimes  | nvm for node (`.nvmrc` switches on `cd`); mise for everything else                     | [`mise/config.toml`](./mise/config.toml) |
