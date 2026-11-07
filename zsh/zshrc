@@ -144,6 +144,7 @@ export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
 # ANSI slots only, so fzf follows mate-dark/mate-light like Starship does.
 export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border=rounded --color=16,fg:-1,bg:-1,fg+:-1,bg+:8,hl:3,hl+:3:bold,prompt:1,pointer:1,marker:1,spinner:3,info:8,header:4,border:8,separator:8,scrollbar:8,label:8'
 export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always --line-range :200 {}'"
+export FZF_CTRL_R_OPTS='--exact'
 source <(fzf --zsh)
 
 # --- nvm --------------------------------------------------------------------
