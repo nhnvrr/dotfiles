@@ -290,9 +290,9 @@
   "workbench.activityBar.compact": true,
   "workbench.colorTheme": "Mate Dark",
   "window.autoDetectColorScheme": true,
-  "workbench.preferredDarkColorTheme": "Mate Dark",
   "workbench.preferredLightColorTheme": "Mate Light",
   "[markdown]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  },
+  "workbench.preferredDarkColorTheme": "Mate Dark"
 }

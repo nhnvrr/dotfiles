@@ -225,24 +225,8 @@ defaults write "${REX_DOMAIN}" Workspace.balancesSplitsOnCreation -bool false
 defaults write "${REX_DOMAIN}" Workspace.appIcon -string "default"
 link_file "${CONFIG_DIR}/rex/shortcuts.json" "${HOME}/Library/Application Support/${REX_DOMAIN}/Shortcuts/shortcuts.json"
 
-# Rebuilt from scratch on every run; an app that is not installed is skipped.
-defaults write com.apple.dock autohide -bool false
-for key in tilesize magnification largesize; do defaults delete com.apple.dock "${key}" 2>/dev/null || true; done
-defaults write com.apple.dock orientation -string "bottom"
-defaults write com.apple.dock show-recents -bool false
-defaults write com.apple.dock minimize-to-application -bool false
-defaults delete com.apple.dock persistent-apps 2>/dev/null || true
-defaults delete com.apple.dock persistent-others 2>/dev/null || true
-for app in "Slack" "Visual Studio Code" "TablePlus" "Claude" "Docker" "Notes" "Calendar" "Messages" "Calculator"; do
-  for dir in /Applications /System/Applications; do
-    [[ -d "${dir}/${app}.app" ]] || continue
-    defaults write com.apple.dock persistent-apps -array-add \
-      "<dict><key>tile-data</key><dict><key>file-data</key><dict><key>_CFURLString</key><string>${dir}/${app}.app</string><key>_CFURLStringType</key><integer>0</integer></dict></dict><key>tile-type</key><string>file-tile</string></dict>"
-    break
-  done
-done
-defaults write com.apple.dock persistent-others -array-add \
-  "<dict><key>tile-data</key><dict><key>file-data</key><dict><key>_CFURLString</key><string>file://${HOME}/Downloads/</string><key>_CFURLStringType</key><integer>15</integer></dict><key>arrangement</key><integer>2</integer><key>displayas</key><integer>0</integer><key>showas</key><integer>0</integer></dict><key>tile-type</key><string>directory-tile</string></dict>"
+# Factory Dock: deleting the domain makes macOS regenerate the default plist.
+defaults delete com.apple.dock 2>/dev/null || true
 killall Dock 2>/dev/null || true
 killall Finder 2>/dev/null || true
 killall SystemUIServer 2>/dev/null || true
