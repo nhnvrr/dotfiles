@@ -36,7 +36,7 @@ vimcmd_replace_one_symbol = '[▶](bright-purple)'
 vimcmd_visual_symbol = '[V](bright-yellow)'
 
 [git_branch]
-symbol = ' '
+symbol = ' '
 style = 'bold green'
 only_attached = true
 format = '\[[$symbol$branch(:$remote_branch)]($style)\]'
@@ -44,7 +44,7 @@ format = '\[[$symbol$branch(:$remote_branch)]($style)\]'
 [git_commit]
 only_detached = true
 tag_disabled = false
-tag_symbol = ' '
+tag_symbol = ' '
 style = 'bright-black'
 format = '\[[$hash$tag]($style)\]'
 

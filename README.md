@@ -1,6 +1,6 @@
 # dotfiles
 
-macOS. Chrome, Ghostty, zsh, vim, VS Code, TablePlus. Nothing else is configured here.
+macOS. Chrome, Ghostty, zsh, vim, nvim, VS Code, TablePlus. Nothing else is configured here.
 
 ## Install
 
@@ -34,6 +34,7 @@ Then, by hand:
 | Browser   | Chrome                                                                                 | —                                        |
 | Editor    | VS Code; settings, keybindings and the Mate theme linked, extensions in the Brewfile   | [`vscode/`](./vscode)                    |
 | Quick edits | vim, no plugins; colours from the terminal palette; `$EDITOR`                  | [`vim/`](./vim)                          |
+| Editor (terminal) | nvim — fzf-lua, oil, treesitter, mini (icons, statusline, clue), gitsigns, native LSP + blink.cmp, conform; servers in the Brewfile; same `mate` colours as vim, plugins pinned in the lockfile | [`nvim/`](./nvim)                        |
 | Terminal  | Ghostty — tabs and splits are its own                                                 | [`ghostty/config`](./ghostty/config)     |
 | Agents    | Rex — one session per worktree; Mate themes, font and layout written to its preferences by `install.sh`, shortcuts linked. The app itself is a manual install, no cask | [`rex/`](./rex)                          |
 | Windows   | Hammerspoon — cmd+alt+0 zooms every window, cmd+alt+- / = drop one in a pane; cmd+§ cycles windows like cmd+` | [`hammerspoon/`](./hammerspoon)          |

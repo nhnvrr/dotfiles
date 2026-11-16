@@ -38,6 +38,11 @@ check "vscode/*.json"         python3 -I -c '
 import json, re, sys
 for f in sys.argv[1:]:
     json.loads(re.sub(r",(\s*[}\]])", r"\1", open(f).read()))' "$DIR"/vscode/settings.json "$DIR"/vscode/keybindings.json "$DIR"/vscode/extensions/mate/themes/*.json
+if command -v nvim >/dev/null 2>&1; then
+  check "nvim/init.lua"       nvim --headless -u "$DIR/nvim/init.lua" +qa
+else
+  skip "nvim not installed"
+fi
 check "fzf accepts FZF_DEFAULT_OPTS" zsh -c "source <(grep '^export FZF_DEFAULT_OPTS' '$DIR/zsh/zshrc'); printf 'a\n' | fzf --filter=a"
 
 echo "Hammerspoon"
@@ -59,6 +64,7 @@ linked vscode/keybindings.json  "$HOME/Library/Application Support/Code/User/key
 linked vscode/extensions/mate   "$HOME/.vscode/extensions/nhnvrr.mate-theme-0.0.1"
 linked vim/vimrc                "$HOME/.vim/vimrc"
 linked vim/colors               "$HOME/.vim/colors"
+linked nvim                     "$HOME/.config/nvim"
 linked hammerspoon/init.lua     "$HOME/.hammerspoon/init.lua"
 linked hammerspoon/mate         "$HOME/.hammerspoon/mate"
 linked mise/config.toml         "$HOME/.config/mise/config.toml"
