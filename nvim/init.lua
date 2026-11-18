@@ -38,6 +38,7 @@ vim.pack.add({
 
 vim.g.everforest_background = 'hard'
 vim.g.everforest_better_performance = 1
+vim.g.everforest_transparent_background = 1
 vim.o.background = 'dark'
 vim.cmd.colorscheme('everforest')
 -- nvim sets 'background' from the terminal's reply after startup; keep it dark.

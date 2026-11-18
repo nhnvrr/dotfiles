@@ -135,6 +135,11 @@ link_file "${CONFIG_DIR}/zsh/functions" "${HOME}/.config/zsh/functions"
 link_file "${CONFIG_DIR}/fish/config.fish" "${HOME}/.config/fish/config.fish"
 # Not the whole dir: fish writes fish_variables into ~/.config/fish.
 link_file "${CONFIG_DIR}/fish/functions" "${HOME}/.config/fish/functions"
+# Not the whole dir: nu writes its history and plugin registry there.
+link_file "${CONFIG_DIR}/nushell/env.nu" "${HOME}/Library/Application Support/nushell/env.nu"
+link_file "${CONFIG_DIR}/nushell/config.nu" "${HOME}/Library/Application Support/nushell/config.nu"
+link_file "${CONFIG_DIR}/nushell/autoload" "${HOME}/Library/Application Support/nushell/autoload"
+link_file "${CONFIG_DIR}/fish/conf.d/mise-activate.fish" "${HOME}/.config/fish/conf.d/mise-activate.fish"
 link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
 mkdir -p "${HOME}/.local/state/zsh" "${HOME}/.cache/zsh" "${HOME}/.cache/fish"
 # compinit refuses the zsh-completions symlinks while share/ is group-writable.
@@ -270,7 +275,7 @@ link_file "${CONFIG_DIR}/rex/shortcuts.json" "${HOME}/Library/Application Suppor
 killall Finder 2>/dev/null || true
 killall SystemUIServer 2>/dev/null || true
 
-SHELL_BIN="/opt/homebrew/bin/fish"
+SHELL_BIN="/opt/homebrew/bin/nu"
 # chsh refuses a shell that is not listed in /etc/shells.
 grep -qx "${SHELL_BIN}" /etc/shells || echo "${SHELL_BIN}" | sudo tee -a /etc/shells >/dev/null
 LOGIN_SHELL="$(dscl . -read "/Users/${USER}" UserShell 2>/dev/null | awk '{print $2}')"

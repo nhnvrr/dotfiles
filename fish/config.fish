@@ -1,5 +1,6 @@
 # Fish, the default shell. zsh/ stays installed and linked as the fallback.
-# mise activates itself from Homebrew's vendor_conf.d before this file runs.
+# mise runs in shims mode: conf.d/mise-activate.fish shadows Homebrew's hook,
+# which ran `mise hook-env` twice per Enter (~60 ms). Shims resolve per directory.
 
 # --- environment -------------------------------------------------------------
 set -gx HOMEBREW_PREFIX /opt/homebrew
@@ -23,8 +24,9 @@ set -gx BAT_THEME ansi
 set -gx NVM_DIR $HOME/.nvm
 
 # fish_add_path skips missing dirs; -m moves entries path_helper already placed.
-fish_add_path -g -m -P /usr/local/bin $HOME/.docker/bin $PNPM_HOME/bin $HOME/.local/bin \
-    $HOME/.bun/bin /opt/homebrew/opt/libpq/bin /opt/homebrew/sbin /opt/homebrew/bin $GOPATH/bin
+# Argument order is the resulting order, same as zshenv.
+fish_add_path -g -m -P $HOME/.local/share/mise/shims $GOPATH/bin /opt/homebrew/bin /opt/homebrew/sbin \
+    /opt/homebrew/opt/libpq/bin $HOME/.bun/bin $HOME/.local/bin $PNPM_HOME/bin $HOME/.docker/bin /usr/local/bin
 
 status is-interactive; or exit
 
@@ -119,6 +121,9 @@ set -g fish_cursor_visual block
 abbr -a gc 'git commit -m'
 abbr -a gco git checkout
 abbr -a gd git diff
+abbr -a lg lazygit
+abbr -a dw 'cd ~/Downloads'
+abbr -a docu 'cd ~/Documents'
 alias ls 'ls -lhG'
 alias la 'ls -lahG'
 abbr -a '?' ask
@@ -146,7 +151,17 @@ end
 
 # --- completions -------------------------------------------------------------
 type -q aws_completer; and complete -c aws -f -a '(begin; set -lx COMP_SHELL fish; set -lx COMP_LINE (commandline); aws_completer | string replace -r \'\s+$\' \'\'; end)'
-type -q kubectl; and _cached_source kubectl kubectl completion fish
+# kubectl's completion costs ~90 ms to source, so it is generated into a
+# completions dir and fish autoloads it on the first `kubectl <tab>`.
+if type -q kubectl
+    set -l dir $HOME/.cache/fish/completions
+    set -l file $dir/kubectl.fish
+    if not test -s $file; or test (command -s kubectl) -nt $file
+        mkdir -p $dir
+        kubectl completion fish >$file 2>/dev/null
+    end
+    contains $dir $fish_complete_path; or set -p fish_complete_path $dir
+end
 
 # --- prompt ------------------------------------------------------------------
 # bobthefish, cloned by install.sh; Starship stays zsh-only. Its functions go
@@ -155,31 +170,89 @@ set -l bob $HOME/.local/share/bobthefish/functions
 if test -d $bob; and not contains $bob $fish_function_path
     set -g fish_function_path $fish_function_path[1] $bob $fish_function_path[2..]
 end
-# Region resolved once per profile change, in the AWS CLI's order; the prompt
-# only reads $_aws_prompt.
-function _aws_region_refresh --on-variable AWS_PROFILE --on-variable AWS_REGION --on-variable AWS_DEFAULT_REGION
-    set -l region $AWS_REGION $AWS_DEFAULT_REGION
-    if test -z "$region[1]"; and test -r $HOME/.aws/config
-        set region (awk -v p="[profile $AWS_PROFILE]" \
-            '$0==p{f=1;next} /^\[/{f=0} f&&$1=="region"{print $3;exit}' $HOME/.aws/config)
-    end
-    set -g _aws_prompt $AWS_PROFILE
-    test -n "$region[1]"; and set _aws_prompt "$AWS_PROFILE@$region[1]"
-end
-_aws_region_refresh
 
-# bobthefish only has an aws-vault segment; this replaces it with
-# profile@region. It has to be defined after fish_prompt.fish autoloads, or
-# the autoload would put the original back.
+# The fish_prompt.fish internals below must be redefined after it autoloads,
+# or the autoload would put the originals back.
 if functions -q fish_prompt
-    function __bobthefish_prompt_aws_vault_profile -S
-        test -n "$_aws_prompt"; or return
-        if test "$AWS_PROFILE" = work
-            __bobthefish_start_segment red black --bold
-        else
-            __bobthefish_start_segment $color_aws_vault
+
+    # Git, fast: bobthefish spawns ~7 git processes per prompt (~90 ms here).
+    # The repo root is found without a process and the state comes from one
+    # `git status --porcelain=v2`. Tags are not shown.
+    function __bobthefish_git_project_dir -S -a real_pwd
+        set -l d $real_pwd
+        while test -n "$d"
+            test -e $d/.git; and echo $d; and return
+            test "$d" = /; and return
+            set d (path dirname $d)
         end
-        echo -ns  ' ' $_aws_prompt ' '
+    end
+    function __bobthefish_prompt_git -S -a git_root_dir -a real_pwd
+        set -l branch
+        set -l oid
+        set -l ab
+        set -l dirty ''
+        set -l staged ''
+        set -l stashed ''
+        for line in (command git --no-optional-locks status --porcelain=v2 --branch --show-stash --untracked-files=no 2>/dev/null)
+            switch $line
+                case '# branch.head *'
+                    set branch (string sub -s 15 -- $line)
+                case '# branch.oid *'
+                    set oid (string sub -s 14 -l 7 -- $line)
+                case '# branch.ab *'
+                    set ab (string split ' ' -- $line)[3..4]
+                case '# stash *'
+                    set stashed $git_stashed_glyph
+                case '1 *' '2 *'
+                    test (string sub -s 3 -l 1 -- $line) != .; and set staged $git_staged_glyph
+                    test (string sub -s 4 -l 1 -- $line) != .; and set dirty $git_dirty_glyph
+                case 'u *'
+                    set dirty $git_dirty_glyph
+            end
+        end
+        set -l ahead ''
+        if test (count $ab) -eq 2
+            set -l a (string sub -s 2 -- $ab[1])
+            set -l b (string sub -s 2 -- $ab[2])
+            if test $a -gt 0 -a $b -gt 0
+                set ahead $git_plus_minus_glyph
+            else if test $a -gt 0
+                set ahead $git_plus_glyph
+            else if test $b -gt 0
+                set ahead $git_minus_glyph
+            end
+        end
+        set -l flags "$dirty$staged$stashed$ahead"
+        test -n "$flags"; and set flags " $flags"
+        set -l flag_colors $color_repo
+        if test -n "$dirty"
+            set flag_colors $color_repo_dirty
+        else if test -n "$staged"
+            set flag_colors $color_repo_staged
+        end
+
+        __bobthefish_path_segment $git_root_dir project
+        __bobthefish_start_segment $flag_colors
+        switch "$branch"
+            case '(detached)'
+                echo -ns $detached_glyph ' ' $oid
+            case main master
+                echo -ns $branch_glyph
+            case '*'
+                echo -ns $branch_glyph ' ' $branch
+        end
+        echo -ns $flags ' '
+        set_color normal
+
+        set -l project_pwd (__bobthefish_project_pwd $git_root_dir $real_pwd)
+        if test -n "$project_pwd"
+            if test -w "$real_pwd"
+                __bobthefish_start_segment $color_path
+            else
+                __bobthefish_start_segment $color_path_nowrite
+            end
+            echo -ns $project_pwd ' '
+        end
     end
 
     # Transient prompt: once a command runs, its line collapses to ❯ in the
@@ -199,25 +272,33 @@ if functions -q fish_prompt
         _return $last
         __bobthefish_fish_prompt
     end
-    functions -q fish_right_prompt; and functions -c fish_right_prompt __bobthefish_fish_right_prompt
+    functions -q fish_right_prompt
+    # bobthefish's right prompt, with the date in magenta (slot 5) instead of
+    # fish_color_autosuggestion.
     function fish_right_prompt
         contains -- --final-rendering $argv; and return
-        __bobthefish_fish_right_prompt
+        set -l __bobthefish_left_arrow_glyph \uE0B3
+        set_color $fish_color_autosuggestion
+        __bobthefish_cmd_duration
+        set_color magenta
+        __bobthefish_timestamp
+        set_color normal
     end
 end
 set -g fish_transient_prompt 1
 
-set -g theme_newline_cursor yes
-# bobthefish paints this in fish_color_autosuggestion, slot 8, near-black here.
-set -g theme_newline_prompt (set_color green)'❯ '(set_color normal)
 set -g theme_show_exit_status yes
 set -g theme_display_k8s_context yes
 set -g theme_display_git_untracked no
-set -g fish_prompt_pwd_dir_length 0
+# Intermediate dirs cut to one letter, the last one kept whole, inside a repo too.
+set -g fish_prompt_pwd_dir_length 1
+set -g theme_project_dir_length 1
 set -g theme_nerd_fonts yes
 set -g theme_display_node yes
-set -g theme_display_vi yes
-set -g theme_date_format '+%H:%M'
+# Off: fish does not pass --final-rendering to the mode prompt, so the mode
+# would stay in the transient line. The cursor shape already shows the mode.
+set -g theme_display_vi no
+set -g theme_date_format '+%a %d %b %H:%M:%S'
 set -g theme_title_use_abbreviated_path yes
 # terminal-* schemes draw with ANSI slots, so the prompt follows Ghostty's mate.
 if string match -q '*mate-light*' -- (cat $HOME/.config/ghostty/mode.local 2>/dev/null)

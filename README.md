@@ -1,6 +1,6 @@
 # dotfiles
 
-macOS. Chrome, Ghostty, fish, zsh, vim, nvim, VS Code, TablePlus. Nothing else is configured here.
+macOS. Chrome, Ghostty, Nushell, fish, zsh, vim, nvim, VS Code, TablePlus. Nothing else is configured here.
 
 ## Install
 
@@ -39,7 +39,8 @@ Then, by hand:
 | Agents    | Rex — one session per worktree; font and layout written to its preferences by `install.sh`, shortcuts linked. The app itself is a manual install, no cask | [`rex/`](./rex)                          |
 | Windows   | Hammerspoon — cmd+alt+0 zooms every window, cmd+alt+- / = drop one in a pane; cmd+§ cycles windows like cmd+` | [`hammerspoon/`](./hammerspoon)          |
 | Dock      | auto-hide, magnification, no recent apps; the app and folder list is rebuilt from scratch by `install.sh`, so anything pinned by hand is dropped on the next run | [`install.sh`](./install.sh)             |
-| Shell     | fish (login shell), [bobthefish](https://github.com/oh-my-fish/theme-bobthefish) prompt in the terminal's colours (pinned clone, no plugin manager) with `profile@region` for AWS, the k8s context and a transient `❯` in the scrollback, vi mode; tab opens fish completions in fzf, ctrl-r / ctrl-t / alt-c are fzf. zsh stays configured as the fallback, with the [Starship](https://starship.rs) prompt | [`fish/`](./fish), [`zsh/`](./zsh), [`starship/`](./starship) |
+| Shell     | [Nushell](https://www.nushell.sh) (login shell and terminal): vi mode, a bobthefish-style prompt written in nu (one git call, transient `❯`), [carapace](https://carapace.sh) completions, fzf on ctrl-r / ctrl-t / alt-c; `awsp`, `ask`, `mate` | [`nushell/`](./nushell) |
+| Shell (also) | fish, [bobthefish](https://github.com/oh-my-fish/theme-bobthefish) prompt in the terminal's colours (pinned clone, no plugin manager) on one line, with the k8s context and a transient `❯` in the scrollback, vi mode; `awsp` prints the AWS profile and region; tab opens fish completions in fzf, ctrl-r / ctrl-t / alt-c are fzf. zsh stays configured as the fallback, with the [Starship](https://starship.rs) prompt | [`fish/`](./fish), [`zsh/`](./zsh), [`starship/`](./starship) |
 | Database  | TablePlus; `psql`, `redis-cli` in the terminal                                         | —                                        |
 | Runtimes  | nvm for node (`.nvmrc` switches on `cd`); mise for everything else                     | [`mise/config.toml`](./mise/config.toml) |
 | Questions | `? <question>` — one-off, read-only Claude                                              | [`zsh/functions/ask`](./zsh/functions/ask) |
@@ -116,8 +117,11 @@ defaults write NSGlobalDomain KeyRepeat -int 2                       # 30 ms bet
 - **`brew bundle cleanup` uninstalls anything not in the Brewfile.** Deleting a line is how you uninstall.
 - **`.zshrc` has a load order.** The cursor-shape widgets go before `starship init` (it wraps them), `mise activate` goes after the PATH is final (it prepends), `fzf-tab` goes after `compinit` and before `zsh-autosuggestions`, and `zsh-syntax-highlighting` goes last of all (it only highlights widgets that already exist).
 - **nvm is loaded lazily.** `zshenv` puts the `default` node on `$PATH` by reading `~/.nvm/alias/default`; `nvm.sh` itself (about 60 ms) is sourced the first time `nvm`, `node`, `npm` or `npx` run, or on `cd` into a directory with a `.nvmrc`. Non-interactive shells only ever see the default version.
-- **The fish AWS segment replaces a bobthefish internal** (`__bobthefish_prompt_aws_vault_profile`, in `fish/config.fish`). After bumping `BOB_REV` in `install.sh`, check that `profile@region` still shows.
+- **The fish git segment replaces bobthefish internals** (`__bobthefish_prompt_git`, `__bobthefish_git_project_dir`, in `fish/config.fish`). After bumping `BOB_REV` in `install.sh`, check that the prompt still renders.
 - **nvm is bash-only, so fish does not use it to switch.** `fish/config.fish` puts the node from `.nvmrc` (or the default alias) on `$PATH` on every `cd`, straight from `~/.nvm/versions`. `nvm install` works through bash; `nvm use` changes nothing in fish.
+- **Nushell is not a POSIX shell.** It is the login shell, so anything that runs `$SHELL -c '…'` gets nu syntax: `&&` and `$(…)` fail there. `ssh this-mac 'a && b'` is the usual case; run `fish` or `zsh` explicitly when a script needs sh syntax.
+- **nu config is linked file by file** into `~/Library/Application Support/nushell/` (`env.nu`, `config.nu`, `autoload/`), not the whole dir: nu writes its history and plugin registry there. Files in `autoload/` are sourced after `config.nu`.
+- **mise runs as shims in fish and nu, not as a hook.** `fish/conf.d/mise-activate.fish` shadows Homebrew's activation, which ran `mise hook-env` on every prompt. Versions still switch per directory through the shims; `[env]` sections in a `mise.toml` are not loaded in fish.
 - **node is not a mise tool**, and `.nvmrc` is excluded from `idiomatic_version_file_enable_tools`. Listing it again would put mise's node ahead of nvm's.
 - **`~/.aws/config` has no `[default]` profile on purpose.** `AWS_PROFILE` follows the directory: `work` under `~/Work`, `personal` everywhere else, re-evaluated on every `cd`.
 - **The font's family is `IoskeleyMonoTerm Nerd Font Mono`**, not its filename. The Brewfile installs the `font-ioskeley-mono-term-nerd-font` cask; the plain `font-ioskeley-mono` cask has no Term cut. A family CoreText cannot find falls back to Menlo silently.

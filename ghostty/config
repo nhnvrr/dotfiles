@@ -1,4 +1,4 @@
-command = /opt/homebrew/bin/fish
+command = /opt/homebrew/bin/nu
 theme = mate-dark
 config-file = ?mode.local
 

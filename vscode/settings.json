@@ -55,7 +55,10 @@
     ],
   },
   "editor.tabCompletion": "off",
-  "terminal.integrated.defaultProfile.osx": "fish",
+  "terminal.integrated.profiles.osx": {
+    "nu": { "path": "/opt/homebrew/bin/nu", "args": ["-l"] }
+  },
+  "terminal.integrated.defaultProfile.osx": "nu",
   "terminal.integrated.fontFamily": "IoskeleyMonoTerm Nerd Font Mono",
   "terminal.integrated.cursorBlinking": true,
   "terminal.integrated.cursorStyle": "line",
