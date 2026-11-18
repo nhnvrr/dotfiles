@@ -1,7 +1,7 @@
 # A bobthefish-style prompt in nu: powerline segments in the terminal's ANSI
 # colours (so it follows Ghostty's mate), one git call, a transient ❯.
 #
-#   [exit] [k8s] [node] [~/D/project] [ branch flags] [s/ubdir]     date
+#   [exit] [k8s] [node] [~/full/path] [ branch flags]              date
 
 const ARROW = "\u{e0b0}"
 const THIN = "\u{e0b1}"
@@ -30,14 +30,10 @@ def seg-close [state: record] {
     $"($state.out)\e[0;($state.bg)m($ARROW)\e[0m"
 }
 
-# ~/Develop/dotfiles -> ~/D/dotfiles: every component but the last cut to one
-# letter (two for dot-dirs).
+# Full path, with $HOME shown as ~.
 def short-path [p: string] {
-    let p = ($p | str replace -r $"^(($env.HOME | str replace -a '/' '\/'))" '~')
-    let parts = ($p | split row '/')
-    if ($parts | length) <= 1 { return $p }
-    let head = ($parts | drop 1 | each {|c| $c | str replace -r '^(\.?[^/])[^/]*$' '$1' })
-    [...$head ($parts | last)] | str join '/'
+    if $p == $env.HOME { return '~' }
+    $p | str replace -r $"^(($env.HOME | str replace -a '/' '\/'))/" '~/'
 }
 
 def find-up [dir: string, names: list<string>] {
@@ -117,15 +113,9 @@ def prompt-left [] {
         $s = (seg $s 92 30 $"\u{e718} ($v)" --bold)
     }
 
-    let root = (find-up $env.PWD [.git])
-    if $root == null {
-        $s = (seg $s 30 37 (short-path $env.PWD))
-    } else {
-        $s = (seg $s 30 37 (short-path $root) --bold)
-        $s = (git-segment $s)
-        let sub = ($env.PWD | str replace $root '' | str trim -l -c '/')
-        if ($sub | is-not-empty) { $s = (seg $s 30 37 (short-path $sub)) }
-    }
+    # The whole working directory in one segment, git after it.
+    $s = (seg $s 30 37 (short-path $env.PWD) --bold)
+    if (find-up $env.PWD [.git]) != null { $s = (git-segment $s) }
     seg-close $s
 }
 
