@@ -1,4 +1,4 @@
-command = /bin/zsh
+command = /opt/homebrew/bin/fish
 theme = mate-dark
 config-file = ?mode.local
 

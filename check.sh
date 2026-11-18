@@ -28,6 +28,9 @@ check "bootstrap.sh"          bash -n "$DIR/bootstrap.sh"
 check "zsh/zshrc"             zsh -n "$DIR/zsh/zshrc"
 check "zsh/zshenv"            zsh -n "$DIR/zsh/zshenv"
 for f in "$DIR"/zsh/functions/*; do check "zsh/functions/$(basename "$f")" zsh -n "$f"; done
+check "fish/config.fish"      fish -n "$DIR/fish/config.fish"
+for f in "$DIR"/fish/functions/*.fish; do check "fish/functions/$(basename "$f")" fish -n "$f"; done
+check "fish starts interactive" fish -i -c exit
 check "starship/starship.toml" env STARSHIP_CONFIG="$DIR/starship/starship.toml" starship print-config
 # The cask puts no `ghostty` on PATH; the binary inside the bundle has the CLI.
 check "ghostty/config"        /Applications/Ghostty.app/Contents/MacOS/ghostty +validate-config --config-file="$DIR/ghostty/config"
@@ -37,7 +40,7 @@ check "Brewfile"              brew bundle check --file="$DIR/Brewfile" --no-upgr
 check "vscode/*.json"         python3 -I -c '
 import json, re, sys
 for f in sys.argv[1:]:
-    json.loads(re.sub(r",(\s*[}\]])", r"\1", open(f).read()))' "$DIR"/vscode/settings.json "$DIR"/vscode/keybindings.json "$DIR"/vscode/extensions/mate/themes/*.json
+    json.loads(re.sub(r",(\s*[}\]])", r"\1", open(f).read()))' "$DIR"/vscode/settings.json "$DIR"/vscode/keybindings.json
 if command -v nvim >/dev/null 2>&1; then
   check "nvim/init.lua"       nvim --headless -u "$DIR/nvim/init.lua" +qa
 else
@@ -57,11 +60,12 @@ echo "Symlinks"
 linked zsh/zshenv               "$HOME/.zshenv"
 linked zsh/zshrc                "$HOME/.zshrc"
 linked zsh/functions            "$HOME/.config/zsh/functions"
+linked fish/config.fish         "$HOME/.config/fish/config.fish"
+linked fish/functions           "$HOME/.config/fish/functions"
 linked starship/starship.toml   "$HOME/.config/starship.toml"
 linked ghostty                  "$HOME/.config/ghostty"
 linked vscode/settings.json     "$HOME/Library/Application Support/Code/User/settings.json"
 linked vscode/keybindings.json  "$HOME/Library/Application Support/Code/User/keybindings.json"
-linked vscode/extensions/mate   "$HOME/.vscode/extensions/nhnvrr.mate-theme-0.0.1"
 linked vim/vimrc                "$HOME/.vim/vimrc"
 linked vim/colors               "$HOME/.vim/colors"
 linked nvim                     "$HOME/.config/nvim"

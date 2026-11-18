@@ -1,6 +1,6 @@
 # dotfiles
 
-macOS. Chrome, Ghostty, zsh, vim, nvim, VS Code, TablePlus. Nothing else is configured here.
+macOS. Chrome, Ghostty, fish, zsh, vim, nvim, VS Code, TablePlus. Nothing else is configured here.
 
 ## Install
 
@@ -32,22 +32,21 @@ Then, by hand:
 | Layer     | Tool                                                                                   | Config                                   |
 | --------- | -------------------------------------------------------------------------------------- | ---------------------------------------- |
 | Browser   | Chrome                                                                                 | —                                        |
-| Editor    | VS Code; settings, keybindings and the Mate theme linked, extensions in the Brewfile   | [`vscode/`](./vscode)                    |
+| Editor    | VS Code, default theme; settings and keybindings linked, extensions in the Brewfile   | [`vscode/`](./vscode)                    |
 | Quick edits | vim, no plugins; colours from the terminal palette; `$EDITOR`                  | [`vim/`](./vim)                          |
 | Editor (terminal) | nvim — fzf-lua, oil, treesitter, mini (icons, statusline, clue), gitsigns, native LSP + blink.cmp, conform; servers in the Brewfile; [Everforest](https://github.com/sainnhe/everforest) hard dark, the only tool off the `mate` palette, plugins pinned in the lockfile | [`nvim/`](./nvim)                        |
 | Terminal  | Ghostty — tabs and splits are its own                                                 | [`ghostty/config`](./ghostty/config)     |
-| Agents    | Rex — one session per worktree; Mate themes, font and layout written to its preferences by `install.sh`, shortcuts linked. The app itself is a manual install, no cask | [`rex/`](./rex)                          |
+| Agents    | Rex — one session per worktree; font and layout written to its preferences by `install.sh`, shortcuts linked. The app itself is a manual install, no cask | [`rex/`](./rex)                          |
 | Windows   | Hammerspoon — cmd+alt+0 zooms every window, cmd+alt+- / = drop one in a pane; cmd+§ cycles windows like cmd+` | [`hammerspoon/`](./hammerspoon)          |
 | Dock      | auto-hide, magnification, no recent apps; the app and folder list is rebuilt from scratch by `install.sh`, so anything pinned by hand is dropped on the next run | [`install.sh`](./install.sh)             |
-| Shell     | zsh, [Starship](https://starship.rs) prompt, fzf, fzf-tab completion; vi mode          | [`zsh/`](./zsh), [`starship/`](./starship) |
+| Shell     | fish (login shell), [Starship](https://starship.rs) prompt, vi mode; tab opens fish completions in fzf, ctrl-r / ctrl-t / alt-c are fzf. zsh stays configured as the fallback | [`fish/`](./fish), [`zsh/`](./zsh), [`starship/`](./starship) |
 | Database  | TablePlus; `psql`, `redis-cli` in the terminal                                         | —                                        |
 | Runtimes  | nvm for node (`.nvmrc` switches on `cd`); mise for everything else                     | [`mise/config.toml`](./mise/config.toml) |
 | Questions | `? <question>` — one-off, read-only Claude                                              | [`zsh/functions/ask`](./zsh/functions/ask) |
 | Claude Code | one config dir per workspace (`~/Work`, `~/Side`, `~/Orange`), seeded from `claude/base/`; custom status line: model, dir + branch, cost, lines, rate limits | [`claude/`](./claude) |
 
-**Colours.** One palette, `mate`, in [`ghostty/themes/`](./ghostty/themes) — dark and light. The terminal switches on its own, apart from macOS: `mate` toggles it from the shell ([`zsh/functions/mate`](./zsh/functions/mate)), `mate dark` / `mate light` force a side. It writes the theme to the git-ignored `ghostty/mode.local` and reloads Ghostty; the prompt, vim, fzf and tmux follow the terminal's colours (nvim is the exception: always Everforest hard dark, in true colour) — Starship is configured with ANSI colour names only, never hex. VS Code gets *Mate Dark* and *Mate Light* from [`vscode/extensions/mate/`](./vscode/extensions/mate) and follows the macOS appearance (`window.autoDetectColorScheme`). Both were derived from the Ghostty files; the light one darkens yellow and green for contrast on its background.
+**Colours.** One palette, `mate`, in [`ghostty/themes/`](./ghostty/themes) — dark and light. The terminal switches on its own, apart from macOS: `mate` toggles it from the shell ([`zsh/functions/mate`](./zsh/functions/mate)), `mate dark` / `mate light` force a side. It writes the theme to the git-ignored `ghostty/mode.local` and reloads Ghostty; the prompt, vim, fzf, tmux and btop follow the terminal's colours (nvim is the exception: always Everforest hard dark, in true colour) — Starship is configured with ANSI colour names only, never hex. The palette lives only in Ghostty: VS Code, Rex and TablePlus use their own default themes.
 
-TablePlus gets the same palette from [`tableplus/`](./tableplus), mapped from the same palette. It is not linked by `install.sh`: import the folder once with *Theme > Import theme…*, then set `mate dark` and `mate light` as the dark and light defaults in *Settings > Theme*.
 
 ## Managed files
 
@@ -60,10 +59,8 @@ TablePlus gets the same palette from [`tableplus/`](./tableplus), mapped from th
 | `ghostty/`           | `~/.config/ghostty`              |
 | `vscode/settings.json` | `~/Library/Application Support/Code/User/settings.json` |
 | `vscode/keybindings.json` | `~/Library/Application Support/Code/User/keybindings.json` |
-| `vscode/extensions/mate/` | `~/.vscode/extensions/nhnvrr.mate-theme-0.0.1` |
 | `mise/config.toml`   | `~/.config/mise/config.toml`     |
 | `btop/btop.conf`     | `~/.config/btop/btop.conf`       |
-| `btop/themes/mate.theme` | `~/.config/btop/themes/mate.theme` |
 | `gh/config.yml`      | `~/.config/gh/config.yml`        |
 | `claude/base/statusline.sh` | `~/.claude/statusline.sh`  |
 
@@ -119,6 +116,7 @@ defaults write NSGlobalDomain KeyRepeat -int 2                       # 30 ms bet
 - **`brew bundle cleanup` uninstalls anything not in the Brewfile.** Deleting a line is how you uninstall.
 - **`.zshrc` has a load order.** The cursor-shape widgets go before `starship init` (it wraps them), `mise activate` goes after the PATH is final (it prepends), `fzf-tab` goes after `compinit` and before `zsh-autosuggestions`, and `zsh-syntax-highlighting` goes last of all (it only highlights widgets that already exist).
 - **nvm is loaded lazily.** `zshenv` puts the `default` node on `$PATH` by reading `~/.nvm/alias/default`; `nvm.sh` itself (about 60 ms) is sourced the first time `nvm`, `node`, `npm` or `npx` run, or on `cd` into a directory with a `.nvmrc`. Non-interactive shells only ever see the default version.
+- **nvm is bash-only, so fish does not use it to switch.** `fish/config.fish` puts the node from `.nvmrc` (or the default alias) on `$PATH` on every `cd`, straight from `~/.nvm/versions`. `nvm install` works through bash; `nvm use` changes nothing in fish.
 - **node is not a mise tool**, and `.nvmrc` is excluded from `idiomatic_version_file_enable_tools`. Listing it again would put mise's node ahead of nvm's.
 - **`~/.aws/config` has no `[default]` profile on purpose.** `AWS_PROFILE` follows the directory: `work` under `~/Work`, `personal` everywhere else, re-evaluated on every `cd`.
 - **The font's family is `IoskeleyMonoTerm Nerd Font Mono`**, not its filename. The Brewfile installs the `font-ioskeley-mono-term-nerd-font` cask; the plain `font-ioskeley-mono` cask has no Term cut. A family CoreText cannot find falls back to Menlo silently.

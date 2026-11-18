@@ -125,18 +125,17 @@ echo "Linking config files..."
 link_file "${CONFIG_DIR}/zsh/zshenv" "${HOME}/.zshenv"
 link_file "${CONFIG_DIR}/zsh/zshrc" "${HOME}/.zshrc"
 link_file "${CONFIG_DIR}/zsh/functions" "${HOME}/.config/zsh/functions"
+link_file "${CONFIG_DIR}/fish/config.fish" "${HOME}/.config/fish/config.fish"
+# Not the whole dir: fish writes fish_variables into ~/.config/fish.
+link_file "${CONFIG_DIR}/fish/functions" "${HOME}/.config/fish/functions"
 link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
-mkdir -p "${HOME}/.local/state/zsh" "${HOME}/.cache/zsh"
+mkdir -p "${HOME}/.local/state/zsh" "${HOME}/.cache/zsh" "${HOME}/.cache/fish"
 # compinit refuses the zsh-completions symlinks while share/ is group-writable.
 chmod go-w /opt/homebrew/share
 link_file "${CONFIG_DIR}/ghostty" "${HOME}/.config/ghostty"
 VSCODE_USER="${HOME}/Library/Application Support/Code/User"
 link_file "${CONFIG_DIR}/vscode/settings.json" "${VSCODE_USER}/settings.json"
 link_file "${CONFIG_DIR}/vscode/keybindings.json" "${VSCODE_USER}/keybindings.json"
-VSCODE_THEME="${HOME}/.vscode/extensions/nhnvrr.mate-theme-0.0.1"
-# A vsix install is a plain copy; a .bak of it beside the link would load twice.
-[[ -d "${VSCODE_THEME}" && ! -L "${VSCODE_THEME}" ]] && rm -rf "${VSCODE_THEME}"
-link_file "${CONFIG_DIR}/vscode/extensions/mate" "${VSCODE_THEME}"
 link_file "${CONFIG_DIR}/vim/vimrc" "${HOME}/.vim/vimrc"
 link_file "${CONFIG_DIR}/vim/colors" "${HOME}/.vim/colors"
 link_file "${CONFIG_DIR}/nvim" "${HOME}/.config/nvim"
@@ -144,7 +143,6 @@ link_file "${CONFIG_DIR}/hammerspoon/init.lua" "${HOME}/.hammerspoon/init.lua"
 link_file "${CONFIG_DIR}/hammerspoon/mate" "${HOME}/.hammerspoon/mate"
 link_file "${CONFIG_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"
 link_file "${CONFIG_DIR}/btop/btop.conf" "${HOME}/.config/btop/btop.conf"
-link_file "${CONFIG_DIR}/btop/themes/mate.theme" "${HOME}/.config/btop/themes/mate.theme"
 link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.config/tmux/tmux.conf"
 link_file "${CONFIG_DIR}/claude/base/statusline.sh" "${HOME}/.claude/statusline.sh"
 mkdir -p "${HOME}/.local/state/tmux"
@@ -238,10 +236,6 @@ if command -v duti >/dev/null 2>&1 && open -Ra "Visual Studio Code" 2>/dev/null;
   done
 fi
 REX_DOMAIN="com.superlogical.rex"
-defaults write "${REX_DOMAIN}" Workspace.customThemes -string "$(cat "${CONFIG_DIR}/rex/themes.json")"
-defaults write "${REX_DOMAIN}" Workspace.darkThemeID -string "custom-8CB97BC0-2529-4DDA-9CE5-4B87204CFBB9"
-defaults write "${REX_DOMAIN}" Workspace.lightThemeID -string "custom-BA5C3648-D51E-4CE1-989C-96B1F9FFDDCB"
-defaults write "${REX_DOMAIN}" Workspace.interfaceStyle -string "useTheme"
 defaults write "${REX_DOMAIN}" Workspace.terminalFontName -string "JetBrains Mono"
 defaults write "${REX_DOMAIN}" Workspace.terminalFontPointSize -float 14
 defaults write "${REX_DOMAIN}" Workspace.terminalFontSmoothing -bool false
@@ -266,13 +260,12 @@ defaults write "${REX_DOMAIN}" Workspace.balancesSplitsOnCreation -bool false
 defaults write "${REX_DOMAIN}" Workspace.appIcon -string "default"
 link_file "${CONFIG_DIR}/rex/shortcuts.json" "${HOME}/Library/Application Support/${REX_DOMAIN}/Shortcuts/shortcuts.json"
 
-# Factory Dock: deleting the domain makes macOS regenerate the default plist.
-defaults delete com.apple.dock 2>/dev/null || true
-killall Dock 2>/dev/null || true
 killall Finder 2>/dev/null || true
 killall SystemUIServer 2>/dev/null || true
 
-SHELL_BIN="/bin/zsh"
+SHELL_BIN="/opt/homebrew/bin/fish"
+# chsh refuses a shell that is not listed in /etc/shells.
+grep -qx "${SHELL_BIN}" /etc/shells || echo "${SHELL_BIN}" | sudo tee -a /etc/shells >/dev/null
 LOGIN_SHELL="$(dscl . -read "/Users/${USER}" UserShell 2>/dev/null | awk '{print $2}')"
 if [[ "${LOGIN_SHELL}" != "${SHELL_BIN}" ]]; then
   echo "Changing login shell to ${SHELL_BIN} (chsh will prompt for your password)..."
