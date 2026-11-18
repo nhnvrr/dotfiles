@@ -1,0 +1,36 @@
+{
+  "title": "Request through a Kubernetes service",
+  "description": "Step through how one HTTP request reaches a pod and fans out to the database and the queue.",
+  "renderer": "three",
+  "grid": { "w": 12, "h": 8 },
+  "nodes": [
+    { "id": "client", "icon": "laptop", "at": [0, 3], "label": "Client" },
+    { "id": "ing", "icon": "k8s-ing", "at": [2, 3], "label": "Ingress" },
+    { "id": "svc", "icon": "k8s-svc", "at": [4, 3], "label": "Service", "sub": "api" },
+    { "id": "pod1", "icon": "k8s-pod", "at": [6, 1], "label": "api-7d9f-a" },
+    { "id": "pod2", "icon": "k8s-pod", "at": [6, 3], "label": "api-7d9f-b", "pulse": true },
+    { "id": "pod3", "icon": "k8s-pod", "at": [6, 5], "label": "api-7d9f-c" },
+    { "id": "db", "icon": "storage", "at": [9, 3], "label": "Postgres" },
+    { "id": "mq", "icon": "queue", "at": [9, 6], "label": "Jobs queue" }
+  ],
+  "groups": [
+    { "id": "cluster", "label": "cluster", "from": [1, 0], "to": [10, 7], "tone": "blue" },
+    { "id": "ns", "label": "ns: api", "from": [5, 0], "to": [7, 6], "tone": "aqua", "style": "dashed" }
+  ],
+  "edges": [
+    { "from": "client", "to": "ing", "packets": {} },
+    { "from": "ing", "to": "svc", "packets": {} },
+    { "from": "svc", "to": "pod1", "route": "yx" },
+    { "from": "svc", "to": "pod2" },
+    { "from": "svc", "to": "pod3", "route": "yx" },
+    { "from": "pod2", "to": "db", "label": "SQL" },
+    { "from": "pod2", "to": "mq", "route": "straight", "style": "dashed" }
+  ],
+  "steps": [
+    { "show": ["cluster", "client", "ing"], "active": ["client->ing"], "caption": "The client calls api.example.com; the Ingress terminates TLS." },
+    { "show": ["svc"], "active": ["ing->svc"], "caption": "The Ingress forwards to the api Service (ClusterIP)." },
+    { "show": ["ns", "pod1", "pod2", "pod3"], "active": ["svc->pod2", "pod2"], "caption": "kube-proxy picks one ready endpoint: pod b." },
+    { "show": ["db"], "active": ["pod2->db"], "caption": "The pod reads and writes Postgres." },
+    { "show": ["mq"], "active": ["pod2->mq", "pod2->db"], "caption": "Slow work is pushed to the jobs queue and the response returns." }
+  ]
+}

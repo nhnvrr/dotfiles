@@ -1,0 +1,31 @@
+<title>{{TITLE}}</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* Single column: heading, lede, then the diagram at full width. Mate Dark, dark only by design. */
+:root {
+  --bg: #0e0f10; --surface: #141516; --surface-2: #202122; --surface-3: #242526;
+  --hover: #333334; --border: #333334; --border-strong: #3a3a3a; --selection: #3e3f40;
+  --text-strong: #e2e2e2; --text: #c1c1c1; --text-2: #959595; --text-muted: #666768;
+  --orange: #fe8019; --yellow: #d79921; --green: #98971a; --blue: #458588;
+  --aqua: #689d6a; --red: #cc241d; --gray: #a7a7a7; --accent: var(--orange);
+  --radius: 10px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { background: var(--bg); }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 'IBM Plex Sans', system-ui, sans-serif; }
+::selection { background: var(--selection); color: var(--text-strong); }
+.page { max-width: 1120px; margin: 0 auto; padding-block: 32px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.eyebrow { font: 600 11px/1 'JetBrains Mono', ui-monospace, monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--text-2); margin: 0 0 10px; }
+h1 { font: 700 clamp(22px, 4vw, 28px)/1.2 'JetBrains Mono', ui-monospace, monospace; letter-spacing: -.01em; color: var(--text-strong); margin: 0 0 8px; text-wrap: balance; }
+.lede { color: var(--text-2); margin: 0 0 24px; max-width: 65ch; }
+</style>
+<main class="page" lang="{{LANG}}">
+  <p class="eyebrow">{{EYEBROW}}</p>
+  <h1>{{HEADING}}</h1>
+  {{LEDE}}
+  {{DIAGRAM}}
+</main>

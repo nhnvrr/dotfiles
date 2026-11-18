@@ -1,0 +1,10 @@
+{
+  "title": "Broken on purpose",
+  "nodes": [
+    { "id": "a", "icon": "server", "at": [0, 0] },
+    { "id": "a", "icon": "no-such-icon", "at": [0, 0] },
+    { "id": "b", "at": [1] }
+  ],
+  "edges": [{ "from": "a", "to": "ghost", "route": "zig" }],
+  "steps": [{ "show": ["nope"] }]
+}

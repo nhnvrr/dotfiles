@@ -21,7 +21,8 @@ $env.config.completions.partial = true
 $env.config.completions.external = {
     enable: true
     max_results: 100
-    completer: {|spans|
+    completer: {|place|
+        let spans = $place.command
         carapace $spans.0 nushell ...$spans | from json
     }
 }

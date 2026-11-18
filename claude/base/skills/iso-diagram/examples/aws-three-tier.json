@@ -1,0 +1,29 @@
+{
+  "title": "Three-tier web app on AWS",
+  "description": "CDN in front of a load-balanced EC2 tier, with RDS and ElastiCache in private subnets. Packets show live request traffic.",
+  "renderer": "svg",
+  "grid": { "w": 12, "h": 8 },
+  "nodes": [
+    { "id": "user", "icon": "laptop", "at": [0, 3], "label": "Browser" },
+    { "id": "cdn", "icon": "aws-cloudfront", "at": [2, 3], "label": "CloudFront" },
+    { "id": "alb", "icon": "aws-elastic-load-balancing", "at": [4, 3], "label": "ALB" },
+    { "id": "web1", "icon": "aws-ec2", "at": [6, 2], "label": "web-1", "sub": "t3.medium" },
+    { "id": "web2", "icon": "aws-ec2", "at": [6, 4], "label": "web-2", "sub": "t3.medium" },
+    { "id": "db", "icon": "aws-rds", "at": [9, 2], "label": "Postgres", "sub": "Multi-AZ" },
+    { "id": "cache", "icon": "aws-elasticache", "at": [9, 4], "label": "Redis" }
+  ],
+  "groups": [
+    { "id": "vpc", "label": "VPC 10.0.0.0/16", "from": [3, 1], "to": [10, 5], "tone": "blue" },
+    { "id": "private", "label": "private", "from": [8, 1], "to": [10, 5], "tone": "aqua", "style": "dashed" }
+  ],
+  "edges": [
+    { "from": "user", "to": "cdn", "packets": { "every": 0.9 } },
+    { "from": "cdn", "to": "alb", "packets": { "every": 1.2 } },
+    { "from": "alb", "to": "web1", "route": "yx", "packets": { "every": 1.6 } },
+    { "from": "alb", "to": "web2", "route": "yx", "packets": { "every": 1.6 } },
+    { "from": "web1", "to": "db", "label": "SQL" },
+    { "from": "web2", "to": "db", "route": "xy" },
+    { "from": "web1", "to": "cache", "style": "dashed" },
+    { "from": "web2", "to": "cache", "style": "dashed", "packets": { "tone": "yellow", "every": 2 } }
+  ]
+}

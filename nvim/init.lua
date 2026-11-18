@@ -20,34 +20,24 @@ o.undofile = true
 o.clipboard = 'unnamed'
 o.laststatus = 2
 o.showmode = false
-o.termguicolors = true
-o.guicursor = 'a:block'
+-- mate.vim paints ANSI slots only, so colours come from Ghostty's palette.
+o.termguicolors = false
+o.guicursor = 'n-v-c-sm:block,i-ci-ve:ver25,r-cr-o:hor20'
 
 vim.pack.add({
-  'https://github.com/sainnhe/everforest',
   'https://github.com/nvim-mini/mini.nvim',
   'https://github.com/ibhagwan/fzf-lua',
   'https://github.com/stevearc/oil.nvim',
   'https://github.com/lewis6991/gitsigns.nvim',
   'https://github.com/neovim/nvim-lspconfig',
   'https://github.com/stevearc/conform.nvim',
+  'https://github.com/MeanderingProgrammer/render-markdown.nvim',
   -- A release tag is what lets blink download its prebuilt fuzzy binary.
   { src = 'https://github.com/saghen/blink.cmp', version = vim.version.range('1.*') },
   { src = 'https://github.com/nvim-treesitter/nvim-treesitter', version = 'main' },
 })
 
-vim.g.everforest_background = 'hard'
-vim.g.everforest_better_performance = 1
-vim.g.everforest_transparent_background = 1
-vim.o.background = 'dark'
-vim.cmd.colorscheme('everforest')
--- nvim sets 'background' from the terminal's reply after startup; keep it dark.
-vim.api.nvim_create_autocmd('OptionSet', {
-  pattern = 'background',
-  callback = function()
-    if vim.o.background ~= 'dark' then vim.o.background = 'dark' end
-  end,
-})
+vim.cmd.colorscheme('mate')
 
 -- Icons first: fzf-lua and oil look them up at setup.
 require('mini.icons').setup()
@@ -83,6 +73,7 @@ clue.setup({
 
 require('fzf-lua').setup({ defaults = { file_icons = 'mini' } })
 require('oil').setup({ view_options = { show_hidden = true } })
+require('render-markdown').setup({})
 
 require('gitsigns').setup({
   on_attach = function(buf)
@@ -142,7 +133,7 @@ require('conform').setup({
 
 require('nvim-treesitter').install({
   'bash', 'json', 'toml', 'yaml', 'lua', 'vim', 'vimdoc', 'markdown',
-  'go', 'rust', 'python', 'typescript', 'tsx', 'javascript', 'hcl', 'terraform',
+  'markdown_inline', 'go', 'rust', 'python', 'typescript', 'tsx', 'javascript', 'hcl', 'terraform',
 })
 vim.treesitter.language.register('bash', 'zsh')
 vim.api.nvim_create_autocmd('FileType', {
@@ -161,3 +152,4 @@ map('n', 'gd', fzf.lsp_definitions, { desc = 'Definitions' })
 map('n', '<Esc><Esc>', '<cmd>nohlsearch<cr>')
 map('v', 'J', ":m '>+1<cr>gv=gv")
 map('v', 'K', ":m '<-2<cr>gv=gv")
+map('i', 'jk', '<Esc>')
