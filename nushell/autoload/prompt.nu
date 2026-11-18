@@ -86,7 +86,6 @@ def git-segment [state: record] {
     }
     let name = match $branch {
         '(detached)' => $"\u{f417} ($oid)"
-        'main' | 'master' => "\u{f418}"
         _ => $"\u{f418} ($branch)"
     }
     let flags = ([
@@ -114,7 +113,7 @@ def prompt-left [] {
     }
 
     # The whole working directory in one segment, git after it.
-    $s = (seg $s 37 30 (short-path $env.PWD) --bold)
+    $s = (seg $s 30 37 (short-path $env.PWD) --bold)
     if (find-up $env.PWD [.git]) != null { $s = (git-segment $s) }
     seg-close $s
 }
