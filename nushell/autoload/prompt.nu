@@ -95,8 +95,8 @@ def git-segment [state: record] {
         (if $stashed { "\u{f0c6}" } else { '' })
         (if $ahead > 0 and $behind > 0 { "\u{f0dc}" } else if $ahead > 0 { "\u{f0de}" } else if $behind > 0 { "\u{f0dd}" } else { '' })
     ] | str join '')
-    # green clean, bright red dirty, yellow staged; black text.
-    let bg = if $dirty { 91 } else if $staged { 33 } else { 32 }
+    # green clean, red dirty, yellow staged; black text.
+    let bg = if $dirty { 31 } else if $staged { 33 } else { 32 }
     seg $state $bg 30 (if ($flags | is-empty) { $name } else { $"($name) ($flags)" })
 }
 
@@ -114,7 +114,7 @@ def prompt-left [] {
     }
 
     # The whole working directory in one segment, git after it.
-    $s = (seg $s 30 37 (short-path $env.PWD) --bold)
+    $s = (seg $s 37 30 (short-path $env.PWD) --bold)
     if (find-up $env.PWD [.git]) != null { $s = (git-segment $s) }
     seg-close $s
 }
@@ -128,7 +128,7 @@ def prompt-right [] {
     } else {
         $"\e[90m(($ms / 1000) | math round -p 1)s \u{e0b3} "
     }
-    $"($took)\e[35m(date now | format date '%a %d %b %H:%M:%S')\e[0m"
+    $"($took)\e[37m(date now | format date '%a %d %b %H:%M:%S')\e[0m"
 }
 
 $env.PROMPT_COMMAND = {|| prompt-left }

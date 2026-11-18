@@ -3,6 +3,7 @@
 
 $env.config.show_banner = false
 $env.config.edit_mode = 'vi'
+$env.config.footer_mode = 'never'
 $env.config.cursor_shape = {vi_insert: blink_line, vi_normal: block, emacs: blink_line}
 $env.config.history = {
     file_format: sqlite
@@ -12,6 +13,31 @@ $env.config.history = {
 }
 # Slot 8 (dark_gray, nu's default for hints) is near-black on mate's ground.
 $env.config.color_config.hints = 'xterm_grey50'
+# Slots 4 and 5 sit at 4.3:1 on mate-dark; their bright twins at ~6.7.
+$env.config.color_config = ($env.config.color_config | merge {
+    shape_block: light_blue_bold
+    shape_flag: light_blue_bold
+    shape_literal: light_blue
+    shape_table: light_blue_bold
+    empty: light_blue
+    shape_vardecl: light_purple
+    shape_variable: light_purple
+    shape_int: light_purple_bold
+    shape_float: light_purple_bold
+    shape_binary: light_purple_bold
+    shape_pipe: light_purple_bold
+    shape_redirection: light_purple_bold
+    datetime: green
+    binary_ascii_other: light_purple_bold
+    search_result: {fg: black, bg: yellow}
+    header: yellow_bold
+    row_index: red_bold
+    filesize: white
+    # Closures colour by value, not column: these words are red in any table.
+    string: {|s| if $s in [file dir symlink] { 'red' } else { 'white' } }
+})
+# Names take `string` above instead of LS_COLORS.
+$env.config.ls.use_ls_colors = false
 
 $env.config.completions.algorithm = 'fuzzy'
 $env.config.completions.case_sensitive = false
