@@ -31,6 +31,7 @@ for f in "$DIR"/zsh/functions/*; do check "zsh/functions/$(basename "$f")" zsh -
 check "fish/config.fish"      fish -n "$DIR/fish/config.fish"
 for f in "$DIR"/fish/functions/*.fish; do check "fish/functions/$(basename "$f")" fish -n "$f"; done
 check "fish starts interactive" fish -i -c exit
+check "bobthefish cloned"     test -f "$HOME/.local/share/bobthefish/functions/fish_prompt.fish"
 check "starship/starship.toml" env STARSHIP_CONFIG="$DIR/starship/starship.toml" starship print-config
 # The cask puts no `ghostty` on PATH; the binary inside the bundle has the CLI.
 check "ghostty/config"        /Applications/Ghostty.app/Contents/MacOS/ghostty +validate-config --config-file="$DIR/ghostty/config"

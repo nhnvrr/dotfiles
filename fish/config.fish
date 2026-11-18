@@ -74,6 +74,11 @@ end
 _nvm_auto
 
 function nvm --description 'nvm through bash; node switches on cd, not with nvm use'
+    # bobthefish calls `nvm current` on every prompt; answer it without bash.
+    if test "$argv" = current
+        string match -qr '/(?<v>v[^/]+)/bin$' -- $_nvm_current; and echo $v; or echo none
+        return
+    end
     bash -c 'source /opt/homebrew/opt/nvm/nvm.sh --no-use && nvm "$@"' nvm $argv
     set -e _nvm_current
     _nvm_auto
@@ -102,16 +107,14 @@ end
 _workspace_env
 
 # --- shell behaviour ---------------------------------------------------------
-set -g fish_greeting
+function fish_greeting
+end
 set -g fish_escape_delay_ms 10
 set -g fish_key_bindings fish_vi_key_bindings
 set -g fish_cursor_default block
 set -g fish_cursor_insert line blink
 set -g fish_cursor_replace_one underscore
 set -g fish_cursor_visual block
-# Starship draws the mode in its prompt character.
-function fish_mode_prompt
-end
 
 abbr -a gc 'git commit -m'
 abbr -a gco git checkout
@@ -146,4 +149,79 @@ type -q aws_completer; and complete -c aws -f -a '(begin; set -lx COMP_SHELL fis
 type -q kubectl; and _cached_source kubectl kubectl completion fish
 
 # --- prompt ------------------------------------------------------------------
-_cached_source starship starship init fish --print-full-init
+# bobthefish, cloned by install.sh; Starship stays zsh-only. Its functions go
+# right after ~/.config/fish/functions so nothing of ours is shadowed.
+set -l bob $HOME/.local/share/bobthefish/functions
+if test -d $bob; and not contains $bob $fish_function_path
+    set -g fish_function_path $fish_function_path[1] $bob $fish_function_path[2..]
+end
+# Region resolved once per profile change, in the AWS CLI's order; the prompt
+# only reads $_aws_prompt.
+function _aws_region_refresh --on-variable AWS_PROFILE --on-variable AWS_REGION --on-variable AWS_DEFAULT_REGION
+    set -l region $AWS_REGION $AWS_DEFAULT_REGION
+    if test -z "$region[1]"; and test -r $HOME/.aws/config
+        set region (awk -v p="[profile $AWS_PROFILE]" \
+            '$0==p{f=1;next} /^\[/{f=0} f&&$1=="region"{print $3;exit}' $HOME/.aws/config)
+    end
+    set -g _aws_prompt $AWS_PROFILE
+    test -n "$region[1]"; and set _aws_prompt "$AWS_PROFILE@$region[1]"
+end
+_aws_region_refresh
+
+# bobthefish only has an aws-vault segment; this replaces it with
+# profile@region. It has to be defined after fish_prompt.fish autoloads, or
+# the autoload would put the original back.
+if functions -q fish_prompt
+    function __bobthefish_prompt_aws_vault_profile -S
+        test -n "$_aws_prompt"; or return
+        if test "$AWS_PROFILE" = work
+            __bobthefish_start_segment red black --bold
+        else
+            __bobthefish_start_segment $color_aws_vault
+        end
+        echo -ns  ' ' $_aws_prompt ' '
+    end
+
+    # Transient prompt: once a command runs, its line collapses to ❯ in the
+    # scrollback. The wrapper hands bobthefish the real $status back.
+    functions -c fish_prompt __bobthefish_fish_prompt
+    function _return -a code
+        return $code
+    end
+    function fish_prompt
+        set -l last $status
+        if contains -- --final-rendering $argv
+            test $last -eq 0; and set_color green; or set_color red
+            echo -n '❯ '
+            set_color normal
+            return
+        end
+        _return $last
+        __bobthefish_fish_prompt
+    end
+    functions -q fish_right_prompt; and functions -c fish_right_prompt __bobthefish_fish_right_prompt
+    function fish_right_prompt
+        contains -- --final-rendering $argv; and return
+        __bobthefish_fish_right_prompt
+    end
+end
+set -g fish_transient_prompt 1
+
+set -g theme_newline_cursor yes
+# bobthefish paints this in fish_color_autosuggestion, slot 8, near-black here.
+set -g theme_newline_prompt (set_color green)'❯ '(set_color normal)
+set -g theme_show_exit_status yes
+set -g theme_display_k8s_context yes
+set -g theme_display_git_untracked no
+set -g fish_prompt_pwd_dir_length 0
+set -g theme_nerd_fonts yes
+set -g theme_display_node yes
+set -g theme_display_vi yes
+set -g theme_date_format '+%H:%M'
+set -g theme_title_use_abbreviated_path yes
+# terminal-* schemes draw with ANSI slots, so the prompt follows Ghostty's mate.
+if string match -q '*mate-light*' -- (cat $HOME/.config/ghostty/mode.local 2>/dev/null)
+    set -g theme_color_scheme terminal-light
+else
+    set -g theme_color_scheme terminal-dark
+end

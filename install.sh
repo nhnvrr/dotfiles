@@ -121,6 +121,13 @@ fi
 echo "Preparing Go workspace..."
 mkdir -p "${HOME}/Develop/go/bin"
 
+echo "Installing the bobthefish fish prompt..."
+# No plugin manager: a pinned clone that config.fish adds to fish_function_path.
+BOB_DIR="${HOME}/.local/share/bobthefish"
+BOB_REV="72a89d424644d087c182843a48fbf0a43c796f31"
+[[ -d "${BOB_DIR}/.git" ]] || git clone -q https://github.com/oh-my-fish/theme-bobthefish "${BOB_DIR}"
+git -C "${BOB_DIR}" fetch -q origin && git -C "${BOB_DIR}" checkout -q "${BOB_REV}"
+
 echo "Linking config files..."
 link_file "${CONFIG_DIR}/zsh/zshenv" "${HOME}/.zshenv"
 link_file "${CONFIG_DIR}/zsh/zshrc" "${HOME}/.zshrc"

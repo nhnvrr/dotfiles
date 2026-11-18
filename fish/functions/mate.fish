@@ -16,5 +16,6 @@ function mate --description 'Switch the terminal between dark and light: mate [d
             return 2
     end
     echo "theme = mate-$mode" >$file
+    set -g theme_color_scheme terminal-$mode
     pkill -USR2 -x ghostty
 end
