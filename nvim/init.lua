@@ -20,17 +20,11 @@ o.undofile = true
 o.clipboard = 'unnamed'
 o.laststatus = 2
 o.showmode = false
-o.termguicolors = false
+o.termguicolors = true
 o.guicursor = 'a:block'
 
-vim.cmd.colorscheme('mate')
--- nvim sets 'background' from the terminal's reply after startup.
-vim.api.nvim_create_autocmd('OptionSet', {
-  pattern = 'background',
-  callback = function() vim.cmd.colorscheme('mate') end,
-})
-
 vim.pack.add({
+  'https://github.com/sainnhe/everforest',
   'https://github.com/nvim-mini/mini.nvim',
   'https://github.com/ibhagwan/fzf-lua',
   'https://github.com/stevearc/oil.nvim',
@@ -40,6 +34,18 @@ vim.pack.add({
   -- A release tag is what lets blink download its prebuilt fuzzy binary.
   { src = 'https://github.com/saghen/blink.cmp', version = vim.version.range('1.*') },
   { src = 'https://github.com/nvim-treesitter/nvim-treesitter', version = 'main' },
+})
+
+vim.g.everforest_background = 'hard'
+vim.g.everforest_better_performance = 1
+vim.o.background = 'dark'
+vim.cmd.colorscheme('everforest')
+-- nvim sets 'background' from the terminal's reply after startup; keep it dark.
+vim.api.nvim_create_autocmd('OptionSet', {
+  pattern = 'background',
+  callback = function()
+    if vim.o.background ~= 'dark' then vim.o.background = 'dark' end
+  end,
 })
 
 -- Icons first: fzf-lua and oil look them up at setup.

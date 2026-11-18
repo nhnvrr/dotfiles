@@ -23,6 +23,10 @@ local M = {}
 --- there.
 M.GAP = 8
 
+--- Extra inset on the bottom edge only: the macOS shadow falls below the window
+--- and hides the bottom gap. Keep it above frameMatches' 4 px tolerance.
+M.SHADOW = 6
+
 --- Polls `cond` until it returns something truthy, then hands that value to
 --- `onReady`. Gives up after `timeout` seconds (default 5).
 function M.waitFor(cond, onReady, timeout)
@@ -51,13 +55,15 @@ end
 ---     right    x = 805, w = 785
 ---     edge = 10     seam = 805 - 795 = 10
 ---
+--- The one exception is the bottom screen edge, which gets `SHADOW` on top.
+---
 --- `screen` defaults to the main one; pass `win:screen()` for anything that
 --- should follow the window rather than the main screen.
 function M.frameFor(xR, yR, wR, hR, gap, screen)
   gap = gap or 0
   local half = gap / 2
   local s = (screen or hs.screen.mainScreen()):frame()
-  local f = { x = s.x + half, y = s.y + half, w = s.w - gap, h = s.h - gap }
+  local f = { x = s.x + half, y = s.y + half, w = s.w - gap, h = s.h - gap - M.SHADOW }
   return hs.geometry.rect(
     f.x + f.w * xR + half,
     f.y + f.h * yR + half,

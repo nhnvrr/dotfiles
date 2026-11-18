@@ -183,6 +183,44 @@ mkdir -p "${HOME}/Screenshots"
 defaults write com.apple.screencapture location "${HOME}/Screenshots"
 defaults write com.apple.screencapture type -string "png"
 
+echo "Rebuilding the Dock..."
+defaults write com.apple.dock autohide -bool true
+defaults write com.apple.dock magnification -bool true
+defaults write com.apple.dock largesize -int 64
+defaults write com.apple.dock show-recents -bool false
+
+dock_url() { # file URL with spaces escaped; the Dock ignores entries with raw spaces
+  printf 'file://%s/' "${1// /%20}"
+}
+dock_app() {
+  [[ -d "$1" ]] || { echo "  → $1 not installed; left out of the Dock."; return 0; }
+  defaults write com.apple.dock persistent-apps -array-add \
+    "<dict><key>tile-data</key><dict><key>file-data</key><dict><key>_CFURLString</key><string>$(dock_url "$1")</string><key>_CFURLStringType</key><integer>15</integer></dict></dict></dict>"
+}
+dock_folder() {
+  defaults write com.apple.dock persistent-others -array-add \
+    "<dict><key>tile-type</key><string>directory-tile</string><key>tile-data</key><dict><key>arrangement</key><integer>2</integer><key>displayas</key><integer>0</integer><key>showas</key><integer>1</integer><key>file-type</key><integer>2</integer><key>file-data</key><dict><key>_CFURLString</key><string>$(dock_url "$1")</string><key>_CFURLStringType</key><integer>15</integer></dict></dict></dict>"
+}
+
+defaults write com.apple.dock persistent-apps -array
+for app in \
+  "/System/Applications/Apps.app" \
+  "/Applications/Slack.app" \
+  "/Applications/Google Chrome.app" \
+  "/Applications/Rex Beta.app" \
+  "/Applications/Docker.app" \
+  "/Applications/Claude.app" \
+  "/Applications/Visual Studio Code.app" \
+  "/System/Applications/Notes.app" \
+  "/System/Applications/Music.app" \
+  "/System/Applications/Calculator.app"; do
+  dock_app "$app"
+done
+defaults write com.apple.dock persistent-others -array
+dock_folder "${HOME}/Downloads"
+dock_folder "${HOME}/Documents"
+killall Dock
+
 if command -v duti >/dev/null 2>&1 && open -Ra "Visual Studio Code" 2>/dev/null; then
     # Until VS Code is registered with LaunchServices, .toml/.ini/.cfg are dynamic UTIs and duti fails.
   VSCODE_APP="$(mdfind "kMDItemCFBundleIdentifier == 'com.microsoft.VSCode'" 2>/dev/null | head -1)"
@@ -192,7 +230,9 @@ if command -v duti >/dev/null 2>&1 && open -Ra "Visual Studio Code" 2>/dev/null;
   duti -s com.microsoft.VSCode public.json all
   duti -s com.microsoft.VSCode public.yaml all
   duti -s com.microsoft.VSCode net.daringfireball.markdown all
-  for ext in toml ini cfg env tfvars; do
+  duti -s com.microsoft.VSCode public.comma-separated-values-text all
+  duti -s com.microsoft.VSCode com.netscape.javascript-source all
+  for ext in toml ini cfg config env tf tfvars js mjs csv; do
     duti -s com.microsoft.VSCode ".${ext}" all 2>/dev/null \
       || echo "  → .${ext}: no app has registered this extension yet; open one in VS Code and rerun."
   done
@@ -202,7 +242,7 @@ defaults write "${REX_DOMAIN}" Workspace.customThemes -string "$(cat "${CONFIG_D
 defaults write "${REX_DOMAIN}" Workspace.darkThemeID -string "custom-8CB97BC0-2529-4DDA-9CE5-4B87204CFBB9"
 defaults write "${REX_DOMAIN}" Workspace.lightThemeID -string "custom-BA5C3648-D51E-4CE1-989C-96B1F9FFDDCB"
 defaults write "${REX_DOMAIN}" Workspace.interfaceStyle -string "useTheme"
-defaults write "${REX_DOMAIN}" Workspace.terminalFontName -string "IoskeleyMonoTerm Nerd Font Mono"
+defaults write "${REX_DOMAIN}" Workspace.terminalFontName -string "JetBrains Mono"
 defaults write "${REX_DOMAIN}" Workspace.terminalFontPointSize -float 14
 defaults write "${REX_DOMAIN}" Workspace.terminalFontSmoothing -bool false
 defaults write "${REX_DOMAIN}" Workspace.terminalUseThemePalette -bool false

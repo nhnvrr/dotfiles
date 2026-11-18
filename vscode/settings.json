@@ -293,6 +293,5 @@
   "workbench.preferredLightColorTheme": "Mate Light",
   "[markdown]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "workbench.preferredDarkColorTheme": "Mate Dark"
+  }
 }
