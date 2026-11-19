@@ -1,0 +1,8 @@
+<span class="label"><span lang="es">Propuesta</span><span lang="en">Proposal</span></span>
+<h2><span lang="es">El worker es dueño del comprobante</span><span lang="en">The worker owns the receipt</span></h2>
+<pre class="diagram" aria-label="receipt pipeline"><span class="dim">  receipt pipeline</span>
+
+  ┌──────────────┐   OrderPaid   ┌──────────────┐  PutObject  ┌──────┐
+  │ api checkout │ ────────────► │ worker       │ ──────────► │ S3   │
+  └──────────────┘               └──────────────┘             └──────┘</pre>
+<!-- flow:receipt -->

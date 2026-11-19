@@ -1,0 +1,20 @@
+{
+  "title": { "es": "Comprobante de pedido", "en": "Order receipt" },
+  "renderer": "svg", "autoplay": true, "stepMs": 3000, "height": 420,
+  "nodes": [
+    { "id": "client", "icon": "laptop", "at": [0, 2], "label": { "es": "Cliente", "en": "Client" } },
+    { "id": "api", "icon": "aws-lambda", "at": [3, 2], "label": "api", "sub": "checkout" },
+    { "id": "bus", "icon": "aws-eventbridge", "at": [6, 2], "label": "EventBridge" },
+    { "id": "worker", "icon": "aws-lambda", "at": [9, 2], "label": "worker" },
+    { "id": "s3", "icon": "aws-simple-storage-service", "at": [12, 2], "label": "S3", "sub": "receipts/" }
+  ],
+  "edges": [
+    { "from": "client", "to": "api" }, { "from": "api", "to": "bus", "label": "OrderPaid" },
+    { "from": "bus", "to": "worker" }, { "from": "worker", "to": "s3", "label": "PutObject" }
+  ],
+  "steps": [
+    { "show": ["client", "api"], "active": ["client->api"], "caption": { "es": "El cliente paga; la api captura y responde.", "en": "The client pays; the api captures and answers." } },
+    { "show": ["bus"], "active": ["api->bus"], "caption": { "es": "La api publica OrderPaid.", "en": "The api publishes OrderPaid." } },
+    { "show": ["worker", "s3"], "active": ["bus->worker", "worker->s3"], "caption": { "es": "El worker arma el PDF y lo guarda en S3.", "en": "The worker renders the PDF and stores it in S3." } }
+  ]
+}

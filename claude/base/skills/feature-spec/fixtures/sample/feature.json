@@ -1,0 +1,46 @@
+{
+  "slug": "order-receipts",
+  "title": { "es": "Comprobantes de pedido en S3", "en": "Order receipts in S3" },
+  "eyebrow": { "es": "Propuesta · api + workers", "en": "Proposal · api + workers" },
+  "lede": { "es": "Generar el comprobante en un worker y guardarlo en <code>S3</code>, en vez de armarlo en el request.", "en": "Build the receipt in a worker and store it in <code>S3</code> instead of inside the request." },
+  "date": "2026-11-19",
+  "repos": { "api": { "path": "~/Work/api", "base": "main" }, "workers": { "path": "~/Work/workers", "base": "main" } },
+  "views": [
+    { "id": "summary", "nav": { "es": "Resumen", "en": "Summary" } },
+    { "id": "proposal", "nav": { "es": "Propuesta", "en": "Proposal" } }
+  ],
+  "sections": [
+    { "view": "summary", "file": "sections/summary.html" },
+    { "view": "proposal", "file": "sections/proposal.html" }
+  ],
+  "flows": [
+    { "id": "receipt", "title": { "es": "Flujo del comprobante", "en": "Receipt flow" }, "scene": "flows/receipt.json" }
+  ],
+  "use_cases": [
+    { "id": "UC1", "title": { "es": "Pedido pagado", "en": "Paid order" },
+      "given": { "es": "un pedido en estado PAID", "en": "an order in PAID state" },
+      "when": { "es": "llega el evento OrderPaid", "en": "the OrderPaid event arrives" },
+      "then": { "es": "el PDF queda en receipts/<id>.pdf", "en": "the PDF lands at receipts/<id>.pdf" },
+      "example": { "input": "{ \"orderId\": \"o_1\", \"total\": 1250 }", "output": "s3://receipts/o_1.pdf" },
+      "tickets": ["A1", "W1"] },
+    { "id": "UC2", "title": { "es": "Reintento idempotente", "en": "Idempotent retry" },
+      "given": { "es": "el comprobante ya existe", "en": "the receipt already exists" },
+      "when": { "es": "el evento se entrega dos veces", "en": "the event is delivered twice" },
+      "then": { "es": "no se genera otro PDF", "en": "no second PDF is generated" },
+      "tickets": ["W1"] }
+  ],
+  "tickets": [
+    { "id": "A1", "repo": "api", "type": "feature", "est": "2 pts", "title": "Publish OrderPaid after payment capture",
+      "summary": "The api emits the event the worker consumes.",
+      "description": ["Emit OrderPaid with orderId and total", "Remove inline PDF generation"],
+      "acceptance": ["Event published once per capture", "Checkout latency unchanged or lower"],
+      "tests": ["Unit: capture publishes exactly one event"], "use_cases": ["UC1"], "deps": [] },
+    { "id": "W1", "repo": "workers", "type": "feature", "est": "3 pts", "title": "Render receipt PDF and store it in S3",
+      "summary": "Idempotent worker keyed by orderId.",
+      "description": ["Consume OrderPaid", "Render PDF, PutObject receipts/<id>.pdf", "Skip when the object exists"],
+      "acceptance": ["UC1 and UC2 pass end to end"],
+      "tests": ["Integration with localstack S3", "Duplicate delivery creates one object"], "use_cases": ["UC1", "UC2"], "deps": ["A1"] },
+    { "id": "W2", "repo": "workers", "type": "chore", "title": "Backfill receipts for last 30 days", "later": true,
+      "description": ["One-off script over PAID orders"], "acceptance": ["Every PAID order has a receipt"], "deps": ["W1"] }
+  ]
+}

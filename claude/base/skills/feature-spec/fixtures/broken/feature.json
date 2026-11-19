@@ -1,0 +1,13 @@
+{
+  "slug": "Broken Slug",
+  "title": "only one language",
+  "repos": { "api": { "path": "~/x", "base": "main" } },
+  "views": [{ "id": "summary", "nav": "Resumen" }],
+  "sections": [{ "view": "nowhere", "file": "sections/missing.html" }],
+  "use_cases": [{ "id": "UC1", "title": { "es": "a", "en": "b" }, "tickets": ["Z9"] }],
+  "tickets": [
+    { "id": "A1", "repo": "web", "type": "feature", "title": "x", "acceptance": ["y"], "deps": ["A2"], "use_cases": ["UC7"] },
+    { "id": "A2", "repo": "api", "type": "feature", "title": "z", "acceptance": ["y"], "deps": ["A1"] },
+    { "id": "A2", "repo": "api", "type": "chore", "title": "dup" }
+  ]
+}

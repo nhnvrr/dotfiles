@@ -21,12 +21,14 @@ Script: `~/.claude/skills/codex-review/scripts/codex-review` (alias below: `$CR`
 From the repo or worktree holding the changes:
 
 ```bash
-$CR start [--base <ref>] [--focus "<what the user is worried about>"]
+$CR start [--base <ref>] [--focus "<what the user is worried about>"] [--run-dir <dir>]
 ```
 
 - Base defaults to `origin/development`, else `origin/HEAD`, else `main`. The review covers
   committed, staged, unstaged and untracked changes since the merge-base.
-- It prints the run dir (inside the git dir, never tracked). Keep it.
+- It prints the run dir (inside the git dir, never tracked). Keep it. `--run-dir` fixes it up
+  front, which is what `ticket-implement` does when it runs the review in a Rex tab.
+- Codex's progress (commands, reasoning headlines) goes to stderr while it works.
 - Effort `max` takes long: **run it with `run_in_background: true`** and wait for the
   completion notification. Never poll, never kill it early: Codex writes only at the end and an
   early kill leaves nothing.

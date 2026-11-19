@@ -16,12 +16,15 @@ Codex: the default sandbox blocks the Rex server socket (every `rex` call fails 
 permission error). Run Codex with `--sandbox danger-full-access`, or approve the escalated
 command when prompted.
 
+Scripts: `scripts/rex-wt` and `scripts/rex-split`, linked into `~/.local/bin` (on PATH).
+
 ## Start a feature in its own worktree
 
-From any directory inside a git repo:
+For tickets of a feature spec use the `ticket-start` skill, which calls this with the right
+names. From any directory inside a git repo:
 
 ```bash
-~/.agents/skills/rex/scripts/rex-wt new <branch> [--name <session>] [--from <base>] [--prompt "<task>"] [--agent claude|codex|none]
+rex-wt new <branch> [--name <session>] [--from <base>] [--prompt "<task>"] [--agent claude|codex|none] [--plan]
 ```
 
 - Creates `<repo>/.claude/worktrees/<slug>`. Inside it delegates to `scripts/spexs-tree`
@@ -32,6 +35,8 @@ From any directory inside a git repo:
 - Opens that Rex session running the agent (`claude` by default, `codex` with `--agent codex`,
   or `$REX_WT_AGENT`) with the prompt if given, and a `shell` block below. `--no-claude`
   is an alias of `--agent none`.
+- `--plan` starts Claude in plan mode. Under `~/Work`, `~/Side` or `~/Orange` the agent gets
+  that workspace's `CLAUDE_CONFIG_DIR`: processes spawned by Rex do not run the shell hooks.
 - Prints `{session_id, label, branch, path, main_block, shell_block}` as JSON. Keep the IDs.
 - Block targets resolve inside the *current* session: always pair `-b <id>` with `-s <session>`.
 - A fresh worktree path triggers Claude's folder-trust dialog (reported as `blocked`); accept it with
@@ -43,8 +48,8 @@ switch the current checkout's branch to do it.
 Other commands:
 
 ```bash
-~/.agents/skills/rex/scripts/rex-wt ls                         # repo worktrees + whether a Rex session is live
-~/.agents/skills/rex/scripts/rex-wt rm <name|branch> [--branch] --yes # kill session + remove worktree
+rex-wt ls                                  # repo worktrees + whether a Rex session is live
+rex-wt rm <name|branch> [--branch] --yes   # kill session + remove worktree
 ```
 
 `rm` is destructive: confirm with the user first, then pass `--yes` (it otherwise prompts on stdin).
@@ -67,7 +72,7 @@ X's agent. Check the session exists first (`rex ls --json`, match `label`, case-
 
 ```bash
 # split next to the CURRENT block: use the script, no flags to work out
-~/.agents/skills/rex/scripts/rex-split [right|left|above|below] [--ratio N] [--label L] -- <cmd...>
+rex-split [right|left|above|below] [--ratio N] [--label L] -- <cmd...>
 # e.g. rex-split right --label db -- psql postgresql://user:pass@localhost:5432/dbname
 
 # new tab (window) in another session
@@ -104,6 +109,9 @@ rex window new -s vesto logs -c ~/work/vesto-workflows --keep-open -- \
 ```
 
 Add `--since 1h` for history, or `--filter-pattern '<text>'` to narrow it.
+
+To run a command in a named tab of the *current* session and get its exit code and a log
+file (tests, reviews), use `ticket-run <label> -- <cmd…>` from the `ticket-implement` skill.
 
 ## Wait and watch
 

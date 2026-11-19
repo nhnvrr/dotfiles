@@ -8,9 +8,10 @@
 # provisioned (.env*, pnpm install, generated clients).
 #
 # Usage:
-#   rex-wt new <branch> [--name <session>] [--from <base>] [--prompt <text>] [--agent claude|codex|none]
+#   rex-wt new <branch> [--name <session>] [--from <base>] [--prompt <text>] [--agent claude|codex|none] [--plan]
 #
 # --agent defaults to $REX_WT_AGENT, then claude. --no-claude is an alias of --agent none.
+# --plan starts Claude Code in plan mode (ignored for codex).
 #   rex-wt ls
 #   rex-wt rm <name|branch> [--branch] [--yes]
 #
@@ -32,6 +33,16 @@ common="$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)" \
   || die "not inside a git repository"
 ROOT="$(cd "$(dirname "$common")" && pwd)"
 WT_DIR="$ROOT/.claude/worktrees"
+
+# Same rule as zshrc's _claude_config_dir: rex spawns processes without the shell hooks.
+claude_config_for() {
+  local ws
+  for ws in Work Side Orange; do
+    case "$1" in
+      "$HOME/$ws"|"$HOME/$ws"/*) [[ -d "$HOME/$ws/.claude-config" ]] && { echo "$HOME/$ws/.claude-config"; return; } ;;
+    esac
+  done
+}
 
 slugify() { printf '%s' "$1" | tr '[:upper:]' '[:lower:]' | sed -E 's#[^a-z0-9]+#-#g; s#^-+|-+$##g'; }
 
@@ -68,7 +79,7 @@ case "$cmd" in
     ;;
 
   new)
-    branch="" name="" base="" prompt="" agent="${REX_WT_AGENT:-claude}"
+    branch="" name="" base="" prompt="" agent="${REX_WT_AGENT:-claude}" plan=0
     while [[ $# -gt 0 ]]; do
       case "$1" in
         --from) base="${2:?--from needs a ref}"; shift 2 ;;
@@ -76,6 +87,7 @@ case "$cmd" in
         --prompt) prompt="${2:?--prompt needs text}"; shift 2 ;;
         --agent) agent="${2:?--agent needs claude|codex|none}"; shift 2 ;;
         --no-claude) agent=none; shift ;;
+        --plan) plan=1; shift ;;
         --*) die "unknown flag: $1" ;;
         *) [[ -z "$branch" ]] && branch="$1" || die "unexpected argument: $1"; shift ;;
       esac
@@ -112,6 +124,9 @@ case "$cmd" in
     if [[ "$agent" != none ]]; then
       # Both CLIs take the initial prompt as a positional argument.
       cmdline=("$agent")
+      ccd="$(claude_config_for "$dest")"
+      [[ -n "$ccd" ]] && cmdline=(env "CLAUDE_CONFIG_DIR=$ccd" "$agent")
+      [[ "$plan" == 1 && "$agent" == claude ]] && cmdline+=(--permission-mode plan)
       [[ -n "$prompt" ]] && cmdline+=("$prompt")
       created="$("$REX" new "$slug" --cwd "$dest" --keep-open --json -- "${cmdline[@]}")"
       main_label="$agent"

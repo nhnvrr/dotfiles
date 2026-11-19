@@ -97,6 +97,24 @@ servers, plugins, extra skills) is added by hand inside `.claude-config/`
 and stays out of this repo: it is public. Each config dir needs its own
 `/login` once, and sessions do not carry across workspaces.
 
+Processes started by Rex do not run the shell hooks, so `rex-wt` sets
+`CLAUDE_CONFIG_DIR` itself when the worktree is inside a workspace.
+
+### Feature workflow
+
+Three skills take a feature from spec to reviewed code, one Rex session per
+ticket:
+
+| Skill | Runs in | Does |
+| ----- | ------- | ---- |
+| `feature-spec` | any session | ES/EN spec artifact (sections, ASCII and animated isometric flows, use cases, tickets) plus `~/Documents/tickets/<slug>/feature.json`; exports tickets to markdown, Shortcut or another tracker |
+| `ticket-start` | the spec session | `rex-wt new --plan`: worktree and Rex session named after the ticket, Claude in plan mode on `/ticket-implement` |
+| `ticket-implement` | the ticket session | plan, implement in auto mode, tests in a `tests` tab, `codex-review` loop in a `codex-review` tab, report in `~/Documents/code-reviews/` |
+
+These, `codex-review` and `rex` are symlinked from `claude/base/skills/` into
+`~/.claude/skills/` and each workspace's `skills/`, and their scripts
+(`rex-wt`, `rex-split`, `ticket-run`, `codex-review`) into `~/.local/bin`.
+
 **Not managed:** Chrome and TablePlus keep settings the apps rewrite. `~/.aws/config` and `~/.pgpass` hold secrets and this repo is public — write them by hand (`chmod 600 ~/.pgpass`).
 
 ## Key repeat

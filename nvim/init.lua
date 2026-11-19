@@ -42,7 +42,49 @@ vim.cmd.colorscheme('mate')
 -- Icons first: fzf-lua and oil look them up at setup.
 require('mini.icons').setup()
 MiniIcons.mock_nvim_web_devicons()
-require('mini.statusline').setup()
+local sl = require('mini.statusline')
+local function counts(items, hide_width)
+  if sl.is_truncated(hide_width) then return '' end
+  local out = {}
+  for _, it in ipairs(items) do
+    if (it[1] or 0) > 0 then out[#out + 1] = '%#' .. it[3] .. '#' .. it[2] .. it[1] end
+  end
+  return table.concat(out, ' ')
+end
+sl.setup({
+  content = {
+    active = function()
+      local mode, mode_hl = sl.section_mode({ trunc_width = 120 })
+      local d = vim.b.gitsigns_status_dict or {}
+      local diff = counts({
+        { d.added, '+', 'StatusLineAdd' },
+        { d.changed, '~', 'StatusLineChange' },
+        { d.removed, '-', 'StatusLineDelete' },
+      }, 75)
+      local s, n = vim.diagnostic.severity, vim.diagnostic.count(0)
+      local diag = counts({
+        { n[s.ERROR], 'E', 'StatusLineError' },
+        { n[s.WARN], 'W', 'StatusLineWarn' },
+        { n[s.INFO], 'I', 'StatusLineInfo' },
+        { n[s.HINT], 'H', 'StatusLineHint' },
+      }, 75)
+      -- No hl: each item carries its own %#Group#, and an empty group without
+      -- hl would still add padding, so it is dropped instead.
+      local coloured = vim.trim(diff .. ' ' .. diag)
+      return sl.combine_groups({
+        { hl = mode_hl, strings = { mode } },
+        { hl = 'MiniStatuslineDevinfo', strings = { sl.section_git({ trunc_width = 40 }) } },
+        coloured ~= '' and { strings = { coloured } } or '',
+        { hl = 'MiniStatuslineDevinfo', strings = { sl.section_lsp({ trunc_width = 75 }) } },
+        '%<',
+        { hl = 'MiniStatuslineFilename', strings = { sl.section_filename({ trunc_width = 140 }) } },
+        '%=',
+        { hl = 'MiniStatuslineFileinfo', strings = { sl.section_fileinfo({ trunc_width = 120 }) } },
+        { hl = mode_hl, strings = { sl.section_searchcount({ trunc_width = 75 }), sl.section_location({ trunc_width = 75 }) } },
+      })
+    end,
+  },
+})
 require('mini.pairs').setup()
 require('mini.surround').setup()
 require('mini.ai').setup()

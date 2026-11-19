@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+#
+# ticket-run — run a command in a named tab of the current Rex session and wait for it.
+#
+#   ticket-run <label> [--for <duration>] [--no-wait] -- <cmd...>
+#
+# Opens tab <label> (tests, codex-review, ...) in $REX_SESSION with cwd $PWD, output tee'd to
+# a log file. A tab with the same label opened earlier by ticket-run is closed first, so
+# re-runs do not pile up tabs. Prints {window, block, exit, log} as JSON; exits with the
+# command's status. --no-wait returns right after opening (exit is null).
+# The tab does not inherit this shell's environment: pass variables as `-- env VAR=x cmd`.
+set -euo pipefail
+
+die() { echo "ticket-run: $*" >&2; exit 2; }
+
+label="" wait_for="" nowait=0
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --for) wait_for="${2:?--for needs a duration}"; shift 2 ;;
+    --no-wait) nowait=1; shift ;;
+    --) shift; break ;;
+    -h|--help) sed -n '2,10p' "$0"; exit 0 ;;
+    -*) die "unknown flag: $1" ;;
+    *) [[ -z "$label" ]] && label="$1" || die "unexpected argument: $1"; shift ;;
+  esac
+done
+[[ -n "$label" ]] || die "missing <label>"
+[[ $# -gt 0 ]] || die "missing command after --"
+[[ -n "${REX_SESSION:-}" ]] || die "not inside a Rex terminal (REX_SESSION unset)"
+command -v jq >/dev/null 2>&1 || die "jq is required"
+REX="${REX_BIN_DIR:+$REX_BIN_DIR/}rex"
+
+if dir="$(git rev-parse --absolute-git-dir 2>/dev/null)"; then state="$dir/ticket-run"
+else state="${TMPDIR:-/tmp}/ticket-run-$(id -u)"; fi
+mkdir -p "$state"
+slug="$(printf '%s' "$label" | tr -c 'A-Za-z0-9_-' '-')"
+log="$state/$slug.log"
+marker="$state/$slug.window"
+
+# Only a window this script opened (recorded in $marker) is ever closed.
+if [[ -s "$marker" ]]; then
+  old="$(cat "$marker")"
+  if "$REX" window ls -s "$REX_SESSION" --json | jq -e --arg w "$old" '.windows[] | select(.window_id == $w)' >/dev/null; then
+    "$REX" window close -s "$REX_SESSION" "$old" >/dev/null
+  fi
+  rm -f "$marker"
+fi
+
+: >"$log"
+cmd="$(printf '%q ' "$@")"
+script="set -o pipefail; { $cmd; } 2>&1 | tee -a $(printf '%q' "$log"); s=\$?; echo \"[ticket-run] exit=\$s\" | tee -a $(printf '%q' "$log"); exit \$s"
+
+created="$("$REX" window new -s "$REX_SESSION" "$label" -c "$PWD" --keep-open --focus=false --json -- bash -c "$script")"
+window="$(jq -r '.window_id' <<<"$created")"
+block="$(jq -r '.block_ids[0]' <<<"$created")"
+printf '%s\n' "$window" >"$marker"
+
+if [[ "$nowait" == 1 ]]; then
+  jq -n --arg w "$window" --arg b "$block" --arg l "$log" '{window: $w, block: $b, exit: null, log: $l}'
+  exit 0
+fi
+
+set +e
+"$REX" wait -s "$REX_SESSION" ${wait_for:+--for "$wait_for"} "$block" >/dev/null 2>&1
+status=$?
+set -e
+# The log's last line is authoritative; rex wait returns 1 on timeout or lost status too.
+if last="$(grep -Eo '^\[ticket-run\] exit=[0-9]+$' "$log" | tail -1)" && [[ -n "$last" ]]; then
+  status="${last##*=}"
+  jq -n --arg w "$window" --arg b "$block" --arg l "$log" --argjson e "$status" '{window: $w, block: $b, exit: $e, log: $l}'
+else
+  jq -n --arg w "$window" --arg b "$block" --arg l "$log" '{window: $w, block: $b, exit: null, still_running: true, log: $l}'
+  exit 124
+fi
+exit "$status"
