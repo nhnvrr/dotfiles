@@ -65,22 +65,20 @@ call s:hi('markdownH2', 3, 'NONE', 'NONE')
 call s:hi('markdownH3', 6, 'NONE', 'NONE')
 call s:hi('markdownHeadingDelimiter', s:dim, 'NONE', 'NONE')
 
-call s:hi('MiniStatuslineModeNormal', 0, 6, 'bold')
-call s:hi('MiniStatuslineModeInsert', 0, 2, 'bold')
-call s:hi('MiniStatuslineModeVisual', 0, 3, 'bold')
-call s:hi('MiniStatuslineModeReplace', 0, 9, 'bold')
-call s:hi('MiniStatuslineModeCommand', 0, 5, 'bold')
-call s:hi('MiniStatuslineModeOther', 0, s:dim, 'bold')
-call s:hi('MiniStatuslineDevinfo', 15, s:surf, 'NONE')
-call s:hi('MiniStatuslineFilename', 15, s:surf, 'bold')
-call s:hi('MiniStatuslineFileinfo', s:dim, s:surf, 'NONE')
-call s:hi('MiniStatuslineInactive', s:dim, s:surf, 'NONE')
-
-" Statusline items need an explicit bg, or %#Group# paints the terminal bg.
-call s:hi('StatusLineError', 9, s:surf, 'bold')
-call s:hi('StatusLineWarn', 3, s:surf, 'NONE')
-call s:hi('StatusLineInfo', 6, s:surf, 'NONE')
-call s:hi('StatusLineHint', s:dim, s:surf, 'NONE')
-call s:hi('StatusLineAdd', 2, s:surf, 'NONE')
-call s:hi('StatusLineChange', 3, s:surf, 'NONE')
-call s:hi('StatusLineDelete', 9, s:surf, 'NONE')
+" neo-tree ships gui-only colours for these, which notermguicolors drops.
+for s:g in ['DimText', 'Expander', 'IndentMarker', 'Message', 'FileStats',
+      \ 'FileStatsHeader', 'Dotfile', 'HiddenByName', 'Ignored', 'GitIgnored',
+      \ 'WindowsHidden', 'FadeText1', 'FadeText2']
+  call s:hi('NeoTree' . s:g, s:dim, 'NONE', 'NONE')
+endfor
+call s:hi('NeoTreeCursorLine', 'NONE', s:surf, 'NONE')
+call s:hi('NeoTreeModified', 3, 'NONE', 'NONE')
+call s:hi('NeoTreeGitUntracked', 2, 'NONE', 'NONE')
+call s:hi('NeoTreeGitUnstaged', 3, 'NONE', 'NONE')
+call s:hi('NeoTreeGitConflict', 9, 'NONE', 'bold')
+call s:hi('NeoTreeTitleBar', 0, 6, 'bold')
+call s:hi('NeoTreeFloatTitle', 'NONE', 'NONE', 'bold')
+call s:hi('NeoTreeTabActive', 15, 'NONE', 'bold')
+call s:hi('NeoTreeTabInactive', s:dim, s:surf, 'NONE')
+call s:hi('NeoTreeTabSeparatorActive', 'NONE', 'NONE', 'NONE')
+call s:hi('NeoTreeTabSeparatorInactive', s:surf, s:surf, 'NONE')

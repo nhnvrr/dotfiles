@@ -1,6 +1,7 @@
 cask "google-chrome"
 cask "visual-studio-code"
 cask "ghostty"
+cask "hammerspoon"
 cask "font-ioskeley-mono-term-nerd-font"
 cask "font-jetbrains-mono"
 brew "starship"

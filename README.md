@@ -25,6 +25,7 @@ Then, by hand:
 2. `gh auth login`
 3. **Set Chrome as the default browser** from its _Make default_ button. Nothing here does it: macOS 27 ignores every scripted route.
 4. **Install Rex** from its DMG; it has no cask. The themes, font and shortcuts are already in place when it first opens.
+5. **Open Hammerspoon once** and grant it Accessibility in *System Settings > Privacy & Security*; without it cmd+§ does nothing.
 
 ## The stack
 
@@ -37,6 +38,7 @@ Then, by hand:
 | Terminal  | Ghostty — tabs and splits are its own                                                 | [`ghostty/config`](./ghostty/config)     |
 | Agents    | Rex — one session per worktree; font and layout written to its preferences by `install.sh`, shortcuts linked. The app itself is a manual install, no cask | [`rex/`](./rex)                          |
 | Dock      | always visible, no magnification, no recent apps; the app and folder list is rebuilt from scratch by `install.sh`, so anything pinned by hand is dropped on the next run | [`install.sh`](./install.sh)             |
+| Windows   | Hammerspoon — cmd+§ and cmd+` cycle the front app's windows on either keyboard | [`hammerspoon/`](./hammerspoon)          |
 | Shell     | fish (login shell and terminal), [bobthefish](https://github.com/oh-my-fish/theme-bobthefish) prompt in the terminal's colours (pinned clone, no plugin manager) on one line, with the k8s context and a transient `❯` in the scrollback, vi mode; `awsp` prints the AWS profile and region; tab opens fish completions in fzf, ctrl-r / ctrl-t / alt-c are fzf | [`fish/`](./fish) |
 | Shell (also) | [Nushell](https://www.nushell.sh): vi mode, a bobthefish-style prompt written in nu (one git call, transient `❯`), [carapace](https://carapace.sh) completions, fzf on ctrl-r / ctrl-t / alt-c; `awsp`, `ask`, `mate`. zsh stays configured as the fallback, with the [Starship](https://starship.rs) prompt | [`nushell/`](./nushell), [`zsh/`](./zsh), [`starship/`](./starship) |
 | Database  | TablePlus; `psql`, `pgcli` (vi mode, mate colours), `redis-cli` in the terminal        | [`pgcli/config`](./pgcli/config)         |

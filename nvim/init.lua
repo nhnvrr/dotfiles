@@ -1,5 +1,5 @@
 vim.g.mapleader = ' '
--- nvim-tree replaces netrw; it must be off before any plugin loads.
+-- neo-tree replaces netrw; it must be off before any plugin loads.
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
@@ -27,10 +27,25 @@ o.showmode = false
 o.termguicolors = false
 o.guicursor = 'n-v-c-sm:block,i-ci-ve:ver25,r-cr-o:hor20'
 
+-- Must exist before vim.pack.add, or the first install never fetches the binary.
+vim.api.nvim_create_autocmd('PackChanged', {
+  callback = function(ev)
+    local name, kind = ev.data.spec.name, ev.data.kind
+    if name == 'fff' and (kind == 'install' or kind == 'update') then
+      if not ev.data.active then vim.cmd.packadd('fff') end
+      require('fff.download').download_or_build_binary()
+    end
+  end,
+})
+
 vim.pack.add({
   'https://github.com/nvim-mini/mini.nvim',
+  'https://github.com/nvim-lualine/lualine.nvim',
+  'https://github.com/dmtrKovalenko/fff',
   'https://github.com/ibhagwan/fzf-lua',
-  'https://github.com/nvim-tree/nvim-tree.lua',
+  { src = 'https://github.com/nvim-neo-tree/neo-tree.nvim', version = vim.version.range('3') },
+  'https://github.com/nvim-lua/plenary.nvim',
+  'https://github.com/MunifTanjim/nui.nvim',
   'https://github.com/lewis6991/gitsigns.nvim',
   'https://github.com/neovim/nvim-lspconfig',
   'https://github.com/stevearc/conform.nvim',
@@ -42,51 +57,43 @@ vim.pack.add({
 
 vim.cmd.colorscheme('mate')
 
--- Icons first: fzf-lua and nvim-tree look them up at setup.
+-- Icons first: fzf-lua and neo-tree look them up at setup.
 require('mini.icons').setup()
 MiniIcons.mock_nvim_web_devicons()
-local sl = require('mini.statusline')
-local function counts(items, hide_width)
-  if sl.is_truncated(hide_width) then return '' end
-  local out = {}
-  for _, it in ipairs(items) do
-    if (it[1] or 0) > 0 then out[#out + 1] = '%#' .. it[3] .. '#' .. it[2] .. it[1] end
-  end
-  return table.concat(out, ' ')
-end
-sl.setup({
-  content = {
-    active = function()
-      local mode, mode_hl = sl.section_mode({ trunc_width = 120 })
-      local d = vim.b.gitsigns_status_dict or {}
-      local diff = counts({
-        { d.added, '+', 'StatusLineAdd' },
-        { d.changed, '~', 'StatusLineChange' },
-        { d.removed, '-', 'StatusLineDelete' },
-      }, 75)
-      local s, n = vim.diagnostic.severity, vim.diagnostic.count(0)
-      local diag = counts({
-        { n[s.ERROR], 'E', 'StatusLineError' },
-        { n[s.WARN], 'W', 'StatusLineWarn' },
-        { n[s.INFO], 'I', 'StatusLineInfo' },
-        { n[s.HINT], 'H', 'StatusLineHint' },
-      }, 75)
-      -- No hl: each item carries its own %#Group#, and an empty group without
-      -- hl would still add padding, so it is dropped instead.
-      local coloured = vim.trim(diff .. ' ' .. diag)
-      return sl.combine_groups({
-        { hl = mode_hl, strings = { mode } },
-        { hl = 'MiniStatuslineDevinfo', strings = { sl.section_git({ trunc_width = 40 }) } },
-        coloured ~= '' and { strings = { coloured } } or '',
-        { hl = 'MiniStatuslineDevinfo', strings = { sl.section_lsp({ trunc_width = 75 }) } },
-        '%<',
-        { hl = 'MiniStatuslineFilename', strings = { sl.section_filename({ trunc_width = 140 }) } },
-        '%=',
-        { hl = 'MiniStatuslineFileinfo', strings = { sl.section_fileinfo({ trunc_width = 120 }) } },
-        { hl = mode_hl, strings = { sl.section_searchcount({ trunc_width = 75 }), sl.section_location({ trunc_width = 75 }) } },
-      })
-    end,
+local dim = vim.o.background == 'dark' and 248 or 8
+require('lualine').setup({
+  options = {
+    theme = 'mate',
+    section_separators = '',
+    component_separators = '',
+    globalstatus = true,
   },
+  sections = {
+    lualine_a = { 'mode' },
+    lualine_b = {
+      'branch',
+      {
+        'diff',
+        source = function()
+          local d = vim.b.gitsigns_status_dict
+          if d then return { added = d.added, modified = d.changed, removed = d.removed } end
+        end,
+        diff_color = { added = { fg = 2 }, modified = { fg = 3 }, removed = { fg = 9 } },
+      },
+      {
+        'diagnostics',
+        sources = { 'nvim_diagnostic' },
+        diagnostics_color = {
+          error = { fg = 9 }, warn = { fg = 3 }, info = { fg = 6 }, hint = { fg = dim },
+        },
+      },
+    },
+    lualine_c = { { 'filename', path = 1 } },
+    lualine_x = { 'lsp_status', { 'filetype', colored = false } },
+    lualine_y = { 'progress' },
+    lualine_z = { 'searchcount', 'location' },
+  },
+  extensions = { 'neo-tree' },
 })
 require('mini.pairs').setup()
 require('mini.surround').setup()
@@ -117,9 +124,32 @@ clue.setup({
 })
 
 require('fzf-lua').setup({ defaults = { file_icons = 'mini' } })
-require('nvim-tree').setup({
-  update_focused_file = { enable = true },
-  filters = { dotfiles = false, git_ignored = false },
+require('fff').setup({
+  -- jk (imap to <Esc>) drops to normal mode, where j/k move the selection.
+  prompt_vim_mode = true,
+  prompt = '> ',
+  keymaps = {
+    move_up = { '<Up>', '<C-p>', '<C-k>' },
+    move_down = { '<Down>', '<C-n>', '<C-j>' },
+  },
+})
+require('neo-tree').setup({
+  close_if_last_window = true,
+  popup_border_style = 'rounded',
+  source_selector = { winbar = true },
+  window = {
+    width = 32,
+    mappings = {
+      ['l'] = 'open',
+      ['h'] = 'close_node',
+    },
+  },
+  filesystem = {
+    follow_current_file = { enabled = true },
+    use_libuv_file_watcher = true,
+    hijack_netrw_behavior = 'open_current',
+    filtered_items = { hide_dotfiles = false, hide_gitignored = false },
+  },
 })
 require('render-markdown').setup({})
 
@@ -190,14 +220,20 @@ vim.api.nvim_create_autocmd('FileType', {
 
 local map = vim.keymap.set
 local fzf = require('fzf-lua')
-map('n', '<leader>e', '<cmd>NvimTreeToggle<cr>', { desc = 'File explorer' })
-map('n', '<leader>ff', fzf.files, { desc = 'Find files' })
-map('n', '<leader>p', fzf.files, { desc = 'Files' })
+map('n', '<leader>e', '<cmd>Neotree toggle<cr>', { desc = 'File explorer' })
+local fff = require('fff')
+map('n', '<leader>ff', fff.find_files, { desc = 'Find files' })
+map('n', '<leader>p', fff.find_files, { desc = 'Files' })
 map('n', '<leader>/', fzf.live_grep, { desc = 'Grep' })
 map('n', '<leader>b', fzf.buffers, { desc = 'Buffers' })
 map('n', '<leader>s', fzf.lsp_document_symbols, { desc = 'Symbols' })
 map('n', '<leader>d', fzf.diagnostics_document, { desc = 'Diagnostics' })
 map('n', 'gd', fzf.lsp_definitions, { desc = 'Definitions' })
+map('n', '<leader>-', '<cmd>split<cr>', { desc = 'Horizontal split' })
+map('n', '<leader>|', '<cmd>vsplit<cr>', { desc = 'Vertical split' })
+for _, k in ipairs({ 'h', 'j', 'k', 'l' }) do
+  map('n', '<C-' .. k .. '>', '<C-w>' .. k, { desc = 'Window ' .. k })
+end
 map('n', '<Esc><Esc>', '<cmd>nohlsearch<cr>')
 map('v', 'J', ":m '>+1<cr>gv=gv")
 map('v', 'K', ":m '<-2<cr>gv=gv")

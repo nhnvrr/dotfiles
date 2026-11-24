@@ -151,6 +151,7 @@ link_file "${CONFIG_DIR}/vscode/keybindings.json" "${VSCODE_USER}/keybindings.js
 link_file "${CONFIG_DIR}/vim/vimrc" "${HOME}/.vim/vimrc"
 link_file "${CONFIG_DIR}/vim/colors" "${HOME}/.vim/colors"
 link_file "${CONFIG_DIR}/nvim" "${HOME}/.config/nvim"
+link_file "${CONFIG_DIR}/hammerspoon/init.lua" "${HOME}/.hammerspoon/init.lua"
 link_file "${CONFIG_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"
 link_file "${CONFIG_DIR}/btop/btop.conf" "${HOME}/.config/btop/btop.conf"
 link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.config/tmux/tmux.conf"
@@ -216,12 +217,7 @@ dock_folder() {
 defaults write com.apple.dock persistent-apps -array
 for app in \
   "/System/Applications/Apps.app" \
-  "/Applications/Slack.app" \
-  "/Applications/Google Chrome.app" \
-  "/Applications/Rex Beta.app" \
-  "/Applications/Docker.app" \
-  "/Applications/Claude.app" \
-  "/Applications/Visual Studio Code.app" \
+  "/System/Cryptexes/App/System/Applications/Safari.app" \
   "/System/Applications/Notes.app" \
   "/System/Applications/Music.app" \
   "/System/Applications/Calculator.app"; do
