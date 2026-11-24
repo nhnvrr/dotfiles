@@ -21,28 +21,3 @@ hs.hotkey.bind({ 'cmd', 'alt' }, '0', function()
     end
   end
 end)
-
--- Orange outline around the focused window. Globals: a collected canvas or
--- filter silently stops drawing.
-border = hs.canvas.new({ x = 0, y = 0, w = 0, h = 0 })
-border:level(hs.canvas.windowLevels.overlay)
-border:behavior(hs.canvas.windowBehaviors.canJoinAllSpaces)
-border[1] = {
-  type = 'rectangle', action = 'stroke', strokeWidth = 4,
-  strokeColor = { hex = '#d65d0e' },
-  roundedRectRadii = { xRadius = 12, yRadius = 12 },
-}
-
-local function redraw()
-  local w = hs.window.focusedWindow()
-  if not w or not w:isStandard() or w:isFullScreen() then return border:hide() end
-  border:frame(w:frame()):show()
-end
-
-windows = hs.window.filter.new()
-windows:subscribe({
-  hs.window.filter.windowFocused, hs.window.filter.windowMoved,
-  hs.window.filter.windowUnfocused, hs.window.filter.windowDestroyed,
-  hs.window.filter.windowMinimized, hs.window.filter.windowFullscreened,
-}, redraw)
-redraw()
