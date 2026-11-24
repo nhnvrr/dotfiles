@@ -1,0 +1,41 @@
+# Only overrides: pgcli merges this over its built-in pgclirc.
+# Mate light: same as config, with slot 0 as the menu surface and slot 8 as
+# the dim, like mate.vim on a light background.
+
+[main]
+vi = True
+less_chatty = True
+pager = less -SRXF
+# bw has no colours of its own, so only the pygments.* lines below paint.
+syntax_style = bw
+
+[colors]
+completion-menu.completion = 'bg:ansiblack'
+completion-menu.completion.current = 'bg:ansired ansiblack'
+completion-menu.meta.completion = 'bg:ansiblack ansibrightblack'
+completion-menu.meta.completion.current = 'bg:ansired ansiblack'
+completion-menu.multi-column-meta = 'bg:ansiblack ansibrightblack'
+scrollbar.arrow = 'bg:ansiblack'
+scrollbar = 'bg:ansiblack'
+selected = 'bg:ansiblack'
+search = 'bg:ansiyellow ansiblack'
+search.current = 'bg:ansired ansiblack'
+bottom-toolbar = 'bg:ansiblack ansibrightblack'
+bottom-toolbar.off = 'bg:ansiblack ansibrightblack'
+bottom-toolbar.on = 'bg:ansiblack bold'
+bottom-toolbar.transaction.valid = 'bg:ansiblack ansigreen bold'
+bottom-toolbar.transaction.failed = 'bg:ansiblack ansibrightred bold'
+prompt = 'ansicyan bold'
+continuation = 'ansibrightblack'
+output.header = 'bold'
+output.null = 'ansibrightblack italic'
+
+# SQL as it is typed, same slots as mate.vim. pgcli logs these as "Unhandled"
+# but applies them. Never use 'default' or 'reverse' above this block: the
+# Pygments output styler rejects them and pgcli crashes at start.
+pygments.keyword = 'bold'
+pygments.keyword.type = 'ansiyellow nobold'
+pygments.name.builtin = 'ansiyellow'
+pygments.literal.string = 'ansigreen noitalic'
+pygments.literal.number = 'ansicyan'
+pygments.comment = 'ansibrightblack italic'

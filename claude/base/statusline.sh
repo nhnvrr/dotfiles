@@ -26,7 +26,7 @@ green=$'\033[32m'
 yellow=$'\033[33m'
 red=$'\033[31m'
 bright_red=$'\033[91m'
-purple=$'\033[38;5;139m'
+purple=$'\033[35m'
 
 segments=()
 

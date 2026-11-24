@@ -31,6 +31,15 @@ def mate [mode?: string] {
     ^pkill -USR2 -x ghostty
 }
 
+# pgcli with the Mate config for the current terminal mode.
+def --wrapped pgcli [...args] {
+    let mode = ($env.HOME | path join .config ghostty mode.local)
+    let rc = if ($mode | path exists) and (open --raw $mode | str contains 'mate-light') {
+        [--pgclirc ($env.HOME | path join .config pgcli config-light)]
+    } else { [] }
+    ^pgcli ...$rc ...$args
+}
+
 # Active AWS profile and region, in the AWS CLI's order: environment first,
 # then the profile's region in ~/.aws/config.
 def awsp [] {

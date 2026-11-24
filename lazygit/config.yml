@@ -1,0 +1,16 @@
+# ANSI names only, so lazygit follows Ghostty's Mate (dark and light).
+gui:
+  theme:
+    activeBorderColor: [red, bold]
+    inactiveBorderColor: [default]
+    searchingActiveBorderColor: [yellow, bold]
+    optionsTextColor: [cyan]
+    selectedLineBgColor: [reverse]
+    inactiveViewSelectedLineBgColor: [bold]
+    cherryPickedCommitBgColor: [cyan]
+    cherryPickedCommitFgColor: [black]
+    unstagedChangesColor: [red]
+    defaultFgColor: [default]
+    # Without this, authors get a truecolor hashed from their name.
+    authorColors:
+      "*": magenta

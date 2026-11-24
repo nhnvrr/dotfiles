@@ -1,6 +1,7 @@
 # Only overrides: pgcli merges this over its built-in pgclirc.
-# ANSI names follow Ghostty's mate, tuned for mate-dark. #a8a8a8 is grey 248,
-# mate.vim's dark dim: slot 8 is the menu surface, too dark for text.
+# Mate dark. config-light is the same file with the light surface and dim;
+# the pgcli shell function picks one from ghostty/mode.local.
+# #a8a8a8 is grey 248, mate.vim's dark dim: slot 8 is the menu surface here.
 
 [main]
 vi = True

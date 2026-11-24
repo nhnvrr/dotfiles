@@ -156,6 +156,8 @@ link_file "${CONFIG_DIR}/btop/btop.conf" "${HOME}/.config/btop/btop.conf"
 link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.config/tmux/tmux.conf"
 # Not the whole dir: pgcli writes its history and log into ~/.config/pgcli.
 link_file "${CONFIG_DIR}/pgcli/config" "${HOME}/.config/pgcli/config"
+link_file "${CONFIG_DIR}/pgcli/config-light" "${HOME}/.config/pgcli/config-light"
+link_file "${CONFIG_DIR}/lazygit/config.yml" "${HOME}/.config/lazygit/config.yml"
 link_file "${CONFIG_DIR}/claude/base/statusline.sh" "${HOME}/.claude/statusline.sh"
 mkdir -p "${HOME}/.local/state/tmux"
 mkdir -p "${HOME}/.local/state/redis"

@@ -51,6 +51,14 @@ from pgcli.pgstyle import style_factory, style_factory_output
 c = load_config(sys.argv[1], os.path.join(os.path.dirname(pgcli.__file__), "pgclirc"))
 style_factory(c["main"]["syntax_style"], c["colors"])
 style_factory_output(c["main"]["syntax_style"], c["colors"])' "$DIR/pgcli/config"
+  check "pgcli/config-light"  "$PGCLI_PY" -I -c '
+import os, sys, logging, pgcli
+logging.disable(logging.ERROR)
+from pgcli.config import load_config
+from pgcli.pgstyle import style_factory, style_factory_output
+c = load_config(sys.argv[1], os.path.join(os.path.dirname(pgcli.__file__), "pgclirc"))
+style_factory(c["main"]["syntax_style"], c["colors"])
+style_factory_output(c["main"]["syntax_style"], c["colors"])' "$DIR/pgcli/config-light"
 else
   skip "pgcli not installed"
 fi
@@ -87,6 +95,8 @@ linked nvim                     "$HOME/.config/nvim"
 linked mise/config.toml         "$HOME/.config/mise/config.toml"
 linked tmux/tmux.conf           "$HOME/.config/tmux/tmux.conf"
 linked pgcli/config             "$HOME/.config/pgcli/config"
+linked pgcli/config-light       "$HOME/.config/pgcli/config-light"
+linked lazygit/config.yml       "$HOME/.config/lazygit/config.yml"
 linked claude/base/statusline.sh "$HOME/.claude/statusline.sh"
 
 echo

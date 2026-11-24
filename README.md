@@ -33,7 +33,7 @@ Then, by hand:
 | Browser   | Chrome                                                                                 | —                                        |
 | Editor    | VS Code, default theme; settings and keybindings linked, extensions in the Brewfile   | [`vscode/`](./vscode)                    |
 | Quick edits | vim, no plugins; colours from the terminal palette; `$EDITOR`                  | [`vim/`](./vim)                          |
-| Editor (terminal) | nvim — fzf-lua, nvim-tree, treesitter, mini (icons, statusline, clue), gitsigns, native LSP + blink.cmp, conform; servers in the Brewfile; [Everforest](https://github.com/sainnhe/everforest) hard dark, the only tool off the `mate` palette, plugins pinned in the lockfile | [`nvim/`](./nvim)                        |
+| Editor (terminal) | nvim — fzf-lua, nvim-tree, treesitter, mini (icons, statusline, clue), gitsigns, native LSP + blink.cmp, conform; servers in the Brewfile; Mate through `vim/colors/mate.vim` (shared with vim, ANSI slots only), plugins pinned in the lockfile | [`nvim/`](./nvim)                        |
 | Terminal  | Ghostty — tabs and splits are its own                                                 | [`ghostty/config`](./ghostty/config)     |
 | Agents    | Rex — one session per worktree; font and layout written to its preferences by `install.sh`, shortcuts linked. The app itself is a manual install, no cask | [`rex/`](./rex)                          |
 | Dock      | always visible, no magnification, no recent apps; the app and folder list is rebuilt from scratch by `install.sh`, so anything pinned by hand is dropped on the next run | [`install.sh`](./install.sh)             |
@@ -44,7 +44,7 @@ Then, by hand:
 | Questions | `? <question>` — one-off, read-only Claude                                              | [`zsh/functions/ask`](./zsh/functions/ask) |
 | Claude Code | one config dir per workspace (`~/Work`, `~/Side`, `~/Orange`), seeded from `claude/base/`; custom status line: model, dir + branch, cost, lines, rate limits | [`claude/`](./claude) |
 
-**Colours.** One palette, `mate`, in [`ghostty/themes/`](./ghostty/themes) — dark and light. The terminal switches on its own, apart from macOS: `mate` toggles it from the shell ([`zsh/functions/mate`](./zsh/functions/mate)), `mate dark` / `mate light` force a side. It writes the theme to the git-ignored `ghostty/mode.local` and reloads Ghostty; the prompt, vim, fzf, tmux, btop and pgcli follow the terminal's colours (nvim is the exception: always Everforest hard dark, in true colour) — Starship is configured with ANSI colour names only, never hex. The palette lives only in Ghostty: VS Code, Rex and TablePlus use their own default themes.
+**Colours.** One palette, Mate 🧉, in [`ghostty/themes/`](./ghostty/themes) — dark and light. The terminal switches on its own, apart from macOS: `mate` toggles it from the shell ([`zsh/functions/mate`](./zsh/functions/mate)), `mate dark` / `mate light` force a side. It writes the theme to the git-ignored `ghostty/mode.local` and reloads Ghostty; every terminal app follows the terminal's colours — the prompts, vim, nvim, fzf, tmux, btop, bat, lazygit, pgcli and the Claude Code status line are configured with ANSI slots only, never hex. pgcli is the one that needs two files: its menu surface and dim differ per mode, so a `pgcli` shell function passes `--pgclirc config-light` when Ghostty is on Mate light. The palette lives only in Ghostty: VS Code, Rex and TablePlus use their own default themes.
 
 
 ## Managed files
@@ -62,6 +62,8 @@ Then, by hand:
 | `btop/btop.conf`     | `~/.config/btop/btop.conf`       |
 | `gh/config.yml`      | `~/.config/gh/config.yml`        |
 | `claude/base/statusline.sh` | `~/.claude/statusline.sh`  |
+| `pgcli/config`, `pgcli/config-light` | `~/.config/pgcli/` (files, not the dir) |
+| `lazygit/config.yml` | `~/.config/lazygit/config.yml`   |
 
 `link_file` moves any pre-existing regular file to `<dst>.bak.<timestamp>` first.
 

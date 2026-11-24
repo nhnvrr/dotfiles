@@ -1,0 +1,7 @@
+# pgcli with the Mate config for the current terminal mode.
+# autoloaded: the file name is the function name.
+
+local -a rc
+[[ "$(<"$HOME/.config/ghostty/mode.local")" == *mate-light* ]] 2>/dev/null &&
+  rc=(--pgclirc "$HOME/.config/pgcli/config-light")
+command pgcli "${rc[@]}" "$@"
