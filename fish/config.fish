@@ -236,8 +236,6 @@ if functions -q fish_prompt
         switch "$branch"
             case '(detached)'
                 echo -ns $detached_glyph ' ' $oid
-            case main master
-                echo -ns $branch_glyph
             case '*'
                 echo -ns $branch_glyph ' ' $branch
         end
@@ -290,9 +288,9 @@ set -g fish_transient_prompt 1
 set -g theme_show_exit_status yes
 set -g theme_display_k8s_context yes
 set -g theme_display_git_untracked no
-# Intermediate dirs cut to one letter, the last one kept whole, inside a repo too.
-set -g fish_prompt_pwd_dir_length 1
-set -g theme_project_dir_length 1
+# 0 = no shortening: every directory name in full, inside a repo too.
+set -g fish_prompt_pwd_dir_length 0
+set -g theme_project_dir_length 0
 set -g theme_nerd_fonts yes
 set -g theme_display_node yes
 # Off: fish does not pass --final-rendering to the mode prompt, so the mode
@@ -305,4 +303,14 @@ if string match -q '*mate-light*' -- (cat $HOME/.config/ghostty/mode.local 2>/de
     set -g theme_color_scheme terminal-light
 else
     set -g theme_color_scheme terminal-dark
+end
+# Same segments as the nu prompt: the whole path bold on black (slot 0), git
+# as a green / red / yellow block with black text.
+function bobthefish_colors -S
+    set -x color_path black white --bold
+    set -x color_path_basename black white --bold
+    set -x color_repo green black
+    set -x color_repo_work_tree black white --bold
+    set -x color_repo_dirty red black
+    set -x color_repo_staged yellow black
 end

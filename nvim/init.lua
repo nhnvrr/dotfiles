@@ -1,4 +1,7 @@
 vim.g.mapleader = ' '
+-- nvim-tree replaces netrw; it must be off before any plugin loads.
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
 
 local o = vim.opt
 o.number = true
@@ -27,7 +30,7 @@ o.guicursor = 'n-v-c-sm:block,i-ci-ve:ver25,r-cr-o:hor20'
 vim.pack.add({
   'https://github.com/nvim-mini/mini.nvim',
   'https://github.com/ibhagwan/fzf-lua',
-  'https://github.com/stevearc/oil.nvim',
+  'https://github.com/nvim-tree/nvim-tree.lua',
   'https://github.com/lewis6991/gitsigns.nvim',
   'https://github.com/neovim/nvim-lspconfig',
   'https://github.com/stevearc/conform.nvim',
@@ -39,7 +42,7 @@ vim.pack.add({
 
 vim.cmd.colorscheme('mate')
 
--- Icons first: fzf-lua and oil look them up at setup.
+-- Icons first: fzf-lua and nvim-tree look them up at setup.
 require('mini.icons').setup()
 MiniIcons.mock_nvim_web_devicons()
 local sl = require('mini.statusline')
@@ -114,7 +117,10 @@ clue.setup({
 })
 
 require('fzf-lua').setup({ defaults = { file_icons = 'mini' } })
-require('oil').setup({ view_options = { show_hidden = true } })
+require('nvim-tree').setup({
+  update_focused_file = { enable = true },
+  filters = { dotfiles = false, git_ignored = false },
+})
 require('render-markdown').setup({})
 
 require('gitsigns').setup({
@@ -184,7 +190,8 @@ vim.api.nvim_create_autocmd('FileType', {
 
 local map = vim.keymap.set
 local fzf = require('fzf-lua')
-map('n', '<leader>e', '<cmd>Oil<cr>', { desc = 'File explorer' })
+map('n', '<leader>e', '<cmd>NvimTreeToggle<cr>', { desc = 'File explorer' })
+map('n', '<leader>ff', fzf.files, { desc = 'Find files' })
 map('n', '<leader>p', fzf.files, { desc = 'Files' })
 map('n', '<leader>/', fzf.live_grep, { desc = 'Grep' })
 map('n', '<leader>b', fzf.buffers, { desc = 'Buffers' })

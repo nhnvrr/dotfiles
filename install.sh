@@ -151,11 +151,11 @@ link_file "${CONFIG_DIR}/vscode/keybindings.json" "${VSCODE_USER}/keybindings.js
 link_file "${CONFIG_DIR}/vim/vimrc" "${HOME}/.vim/vimrc"
 link_file "${CONFIG_DIR}/vim/colors" "${HOME}/.vim/colors"
 link_file "${CONFIG_DIR}/nvim" "${HOME}/.config/nvim"
-link_file "${CONFIG_DIR}/hammerspoon/init.lua" "${HOME}/.hammerspoon/init.lua"
-link_file "${CONFIG_DIR}/hammerspoon/mate" "${HOME}/.hammerspoon/mate"
 link_file "${CONFIG_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"
 link_file "${CONFIG_DIR}/btop/btop.conf" "${HOME}/.config/btop/btop.conf"
 link_file "${CONFIG_DIR}/tmux/tmux.conf" "${HOME}/.config/tmux/tmux.conf"
+# Not the whole dir: pgcli writes its history and log into ~/.config/pgcli.
+link_file "${CONFIG_DIR}/pgcli/config" "${HOME}/.config/pgcli/config"
 link_file "${CONFIG_DIR}/claude/base/statusline.sh" "${HOME}/.claude/statusline.sh"
 mkdir -p "${HOME}/.local/state/tmux"
 mkdir -p "${HOME}/.local/state/redis"
@@ -194,9 +194,8 @@ defaults write com.apple.screencapture location "${HOME}/Screenshots"
 defaults write com.apple.screencapture type -string "png"
 
 echo "Rebuilding the Dock..."
-defaults write com.apple.dock autohide -bool true
-defaults write com.apple.dock magnification -bool true
-defaults write com.apple.dock largesize -int 64
+defaults write com.apple.dock autohide -bool false
+defaults write com.apple.dock magnification -bool false
 defaults write com.apple.dock show-recents -bool false
 
 dock_url() { # file URL with spaces escaped; the Dock ignores entries with raw spaces
@@ -275,7 +274,7 @@ link_file "${CONFIG_DIR}/rex/shortcuts.json" "${HOME}/Library/Application Suppor
 killall Finder 2>/dev/null || true
 killall SystemUIServer 2>/dev/null || true
 
-SHELL_BIN="/opt/homebrew/bin/nu"
+SHELL_BIN="/opt/homebrew/bin/fish"
 # chsh refuses a shell that is not listed in /etc/shells.
 grep -qx "${SHELL_BIN}" /etc/shells || echo "${SHELL_BIN}" | sudo tee -a /etc/shells >/dev/null
 LOGIN_SHELL="$(dscl . -read "/Users/${USER}" UserShell 2>/dev/null | awk '{print $2}')"

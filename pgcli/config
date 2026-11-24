@@ -1,0 +1,41 @@
+# Only overrides: pgcli merges this over its built-in pgclirc.
+# ANSI names follow Ghostty's mate, tuned for mate-dark. #a8a8a8 is grey 248,
+# mate.vim's dark dim: slot 8 is the menu surface, too dark for text.
+
+[main]
+vi = True
+less_chatty = True
+pager = less -SRXF
+# bw has no colours of its own, so only the pygments.* lines below paint.
+syntax_style = bw
+
+[colors]
+completion-menu.completion = 'bg:ansibrightblack'
+completion-menu.completion.current = 'bg:ansired ansiblack'
+completion-menu.meta.completion = 'bg:ansibrightblack #a8a8a8'
+completion-menu.meta.completion.current = 'bg:ansired ansiblack'
+completion-menu.multi-column-meta = 'bg:ansibrightblack #a8a8a8'
+scrollbar.arrow = 'bg:ansibrightblack'
+scrollbar = 'bg:ansibrightblack'
+selected = 'bg:ansibrightblack'
+search = 'bg:ansiyellow ansiblack'
+search.current = 'bg:ansired ansiblack'
+bottom-toolbar = 'bg:ansibrightblack #a8a8a8'
+bottom-toolbar.off = 'bg:ansibrightblack #a8a8a8'
+bottom-toolbar.on = 'bg:ansibrightblack bold'
+bottom-toolbar.transaction.valid = 'bg:ansibrightblack ansigreen bold'
+bottom-toolbar.transaction.failed = 'bg:ansibrightblack ansibrightred bold'
+prompt = 'ansicyan bold'
+continuation = '#a8a8a8'
+output.header = 'bold'
+output.null = '#a8a8a8 italic'
+
+# SQL as it is typed, same slots as mate.vim. pgcli logs these as "Unhandled"
+# but applies them. Never use 'default' or 'reverse' above this block: the
+# Pygments output styler rejects them and pgcli crashes at start.
+pygments.keyword = 'bold'
+pygments.keyword.type = 'ansiyellow nobold'
+pygments.name.builtin = 'ansiyellow'
+pygments.literal.string = 'ansigreen noitalic'
+pygments.literal.number = 'ansicyan'
+pygments.comment = '#a8a8a8 italic'
