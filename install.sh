@@ -198,7 +198,11 @@ defaults write com.apple.dock magnification -bool false
 defaults write com.apple.dock show-recents -bool false
 # Less GPU work: no translucency, Liquid Glass slightly tinted, Low Power Mode
 # on battery and on AC.
-defaults write com.apple.universalaccess reduceTransparency -bool true
+# This domain is TCC-protected: without Full Disk Access for the terminal the
+# write fails, and under set -e that would end the install.
+if ! defaults write com.apple.universalaccess reduceTransparency -bool true 2>/dev/null; then
+  echo "  skipped Reduce Transparency: give the terminal Full Disk Access, or turn it on in Accessibility > Display"
+fi
 defaults write NSGlobalDomain NSGlassTintAmount -float 0.18
 sudo pmset -a lowpowermode 1
 

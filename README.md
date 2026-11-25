@@ -26,7 +26,8 @@ Then, by hand:
 3. **Set Chrome as the default browser** from its _Make default_ button. Nothing here does it: macOS 27 ignores every scripted route.
 4. **Install Rex** from its DMG; it has no cask. The themes, font and shortcuts are already in place when it first opens.
 5. **Open Hammerspoon once** and grant it Accessibility in *System Settings > Privacy & Security*; without it cmd+§ does nothing.
-6. **Open Tailscale and log in** from its menu bar icon; the login cannot be scripted without an auth key.
+6. **Reduce Transparency**, only if `install.sh` printed `skipped Reduce Transparency`: turn it on in *System Settings > Accessibility > Display*. macOS blocks that write unless the terminal has Full Disk Access.
+7. **Open Tailscale and log in** from its menu bar icon; the login cannot be scripted without an auth key.
 
 ## The stack
 
