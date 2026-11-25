@@ -61,12 +61,6 @@
       "args": [
         "-l"
       ]
-    },
-    "nu": {
-      "path": "/opt/homebrew/bin/nu",
-      "args": [
-        "-l"
-      ]
     }
   },
   "terminal.integrated.defaultProfile.osx": "fish",

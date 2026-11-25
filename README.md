@@ -1,6 +1,6 @@
 # dotfiles
 
-macOS. Chrome, Ghostty, Nushell, fish, zsh, vim, nvim, VS Code, TablePlus. Nothing else is configured here.
+macOS. Chrome, Ghostty, fish, zsh, vim, nvim, VS Code, TablePlus. Nothing else is configured here.
 
 ## Install
 
@@ -17,7 +17,7 @@ curl -fsSL https://raw.githubusercontent.com/nhnvrr/dotfiles/main/bootstrap.sh |
 ./check.sh                # validates configs and symlinks without changing anything
 ```
 
-Idempotent. It installs Homebrew and applies the [`Brewfile`](./Brewfile), installs the runtimes pinned in [`mise/config.toml`](./mise/config.toml) and node 24 through nvm, generates an `ed25519` SSH key and registers it with the Keychain, symlinks the files listed below, applies a few macOS defaults (key repeat, Finder, screenshots, the Dock reset to factory defaults) and makes fish the login shell.
+Idempotent. It installs Homebrew and applies the [`Brewfile`](./Brewfile), installs the runtimes pinned in [`mise/config.toml`](./mise/config.toml) and node 24 through nvm, generates an `ed25519` SSH key and registers it with the Keychain, symlinks the files listed below, applies a few macOS defaults (key repeat, Finder, screenshots, reduced transparency, tinted glass and Low Power Mode, the Dock reset to factory defaults) and makes fish the login shell.
 
 Then, by hand:
 
@@ -26,6 +26,7 @@ Then, by hand:
 3. **Set Chrome as the default browser** from its _Make default_ button. Nothing here does it: macOS 27 ignores every scripted route.
 4. **Install Rex** from its DMG; it has no cask. The themes, font and shortcuts are already in place when it first opens.
 5. **Open Hammerspoon once** and grant it Accessibility in *System Settings > Privacy & Security*; without it cmd+§ does nothing.
+6. **Open Tailscale and log in** from its menu bar icon; the login cannot be scripted without an auth key.
 
 ## The stack
 
@@ -36,17 +37,17 @@ Then, by hand:
 | Quick edits | vim, no plugins; colours from the terminal palette; `$EDITOR`                  | [`vim/`](./vim)                          |
 | Editor (terminal) | nvim — fzf-lua, nvim-tree, treesitter, mini (icons, statusline, clue), gitsigns, native LSP + blink.cmp, conform; servers in the Brewfile; Mate through `vim/colors/mate.vim` (shared with vim, ANSI slots only), plugins pinned in the lockfile | [`nvim/`](./nvim)                        |
 | Terminal  | Ghostty — tabs and splits are its own                                                 | [`ghostty/config`](./ghostty/config)     |
-| Agents    | Rex — one session per worktree; font and layout written to its preferences by `install.sh`, shortcuts linked. The app itself is a manual install, no cask | [`rex/`](./rex)                          |
+| Agents    | Rex — one session per worktree; Mate themes ([`rex/themes.json`](./rex/themes.json)), font and layout written to its preferences by `install.sh`, shortcuts linked. The app itself is a manual install, no cask | [`rex/`](./rex)                          |
 | Dock      | always visible, no magnification, no recent apps; the app and folder list is rebuilt from scratch by `install.sh`, so anything pinned by hand is dropped on the next run | [`install.sh`](./install.sh)             |
 | Windows   | Hammerspoon — cmd+§ and cmd+` cycle the front app's windows on either keyboard | [`hammerspoon/`](./hammerspoon)          |
 | Shell     | fish (login shell and terminal), [bobthefish](https://github.com/oh-my-fish/theme-bobthefish) prompt in the terminal's colours (pinned clone, no plugin manager) on one line, with the k8s context and a transient `❯` in the scrollback, vi mode; `awsp` prints the AWS profile and region; tab opens fish completions in fzf, ctrl-r / ctrl-t / alt-c are fzf | [`fish/`](./fish) |
-| Shell (also) | [Nushell](https://www.nushell.sh): vi mode, a bobthefish-style prompt written in nu (one git call, transient `❯`), [carapace](https://carapace.sh) completions, fzf on ctrl-r / ctrl-t / alt-c; `awsp`, `ask`, `mate`. zsh stays configured as the fallback, with the [Starship](https://starship.rs) prompt | [`nushell/`](./nushell), [`zsh/`](./zsh), [`starship/`](./starship) |
+| Shell (also) | zsh stays configured as the fallback, with the [Starship](https://starship.rs) prompt | [`zsh/`](./zsh), [`starship/`](./starship) |
 | Database  | TablePlus; `psql`, `pgcli` (vi mode, mate colours), `redis-cli` in the terminal        | [`pgcli/config`](./pgcli/config)         |
 | Runtimes  | nvm for node (`.nvmrc` switches on `cd`); mise for everything else                     | [`mise/config.toml`](./mise/config.toml) |
 | Questions | `? <question>` — one-off, read-only Claude                                              | [`zsh/functions/ask`](./zsh/functions/ask) |
 | Claude Code | one config dir per workspace (`~/Work`, `~/Side`, `~/Orange`), seeded from `claude/base/`; custom status line: model, dir + branch, cost, lines, rate limits | [`claude/`](./claude) |
 
-**Colours.** One palette, Mate 🧉, in [`ghostty/themes/`](./ghostty/themes) — dark and light. The terminal switches on its own, apart from macOS: `mate` toggles it from the shell ([`zsh/functions/mate`](./zsh/functions/mate)), `mate dark` / `mate light` force a side. It writes the theme to the git-ignored `ghostty/mode.local` and reloads Ghostty; every terminal app follows the terminal's colours — the prompts, vim, nvim, fzf, tmux, btop, bat, lazygit, pgcli and the Claude Code status line are configured with ANSI slots only, never hex. pgcli is the one that needs two files: its menu surface and dim differ per mode, so a `pgcli` shell function passes `--pgclirc config-light` when Ghostty is on Mate light. The palette lives only in Ghostty: VS Code, Rex and TablePlus use their own default themes.
+**Colours.** One palette, Mate 🧉, in [`ghostty/themes/`](./ghostty/themes) — dark and light. The terminal switches on its own, apart from macOS: `mate` toggles it from the shell ([`zsh/functions/mate`](./zsh/functions/mate)), `mate dark` / `mate light` force a side. It writes the theme to the git-ignored `ghostty/mode.local` and reloads Ghostty; every terminal app follows the terminal's colours — the prompts, vim, nvim, fzf, tmux, btop, bat, lazygit, pgcli and the Claude Code status line are configured with ANSI slots only, never hex. pgcli is the one that needs two files: its menu surface and dim differ per mode, so a `pgcli` shell function passes `--pgclirc config-light` when Ghostty is on Mate light. The palette lives only in Ghostty: Rex is the exception: it has no ANSI-slot mode, so `rex/themes.json` carries its own copy of both palettes. VS Code and TablePlus use their own default themes.
 
 
 ## Managed files
@@ -140,8 +141,7 @@ defaults write NSGlobalDomain KeyRepeat -int 2                       # 30 ms bet
 - **The fish git segment replaces bobthefish internals** (`__bobthefish_prompt_git`, `__bobthefish_git_project_dir`, in `fish/config.fish`). After bumping `BOB_REV` in `install.sh`, check that the prompt still renders.
 - **nvm is bash-only, so fish does not use it to switch.** `fish/config.fish` puts the node from `.nvmrc` (or the default alias) on `$PATH` on every `cd`, straight from `~/.nvm/versions`. `nvm install` works through bash; `nvm use` changes nothing in fish.
 - **fish is not a POSIX shell.** It is the login shell, so anything that runs `$SHELL -c '…'` gets fish syntax. `&&`, `$(…)` and `VAR=x cmd` work; heredocs, `[[ ]]` and `if …; then … fi` do not. `ssh this-mac '…'` is the usual case; run `zsh -c` explicitly when a script needs sh syntax.
-- **nu config is linked file by file** into `~/Library/Application Support/nushell/` (`env.nu`, `config.nu`, `autoload/`), not the whole dir: nu writes its history and plugin registry there. Files in `autoload/` are sourced after `config.nu`.
-- **mise runs as shims in fish and nu, not as a hook.** `fish/conf.d/mise-activate.fish` shadows Homebrew's activation, which ran `mise hook-env` on every prompt. Versions still switch per directory through the shims; `[env]` sections in a `mise.toml` are not loaded in fish.
+- **mise runs as shims in fish, not as a hook.** `fish/conf.d/mise-activate.fish` shadows Homebrew's activation, which ran `mise hook-env` on every prompt. Versions still switch per directory through the shims; `[env]` sections in a `mise.toml` are not loaded in fish.
 - **node is not a mise tool**, and `.nvmrc` is excluded from `idiomatic_version_file_enable_tools`. Listing it again would put mise's node ahead of nvm's.
 - **`~/.aws/config` has no `[default]` profile on purpose.** `AWS_PROFILE` follows the directory: `work` under `~/Work`, `personal` everywhere else, re-evaluated on every `cd`.
 - **The font's family is `IoskeleyMonoTerm Nerd Font Mono`**, not its filename. The Brewfile installs the `font-ioskeley-mono-term-nerd-font` cask; the plain `font-ioskeley-mono` cask has no Term cut. A family CoreText cannot find falls back to Menlo silently.

@@ -32,9 +32,6 @@ check "fish/config.fish"      fish -n "$DIR/fish/config.fish"
 check "fish/conf.d/mise-activate.fish" fish -n "$DIR/fish/conf.d/mise-activate.fish"
 for f in "$DIR"/fish/functions/*.fish; do check "fish/functions/$(basename "$f")" fish -n "$f"; done
 check "fish starts interactive" fish -i -c exit
-for f in "$DIR"/nushell/*.nu "$DIR"/nushell/autoload/*.nu; do
-  check "nushell/${f#"$DIR"/nushell/}" nu --no-config-file -c "if not (nu-check '$f') { exit 1 }"
-done
 check "bobthefish cloned"     test -f "$HOME/.local/share/bobthefish/functions/fish_prompt.fish"
 check "starship/starship.toml" env STARSHIP_CONFIG="$DIR/starship/starship.toml" starship print-config
 # The cask puts no `ghostty` on PATH; the binary inside the bundle has the CLI.
@@ -81,9 +78,6 @@ linked zsh/zshrc                "$HOME/.zshrc"
 linked zsh/functions            "$HOME/.config/zsh/functions"
 linked fish/config.fish         "$HOME/.config/fish/config.fish"
 linked fish/functions           "$HOME/.config/fish/functions"
-linked nushell/env.nu           "$HOME/Library/Application Support/nushell/env.nu"
-linked nushell/config.nu        "$HOME/Library/Application Support/nushell/config.nu"
-linked nushell/autoload         "$HOME/Library/Application Support/nushell/autoload"
 linked fish/conf.d/mise-activate.fish "$HOME/.config/fish/conf.d/mise-activate.fish"
 linked starship/starship.toml   "$HOME/.config/starship.toml"
 linked ghostty                  "$HOME/.config/ghostty"

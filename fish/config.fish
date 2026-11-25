@@ -304,7 +304,7 @@ if string match -q '*mate-light*' -- (cat $HOME/.config/ghostty/mode.local 2>/de
 else
     set -g theme_color_scheme terminal-dark
 end
-# Same segments as the nu prompt: the whole path bold on black (slot 0), git
+# The whole path bold on black (slot 0), git
 # as a green / red / yellow block with black text.
 function bobthefish_colors -S
     set -x color_path black white --bold

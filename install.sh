@@ -135,10 +135,6 @@ link_file "${CONFIG_DIR}/zsh/functions" "${HOME}/.config/zsh/functions"
 link_file "${CONFIG_DIR}/fish/config.fish" "${HOME}/.config/fish/config.fish"
 # Not the whole dir: fish writes fish_variables into ~/.config/fish.
 link_file "${CONFIG_DIR}/fish/functions" "${HOME}/.config/fish/functions"
-# Not the whole dir: nu writes its history and plugin registry there.
-link_file "${CONFIG_DIR}/nushell/env.nu" "${HOME}/Library/Application Support/nushell/env.nu"
-link_file "${CONFIG_DIR}/nushell/config.nu" "${HOME}/Library/Application Support/nushell/config.nu"
-link_file "${CONFIG_DIR}/nushell/autoload" "${HOME}/Library/Application Support/nushell/autoload"
 link_file "${CONFIG_DIR}/fish/conf.d/mise-activate.fish" "${HOME}/.config/fish/conf.d/mise-activate.fish"
 link_file "${CONFIG_DIR}/starship/starship.toml" "${HOME}/.config/starship.toml"
 mkdir -p "${HOME}/.local/state/zsh" "${HOME}/.cache/zsh" "${HOME}/.cache/fish"
@@ -200,6 +196,11 @@ echo "Rebuilding the Dock..."
 defaults write com.apple.dock autohide -bool false
 defaults write com.apple.dock magnification -bool false
 defaults write com.apple.dock show-recents -bool false
+# Less GPU work: no translucency, Liquid Glass slightly tinted, Low Power Mode
+# on battery and on AC.
+defaults write com.apple.universalaccess reduceTransparency -bool true
+defaults write NSGlobalDomain NSGlassTintAmount -float 0.18
+sudo pmset -a lowpowermode 1
 
 dock_url() { # file URL with spaces escaped; the Dock ignores entries with raw spaces
   printf 'file://%s/' "${1// /%20}"
@@ -245,7 +246,13 @@ if command -v duti >/dev/null 2>&1 && open -Ra "Visual Studio Code" 2>/dev/null;
   done
 fi
 REX_DOMAIN="com.superlogical.rex"
-defaults write "${REX_DOMAIN}" Workspace.terminalFontName -string "JetBrains Mono"
+# Mate for Rex's own chrome and terminal; the ids are what dark/lightThemeID point at.
+defaults write "${REX_DOMAIN}" Workspace.customThemes -string "$(cat "${CONFIG_DIR}/rex/themes.json")"
+defaults write "${REX_DOMAIN}" Workspace.darkThemeID -string "custom-443CDBED-8774-4544-BF66-389FBD3FA321"
+defaults write "${REX_DOMAIN}" Workspace.lightThemeID -string "custom-75F13C9D-8CF0-451D-991D-B99FE3E0F9E8"
+defaults write "${REX_DOMAIN}" Workspace.appearance -string "system"
+defaults write "${REX_DOMAIN}" Workspace.interfaceStyle -string "useTheme"
+defaults write "${REX_DOMAIN}" Workspace.terminalFontName -string "IoskeleyMonoTerm Nerd Font Mono"
 defaults write "${REX_DOMAIN}" Workspace.terminalFontPointSize -float 14
 defaults write "${REX_DOMAIN}" Workspace.terminalFontSmoothing -bool false
 defaults write "${REX_DOMAIN}" Workspace.terminalUseThemePalette -bool false
@@ -267,6 +274,15 @@ defaults write "${REX_DOMAIN}" Workspace.usesPaneGlass -bool false
 defaults write "${REX_DOMAIN}" Workspace.usesStandardInactiveWindowPaneStyles -bool true
 defaults write "${REX_DOMAIN}" Workspace.balancesSplitsOnCreation -bool false
 defaults write "${REX_DOMAIN}" Workspace.appIcon -string "default"
+defaults write "${REX_DOMAIN}" Workspace.paneHeaderVisibility -string "onHover"
+defaults write "${REX_DOMAIN}" Workspace.tabBarEdge -string "top"
+defaults write "${REX_DOMAIN}" Workspace.sidebarShowsActivity -bool false
+defaults write "${REX_DOMAIN}" Workspace.terminalSmoothScrolling -bool true
+defaults write "${REX_DOMAIN}" Workspace.usesGestures -bool true
+defaults write "${REX_DOMAIN}" Workspace.animationStyle -string "natural"
+defaults write "${REX_DOMAIN}" Workspace.notificationPosition -string "top-right"
+defaults write "${REX_DOMAIN}" Workspace.prefersGeneratedTitles -bool false
+defaults write "${REX_DOMAIN}" Workspace.activityGrouping -string "priority"
 link_file "${CONFIG_DIR}/rex/shortcuts.json" "${HOME}/Library/Application Support/${REX_DOMAIN}/Shortcuts/shortcuts.json"
 
 killall Finder 2>/dev/null || true
