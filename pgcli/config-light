@@ -6,6 +6,7 @@
 vi = True
 less_chatty = True
 pager = less -SRXF
+table_format = psql_unicode
 # bw has no colours of its own, so only the pygments.* lines below paint.
 syntax_style = bw
 
@@ -27,7 +28,7 @@ bottom-toolbar.transaction.valid = 'bg:ansiblack ansigreen bold'
 bottom-toolbar.transaction.failed = 'bg:ansiblack ansibrightred bold'
 prompt = 'ansicyan bold'
 continuation = 'ansibrightblack'
-output.header = 'bold'
+output.header = 'ansicyan'
 output.null = 'ansibrightblack italic'
 
 # SQL as it is typed, same slots as mate.vim. pgcli logs these as "Unhandled"

@@ -6,7 +6,7 @@ local surf = dark and 8 or 0
 
 local function mode(bg)
   return {
-    a = { fg = 0, bg = bg, gui = 'bold' },
+    a = { fg = 0, bg = bg },
     b = { fg = 15, bg = surf },
     c = { fg = 15, bg = surf },
   }
