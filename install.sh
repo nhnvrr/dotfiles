@@ -44,6 +44,12 @@ ensure_brew() {
 link_file() {
   local src="$1" dst="$2"
   mkdir -p "$(dirname "${dst}")"
+  # A linked parent (an old ~/.config/fish -> repo) makes dst the repo file
+  # itself: the backup would move it away and the link would point at itself.
+  if [[ "$(cd "$(dirname "${dst}")" && pwd -P)" == "$(cd "$(dirname "${src}")" && pwd -P)" ]]; then
+    echo "  ${dst} resolves into the repo through a symlinked parent; remove that link and rerun."
+    exit 1
+  fi
   if [[ -e "${dst}" && ! -L "${dst}" ]]; then
     local backup
     backup="${dst}.bak.$(date +%Y%m%d-%H%M%S)"
@@ -132,6 +138,8 @@ echo "Linking config files..."
 link_file "${CONFIG_DIR}/zsh/zshenv" "${HOME}/.zshenv"
 link_file "${CONFIG_DIR}/zsh/zshrc" "${HOME}/.zshrc"
 link_file "${CONFIG_DIR}/zsh/functions" "${HOME}/.config/zsh/functions"
+# Older setups linked the whole dir; link_file needs a real one.
+[[ -L "${HOME}/.config/fish" ]] && rm "${HOME}/.config/fish"
 link_file "${CONFIG_DIR}/fish/config.fish" "${HOME}/.config/fish/config.fish"
 # Not the whole dir: fish writes fish_variables into ~/.config/fish.
 link_file "${CONFIG_DIR}/fish/functions" "${HOME}/.config/fish/functions"
